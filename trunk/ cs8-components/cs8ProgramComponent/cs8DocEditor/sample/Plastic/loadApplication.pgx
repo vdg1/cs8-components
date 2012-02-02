@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="loadApplication">
+  <paramSection>
+   <param byVal="true" type="string" name="name_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="num" name="nResult"/>
+   <local size="1" type="string" name="txt"/>
+  </localSection>
+  <source>
+   <code>
+begin
+  
+  //\var nResult 
+  //\var txt 
+
+  //\param name_ 
+call rob:haltTasks()
+  //!change 23.05.06, vdg: unload the application from application manager only if reloading the
+  // same application again
+  if name_==data:sApplication
+    //!fixme 09.10.06, vdg: make sure that reloading the same application works
+    logMsg("Closing library in app manager: "+name_)
+    app:$libClose()
+    logMsg("Library closed")
+    delay(2)
+    logMsg("Loading library alias")
+    nResult=appTmp:libLoad("z01_Application")
+    logMsg("return code for temp load: "+toString("",nResult))
+    delay(2)
+    nResult=app:libLoad("z01_Application")
+    logMsg("return code: "+toString("",nResult))
+    delay(2)
+    logMsg("Loading alias done")
+  endIf
+  // try to load the application
+  nResult=app:libLoad(name_)
+  // check if loading was successfull
+  if nResult!=0
+    // revert changes and reload the old application
+    //!change 05.04.06, vdg: add information to log
+    call str:textNum("Loading Application "+name_+" failed: /f0.0 System Message: "+ui:sLibraryMessage[min(nResult,size(ui:sLibraryMessage)-1)],nResult,txt)
+    popUpMsg(txt)
+    logMsg(txt)
+    //!change 06.06.06, vdg: if reloading the old application also fails, reload
+    //  the standard library z01_Application
+    nResult=app:libLoad(data:sApplication)
+    if nResult!=0
+      app:libLoad("z01_Application")
+      data:sApplication=""
+    endIf
+  else
+    //!change 05.04.06, vdg: add information to log
+    logMsg("Application "+name_+" loaded")
+    //!change 23.05.06, vdg: load application in application manager
+    //!fixme 07.08.06, vdg: sometimes loading a library with $libOpen crashes the application manager
+    // thus $libOpen() removed again. 
+    //app:$libOpen()
+    delay(5)
+    data:sApplication=name_
+    //!todo 03.05.06, vdg: For some reason saving data causes a page fault here
+    //data:libSave()
+    //!issue 42: reset auxilary buttons
+    SYS:sAux1=""
+    SYS:sAux2=""
+    SYS:nLiAux1=0
+    SYS:nLiAux2=0
+  endIf
+  SYS:bFirstRunAfterL=true
+  SYS:bModified=false
+  data:jHome=app:jHome
+  //!fix 10.05.06, vdg: do not copy the entire structure as this will create undefined references
+  //                    when app is being replaced by a libLoad() instruction
+  data:tTCP.trsf=app:tGripCenter.trsf
+  //!fix 05.04.06, vdg: relink IO to make them effective in application... is this a bug?
+  call ui:clearUserIO()
+  //!fix 22.05.06, vdg: reset gripper links if user gripper signals are used
+  if !data:setSystemGrip
+    call ui:clearGripperIO()
+  endIf
+  call SYS:InitSysIO()
+  call USER:InitUserIO()
+  //!fix 03.05.06, vdg: restart all tasks
+  call rob:StartUpRobot()
+  data:libSave()  
+end
+</code>
+  </source>
+ </program>
+</programList>

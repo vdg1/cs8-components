@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="setDevices" public="false" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+    </paramSection>
+    <localSection>
+      <local name="_bReset" type="bool" size="10" />
+      <local name="_bTmpStopStart" type="bool" size="10" />
+      <local name="_bRotStart" type="bool" size="10" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  //Set devices on/off to drive in serial commmunication mode.
+  //
+  //\sa
+  //MR_J3_T_D01_Built_in_position_function, page 14-29
+  if nMode!=modSERIAL
+    return
+  endIf
+  // send point table index
+  buffer[0]=0
+  buffer[1]=0
+  buffer[2]=0
+  buffer[3]=0
+  //buffer[3]=bAnd(15,dioGet(doPosTable[station_*4]))
+  buffer[3]=bAnd(15,roundDown(dioGet(doPosTable)/power(2,station_*4)))
+  //? &quot;send position index&quot;
+  call sendCommand(station_,cmdSET_DEVICES,61,buffer,4)
+  // copy edge sensitive global variables to local variables
+  _bReset[station_]=doReset[station_]
+  _bTmpStopStart[station_]=doTmpStopStart[station_]
+  _bRotStart[station_]=doRotStart[station_]
+  //
+  buffer[0]=0
+  buffer[1]=0
+  buffer[2]=0
+  buffer[3]=0
+  // BYTE 1
+  // set SON symbol
+  buffer[0]=sel(doServoOn[station_]==true,bOr(1,buffer[0]),buffer[0])
+  // set RES symbol
+  buffer[0]=sel(_bReset[station_],bOr(64,buffer[0]),buffer[0])
+  // BYTE 2
+  // set ST1 symbol
+  buffer[1]=sel(_bRotStart[station_],bOr(8,buffer[1]),buffer[1])
+  // BYTE 3
+  // set MD0 symbol
+  buffer[2]=sel(doAutomatic[station_]==true,bOr(2,buffer[2]),buffer[2])
+  // BYTE 4
+  // set TSTP symbol
+  buffer[3]=sel(_bTmpStopStart[station_],bOr(1,buffer[3]),buffer[3])
+  call sendCommand(station_,cmdSET_DEVICES,60,buffer,4)
+  // reset edge sensitive flags
+  if !bCalibrate[station_]
+    if _bReset[station_]
+      doReset[station_]=false
+    endIf
+    if _bTmpStopStart[station_]
+      doTmpStopStart[station_]=false
+    endIf
+    if _bRotStart[station_]
+      doRotStart[station_]=false
+    endIf
+  else
+  endIf
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

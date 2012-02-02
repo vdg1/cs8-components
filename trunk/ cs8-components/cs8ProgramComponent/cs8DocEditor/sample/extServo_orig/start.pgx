@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="start" public="false" >
+    <description />
+    <paramSection/>
+    <localSection/>
+    <source>
+      <code>begin
+  if taskStatus(sTaskName)!=1
+    taskKill(sTaskName)
+    wait(taskStatus(sTaskName)==-1)
+    taskCreate sTaskName,10,taskServoCtrl()
+  endIf
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

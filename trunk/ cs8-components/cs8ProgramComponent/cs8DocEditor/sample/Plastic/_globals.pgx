@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="_globals">
+  <paramSection/>
+  <localSection/>
+  <source>
+   <code>begin
+end
+    </code>
+  </source>
+ </program>
+</programList>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+ <Program name="createLicense">
+  <Locals>
+   <Local size="6" type="string" name="txt" xsi:type="array"/>
+   <Local size="1" type="string" name="orderNumber" xsi:type="array"/>
+   <Local size="1" type="num" name="i" xsi:type="array"/>
+  </Locals>
+  <Code><![CDATA[ begin
+    //\brief
+  // Create a license key for the robot system. License key information is saved
+  // in system data library
+  //
+  //\var txt 
+  //\var orderNumber 
+  //\var i 
+  //
+//!brief
+  // Create a license key for the robot system. License key information is saved
+  // in system data library
+  //
+  orderNumber=getVersion("serialNumber")
+  txt=""
+  //!issue 36
+  if data:libLoad("zData")==0
+    call list:resizeNum(data:nLic,len(orderNumber))
+    data:sMachineNumber=orderNumber
+    for i=0 to size(data:nLic)-1
+      data:nLic[i]=asc(orderNumber,i)*(i+1)
+      txt=txt+toString("",asc(orderNumber,i)*(i+1))+", "
+    endFor
+    call data:saveData()
+    popUpMsg(txt)
+  else
+    popUpMsg("Loading the data library failed!")
+  endIf
+end
+
+
+      ]]></Code>
+ </Program>
+</Programs>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+ <Program name="controlTasks">
+  <Locals>
+   <Local size="1" type="bool" name="bResult" xsi:type="array"/>
+   <Local size="1" type="num" name="nResult" xsi:type="array"/>
+  </Locals>
+  <Code><![CDATA[begin
+    //
+  //\var bResult 
+  //\var nResult 
+  //
+//=========================================================================
+  // START PLC
+  //=========================================================================
+  if (taskStatus(sTaskName[0])==-1)
+    taskCreate (sTaskName[0]),10,app:PLC_MainPLC()
+  endIf
+  // if PLC task is stopped due to an runtime error it should be restarted immediately
+  if (taskStatus(sTaskName[0])>1) and nPLCRestartCnt<5
+    if nPLCRestartCnt<5
+      call ui:error("PLC task "+sTaskName[0]+" of "+data:sApplication+" died unexpectedly with error #"+toString(".0",taskStatus(sTaskName[0])))
+      nPLCRestartCnt=nPLCRestartCnt+1
+      nResult=1
+    else
+      call ui:question("PLC task "+sTaskName[0]+" died to often! Do you want to continue?",nResult)
+      if nResult==1
+        nPLCRestartCnt=0
+      endIf
+    endIf
+    if nResult==1
+      taskKill(sTaskName[0])
+      delay(1)
+      taskCreate (sTaskName[0]),10,app:PLC_MainPLC()
+    endIf
+  endIf
+  //!change: 11.03.08, vdg: try to restart PLC task when robot leaves home position
+  if !SYS:bRobotHome and homeFlag and nPLCRestartCnt>=5
+    nPLCRestartCnt=0
+  endIf
+  homeFlag=SYS:bRobotHome
+  //=========================================================================
+  // START PRODUCTION CYCLE
+  //=========================================================================
+  if SYS:bStartProdCycle and SYS:bRobotHome and (taskStatus(sTaskName[1])==-1)
+    SYS:bStartProdCycle=false
+    call taskKill(sTaskName[2],bResult)
+    if !bResult
+      // killing the task failed, because it is being debugged?!
+      call ui:popUp((("Cycle start not possible!/nPlease check if task HR_HomeReturn exists in task manager!")),0,false)
+    else
+      // inform operator that force recording is active
+      if SYS:bRecordForce
+        call ui:popUp((("Recording is active!/nDeactivate it in Advanced Settings->Test Run->Edit System Settings")),data:nMsgTimeOut,false)
+      endIf
+      resetMotion()
+      restartMove()
+      // reduce monitor speed to data:nSpeedAfterLoad if this is the first start cycle
+      if SYS:bFirstRunAfterL
+        ///TODO
+        //$setSpeed(min(data:nSpeedAfterLoad,speedScale()))
+        call fun:setSpeed(min(data:nSpeedAfterLoad,getMonitorSpeed()))
+        // give the system some time to adjust the monitor speed before
+        // MP_MainProgram is actually started
+        delay(0.4)
+        SYS:bFirstRunAfterL=false
+        //
+        //!change 18.05.06, vdg: activate test run after application has been loaded
+        if data:setAutoTestRun
+          data:setTestRun=true
+        endIf
+      endIf
+      //!change 22.08.06, vdg: reset area test
+      call secu:primeAreaTest()
+      logMsg("Production started")
+      // disallow to start IMM if end cycle is active
+      SYS:bStartInEndCycl=false
+      // allow to cancel end cycle function by operator
+      SYS:bCancelEndCycle=true
+      //!Issue 22: call user event program
+      call prg:onAppStart()
+      taskCreate (sTaskName[1]),10,app:MP_MainProgram()
+      SYS:bTotalHome=false
+    endIf
+  endIf
+  // reset state if main task has ended
+  if taskStatus(sTaskName[1])==-1 and SYS:nStateRobot>=10 and SYS:nStateRobot<26
+    SYS:nStateRobot=0
+  endIf
+  //!change 12.07.06, vdg: reset automatic timer if robot cycle is not running or
+  // robot power is disabled or working mode is not automatic
+  if (taskStatus(sTaskName[1])!=1) or !isPowered() or (workingMode()<3)
+    call ui:resetAutoTimer()
+  endIf
+  //=========================================================================
+  // START HOME RETURN CYCLE
+  //=========================================================================
+  if SYS:bStartHomeCycle and (taskStatus(sTaskName[2])==-1)
+    logMsg("Production stopped")
+    //!issue 48: home return not possible if main task is being debugged
+    // This is a work around for a Val3 bug which makes the
+    // program block in taskKill() when the task is currently being debugged
+    //taskKill(sTaskName[1])
+    // try to kill the task
+    call taskKill(sTaskName[1],bResult)
+    if !bResult
+      // killing the task failed, because it is being debugged?!
+      call ui:popUp("Home return not possible!/nPlease verify that task MP_MainPrg is not debuuged in task manager",0,false)
+      // reset state machine robMotionCtrl
+      SYS:nStateRobot=0
+    else
+      if SYS:bTotalHome
+        //!issue 22
+        if data:setResetPLCOnHo
+          call prg:resetPLC()
+        endIf
+      endIf
+      //!change 08.06.06, vdg: wait until task is killed by system
+      wait(taskStatus(sTaskName[1])==-1)
+      //!Issue 22: call user event program
+      call prg:onAppStop()
+      //!issue 48
+      // go to next step in state machine robMotionCtrl
+      SYS:nStateRobot=32
+      resetMotion()
+      restartMove()
+      taskCreate (sTaskName[2]),10,app:HR_HomeReturn()
+      //!Issue 22: call user event program
+      call prg:onHomeStart(SYS:bTotalHome)
+    endIf
+    SYS:bStartHomeCycle=false
+  endIf
+  //=========================================================================
+  // CANCEL HOME RETURN CYCLE
+  //=========================================================================
+  //!fix vdg, 13.03.08: Reset SYS:bCancelHomeCycl event if home return is not active
+  if SYS:bCancelHomeCycl
+    if (taskStatus(sTaskName[2])!=-1)
+      stopMove()
+      call taskKill(sTaskName[2],bResult)
+      if !bResult
+        // killing the task failed, because it is being debugged?!
+        call ui:popUp("Cycle start not possible!/nPlease verify that task HR_HomeReturn is not debugged in task manager!",0,false)
+      else
+        resetMotion()
+        SYS:bCancelHomeCycl=false
+      endIf
+    else
+      SYS:bCancelHomeCycl=false
+    endIf
+  endIf
+end
+
+      
+      ]]></Code>
+ </Program>
+</Programs>

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<project xmlns="ProjectNameSpace" >
+  <parameters version="s6.6.1" stackSize="5000" millimeterUnit="true" />
+  <programSection>
+    <program file="calibrate.pgx" />
+    <program file="disablePower.pgx" />
+    <program file="enablePower.pgx" />
+    <program file="errorString.pgx" />
+    <program file="init.pgx" />
+    <program file="move.pgx" />
+    <program file="pulse.pgx" />
+    <program file="reset.pgx" />
+    <program file="restartMove.pgx" />
+    <program file="start.pgx" />
+    <program file="status.pgx" />
+    <program file="stop.pgx" />
+    <program file="suspendMove.pgx" />
+    <program file="taskServoCtrl.pgx" />
+    <program file="test.pgx" />
+    <program file="waitEndMove.pgx" />
+  </programSection>
+  <dataSection>
+    <data file="extServo.dtx" />
+  </dataSection>
+  <aliasSection>
+    <alias name="io" interface="io" autoload="true" password="" />
+  </aliasSection>
+</project>

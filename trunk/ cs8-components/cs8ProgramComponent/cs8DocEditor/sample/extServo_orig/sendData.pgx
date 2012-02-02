@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="sendData" public="false" >
+    <description />
+    <paramSection>
+      <param name="buffer_" type="num" byVal="false" />
+      <param name="count_" type="num" byVal="true" />
+    </paramSection>
+    <localSection>
+      <local name="i" type="num" size="1" />
+      <local name="char" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  for i=0 to count_-1
+    char=buffer_[i]
+    sioSet(serial,char)
+    //? &quot;&gt;&quot;+toString(&quot;2&quot;,buffer_[i])+&quot;     &quot;+chr(buffer_[i])
+  endFor
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

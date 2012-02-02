@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="pulse">
+  <description/>
+  <paramSection>
+   <param byVal="true" type="dio" name="signal_"/>
+  </paramSection>
+  <localSection/>
+  <source>
+   <code>begin
+  //
+  //\param signal_ 
+  //
+signal_=true
+  delay(0.1)
+  signal_=false
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

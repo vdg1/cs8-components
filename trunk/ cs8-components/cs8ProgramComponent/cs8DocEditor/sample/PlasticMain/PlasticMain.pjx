@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.0" stackSize="400000" millimeterUnit="true" />
+  <Programs>
+    <Program file="__ts_english.pgx" />
+    <Program file="__ts_german.pgx" />
+    <Program file="__ts_swedish.pgx" />
+    <Program file="_globals.pgx" />
+    <Program file="changeLog.pgx" />
+    <Program file="checkRobotPos.pgx" />
+    <Program file="checkTaskStates.pgx" />
+    <Program file="cleanUpDataBase.pgx" />
+    <Program file="controlTasks.pgx" />
+    <Program file="createLicense.pgx" />
+    <Program file="detailedStack.pgx" />
+    <Program file="loadApplication.pgx" />
+    <Program file="loadLibraries.pgx" />
+    <Program file="loadSysData.pgx" />
+    <Program file="loadUserProgram.pgx" />
+    <Program file="loadVersionInfo.pgx" />
+    <Program file="logo.pgx" />
+    <Program file="parseStackInfo.pgx" />
+    <Program file="processEvents.pgx" />
+    <Program file="run.pgx" />
+    <Program file="saveApplication.pgx" />
+    <Program file="start.pgx" />
+    <Program file="startUpTask.pgx" />
+    <Program file="status.pgx" />
+    <Program file="stop.pgx" />
+    <Program file="taskKill.pgx" />
+    <Program file="taskKiller.pgx" />
+  </Programs>
+  <Database>
+    <Data file="PlasticMain.dtx" />
+  </Database>
+  <Libraries>
+    <Library alias="rob" path="Disk://Plastic/Prototypes/modRobot/modRobot.pjx" autoload="false" />
+    <Library alias="data" path="Disk://Plastic/templates/sysDataTemplate/sysDataTemplate.pjx" autoload="false" />
+    <Library alias="secu" path="Disk://Plastic/Prototypes/modSafety/modSafety.pjx" autoload="false" />
+    <Library alias="util" path="Disk://Plastic/Prototypes/modBackup/modBackup.pjx" autoload="false" />
+    <Library alias="FUN" path="Disk://Plastic/templates/tempSysFuncCall/tempSysFuncCall.pjx" autoload="false" />
+    <Library alias="fun" path="Disk://Plastic/Prototypes/modFunction/modFunction.pjx" autoload="false" />
+    <Library alias="ui" path="Disk://Plastic/Prototypes/modUserDisp/modUserDisp.pjx" autoload="false" />
+    <Library alias="prg" path="Disk://Plastic/templates/tempUserProgram/tempUserProgram.pjx" autoload="false" />
+    <Library alias="USER" path="Disk://Plastic/templates/tempIoUser/tempIoUser.pjx" autoload="false" />
+    <Library alias="app" path="Disk://Plastic/templates/tempApplication/tempApplication.pjx" />
+    <Library alias="appTmp" path="Disk://Plastic/templates/tempApplication/tempApplication.pjx" />
+    <Library alias="evt" path="Disk://Plastic/Prototypes/modEvents/modEvents.pjx" autoload="false" />
+    <Library alias="SYS" path="Disk://io_System/io_System.pjx" />
+    <Library alias="str" path="Disk://Libraries/stringHandling/stringHandling.pjx" />
+    <Library alias="list" path="Disk://Libraries/listHandling/listHandling.pjx" />
+    <Library alias="upd" path="Disk://Plastic/Prototypes/modUpdater/modUpdater.pjx" autoload="false" />
+    <Library alias="stat" path="Disk://Plastic/Prototypes/modStatus/modStatus.pjx" autoload="false" />
+    <Library alias="lang" path="Disk://Plastic/i18n/i18n.pjx" />
+    <Library alias="db" path="Disk://Plastic/Prototypes/modDatabase/modDatabase.pjx" autoload="false" />
+    <Library alias="usr" path="Disk://Plastic/Prototypes/modUserIO/modUserIO.pjx" autoload="false" />
+    <Library alias="hw" path="Disk://Libraries/hardware/hardware.pjx" />
+    <Library alias="msl" path="Disk://Plastic/Prototypes/modMsl/modMsl.pjx" autoload="false" />
+    <Library alias="customModule" path="Disk://Plastic/Prototypes/modCustom/modCustom.pjx" autoload="false" />
+    <Library alias="userIO" path="Disk://zUserIODef/zUserIODef.pjx" autoload="false" />
+    <Library alias="monitor" path="Disk://Plastic/Prototypes/modMonitor/modMonitor.pjx" autoload="false" />
+    <Library alias="debug" path="Disk://Libraries/debug/debug.pjx" />
+  </Libraries>
+</Project>

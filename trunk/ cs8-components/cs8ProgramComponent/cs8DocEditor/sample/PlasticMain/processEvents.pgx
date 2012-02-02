@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+ <Program name="processEvents">
+  <Locals>
+   <Local size="1" type="num" name="event" xsi:type="array"/>
+   <Local size="1" type="num" name="idx" xsi:type="array"/>
+   <Local size="1" type="num" name="nResult" xsi:type="array"/>
+   <Local size="1" type="num" name="char" xsi:type="array"/>
+  </Locals>
+  <Code><![CDATA[begin
+    //
+  //\var event 
+  //\var idx 
+  //\var nResult 
+  //\var char 
+  //
+// check pending events
+  call evt:getEvent(event)
+  switch event
+    // application load event
+    case evt:evtLoadApp
+      // clear any non persistent status messages
+      call stat:clearStatusMsg(false)
+      // Aquire stat:mutex in order to avoid calls to the status list control
+      // (stat:addStatusMsg(), etc) when the user application task are being called.
+      // This should avoid a race condition which was first observed in Hammarplast application.
+      call stat:aquireMutex()
+      // stop application tasks
+      taskKill(sTaskName[0])
+      taskKill(sTaskName[1])
+      taskKill(sTaskName[2])
+      //!change 05.07.06, vdg: wait until all tasks are killed
+      for idx=0 to size(sTaskName)-1
+        wait(taskStatus(sTaskName[idx])==-1)
+      endFor
+      call stat:releaseMutex()
+      resetMotion()
+      disablePower()
+      call loadApplication(evt:sEventParam[0])
+      //!TODO
+      if bFirstLoad
+        //call loadApplication(evt:sEventParam[0])
+        bFirstLoad=false
+      endIf
+      // do a total home return after loading the new application
+      SYS:bTotalHome=true
+      // inform ui that event has been processed
+      call evt:resetEvent()
+    break
+    // save application event
+    case evt:evtSaveApp
+      call saveApplication()
+      // inform ui that event has been processed
+      call evt:resetEvent()
+    break
+    case evt:evtRunWizard
+      //call wiz:wzNewApp()
+      call evt:resetEvent()
+    break
+    case evt:evtBackup
+      call util:backup(evt:sEventParam[0],nResult)
+      call evt:resetEvent()
+    break
+    case evt:evtUpdStatusTxt
+      call stat:update()
+      call evt:resetEvent()
+    break
+    case evt:evtStackInfo
+      call detailedStack()
+      call evt:resetEvent()
+    break
+    //  if sioGet(io:slave,char)==1
+    //    char=io:slave
+    //    if true
+    //      call stat:sendStatus(io:slave)
+    //      clearBuffer(io:slave)
+    //    endIf
+    //  endIf
+  endSwitch
+end
+
+
+]]></Code>
+ </Program>
+</Programs>

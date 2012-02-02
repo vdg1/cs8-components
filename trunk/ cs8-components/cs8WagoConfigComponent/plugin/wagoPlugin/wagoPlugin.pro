@@ -1,0 +1,10 @@
+TEMPLATE = lib
+HEADERS += src/cs8wagoplugin.h
+SOURCES += src/cs8wagoplugin.cpp
+CONFIG += designer plugin warn_on release
+QT += core gui network
+INSTALLS = target
+target.path = $$[QT_INSTALL_PLUGINS]/designer
+INCLUDEPATH = ../../lib/src ../../lib/build
+TARGET = wagowidgetplugin
+LIBS = -lcs8WagoConfigComponent -L../../../lib -lcs8ControllerComponent

@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="dataMakeUp" public="false" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+      <param name="cmd_" type="num" byVal="true" />
+      <param name="dataNo_" type="num" byVal="true" />
+      <param name="dataBuffer_" type="num" byVal="false" />
+      <param name="dataCount_" type="num" byVal="true" />
+      <param name="buffer_" type="num" byVal="false" />
+      <param name="count_" type="num" byVal="false" />
+    </paramSection>
+    <localSection>
+      <local name="i" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  // Prepare a data message to be send to servo drive.
+  //\param station_ The station number of the servo
+  //\param cmd_ The command code
+  //\param dataNo_ The data number of the requested command code
+  //\param buffer_ The buffer data
+  //\param count_ Number of valid bytes in buffer
+  //
+  buffer_[0]=SOH
+  count_=1
+  call toCharacterCode(station_,buffer_,1,count_)
+  call toCharacterCode(cmd_,buffer_,2,count_)
+  call addByte(STX,buffer_,count_)
+  call toCharacterCode(dataNo_,buffer_,2,count_)
+  //
+  // If the expected length of data on reception is 0 means that data
+  // is being send to the drive.
+  //
+  if nExpDataLength[cmd_]==0
+    for i=0 to dataCount_-1
+      call toCharacterCode(dataBuffer_[dataCount_-1-i],buffer_,2,count_)
+    endFor
+  endIf
+  call addByte(ETX,buffer_,count_)
+  call calcChecksumBuf(buffer_,count_)
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

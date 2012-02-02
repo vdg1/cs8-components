@@ -1,0 +1,157 @@
+<ui version="4.0" >
+ <class>licenseMakerWidget</class>
+ <widget class="QDialog" name="licenseMakerWidget" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>557</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Plastics Innovation License Creator</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <layout class="QGridLayout" >
+     <item row="0" column="0" >
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>Machine Number:</string>
+       </property>
+       <property name="buddy" >
+        <cstring>leMachineNumber</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" >
+      <widget class="QLineEdit" name="leMachineNumber" >
+       <property name="inputMask" >
+        <string>F99_NNNNNN_A_99; </string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" >
+      <widget class="QPushButton" name="btCreate" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="text" >
+        <string>&amp;Calculate Key</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" >
+      <widget class="QLabel" name="label_2" >
+       <property name="text" >
+        <string>License</string>
+       </property>
+       <property name="buddy" >
+        <cstring>leKey</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" >
+      <widget class="QLineEdit" name="leKey" >
+       <property name="readOnly" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTextEdit" name="textEdit" >
+     <property name="readOnly" >
+      <bool>true</bool>
+     </property>
+     <property name="html" >
+      <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;/p>&lt;/body>&lt;/html></string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btPrint" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="text" >
+        <string>&amp;Print</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox" >
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../rc/licenseMaker.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>licenseMakerWidget</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>347</x>
+     <y>357</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>397</x>
+     <y>89</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btCreate</sender>
+   <signal>clicked()</signal>
+   <receiver>licenseMakerWidget</receiver>
+   <slot>update()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>232</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>398</x>
+     <y>55</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

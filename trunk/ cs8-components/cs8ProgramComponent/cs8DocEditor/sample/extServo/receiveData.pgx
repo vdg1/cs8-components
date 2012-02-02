@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="receiveData">
+  <description/>
+  <paramSection>
+   <param byVal="true" type="num" name="cmd_"/>
+   <param byVal="false" type="num" name="stationNumber_"/>
+   <param byVal="false" type="num" name="buffer_"/>
+   <param byVal="false" type="num" name="count_"/>
+   <param byVal="false" type="num" name="comError_"/>
+   <param byVal="false" type="bool" name="timeout_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="num" name="data"/>
+   <local size="1" type="num" name="state"/>
+   <local size="1" type="num" name="timer"/>
+   <local size="1" type="string" name="char"/>
+   <local size="1" type="num" name="checksum"/>
+   <local size="2" type="num" name="recChecksum"/>
+   <local size="2" type="num" name="calcCheckSum"/>
+   <local size="1" type="bool" name="ok"/>
+  </localSection>
+  <source>
+   <code>begin
+  //\brief
+  //Receives the reply from the servo drive on a command sent to the drive
+  //
+  //\var data 
+  //\var state 
+  //\var timer 
+  //\var char 
+  //\var checksum 
+  //\var recChecksum 
+  //\var calcCheckSum 
+  //\var ok 
+  //\param cmd_ The command number on which data is received
+  //\param stationNumber_ The station number of the servo
+  //\param buffer_ The input buffer containing the data sent by the servo drive
+  //\param count_ Number of valid bytes in buffer
+  //\param comError_ The communication error code is:
+  //&lt;table>
+  //&lt;tr>&lt;td>Value&lt;/td>&lt;td>Description&lt;/td>
+  //&lt;tr>&lt;td>0&lt;/td>&lt;td>Data transmission was processed properly&lt;/td>
+  //&lt;tr>&lt;td>1&lt;/td>&lt;td>Parity error occured in the transmitted data&lt;/td>
+  //&lt;tr>&lt;td>2&lt;/td>&lt;td>Checksum error occured in the transmitted data&lt;/td>
+  //&lt;tr>&lt;td>3&lt;/td>&lt;td>Character not existing in the specification was transmitted&lt;/td>
+  //&lt;tr>&lt;td>4&lt;/td>&lt;td>Command not existing in the specification was transmitted&lt;/td>
+  //&lt;tr>&lt;td>5&lt;/td>&lt;td>Data number not existing in the specification was transmitted&lt;/td>
+  //&lt;tr>&lt;td>6&lt;/td>&lt;td>Checksum error occured in the received data&lt;/td>
+  //&lt;tr>&lt;td>7&lt;/td>&lt;td>The received data length does not correspond to the expected data length. Communication is out of sync.&lt;/td>
+  //&lt;tr>&lt;td>8&lt;/td>&lt;td>A Communication time-out has occured&lt;/td>
+  //&lt;/table>
+  //
+  //\param timeout_ A timeout has occured during communication.
+  //
+  //
+count_=0
+  state=0
+  timeout_=false
+  while true
+    timer=clock()
+    if sioGet(serial,data)>0
+      timer=clock()
+      //? "&lt;"+toString("2",data)+"  "+chr(data)
+      switch true
+        //
+        default
+          switch state
+            // expected STX
+            case 0
+              if data==STX
+                state=1
+              else
+                logMsg("extServo: Protocol error on reception: STX expected #"+toString("",stationNumber_))
+              endIf
+            break
+            // station number
+            case 1
+              toNum(chr(data),stationNumber_,ok)
+              checksum=data
+              state=2
+            break
+            // error code
+            case 2
+              checksum=checksum+data
+              // returned error code [a] .. [f] indicates a servo alarm
+              bServoAlarm[stationNumber_]=data>=97 and data&lt;=102
+              // set comError_ parameter:
+              // data >= 70 indicates also an servo alarm, hence we need to substract the servo alarm offset 32
+              // The communication error code is:
+              // 0 : Data transmission was processed properly
+              // 1 : Parity error occured in the transmitted data
+              // 2 : Checksum error occured in the transmitted data
+              // 3 : Character not existing in the specification was transmitted
+              // 4 : Command not existing in the specification was transmitted
+              // 5 : Data number not existing in the specification was transmitted
+              // 6 : Checksum error occured in the received data ( see state==5 )
+              // 7 : The received data length does not correspond to the expected data length. Communication is out of sync.
+              // 8 : A Communication time-out has occured
+              comError_=max(0,sel(data>=70,data-32,data)-65)
+              state=3
+            break
+            // data
+            case 3
+              checksum=checksum+data
+              if data!=ETX
+                buffer_[count_]=data
+                count_=count_+1
+              else
+                state=4
+              endIf
+            break
+            // checksum char 1
+            case 4
+              // check if received data length corresponds to expected data length
+              if count_!=nExpDataLength[cmd_]
+                comError_=7
+              endIf
+              recChecksum[0]=data
+              state=5
+            break
+            // checksum char 2 and comparision of calculated checksum and transmitted checksum
+            case 5
+              recChecksum[1]=data
+              call calcChecksumNum(checksum,calcCheckSum[0],calcCheckSum[1])
+              //? "calc chk:"+chr(calcCheckSum[0])+chr(calcCheckSum[1])
+              if calcCheckSum[0]!=recChecksum[0] or calcCheckSum[1]!=recChecksum[1]
+                //comError_=6
+              endIf
+              return
+            break
+          endSwitch
+        break
+      endSwitch
+    endIf
+    // receive timeout
+    if clock()-timer>0.3
+      timeout_=true
+      return
+    endIf
+  endWhile
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

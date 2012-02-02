@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="getAlarmCode" public="false" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+      <param name="code_" type="num" byVal="false" />
+    </paramSection>
+    <localSection>
+      <local name="value" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  //Returns the alarm code of drive station_ in code_.
+  // workaround because dioGet(diAlarmCode[8*station_]) always returns the value of the complete bit field
+  value=dioGet(diAlarmCode)
+  value=roundDown(value/power(2,8*station_))
+  //mask out bits
+  code_=bAnd(value,255)
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

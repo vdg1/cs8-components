@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="checkStationVal" public="false" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+      <param name="ok_" type="bool" byVal="false" />
+    </paramSection>
+    <localSection/>
+    <source>
+      <code>begin
+  //!brief
+  //Check if station number station_ is in valid range
+  ok_=(station_&gt;=0) and (station_&lt;nNbOfAxis)
+  if !ok_
+    logMsg(&quot;extServo: invalid station number: &quot;+toString(&quot;&quot;,station_))
+  endIf
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

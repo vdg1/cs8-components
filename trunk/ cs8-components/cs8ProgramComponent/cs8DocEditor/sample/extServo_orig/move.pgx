@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="move" public="true" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+      <param name="posIndex_" type="num" byVal="true" />
+      <param name="wait_" type="bool" byVal="true" />
+    </paramSection>
+    <localSection>
+      <local name="ok" type="bool" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  //Start a new move of the servo drive number station_ to the position index posIndex_.
+  //
+  //If parameter wait_ is true this function waits until the movement is completed.
+  //\note
+  //Parameter station_ is a zero based index. That means for the first drive station_ is 0, for the second drive station_ is 1, etc.
+  call checkStationVal(station_,ok)
+  if !ok
+    return
+  endIf
+  // wait until there is no movement pending
+  wait(nCmdPos[station_]==nCurrPos[station_])
+  // set new movement
+  nCmdPos[station_]=posIndex_
+  // wait for motion to complete if wait_ is true
+  wait(!wait_ or (wait_ and (nCmdPos[station_]==nCurrPos[station_])))
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

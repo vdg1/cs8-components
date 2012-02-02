@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="processEvents">
+  <paramSection/>
+  <localSection>
+   <local size="1" type="num" name="event"/>
+   <local size="1" type="num" name="idx"/>
+   <local size="1" type="num" name="nResult"/>
+  </localSection>
+  <source>
+   <code>begin
+  
+  //\var event 
+  //\var idx 
+  //\var nResult 
+call evt:getEvent(event)
+  
+  
+  // application load event
+  if event== evt:evtLoadApp
+    // stop application tasks
+    taskKill(sTaskName[0])
+    taskKill(sTaskName[1])
+    taskKill(sTaskName[2])
+    //!change 05.07.06, vdg: wait until all tasks are killed
+    for idx=0 to size(sTaskName)-1
+      wait(taskStatus(sTaskName[idx])==-1)
+    endFor
+    resetMotion()
+    disablePower()
+    call loadApplication(evt:sEventParam[0])
+    // do a total home return after loading the new application
+    SYS:bTotalHome=true
+    // inform ui that event has been processed
+    call evt:resetEvent()
+  endIf
+  // save application event
+  if event==evt:evtSaveApp
+    call saveApplication()
+    // inform ui that event has been processed
+    call evt:resetEvent()
+  endIf
+  
+  if event==evt:evtRunWizard
+    call wiz:wzNewApp()
+    call evt:resetEvent()
+  endIf
+    if event==evt:evtBackup
+    call util:backup(evt:sEventParam[0],nResult)
+    call evt:resetEvent()
+  endIf
+end
+</code>
+  </source>
+ </program>
+</programList>
