@@ -21,7 +21,7 @@ DialogImpl::DialogImpl ( QWidget * parent, Qt::WFlags f )
 
 
         QUrl url;
-        url.setUrl ( QString ( "cs8://staubli:Herakles@%1/" ).arg ( leHost->text() ) );
+        url.setUrl ( QString ( "cs8://staubli:@%1/" ).arg ( leHost->text() ) );
 
         cs8DirModel* model=new cs8DirModel(this);
         model->setLazyChildCount(true);
@@ -30,7 +30,7 @@ DialogImpl::DialogImpl ( QWidget * parent, Qt::WFlags f )
         treeView->setRootIndex(model->index(url.toString()));
 
         m_ctrl->setAddress(leHost->text());
-        m_ctrl->setLoginData("staubli","Herakles");
+        m_ctrl->setLoginData("staubli","");
         scanner=new cs8NetworkScanner(this);
 
         scanner->start(false);
@@ -105,7 +105,7 @@ void DialogImpl::slotLoad()
         // use convenience class for accessing controller information
 
         // m_ctrl->setAddress ( leHost->text() );
-        // m_ctrl->setLoginData("staubli","Herakles");
+        // m_ctrl->setLoginData("staubli","");
         // url=m_ctrl->url();
         // url.setPath("/usr/applicom/io/config/APLDFILE.TA3");//"D:\data\Staubli\CS8\6.2\usr\applicom\io\config\APLDFILE.TA3"
 
