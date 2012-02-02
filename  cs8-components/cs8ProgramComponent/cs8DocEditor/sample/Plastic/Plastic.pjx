@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project xmlns="ProjectNameSpace">
+  <parameters version="~VAL3:s5.2.4~Options:s5.2.4~Index:s5.2.4~Motion:s5.2.4~Protect:s5.2.4~Relbo:s5.2.4" stackSize="100000" millimeterUnit="true" />
+  <programSection>
+    <program file="loadApplication.pgx" />
+    <program file="run.pgx" />
+    <program file="start.pgx" />
+    <program file="stop.pgx" />
+    <program file="saveApplication.pgx" />
+    <program file="changeLog.pgx" />
+    <program file="processEvents.pgx" />
+    <program file="gripperStates.pgx" />
+    <program file="checkTaskStates.pgx" />
+    <program file="controlTasks.pgx" />
+    <program file="checkRobotPos.pgx" />
+    <program file="_globals.pgx" />
+    <program file="loadSysData.pgx" />
+    <program file="taskKiller.pgx" />
+    <program file="taskKill.pgx" />
+  </programSection>
+  <dataSection>
+    <data file="Plastic.dtx" />
+  </dataSection>
+  <aliasSection>
+    <alias name="io" interface="io" autoload="true" />
+    <alias name="rob" interface="z01_SysRobot" autoload="true" />
+    <alias name="SYS" interface="io_System" autoload="true" />
+    <alias name="app" interface="z01_Application" autoload="true" />
+    <alias name="data" interface="Plastic/sysDataTemplate" autoload="true" />
+    <alias name="evt" interface="z01_SysEvents" autoload="true" />
+    <alias name="ui" interface="z01_SysUserDisp" autoload="true" />
+    <alias name="USER" interface="io_User" autoload="true" />
+    <alias name="str" interface="/Libraries/stringHandling" autoload="true" />
+    <alias name="STK" interface="z01_SysStacking" autoload="true" />
+    <alias name="secu" interface="z01_SysSecurity" autoload="true" />
+    <alias name="wiz" interface="z01_SysUserDisp/Wizard" autoload="true" />
+    <alias name="util" interface="z01_SysUserDisp/Util" autoload="true" />
+    <alias name="upd" interface="Plastic/updater" autoload="true" />
+    <alias name="FUN" interface="z01_SysFuncCall" autoload="true" />
+    <alias name="fun" interface="z01_SysFunction" autoload="true" />
+    <alias name="scr" interface="z01_SysUserDisp/Screen" autoload="true" />
+    <alias name="appTmp" interface="z01_Application" autoload="true" />
+  </aliasSection>
+</project>

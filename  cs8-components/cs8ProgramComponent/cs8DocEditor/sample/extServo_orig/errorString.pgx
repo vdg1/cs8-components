@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="errorString" public="true" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+      <param name="txt_" type="string" byVal="false" />
+    </paramSection>
+    <localSection>
+      <local name="ok" type="bool" size="1" />
+      <local name="errCode" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  // Return txt_ which contains the error string of the currently pending error of drive number station_.
+  //
+  //Return parameter txt_ is empty if no error is pending.
+  //\note
+  //Parameter station_ is a zero based index. That means for the first drive station_ is 0, for the second drive station_ is 1, etc.
+  txt_=&quot;&quot;
+  call checkStationVal(station_,ok)
+  if !ok
+    return
+  endIf
+  //errCode=dioGet(diAlarmCode[8*station_])
+  call getAlarmCode(station_,errCode)
+  switch true
+    case nMode==modDISCRETE and errCode!=0 and diTrouble[station_]==false
+      if errCode&lt;size(sErrorMsgDis)
+        txt_=sErrorMsgDis[errCode]
+      else
+        txt_=&quot;Unknown error&quot;
+      endIf
+    break
+    case nMode==modSERIAL and errCode!=0
+      switch true
+        case errCode&gt;size(sErrorMsgSer)
+          txt_=&quot;Undefined error&quot;
+        break
+        case errCode&lt;size(sErrorMsgSer)
+          txt_=sErrorMsgSer[errCode]
+        break
+        case sErrorMsgSer[errCode]==&quot;&quot;
+          txt_=&quot;Undefined error&quot;
+        break
+      endSwitch
+    break
+    case diTrouble[station_]==false
+      txt_=&quot;Unknown error&quot;
+    break
+    default
+      txt_=&quot;No Error Pending&quot;
+      txt_=&quot;&quot;
+    break
+  endSwitch
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

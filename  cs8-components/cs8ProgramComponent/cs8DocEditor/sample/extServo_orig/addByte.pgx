@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="addByte" public="false" >
+    <description />
+    <paramSection>
+      <param name="byte_" type="num" byVal="true" />
+      <param name="buffer_" type="num" byVal="false" />
+      <param name="count_" type="num" byVal="false" />
+    </paramSection>
+    <localSection/>
+    <source>
+      <code>begin
+  //!brief
+  //Adds byte_ to buffer_ at position count_ and increase count_ by 1.
+  buffer_[count_]=byte_
+  count_=count_+1
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

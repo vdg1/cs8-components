@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="setAlarmCode" public="false" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+      <param name="code_" type="num" byVal="true" />
+    </paramSection>
+    <localSection>
+      <local name="current" type="num" size="1" />
+      <local name="allCodes" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  //Set alarm code in diAlarmCode field
+  // read out current alarm codes of all drives from bit field
+  allCodes=dioGet(diAlarmCode)
+  call getAlarmCode(station_,current)
+  // delete current alarm code bits from field
+  allCodes=bXor(allCodes,current*power(2,station_*8))
+  // set new alarm code bits in field
+  allCodes=bOr(allCodes,bAnd(code_,255)*power(2,station_*8))
+  dioSet(diAlarmCode,allCodes)
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

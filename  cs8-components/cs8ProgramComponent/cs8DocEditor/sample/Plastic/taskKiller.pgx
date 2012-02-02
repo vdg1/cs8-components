@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="taskKiller">
+  <paramSection>
+   <param byVal="true" type="string" name="sTask_"/>
+  </paramSection>
+  <localSection/>
+  <source>
+   <code>begin
+  
+  //\param sTask_ 
+taskKill(sTask_)
+end
+    </code>
+  </source>
+ </program>
+</programList>

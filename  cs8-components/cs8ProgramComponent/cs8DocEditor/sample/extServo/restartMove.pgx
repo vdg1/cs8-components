@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="true" name="restartMove">
+  <description/>
+  <paramSection>
+   <param byVal="true" type="num" name="station_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="bool" name="ok"/>
+  </localSection>
+  <source>
+   <code>begin
+  //\brief
+  //Restart a pending movement in drive number station_.
+  //\note 
+  //Parameter station_ is a zero based index. That means for the first drive station_ is 0, for the second drive station_ is 1, etc.
+  //\var ok 
+  //\param station_ 
+  //
+call checkStationVal(station_,ok)
+  if !ok
+    return
+  endIf
+  if diTmpStop[station_]==true
+    switch nMode
+      case modDISCRETE
+        call pulse(doTmpStopStart[station_])
+      break
+      case modSERIAL
+        doTmpStopStart[station_]=true
+      break
+    endSwitch
+  endIf
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

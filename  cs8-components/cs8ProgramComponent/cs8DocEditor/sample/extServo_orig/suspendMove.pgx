@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="suspendMove" public="true" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+    </paramSection>
+    <localSection>
+      <local name="ok" type="bool" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  //Suspend the current movement of the servo.
+  //
+  //The function does nothing if no movement is active. When the movement is stopped
+  //it can be resumed by calling restartMove().
+  //\note
+  //Parameter station_ is a zero based index. That means for the first drive station_ is 0, for the second drive station_ is 1, etc.
+  call checkStationVal(station_,ok)
+  if !ok
+    return
+  endIf
+  if diTmpStop[station_]==false
+    switch nMode
+      case modDISCRETE
+        call pulse(doTmpStopStart[station_])
+      break
+      case modSERIAL
+        doTmpStopStart[station_]=true
+      break
+    endSwitch
+  endIf
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

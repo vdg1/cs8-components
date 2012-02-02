@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="fromCharCode">
+  <description/>
+  <paramSection>
+   <param byVal="false" type="num" name="buffer_"/>
+   <param byVal="true" type="num" name="count_"/>
+   <param byVal="false" type="num" name="out_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="num" name="i"/>
+   <local size="1" type="num" name="digit"/>
+  </localSection>
+  <source>
+   <code>begin
+  //
+  //\var i 
+  //\var digit 
+  //\param buffer_ 
+  //\param count_ 
+  //\param out_ 
+  //
+out_=0
+  for i=0 to count_-1
+    // translate ASCII char 0..9, A..F to num
+    digit=sel(buffer_[i]>=65,buffer_[i]-55,buffer_[i]-48)
+    out_=out_+digit*power(16,count_-1-i)
+  endFor
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

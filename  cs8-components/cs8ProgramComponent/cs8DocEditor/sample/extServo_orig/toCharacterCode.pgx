@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="toCharacterCode" public="false" >
+    <description />
+    <paramSection>
+      <param name="code_" type="num" byVal="true" />
+      <param name="buffer_" type="num" byVal="false" />
+      <param name="reqFrameLength_" type="num" byVal="true" />
+      <param name="count_" type="num" byVal="false" />
+    </paramSection>
+    <localSection>
+      <local name="i" type="num" size="1" />
+      <local name="data" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //\brief
+  //Encodes code_ to BCD encoding and returns the result in buffer_ as ASCII chars of the digit character.
+  //
+  //The value in count_
+  // represents the start index fro writing into buffer_. The encoding is limited to
+  //reqFrameLength_ number of digits. If the number of generated digits is shorter than reqFrameLength_
+  // the remaining digts are set to 0.
+  //\sa fromCharCode
+  //\note
+  //See MR_J3_T_D01_Built_in_position_functionn_manual.pdf, chapter 14 for details
+  for i=0 to reqFrameLength_-1
+    data=round((code_/10-roundDown(code_/10))*10)
+    code_=roundDown(code_/10)
+    switch true
+      case data&lt;10
+        buffer_[count_+reqFrameLength_-i-1]=48+data
+      break
+      case data&gt;=10 and data&lt;32
+        buffer_[count_+reqFrameLength_-i-1]=65+data-10
+      break
+      default
+        logMsg(&quot;extServo: Invalid data&quot;)
+      break
+    endSwitch
+  endFor
+  count_=count_+reqFrameLength_
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

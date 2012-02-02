@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="setPosTable">
+  <description/>
+  <paramSection>
+   <param byVal="true" type="num" name="station_"/>
+   <param byVal="true" type="num" name="posIdx_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="num" name="current"/>
+   <local size="1" type="num" name="allCodes"/>
+  </localSection>
+  <source>
+   <code>begin
+  //\brief
+  //Set position table bit field
+  // read out current position table of all drives from bit field
+  //\var current 
+  //\var allCodes 
+  //\param station_ 
+  //\param posIdx_ 
+  //
+allCodes=dioGet(doPosTable)
+  current=roundDown(allCodes/power(2,4*station_))
+  current=bAnd(15,current)
+  // delete current alarm code bits from field
+  allCodes=bXor(allCodes,current*power(2,station_*4))
+  // set new position code bits in field
+  allCodes=bOr(allCodes,bAnd(posIdx_,15)*power(2,station_*4))
+  dioSet(doPosTable,allCodes)
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

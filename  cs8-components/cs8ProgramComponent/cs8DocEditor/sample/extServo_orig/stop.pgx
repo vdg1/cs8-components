@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="stop" public="true" >
+    <description />
+    <paramSection/>
+    <localSection>
+      <local name="i" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  bQuit=true
+  watch(taskStatus(sTaskName)==-1,5)
+  taskKill(sTaskName)
+  for i=0 to nNbOfAxis-1
+    doServoOn[i]=false
+    call setDevices(i)
+  endFor
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="monitor">
+  <description/>
+  <paramSection>
+   <param byVal="true" type="num" name="station_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="num" name="pos"/>
+   <local size="1" type="num" name="key"/>
+  </localSection>
+  <source>
+   <code>begin
+  //
+  //\var pos 
+  //\var key 
+  //\param station_ 
+  //
+bCalibrate[station_]=true
+  call setPosTable(station_,0)
+  //dioSet(doPosTable[station_*4],0)
+  cls()
+  userPage()
+  while bCalibrate[station_]
+    title("Servo "+toString("",station_))
+    gotoxy(0,0)
+    putln("HOME         : "+toString("",sel(diHomePos[station_]==true,1,0)))
+    putln("IN POS       : "+toString("",sel(diInPosition[station_]==true,1,0)))
+    putln("MOVE FINISHED: "+toString("",sel(diMoveFinished[station_]==true,1,0)))
+    putln("READY        : "+toString("",sel(diReady[station_]==true,1,0)))
+    putln("ROUGH MATCH  : "+toString("",sel(diRoughMatch[station_]==true,1,0)))
+    putln("TROUBLE      : "+toString("",sel(diTrouble[station_]==true,1,0)))
+    putln("ZERO SPEED   : "+toString("",sel(diZeroSpeed[station_]==true,1,0)))
+    //putln("")
+    putln("AUTO         : "+toString("",sel(doAutomatic[station_]==true,1,0)))
+    putln("RESET        : "+toString("",sel(doReset[station_]==true,1,0)))
+    putln("START ROT    : "+toString("",sel(doRotStart[station_]==true,1,0)))
+    putln("ENABLE       : "+toString("",sel(doServoOn[station_]==true,1,0)))
+    putln("POS IDX      : "+toString("1.0",pos))
+    gotoxy(0,13)
+    put("AUTO RESET ROT ENABLE")
+    switch true
+      case isKeyPressed(271)
+        doAutomatic[station_]=!doAutomatic[station_]
+        wait(!isKeyPressed(271))
+      break
+      case isKeyPressed(272)
+        doReset[station_]=!doReset[station_]
+        wait(!isKeyPressed(272))
+      break
+      case isKeyPressed(273)
+        doRotStart[station_]=!doRotStart[station_]
+        wait(!isKeyPressed(273))
+      break
+      case isKeyPressed(274)
+        doServoOn[station_]=!doServoOn[station_]
+        wait(!isKeyPressed(274))
+      break
+      default
+        key=getKey()
+        if key>47 and key&lt;53
+          pos=key-48
+          //dioSet(doPosTable[station_*4],pos)
+          call setPosTable(station_,pos)
+        else
+        endIf
+      break
+    endSwitch
+  endWhile
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

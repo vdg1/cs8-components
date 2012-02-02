@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="calibrate">
+  <description/>
+  <paramSection>
+   <param byVal="true" type="num" name="station_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="bool" name="ok"/>
+  </localSection>
+  <source>
+   <code>begin
+  //
+  //\var ok 
+  //\param station_ 
+  //
+call checkStationVal(station_,ok)
+  if ok
+    doAutomatic[station_]=true
+    call setPosTable(station_,0)
+    //dioSet(doPosTable[station_],0)
+    doRotStart[station_]=true
+    delay(0.1)
+    doRotStart[station_]=false
+    wait(diMoveFinished[station_]==false)
+    wait(diMoveFinished[station_]==true)
+    wait(diHomePos[station_]==true)
+  endIf
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

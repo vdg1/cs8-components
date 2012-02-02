@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="linkSerial" public="true" >
+    <description />
+    <paramSection>
+      <param name="serial_" type="sio" byVal="true" />
+      <param name="ioArea_" type="dio" byVal="false" />
+    </paramSection>
+    <localSection>
+      <local name="i" type="num" size="1" />
+      <local name="station" type="num" size="1" />
+      <local name="offset" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  //Link serial link serial_ for serial communication with servo drive.
+  //
+  //In serial communication mode the parameter ioArea_ must be provided. ioArea_ points to a free io area, e.g. unused modbus signal space,
+  //which is used for mapping simulated signals to signals available to applications via the io: alias.
+  //Each servo drive requires a 26bit wide io space, padded to 32bit. So for a two servo drive configuration the io space must be at least 64bit wide.
+  //\note
+  //The serial link must support RS422 mode unless an external RS232 - RS422 converter is used.
+  sioLink(serial,serial_)
+  sioCtrl(serial,&quot;baudRate&quot;,57600)
+  sioCtrl(serial,&quot;bits&quot;,8)
+  sioCtrl(serial,&quot;parity&quot;,&quot;even&quot;)
+  sioCtrl(serial,&quot;stopBits&quot;,1)
+  sioCtrl(serial,&quot;timeout&quot;,1)
+  sioCtrl(serial,&quot;endOfString&quot;,13)
+  //sioCtrl(serial,&quot;mode&quot;,&quot;RS422&quot;)
+  //
+  for station=0 to nNbOfAxis-1
+    offset=station*32
+    // servo outputs
+    dioLink(diHomePos[station],ioArea_[0+offset])
+    dioLink(diInPosition[station],ioArea_[1+offset])
+    dioLink(diMoveFinished[station],ioArea_[2+offset])
+    dioLink(diReady[station],ioArea_[3+offset])
+    dioLink(diRoughMatch[station],ioArea_[4+offset])
+    dioLink(diTmpStop[station],ioArea_[5+offset])
+    dioLink(diTrouble[station],ioArea_[6+offset])
+    dioLink(diZeroSpeed[station],ioArea_[7+offset])
+    dioLink(diLimitTorque[station],ioArea_[8+offset])
+    dioLink(diWarning[station],ioArea_[9+offset])
+    for i=0 to 7
+      dioLink(diAlarmCode[i+station*8],ioArea_[10+i+offset])
+    endFor
+    // servo inputs
+    dioLink(doAutomatic[station],ioArea_[18+offset])
+    dioLink(doReset[station],ioArea_[19+offset])
+    dioLink(doRotStart[station],ioArea_[20+offset])
+    dioLink(doServoOn[station],ioArea_[21+offset])
+    dioLink(doTmpStopStart[station],ioArea_[22+offset])
+    for i=0 to 3
+      dioLink(doPosTable[i+station*4],ioArea_[23+i+offset])
+    endFor
+  endFor
+  nMode=modSERIAL
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

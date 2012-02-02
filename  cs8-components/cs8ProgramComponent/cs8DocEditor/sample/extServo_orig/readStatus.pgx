@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="readStatus" public="false" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+    </paramSection>
+    <localSection>
+      <local name="nNum" type="num" size="1" />
+      <local name="i" type="num" size="1" />
+      <local name="txt" type="string" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //\brief
+  //Read the status signals of the drive.
+  //
+  //The current status and alarm codes are read from drive #station_.
+  //
+  //\sa
+  //MR_J3_T_D01_Built_in_position_function, page 14-13 and page 14-28
+  if nMode!=modSERIAL
+    return
+  endIf
+  call sendCommand(station_,cmdSTATUS,80,buffer,count)
+  call fromCharCode(buffer,count,nNum)
+  // section for debugging
+  // -&gt;
+  //  txt=&quot;&quot;
+  //  for i=0 to count-1
+  //    txt=toString(&quot;4.0&quot;,buffer[i])+txt
+  //  endFor
+  //  ? txt+toString(&quot;10&quot;,nNum)
+  // &lt;-
+  //
+  //BYTE 1
+  // read RD symbol
+  diReady[station_]=bAnd(nNum,1)!=0
+  // read ZSP symbol
+  diZeroSpeed[station_]=bAnd(nNum,4)!=0
+  // read TLC symbol
+  diLimitTorque[station_]=bAnd(nNum,8)!=0
+  // read INP symbol
+  diInPosition[station_]=bAnd(nNum,32)!=0
+  // read WNG symbol
+  diWarning[station_]=bAnd(nNum,128)!=0
+  // BYTE 2
+  // read ALM symbol
+  // symbol is inversed
+  diTrouble[station_]=bAnd(nNum,256)==0
+  // BYTE 3
+  // read ZP symbol
+  diHomePos[station_]=bAnd(nNum,131072)!=0
+  // read PUS symbol
+  diTmpStop[station_]=bAnd(nNum,524288)!=0
+  // BYTE 4
+  // read MEND symbol
+  diMoveFinished[station_]=bAnd(nNum,268435456)!=0
+  // Read current alarm code
+  //call sendCommand(0,12,82,buffer,count)
+  call sendCommand(station_,cmdCURR_ALARM,0,buffer,count)
+  call fromCharCode(buffer,count,nNum)
+  if !bServoComError[station_]
+    // set diAlarmCode bit field
+    // 1. byte: alarm code station 0
+    // 2. byte: alarm code station 1
+    //..
+    //
+    // limit error code number to 8 bits
+    //dioSet(diAlarmCode[station_*256],bAnd(nNum,255))
+    call setAlarmCode(station_,bAnd(nNum,255))
+    nAlarmCode[station_]=nNum
+  endIf
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

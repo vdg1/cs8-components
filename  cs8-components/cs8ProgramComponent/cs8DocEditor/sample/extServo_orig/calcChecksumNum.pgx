@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="calcChecksumNum" public="false" >
+    <description />
+    <paramSection>
+      <param name="sum_" type="num" byVal="true" />
+      <param name="checkSum1_" type="num" byVal="false" />
+      <param name="checkSum2_" type="num" byVal="false" />
+    </paramSection>
+    <localSection>
+      <local name="sum" type="num" size="1" />
+      <local name="i" type="num" size="1" />
+      <local name="hex" type="string" size="1" />
+      <local name="count" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  //Calculate check sum of sum_ and returns two byte check sum in checkSum1_ and checkSum2_.
+  //
+  //\sa calcChecksumBuf()
+  call math:decToHexStr(sum,hex)
+  checkSum1_=asc(hex,len(hex)-2)
+  checkSum2_=asc(hex,len(hex)-1)
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

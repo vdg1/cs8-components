@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+ <Program name="checkTaskStates">
+  <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+   <Parameter use="reference" type="num" name="nTaskState_" xsi:type="array"/>
+  </Parameters>
+  <Locals>
+   <Local size="1" type="num" name="idx" xsi:type="array"/>
+   <Local size="1" type="string" name="sText" xsi:type="array"/>
+   <Local size="1" type="num" name="count" xsi:type="array"/>
+   <Local size="20" type="string" name="callStack" xsi:type="array"/>
+   <Local size="1" type="num" name="line" xsi:type="array"/>
+   <Local size="1" type="string" name="library" xsi:type="array"/>
+   <Local size="1" type="string" name="program" xsi:type="array"/>
+   <Local size="1" type="string" name="code" xsi:type="array"/>
+  </Locals>
+  <Code><![CDATA[begin
+    //\brief
+  //
+  //\change 
+  //07.06.06, vdg: log status of user tasks
+  // go through list of tasks
+  //\var idx 
+  //\var sText 
+  //\var count 
+  //\var callStack 
+  //\var line 
+  //\var library 
+  //\var program 
+  //\var code 
+  //\param nTaskState_ 
+  //
+//!change 07.06.06, vdg: log status of user tasks
+  // go through list of tasks
+  for idx=0 to size(sTaskName)-1
+    // check if task state has changed
+    if taskStatus(sTaskName[idx])!=nTaskState_[idx]
+      // store new task state
+      nTaskState_[idx]=taskStatus(sTaskName[idx])
+      // get message string
+      call ui:getTaskErrorMsg(nTaskState_[idx],sText)
+      // log the message
+      logMsg(sTaskName[idx]+": "+sText)
+    endIf
+    // get call stack of task
+    count=$taskCallStack(sTaskName[idx],callStack)
+    if idx==1
+      call parseStackInfo(callStack,library,program,line,code)
+      if program=="SP_Traj"
+        call list:resizeString(programList,max(size(programList),line))
+        programList[line]=code
+      endIf
+    endIf
+    if count>0
+      stat:sTaskStack[idx]=callStack[count-1]
+    else
+      stat:sTaskStack[idx]=""
+    endIf
+  endFor
+  // check if home return is active
+  //!change vdg, 11.03.08 : set SYS:bHomeRetActive when home return task exists, not only when it is executing
+  SYS:bHomeRetActive=taskStatus(sTaskName[2])!=-1
+  //
+  //!issue 22
+  // poll state of user PLC
+  call prg:statusPLC(stat:PLCStatus,stat:PLCStatusText)
+end
+
+      
+      ]]></Code>
+ </Program>
+</Programs>

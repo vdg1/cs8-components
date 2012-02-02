@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="checkTaskStates">
+  <paramSection>
+   <param byVal="false" type="num" name="nTaskState_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="num" name="idx"/>
+   <local size="1" type="string" name="sText"/>
+  </localSection>
+  <source>
+   <code>begin
+  
+  //\var idx 
+  //\var sText 
+
+  //\param nTaskState_ 
+for idx=0 to size(sTaskName)-1
+    // check if task state has changed
+    if taskStatus(sTaskName[idx])!=nTaskState_[idx]
+      // store new task state
+      nTaskState_[idx]=taskStatus(sTaskName[idx])     
+      // get message string
+      call ui:getTaskErrorMsg(nTaskState_[idx],sText)
+      // log the message
+      logMsg(sTaskName[idx]+": "+sText)
+    endIf
+  endFor
+  // check if home return is active
+  SYS:bHomeRetActive=taskStatus(sTaskName[2])!=-1
+  //  
+end
+</code>
+  </source>
+ </program>
+</programList>

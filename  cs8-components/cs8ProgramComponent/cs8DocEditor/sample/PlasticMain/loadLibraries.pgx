@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+ <Program name="loadLibraries">
+  <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+   <Parameter use="reference" type="bool" name="bResult_" xsi:type="array"/>
+  </Parameters>
+  <Locals>
+   <Local size="1" type="num" name="nResult" xsi:type="array"/>
+   <Local size="1" type="string" name="libName" xsi:type="array"/>
+   <Local size="1" type="num" name="i" xsi:type="array"/>
+   <Local size="1" type="string" name="name" xsi:type="array"/>
+  </Locals>
+  <Code><![CDATA[begin
+    //
+  //\var nResult 
+  //\var libName 
+  //\var i 
+  //\var name 
+  //\param bResult_ 
+  //
+for i=-1 to 15
+    switch i
+      case 3
+        libName="Plastic/Modules/modUserDisp"
+        put("Loading "+libName+": ")
+        nResult=ui:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=ui:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for ui:")
+            call debug:info(libPath(),": Problem loading library for ui:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+ui:libPath())
+          endIf
+        endIf
+      break
+      case 0
+        libName="zFuncCall"
+        put("Loading "+libName+": ")
+        nResult=FUN:libLoad(libName)
+      break
+      case 2
+        libName="Plastic/Modules/modRobot"
+        put("Loading "+libName+": ")
+        nResult=rob:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=rob:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for rob:")
+            call debug:info(libPath(),": Problem loading library for rob:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+rob:libPath())
+          endIf
+        endIf
+      break
+      case 4
+        libName="Plastic/Modules/modFunction"
+        put("Loading "+libName+": ")
+        nResult=fun:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=fun:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for fun:")
+            call debug:info(libPath(),": Problem loading library for fun:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+fun:libPath())
+          endIf
+        endIf
+      break
+      case 5
+        libName="Plastic/Modules/modSafety"
+        put("Loading "+libName+": ")
+        nResult=secu:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=secu:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for secu:")
+            call debug:info(libPath(),": Problem loading library for secu:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+secu:libPath())
+          endIf
+        endIf
+      break
+      case 1
+        libName="io_User"
+        put("Loading "+libName+": ")
+        nResult=USER:libLoad(libName)
+        // if loading io_User failed because it does not exist, save the template as io_User
+        if nResult>=30
+          logMsg("io_User not found!")
+          // reload template
+          nResult=USER:libLoad("Plastic/templates/tempIoUser")
+          if nResult==0
+            // save template as io_User
+            nResult=USER:libSave("io_User")
+            if nResult==0
+              logMsg("io_User recreated from template")
+            endIf
+          endIf
+        endIf
+      break
+      case 15
+        libName="zUserProgram"
+        put("Loading "+libName+": ")
+        nResult=prg:libLoad(libName)
+        // if loading zUserProgram failed because it does not exist, save the template as io_User
+        if nResult>=30
+          logMsg("zUserProgram not found!")
+          // reload template
+          nResult=prg:libLoad("Plastic/templates/tempUserProgram")
+          if nResult==0
+            // save template as zUserProgram
+            nResult=prg:libSave("zUserProgram")
+            if nResult==0
+              logMsg("zUserProgram recreated from template")
+            endIf
+          endIf
+        endIf
+      break
+      case -1
+        libName="zUserIODef"
+        put("Loading "+libName+": ")
+        nResult=userIO:libLoad(libName)
+        call userIO:start()
+      break
+      case 6
+        libName="Plastic/Modules/modBackup"
+        put("Loading "+libName+": ")
+        nResult=util:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=util:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for util:")
+            call debug:info(libPath(),": Problem loading library for util:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+util:libPath())
+          endIf
+        endIf
+      break
+      case 7
+        libName="Plastic/Modules/modDatabase"
+        put("Loading "+libName+": ")
+        nResult=db:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=db:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for db:")
+            call debug:info(libPath(),": Problem loading library for db:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+db:libPath())
+          endIf
+        endIf
+      break
+      case 8
+        libName="Plastic/Modules/modCustom"
+        put("Loading "+libName+": ")
+        nResult=customModule:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=customModule:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for customModule:")
+            call debug:info(libPath(),": Problem loading library for customModule:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+customModule:libPath())
+          endIf
+        endIf
+      break
+      case 9
+        libName="Plastic/Modules/modMsl"
+        put("Loading "+libName+": ")
+        nResult=msl:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=msl:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for msl:")
+            call debug:info(libPath(),": Problem loading library for msl:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+msl:libPath())
+          endIf
+        endIf
+      break
+      case 10
+        libName="Plastic/Modules/modEvents"
+        put("Loading "+libName+": ")
+        nResult=evt:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=evt:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for evt:")
+            call debug:info(libPath(),": Problem loading library for evt:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+evt:libPath())
+          endIf
+        endIf
+      break
+      case 11
+        libName="Plastic/Modules/modStatus"
+        put("Loading "+libName+": ")
+        nResult=stat:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=stat:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for stat:")
+            call debug:info(libPath(),": Problem loading library for stat:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+stat:libPath())
+          endIf
+        endIf
+      break
+      case 12
+        libName="Plastic/Modules/modUpdater"
+        put("Loading "+libName+": ")
+        nResult=upd:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=upd:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for upd:")
+            call debug:info(libPath(),": Problem loading library for upd:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+upd:libPath())
+          endIf
+        endIf
+      break
+      case 13
+        libName="Plastic/Modules/modUserIO"
+        put("Loading "+libName+": ")
+        nResult=usr:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=usr:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for usr:")
+            call debug:info(libPath(),": Problem loading library for usr:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+usr:libPath())
+          endIf
+        endIf
+      break
+      case 14
+        libName="Plastic/Modules/modMonitor"
+        put("Loading "+libName+": ")
+        nResult=monitor:libLoad(libName+".zip","a81d706f651db0a6b2")
+        if nResult!=0
+          name=libPath()
+          nResult=monitor:libLoad(libName)
+          if nResult!=0
+            popUpMsg(name+":  Problem loading library for monitor:")
+            call debug:info(libPath(),": Problem loading library for monitor:")
+          else
+            call debug:info(libPath(),": Loading uncrypted version "+monitor:libPath())
+          endIf
+        endIf
+      break
+    endSwitch
+    if nResult==0
+      putln("ok")
+    else
+      putln("failed ("+toString("",nResult)+")")
+      bResult_=false
+    endIf
+  endFor
+end
+
+      
+      ]]></Code>
+ </Program>
+</Programs>

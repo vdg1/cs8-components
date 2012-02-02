@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="true" name="status">
+  <description/>
+  <paramSection>
+   <param byVal="true" type="num" name="station_"/>
+   <param byVal="false" type="num" name="status_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="bool" name="ok"/>
+   <local size="1" type="num" name="alarmCode"/>
+  </localSection>
+  <source>
+   <code>begin
+  //\brief
+  //Retrieve the status of drive number station_
+  //\note 
+  //Parameter station_ is a zero based index. That means for the first drive station_ is 0, for the second drive station_ is 1, etc.
+  //\var ok 
+  //\var alarmCode 
+  //\param station_ 
+  //\param status_ 
+  //
+call checkStationVal(station_,ok)
+  if !ok
+    status_=0
+    return
+  endIf
+  call getAlarmCode(station_,alarmCode)
+  switch true
+    case nMode==modNONE or !ok
+      status_=0
+    break
+    case alarmCode!=0
+      status_=alarmCode
+    break
+    case diTrouble[station_]==false
+      status_=256
+    break
+    default
+      status_=0
+    break
+  endSwitch
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

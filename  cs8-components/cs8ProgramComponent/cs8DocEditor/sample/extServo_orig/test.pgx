@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="test" public="false" >
+    <description />
+    <paramSection/>
+    <localSection/>
+    <source>
+      <code>begin
+  while true
+    call move(1,2,true)
+    delay(0.1)
+    call move(1,4,true)
+    delay(0.1)
+  endWhile
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

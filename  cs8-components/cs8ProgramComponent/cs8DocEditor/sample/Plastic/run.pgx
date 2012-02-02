@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="run">
+  <paramSection/>
+  <localSection>
+   <local size="3" type="num" name="nTaskState"/>
+   <local size="1" type="num" name="idx"/>
+  </localSection>
+  <source>
+   <code>
+begin
+  
+  //\var nTaskState 
+  //\var idx 
+for idx=0 to size(nTaskState)-1
+    nTaskState[idx]=-1
+  endFor
+  //
+  while (rob:bRobActive)
+    delay(0)
+    call checkRobotPos()
+    call checkTaskStates(nTaskState)
+    call controlTasks()
+    call processEvents()
+    call gripperStates()
+  endWhile
+end
+</code>
+  </source>
+ </program>
+</programList>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="true" name="init">
+  <description/>
+  <paramSection>
+   <param byVal="true" type="num" name="nNbOfAxis_"/>
+  </paramSection>
+  <localSection/>
+  <source>
+   <code>begin
+  //\brief
+  //Initliases the servo drive library.
+  //\param nNbOfAxis_ 
+  //
+logMsg("extServo: init()")
+  nState=-20
+  nCmdPos=0
+  nCurrPos=0
+  bCalibrate=false
+  bQuit=false
+  // limit the number of axis to range [1..2]
+  nNbOfAxis=limit(nNbOfAxis_,1,2)
+  //
+  // resize IOs according to nNbOfAxis
+  call list:resizeDio(diAlarmCode,8*nNbOfAxis)
+  call list:resizeDio(diHomePos,nNbOfAxis)
+  call list:resizeDio(diLimitTorque,nNbOfAxis)
+  call list:resizeDio(diMoveFinished,nNbOfAxis)
+  call list:resizeDio(diInPosition,nNbOfAxis)
+  call list:resizeDio(diReady,nNbOfAxis)
+  call list:resizeDio(diRoughMatch,nNbOfAxis)
+  call list:resizeDio(diTmpStop,nNbOfAxis)
+  call list:resizeDio(diTrouble,nNbOfAxis)
+  call list:resizeDio(diWarning,nNbOfAxis)
+  call list:resizeDio(diZeroSpeed,nNbOfAxis)
+  //
+  call list:resizeDio(doAutomatic,nNbOfAxis)
+  call list:resizeDio(doPosTable,4*nNbOfAxis)
+  call list:resizeDio(doReset,nNbOfAxis)
+  call list:resizeDio(doRotStart,nNbOfAxis)
+  call list:resizeDio(doServoOn,nNbOfAxis)
+  call list:resizeDio(doTmpStopStart,nNbOfAxis)
+  //
+  call list:resizeNum(nCurrPos,nNbOfAxis)
+  call list:resizeNum(nCmdPos,nNbOfAxis)
+  call list:resizeNum(nAlarmCode,nNbOfAxis)
+  call list:resizeNum(nState,nNbOfAxis)
+  call list:resizeBool(bCalibrate,nNbOfAxis)
+  call list:resizeBool(bTrouble,nNbOfAxis)
+  call list:resizeBool(bServoAlarm,nNbOfAxis)
+  call list:resizeBool(bServoComError,nNbOfAxis)
+  call list:resizeBool(bTimeOut,nNbOfAxis)
+  call start()
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="_globals" public="false" >
+    <description />
+    <paramSection/>
+    <localSection/>
+    <source>
+      <code>begin
+  //!module
+  //This module is for controlling a Mitsubishi MR J3 servo drive connected via serial link or discrete signals.
+  //
+  //The IO configuration should be declared in io_User:
+  //\li For discrete signals:
+  //&lt;code&gt;
+  //// servo outputs
+  //  for i=0 to 3
+  //    dioLink(srv:diAlarmCode[i],io:N2_103[i])
+  //  endFor
+  //  dioLink(srv:diHomePos,io:N2_102[2])
+  //  dioLink(srv:diInPosition,io:N2_102[6])
+  //  dioLink(srv:diMoveFinished,io:N2_102[4])
+  //  dioLink(srv:diReady,io:N2_102[0])
+  //  dioLink(srv:diRoughMatch,io:N2_102[5])
+  //  dioLink(srv:diTmpStop,io:N2_102[3])
+  //  dioLink(srv:diTrouble,io:N2_102[1])
+  //  dioLink(srv:diZeroSpeed, io:N2_102[4])
+  //  dioLink(srv:diLimitingTorque, io:N2_102[4])
+  //  // servo inputs
+  //  dioLink(srv:doAutomatic,io:N2_106[2])
+  //  for i=0 to 2
+  //    dioLink(srv:doPosTable[i],io:N2_106[i+5])
+  //  endFor
+  //  dioLink(srv:doReset,io:N2_106[1])
+  //  dioLink(srv:doRotStart,io:N2_106[4])
+  //  dioLink(srv:doServoOn,io:N2_106[0])
+  //  dioLink(srv:doTmpStopStart,io:N2_106[3])
+  //  call srv:setDiscreteMode()
+  //&lt;/code&gt;
+  //\li For serial link:
+  //When using serial links the serial link must provide RS422 mode or a external converter RS232-RS422 must be used.
+  //&lt;code&gt;
+  //call srv:linkSerial(io:serialPort1, io:reserved1)
+  //\note
+  //In case a serial link is used for communication an io buffer with a min size of 32*nNbOfAxis must be passed on to linkSerial().
+  // This io buffer is used for internal signal communication.
+  //Hence, signals of io:reserved1 must not be used!
+  //!global nNbOfAxis
+  //nNbOfAxis is the number of external servos be controlled by this module.
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

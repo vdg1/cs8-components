@@ -1,0 +1,13 @@
+#
+# Feature file requested to create applications using QCodeEdit
+#
+
+DEFINES += _QCODE_EDIT_
+INCLUDEPATH += $${QMAKE_INCDIR_QT}/QCodeEdit
+
+CONFIG(debug, debug|release) {
+	LIBS += -lqcodeedit_debug
+	DEFINES += _QCODE_EDIT_DEBUG_
+} else {
+	LIBS += -lqcodeedit
+}

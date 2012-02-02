@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="taskKill">
+  <paramSection>
+   <param byVal="true" type="string" name="sTaskName_"/>
+   <param byVal="false" type="bool" name="bResult_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="num" name="idx"/>
+  </localSection>
+  <source>
+   <code>begin
+  
+  //\brief
+  // 
+  // The program tries to kill task sTaskName_. bResult_ is false if it does not
+  //  succeed within 2 sec
+  //\var idx 
+
+  //\param sTaskName_ The name of the task that should be killed
+  //\param bResult_ The result of the kill operation
+  //
+  // find free task
+idx=0
+  while taskStatus("killer"+toString("",idx))!=-1
+    idx=idx+1
+  endWhile
+  
+  taskCreate "killer"+toString("",idx),1,taskKiller(sTaskName_)
+  if !watch(taskStatus("killer"+toString("",idx))==-1,2)
+    bResult_=false
+    taskKill("killer"+toString("",idx))
+  else
+    bResult_=true
+  endIf
+end
+    </code>
+  </source>
+ </program>
+</programList>

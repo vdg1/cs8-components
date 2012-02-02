@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="loadSysData">
+  <paramSection>
+   <param byVal="false" type="bool" name="bResult_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="num" name="nResult"/>
+  </localSection>
+  <source>
+   <code>begin
+  
+  //\var nResult 
+
+  //\param bResult_ 
+put("Loading Data for: "+libPath()+" :")
+  nResult=data:libLoad("z01_SysData")
+  if nResult!=0
+    putln("failed")
+    putln("Checking data dependencies")
+    call upd:checkDepend()
+    bResult_=false
+  else
+    upd:sResult=""
+  endIf
+end
+    </code>
+  </source>
+ </program>
+</programList>

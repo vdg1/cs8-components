@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="calcChecksumBuf">
+  <description/>
+  <paramSection>
+   <param byVal="false" type="num" name="buffer_"/>
+   <param byVal="false" type="num" name="count_"/>
+  </paramSection>
+  <localSection>
+   <local size="1" type="num" name="sum"/>
+   <local size="1" type="num" name="i"/>
+   <local size="1" type="string" name="hex"/>
+   <local size="1" type="num" name="count"/>
+  </localSection>
+  <source>
+   <code>begin
+  //\brief
+  //Calculate check sum of data in buffer_ and append the calculated checksum to buffer_.
+  //
+  //The scope of the check sum calculation is from the 2nd byte in the buffer to the end of the buffer.
+  //The check sum is a ASCII-coded hexadecimal representing the lower two digits of the
+  //sum of ASCII-coded hexadecimal numbers.
+  //\var sum 
+  //\var i 
+  //\var hex 
+  //\var count 
+  //\param buffer_ The
+  //\param count_ 
+  //
+sum=0
+  for i=1 to count_-1
+    sum=sum+buffer_[i]
+  endFor
+  //? "checksum "+toString("3",sum)
+  call math:decToHexStr(sum,hex)
+  buffer_[count_]=asc(hex,len(hex)-2)
+  buffer_[count_+1]=asc(hex,len(hex)-1)
+  count_=count_+2
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

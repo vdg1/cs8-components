@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="sendCommand" public="false" >
+    <description />
+    <paramSection>
+      <param name="stationOut_" type="num" byVal="true" />
+      <param name="cmd_" type="num" byVal="true" />
+      <param name="dataNo_" type="num" byVal="true" />
+      <param name="dataFrame_" type="num" byVal="false" />
+      <param name="frameLength_" type="num" byVal="false" />
+    </paramSection>
+    <localSection>
+      <local name="outCount" type="num" size="1" />
+      <local name="outBuffer" type="num" size="50" />
+      <local name="sendComplete" type="bool" size="1" />
+      <local name="error" type="num" size="1" />
+      <local name="inBuffer" type="num" size="50" />
+      <local name="inCount" type="num" size="1" />
+      <local name="timeout" type="bool" size="1" />
+      <local name="stationIn" type="num" size="1" />
+      <local name="timeoutCount" type="num" size="1" />
+      <local name="comErrorCount" type="num" size="1" />
+      <local name="i" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //\brief
+  //Send a command to the servo drive with optional data and await reception of response from servo drive.
+  call dataMakeUp(stationOut_,cmd_,dataNo_,dataFrame_,frameLength_,outBuffer,outCount)
+  sendComplete=false
+  timeoutCount=0
+  comErrorCount=0
+  while !sendComplete
+    call sendData(outBuffer,outCount)
+    call receiveData(cmd_,stationIn,inBuffer,inCount,error,timeout)
+    //log end of timeout message
+    if bTimeOut[stationOut_] and !timeout
+      logMsg(&quot;extServo: Wait reply: End of timeout #&quot;+toString(&quot;&quot;,stationOut_))
+      bTimeOut[stationOut_]=false
+    endIf
+    switch true
+      // timeout has occured
+      case timeout
+        // timeout has occured
+        timeoutCount=timeoutCount+1
+        if !bTimeOut[stationOut_]
+          logMsg(&quot;extServo: Wait reply: Timeout #&quot;+toString(&quot;&quot;,stationOut_))
+        endIf
+        if timeoutCount&gt;4
+          // error processing
+          bServoComError[stationOut_]=true
+          sendComplete=true
+        endIf
+        bTimeOut[stationOut_]=true
+        // send EOT
+        sioSet(serial,EOT)
+        delay(0.4)
+        clearBuffer(serial)
+        error=8
+      break
+      // expected data from stationOut_ but received data from stationIn
+      case stationIn!=stationOut_
+        logMsg(&quot;extServo: Received data from&quot;+toString(&quot;&quot;,stationIn)+&quot; expected was data from: &quot;+toString(&quot;&quot;,stationOut_))
+        bServoComError[stationOut_]=true
+        sendComplete=false
+      break
+      // no comm error has occured
+      case error==0
+        for i=0 to inCount-1
+          dataFrame_[i]=inBuffer[i]
+        endFor
+        frameLength_=inCount
+        sendComplete=true
+        bServoComError[stationOut_]=false
+      break
+      // com error has occured
+      default
+        comErrorCount=comErrorCount+1
+        logMsg(&quot;extServo: Communication error &quot;+toString(&quot;&quot;,error)+&quot; #&quot;+toString(&quot;&quot;,stationOut_))
+        if comErrorCount==3
+          // error processing
+          bServoComError[stationOut_]=true
+        endIf
+      break
+    endSwitch
+    // Send alarm code if comm error has occured
+    // Comm errors start at alarm number offset 200
+    if error!=0
+      //dioSet(diAlarmCode,error+200)
+      call setAlarmCode(stationOut_,error+200)
+    endIf
+  endWhile
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="setDiscreteMode" public="true" >
+    <description />
+    <paramSection/>
+    <localSection/>
+    <source>
+      <code>begin
+  //!brief
+  //Set discrete IO communication mode
+  nMode=modDISCRETE
+end
+
+      </code>
+    </source>
+  </program>
+</programList>

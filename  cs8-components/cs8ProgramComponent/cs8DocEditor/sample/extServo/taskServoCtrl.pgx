@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="taskServoCtrl">
+  <description/>
+  <paramSection/>
+  <localSection>
+   <local size="1" type="num" name="station"/>
+  </localSection>
+  <source>
+   <code>begin
+  //
+  //\var station 
+  //
+switch nMode
+    case modNONE
+      logMsg("extServo: shutdown because no mode defined")
+      //popUpMsg("extServo: shutdown because no mode defined")
+      bQuit=true
+    break
+    case modDISCRETE
+      logMsg("extServo: discrete signal mode")
+    break
+    case modSERIAL
+      logMsg("extServo: serial line mode")
+    break
+  endSwitch
+  //
+  while !bQuit
+    for station=0 to nNbOfAxis-1
+      call readStatus(station)
+      // normal operation mode
+      if !bCalibrate[station]
+        // enable servo on in remote mode and if arm power is on
+        if workingMode()==4 and isPowered() and diTrouble[station]==true or true
+          ;doServoOn=true
+        endIf
+        // set automatic mode on servo if arm is powered, regardless working mode of robot
+        doAutomatic[station]=isPowered()==true
+        doServoOn[station]=isPowered()==true
+        bTrouble[station]=diTrouble[station]==false or bServoComError[station]
+        //
+        switch nState[station]
+          case -20
+            nState[station]=0
+          break
+          // idle
+          case 0
+            switch true
+              // drive is not ready
+              case diReady[station]==false
+              break
+              // error is pending
+              case diTrouble[station]==false
+              break
+              case nCmdPos[station]==0
+              break
+              // invalid move id
+              case nCmdPos[station]&lt;1 or nCmdPos[station]>7
+                logMsg("extServo: invalid pt table id:"+toString("",nCmdPos[station])+" #"+toString("",station))
+                nCmdPos[station]=nCurrPos[station]
+              break
+              //  a new move is commanded
+              case nCurrPos[station]!=nCmdPos[station]
+                //dioSet(doPosTable[station],nCmdPos[station])
+                call setPosTable(station,nCmdPos[station])
+                switch nMode
+                  case modDISCRETE
+                    delay(0)
+                    call pulse(doRotStart[station])
+                    delay(0.05)
+                  break
+                  case modSERIAL
+                    doRotStart[station]=true
+                    call setDevices(station)
+                  break
+                endSwitch
+                //wait(diInPosition==false)
+                nState[station]=10
+              break
+            endSwitch
+          break
+          // movement pending
+          case 10
+            switch true
+              // movement completed
+              case diMoveFinished[station]==true and diInPosition[station]==true and diHomePos[station]==true
+                nCurrPos[station]=nCmdPos[station]
+                nState[station]=0
+              break
+              // error occured during movement
+              case diTrouble[station]==false or diReady[station]==false
+                nState[station]=20
+              break
+            endSwitch
+          break
+          // error condition during move
+          case 20
+            // when drive is ready again, reinitiate movement
+            if diReady[station]==true
+              nState[station]=0
+            endIf
+          break
+        endSwitch
+      else
+        // calibration mode
+        nState[station]=-1
+        switch nState[station]
+          case 0
+            doAutomatic[station]=true
+            doServoOn[station]=false
+            //dioSet(doPosTable[station],0)
+            call setPosTable(station,0)
+            nState[station]=1
+          break
+          case 1
+            doRotStart[station]=true
+            nState[station]=2
+          break
+          case 2
+            doRotStart[station]=false
+            nState[station]=3
+          break
+          case 3
+            if diMoveFinished[station]==true or true
+              bCalibrate[station]=false
+              doAutomatic[station]=false
+              nState=0
+            endIf
+          break
+          default
+            nState[station]=0
+          break
+        endSwitch
+      endIf
+      call setDevices(station)
+    endFor
+  endWhile
+end
+
+      </code>
+  </source>
+ </program>
+</programList>

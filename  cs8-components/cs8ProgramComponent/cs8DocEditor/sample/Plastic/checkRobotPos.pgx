@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+ <program public="false" name="checkRobotPos">
+  <paramSection/>
+  <localSection/>
+  <source>
+   <code>begin
+  SYS:bRobotHome=abs(herej()-app:jHome)&lt;{2,2,2,2,2,2}
+  // check if robot at zero location
+  SYS:bRobotZero=abs(herej()-{0,0,0,0,0,0})&lt;{1,1,1,1,1,1}
+end
+</code>
+  </source>
+ </program>
+</programList>

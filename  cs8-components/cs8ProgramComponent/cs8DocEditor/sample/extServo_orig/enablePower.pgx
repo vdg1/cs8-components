@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<programList xmlns="ProgramNameSpace" >
+  <program name="enablePower" public="true" >
+    <description />
+    <paramSection>
+      <param name="station_" type="num" byVal="true" />
+    </paramSection>
+    <localSection>
+      <local name="ok" type="bool" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  //!brief
+  //Enable power if workingMode is not automatic mode on drive station_
+  //\note
+  //Parameter station_ is a zero based index. That means for the first drive station_ is 0, for the second drive station_ is 1, etc.
+  call checkStationVal(station_,ok)
+  if ok
+    if workingMode()!=4 and diTrouble[station_]==true
+      doServoOn[station_]=true
+    endIf
+  endIf
+end
+
+      </code>
+    </source>
+  </program>
+</programList>
