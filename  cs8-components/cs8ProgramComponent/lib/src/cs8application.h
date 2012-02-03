@@ -32,6 +32,8 @@ public:
         }
         bool loadDocumentationFile(const QString & fileName);
         QString documentation();
+        QString checkVariables();
+        void setCellPath(const QString & path);
 
 protected:
         QString m_projectName;
@@ -41,6 +43,7 @@ protected:
         cs8LibraryAliasModel* m_libraryAliasModel;
         //QDomDocument m_dataDoc;
         QString m_documentation;
+        QString m_cellPath;
 
         QDomElement m_parameters;
         QDomElement m_programSection;

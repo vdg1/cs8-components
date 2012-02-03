@@ -72,6 +72,16 @@ cs8Variable* cs8VariableModel::variable(QModelIndex index){
     return m_variableList.at(index.row());
 }
 
+QStringList cs8VariableModel::variableNameList()
+{
+    QStringList list;
+    foreach(cs8Variable *variable, m_variableList)
+    {
+        list << variable->name ();
+    }
+    return list;
+}
+
 QString cs8VariableModel::toDtxDocument() {
     QDomDocument doc;
 

@@ -14,7 +14,8 @@ SOURCES = src/mainwindowimpl.cpp \
     src/main.cpp
 INCLUDEPATH += ../lib \
     ../../cs8ControllerComponent/lib/src \
-    ../lib/src
+    ../lib/src \
+    build
 FORMS += ui/mainwindow.ui
 LIBS += ../../lib/libcs8ProjectComponent.a \
     -L../../lib/ \

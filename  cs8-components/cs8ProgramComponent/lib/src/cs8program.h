@@ -35,7 +35,8 @@ public:
     QString definition();
     QString documentation(bool withPrefix=true);
     QString extractDocumentation(const QString & code_);
-    QString extractCode(const QString & code_);
+    QString extractCode(const QString & code_) const;
+    QStringList variableTokens();
 
 private:
     cs8VariableModel* m_localVariableModel;
@@ -54,6 +55,8 @@ public:
     void setDescription(const QString& theValue);
 
     QString description() const;
+    void setCellPath(const QString & path);
+    QString cellFilePath() const;
 
 protected:
     bool parseProgramDoc(const QDomDocument & doc);
@@ -63,6 +66,8 @@ protected:
     QDomElement m_localSection;
     QDomElement m_codeSection;
     QString m_description;
+    QString m_cellPath;
+    QString m_filePath;
 
 signals:
     void globalVariableDocumentationFound(const QString & name,
