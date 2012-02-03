@@ -7,11 +7,13 @@ DESTDIR = ../bin
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
+
 FORMS = ui/dialog.ui
 HEADERS = src/dialogimpl.h
 SOURCES = src/dialogimpl.cpp src/main.cpp
-INCLUDEPATH = ../lib/src
+INCLUDEPATH = ../lib/src \
+        build
 LIBS += ../../lib/libcs8ControllerComponentd.a
-TARGETDEPS += ../../lib/libcs8ControllerComponent.a
+POST_TARGETDEPS += ../../lib/libcs8ControllerComponent.a
 
 

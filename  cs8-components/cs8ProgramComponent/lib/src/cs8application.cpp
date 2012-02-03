@@ -383,16 +383,7 @@ QString cs8Application::checkVariables()
                 }
 
             }
-            foreach(cs8Variable* lvar,program->localVariableModel ()->variableList ())
-            {
-                if (!program->variableTokens ().contains (lvar->name ()))
-                {
-                    output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>1<msg>%2<file>%3")
-                                   .arg (program->name ())
-                                   .arg ("Warning: Local variable '" + lvar->name () + "' is not used")
-                                   .arg(program->cellFilePath ()));
-                }
-            }
+
         }
         if (referencedMap[var->name ()]==false)
         {
@@ -402,6 +393,19 @@ QString cs8Application::checkVariables()
                            .arg ("Warning: Global variable '" + var->name () + "' is not used")
                            .arg(""));
 
+        }
+    }
+    foreach(cs8Program* program, m_programModel->programList ())
+    {
+        foreach(cs8Variable* lvar,program->localVariableModel ()->variableList ())
+        {
+            if (!program->variableTokens ().contains (lvar->name ()))
+            {
+                output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>1<msg>%2<file>%3")
+                               .arg (program->name ())
+                               .arg ("Warning: Local variable '" + lvar->name () + "' is not used")
+                               .arg(program->cellFilePath ()));
+            }
         }
     }
     return output.join ("\n");
