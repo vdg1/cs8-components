@@ -30,6 +30,7 @@ SOURCES += src/cs8project.cpp \
     src/cs8libraryaliasmodel.cpp  \
     src/formvariabledetaileditor.cpp
 FORMS +=  ../lib/forms/formvariabledetaileditor.ui
+INCLUDEPATH = build
 TEMPLATE = lib
 CONFIG += console \
     staticlib

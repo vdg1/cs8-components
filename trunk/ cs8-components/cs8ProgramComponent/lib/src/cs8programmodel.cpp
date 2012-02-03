@@ -14,7 +14,8 @@
 #include <QDebug>
 #include <QFont>
 cs8ProgramModel::cs8ProgramModel(QObject *parent) :
-	QAbstractListModel(parent) {
+    QAbstractListModel(parent) {
+    m_cellPath="";
 }
 
 cs8ProgramModel::~cs8ProgramModel() {
@@ -41,6 +42,12 @@ cs8Program* cs8ProgramModel::getProgramByName(const QString & name) {
     }
     return 0;
 }
+
+void cs8ProgramModel::setCellPath(const QString &path)
+{
+    m_cellPath=path;
+}
+
 QList<cs8Program*> cs8ProgramModel::publicPrograms() {
     QList<cs8Program*> out;
     foreach(cs8Program* program,m_programList)
@@ -94,10 +101,10 @@ QVariant cs8ProgramModel::data(const QModelIndex & index, int role) const {
     ///TODO why compiler error here?
     /*
         if (role == Qt::UserRole + 1)
-		return m_programList.at(index.row())->parameterModel();
+        return m_programList.at(index.row())->parameterModel();
 
-	if (role == Qt::UserRole + 2)
-		return m_programList.at(index.row())->localVariableModel();
+    if (role == Qt::UserRole + 2)
+        return m_programList.at(index.row())->localVariableModel();
                 */
     if (role == Qt::UserRole + 10)
         return m_programList.at(index.row())->description();
@@ -107,9 +114,11 @@ QVariant cs8ProgramModel::data(const QModelIndex & index, int role) const {
 void cs8ProgramModel::addProgram(const QString & filePath) {
     //qDebug() << "cs8ProgramModel::addProgram () " << filePath;
     cs8Program* program = new cs8Program(this);
+
     m_programList.append(program);
     connect(program, SIGNAL(globalVariableDocumentationFound(const QString & , const QString & )),this, SLOT(slotGlobalVariableDocumentationFound(const QString & , const QString & )));
     connect(program, SIGNAL(moduleDocumentationFound(const QString & )),this, SLOT(slotModuleDocumentationFound(const QString & )));
+    program->setCellPath(m_cellPath);
     program->open(filePath);
     reset();
 }

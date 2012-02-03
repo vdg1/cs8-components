@@ -44,9 +44,11 @@ public:
     QList<cs8Program*> publicPrograms();
     QList<cs8Program*> privatePrograms();
     cs8Program* getProgramByName(const QString & name);
+    void setCellPath(const QString &path);
 
 protected:
     QList<cs8Program*> m_programList;
+    QString m_cellPath;
 
 protected slots:
     void slotGlobalVariableDocumentationFound(const QString & name,
