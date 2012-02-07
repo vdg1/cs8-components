@@ -19,6 +19,8 @@ cs8ProgramModel::cs8ProgramModel(QObject *parent) :
 }
 
 cs8ProgramModel::~cs8ProgramModel() {
+    foreach(cs8Program *program, m_programList)
+        delete program;
 }
 
 /*!
@@ -46,6 +48,12 @@ cs8Program* cs8ProgramModel::getProgramByName(const QString & name) {
 void cs8ProgramModel::setCellPath(const QString &path)
 {
     m_cellPath=path;
+}
+
+void cs8ProgramModel::append(cs8Program *program)
+{
+    m_programList.append (program);
+    reset ();
 }
 
 QList<cs8Program*> cs8ProgramModel::publicPrograms() {

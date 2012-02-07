@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="start" access="public">
+    <Code><![CDATA[begin
+  // set nCaseBtRobOff to 1 instead of 0 in order to initialize the robot off function properly
+  // If nCaseBtRobOff is 0 at start up it may happen that SYS:doRobotOff["+toString("",moduleIndex)+"] is on although btRobotOff assumes that 
+  // SYS:doRobotOff["+toString("",moduleIndex)+"] is off.
+  
+  call debug:setVerbosity(libPath(),debug:LEV_INFO)
+  call loadLibraries()
+  // call setDryRunSig(data:setDryRun)
+  call sig:connect(EV:DRY_RUN,libPath())
+  call sig:connect(EV:FATAL_ERROR,libPath())
+  call sig:connect(EV:START_COMPLETE,libPath())
+  call status:registerStatus(libPath(),status:CL_STATUS,"Wait for mould free condition","SYS:doMouldFree["+toString("",moduleIndex)+"]==true","SYS:doMouldFree["+toString("",moduleIndex)+"]==false",false,WAIT_MOULD_FREE,false)
+  call status:registerStatus(libPath(),status:CL_STATUS,"Wait for mould open","SYS:diMouldOpen["+toString("",moduleIndex)+"]==true","SYS:diMouldOpen["+toString("",moduleIndex)+"]==false",false,WAIT_MOULD_OPEN,false)
+  call status:registerStatus(libPath(),status:CL_STATUS,"Wait for robot enabled","SYS:doRobotOff["+toString("",moduleIndex)+"]==false","SYS:doRobotOff["+toString("",moduleIndex)+"]==true",false,WAIT_ROB_ENABLE,false)
+  call status:registerStatus(libPath(),status:CL_STATUS,"Wait for IMM in auto mode","SYS:diMachineInAuto["+toString("",moduleIndex)+"]==true","SYS:diMachineInAuto["+toString("",moduleIndex)+"]==false",false,WAIT_ROB_ENABLE,false)
+  call status:registerStatus(libPath(),status:CL_STATUS,"Wait for part produced","SYS:bPartMade["+toString("",moduleIndex)+"]==true","SYS:bPartMade["+toString("",moduleIndex)+"]==false",false,WAIT_PARTMADE,false)
+  call status:registerStatus(libPath(),status:CL_ERROR,"Mould area test failed. Robot was not programmed to enter mould","","",true,AREA_TEST_FAIL,true)
+  call status:registerStatus(libPath(),status:CL_ERROR,"Home position is defined in mould area","","",true,HOME_IN_MOULD,true)
+  call status:registerStatus(libPath(),status:CL_ERROR,"Arm in mould while mould is not open","","",true,ARM_IN_MOULD_NO,true)
+  call status:registerStatus(libPath(),status:CL_ERROR,"Arm in mould while 'Enable Closure' signal is set","","",true,ARM_IN_MOULD_ST,true)
+end
+]]></Code>
+  </Program>
+</Programs>

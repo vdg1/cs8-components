@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.2" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="_StartMachine.pgx" />
+    <Program file="_WaitAuto.pgx" />
+    <Program file="_WaitEnd.pgx" />
+    <Program file="_WaitPart.pgx" />
+    <Program file="_WaitPartDyn.pgx" />
+    <Program file="BtRobotOff.pgx" />
+    <Program file="checkMotStack.pgx" />
+    <Program file="childAction.pgx" />
+    <Program file="getSetting.pgx" />
+    <Program file="IMMTiming.pgx" />
+    <Program file="init.pgx" />
+    <Program file="loadLibraries.pgx" />
+    <Program file="primeAreaTest.pgx" />
+    <Program file="primeMotStack.pgx" />
+    <Program file="registerSetting.pgx" />
+    <Program file="retrieveViews.pgx" />
+    <Program file="runHigh.pgx" />
+    <Program file="runLow.pgx" />
+    <Program file="secuTask1.pgx" />
+    <Program file="secuTask2.pgx" />
+    <Program file="setDryRunSig.pgx" />
+    <Program file="setSetting.pgx" />
+    <Program file="slot.pgx" />
+    <Program file="start.pgx" />
+    <Program file="startAreaTest.pgx" />
+    <Program file="stop.pgx" />
+    <Program file="stopAreaTest.pgx" />
+    <Program file="taskPartMade.pgx" />
+    <Program file="updateView.pgx" />
+    <Program file="WaitPart.pgx" />
+  </Programs>
+  <Database>
+    <Data file="modIMM.dtx" />
+  </Database>
+  <Libraries>
+    <Library alias="io" path="Disk://io/io.pjx" />
+    <Library alias="SYS" path="Disk://io_System/io_System.pjx" />
+    <Library alias="scr" path="Disk://Plastic/coreModules/modScreen/modScreen.pjx" />
+    <Library alias="str" path="Disk://Libraries/stringHandling/stringHandling.pjx" />
+    <Library alias="lang" path="Disk://Plastic/i18n/i18n.pjx" />
+    <Library alias="debug" path="Disk://Libraries/debug/debug.pjx" />
+    <Library alias="data" path="Disk://zData/zData.pjx" />
+    <Library alias="status" path="Disk://Plastic/coreModules/modStatusModel/modStatusModel.pjx" />
+    <Library alias="EV" path="Disk://Plastic/Consts/EVENT/EVENT.pjx" />
+    <Library alias="sig" path="Disk://Plastic/coreModules/modSignalSlot/modSignalSlot.pjx" />
+    <Library alias="STATE" path="Disk://Plastic/Consts/STATE/STATE.pjx" />
+    <Library alias="views" path="Disk://Plastic/coreModules/viewContainer/viewContainer.pjx" />
+    <Library alias="jt" path="Disk://Libraries/jointFunctions/jointFunctions.pjx" />
+  </Libraries>
+  <Types>
+    <Type name="event" path="Disk://Plastic/Types/event/event.pjx" />
+    <Type name="settingType" path="Disk://Plastic/Types/setting/setting.pjx" />
+    <Type name="viewType" path="Disk://Plastic/Types/view/view.pjx" />
+    <Type name="childNodeType" path="Disk://Plastic/Types/childNode/childNode.pjx" />
+    <Type name="nodeType" path="Disk://Plastic/Types/node/node.pjx" />
+  </Types>
+</Project>

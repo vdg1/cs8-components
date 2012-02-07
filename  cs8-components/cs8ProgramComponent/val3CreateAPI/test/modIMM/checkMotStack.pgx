@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="checkMotStack">
+    <Code><![CDATA[begin
+  //!brief
+  //This routine sets a warnig if the motion stack has been empty for more than WAR_MOTIONSTACK seconds.
+ 
+  if (clock()-tmMotionStack>WAR_MOTIONSTACK) and !bDisplayed and isEmpty()
+    ///TODO
+    //call status:raise()
+    //call ui:popUp((("The routine StartMachine() was called, but the arm is not programmed to leave the mould!")),data:nMsgTimeOut,false)
+    bDisplayed=true
+  endIf
+end
+]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="slot" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="event_" type="event" xsi:type="element" use="reference" />
+    </Parameters>
+    <Code><![CDATA[begin
+  switch event_.nType
+    case EV:DRY_RUN
+      call setDryRunSig(event_.sParam=="1")
+    break
+    case EV:START_COMPLETE
+      SYS:doSecu[0]=true
+    SYS:doSecu[1]=true
+    break
+  endSwitch
+end]]></Code>
+  </Program>
+</Programs>

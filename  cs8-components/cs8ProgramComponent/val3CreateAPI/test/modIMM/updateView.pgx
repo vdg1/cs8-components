@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="updateView" access="public">
+    <Locals>
+      <Local name="sValues" type="string" xsi:type="array" size="5" />
+      <Local name="child" type="childNodeType" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[0],0,"Safety Relay 1",SYS:doSecu[0])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[0],1,"Safety Relay 2",SYS:doSecu[1])
+
+  sValues[0]=toString("4.0",nMouldAreaDist)
+  if SYS:doMouldFree[moduleIndex]==true
+    sValues[1]="/ti"
+  endIf
+  call str:printf(("%2 %1/tnmm"),sValues,child.valueText)
+  child.label="Safety Distance"
+  call views:setChild(views:views[IMM_IO_PTH].nodes[0],2,child)
+
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[1],0,"Robot Off",SYS:doRobotOff[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[1],1,"Mould Area Free",SYS:doMouldFree[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[1],2,"Enable Mould Closure",SYS:doStartMachine[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[1],3,"Automatic Mode",SYS:diMachineInAuto[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[1],4,"Reject Part",SYS:diRejectPart[moduleIndex])
+
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[2],0,"Ejector forward",SYS:doEjcOut[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[2],1," ",SYS:diEjcOut[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[2],2,"Ejector forward",SYS:doEjcIn[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[2],3," ",SYS:diEjcIn[moduleIndex])
+
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[3],0,"Core 1 Pos 1",SYS:doCore1Pos1[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[3],1," ",SYS:diCore1Pos1[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[3],2,"Core 1 Pos 2",SYS:doCore1Pos2[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[3],3," ",SYS:diCore1Pos2[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[3],4,"Core 2 Pos 1",SYS:doCore2Pos1[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[3],5," ",SYS:diCore1Pos1[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[3],6,"Core 2 Pos 2",SYS:doCore2Pos2[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[3],7," ",SYS:diCore1Pos2[moduleIndex])
+
+ 
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[4],0,"Mould Open",SYS:doFullOpening[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[4],1," ",SYS:diMouldOpen[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[4],2,"Mould Closed",SYS:diMouldClosed[moduleIndex])
+  call views:childDIO(views:views[IMM_IO_PTH].nodes[4],3,"Mould Intermediate Pos",SYS:diMouldMidOpen[moduleIndex])
+end]]></Code>
+  </Program>
+</Programs>

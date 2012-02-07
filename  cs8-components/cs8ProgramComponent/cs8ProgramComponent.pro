@@ -6,4 +6,5 @@ SUBDIRS = plugin \
     extractDoc \
     doxygenFilter \
     cs8DocEditor \
-    val3PreCompiler
+    val3PreCompiler \
+    val3CreateAPI

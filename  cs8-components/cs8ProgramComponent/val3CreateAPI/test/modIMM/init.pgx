@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="init" access="public">
+    <Locals>
+      <Local name="ok" type="bool" xsi:type="array" size="1" />
+      <Local name="path" type="string" xsi:type="array" size="1" />
+      <Local name="idx" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  // set module index 
+  path=libPath()
+  path=right(path,1)
+  path=toNum(path,moduleIndex,ok)
+  if !ok
+    moduleIndex=0
+  endIf
+  name="IMM"+toString("1.0",moduleIndex)
+  IMM_IO_PTH="2:IO/1:"+name
+  nCaseBtRobOff=1
+  bState=false
+  pointer=0
+  for idx=0 to size(timings)-1
+    timings[idx]=0
+  endFor
+  
+end]]></Code>
+  </Program>
+</Programs>

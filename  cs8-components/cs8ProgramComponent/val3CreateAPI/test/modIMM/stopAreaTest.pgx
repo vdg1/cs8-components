@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="stopAreaTest" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="bResult_" type="bool" xsi:type="array" use="reference" />
+    </Parameters>
+    <Code><![CDATA[begin
+  // test result of area test state machine
+  // the state nAreaTestState must be 40
+  if nAreaTestState!=40 and nAreaTestState!=0
+    call status:raise(AREA_TEST_FAIL,"")
+  endIf
+  bResult_=nAreaTestState==40 or nAreaTestState==0
+end
+
+      ]]></Code>
+  </Program>
+</Programs>
