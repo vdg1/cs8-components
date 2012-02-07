@@ -24,16 +24,24 @@ public:
         bool parseProject(const QDomDocument & doc);
 
         cs8ProgramModel* programModel() const;
+        cs8LibraryAliasModel* libraryModel() const;
         void exportToCFile(const QString & path);
         QString exportToCSyntax();
         bool exportInterfacePrototype(const QString & path);
-        QString name() {
+        QString name() const {
                 return m_projectName;
         }
+        void setName(const QString & name){
+            m_projectName=name;
+        }
+
         bool loadDocumentationFile(const QString & fileName);
         QString documentation();
-        QString checkVariables();
+        QString checkVariables() const;
         void setCellPath(const QString & path);
+        QString cellPath() const;
+        QString cellProjectFilePath() const;
+        QString cellDataFilePath() const;
 
 protected:
         QString m_projectName;

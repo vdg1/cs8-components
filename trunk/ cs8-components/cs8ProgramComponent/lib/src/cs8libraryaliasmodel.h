@@ -23,12 +23,13 @@ protected:
 public:
     QString toDocumentedCode();
     QVariant headerData(int section, Qt::Orientation orientation, int role =
-			Qt::DisplayRole) const;
+            Qt::DisplayRole) const;
     int rowCount(const QModelIndex& index) const;
     QVariant data(const QModelIndex & index, int role) const;
     int columnCount(const QModelIndex & index) const;
     bool addAlias(const QDomElement & element, const QString & description =
                   QString());
+    bool addAlias(const QString & aliasName, const QString &path, const bool autoLoad=true);
     cs8LibraryAliasModel(QObject * parent = 0);
     bool setData(const QModelIndex & index, const QVariant & value, int role =
                  Qt::EditRole);
@@ -39,6 +40,7 @@ public:
     }
     void clear();
     void setProjectVersion(uint version){m_projectVersion=version;}
+    bool contains(const QString &alias_);
 };
 
 #endif /* CS8LIBRARYALIASMODEL_H_ */

@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="loadLibraries">
+    <Code><![CDATA[begin
+//  nResult=scr:libLoad("Plastic/Modules/modScreen.zip","a81d706f651db0a6b2")
+//  if nResult!=0
+//    name=libPath()
+//    nResult=scr:libLoad("Plastic/Modules/modScreen")
+//    if nResult!=0
+//      popUpMsg(name+":  Problem loading library for scr:")
+//      call debug:error(libPath(),": Problem loading library for scr:")
+//    else
+//      call debug:info(libPath(),": Loading uncrypted version "+scr:libPath())
+//    endIf
+//  endIf
+  // SECU
+//  nResult=secu:libLoad("Plastic/Modules/modSafety.zip","a81d706f651db0a6b2")
+//  if nResult!=0
+//    name=libPath()
+//    nResult=secu:libLoad("Plastic/Modules/modSafety")
+//    if nResult!=0
+//      popUpMsg(name+":  Problem loading library for secu:")
+//      call debug:error(libPath(),": Problem loading library for secu:")
+//    else
+//      call debug:info(libPath(),": Loading uncrypted version "+secu:libPath())
+//    endIf
+//  endIf
+//  // STATUS
+//  nResult=stat:libLoad("Plastic/Modules/modStatus.zip","a81d706f651db0a6b2")
+//  if nResult!=0
+//    name=libPath()
+//    nResult=stat:libLoad("Plastic/Modules/modStatus")
+//    if nResult!=0
+//      popUpMsg(name+":  Problem loading library for stat:")
+//      call debug:error(libPath(),": Problem loading library for stat:")
+//    else
+//      call debug:info(libPath(),": Loading uncrypted version "+stat:libPath())
+//    endIf
+//  endIf
+end
+
+      ]]></Code>
+  </Program>
+</Programs>

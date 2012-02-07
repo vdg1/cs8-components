@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="taskPartMade">
+    <Description><![CDATA[Part produced in an IMM]]></Description>
+    <Code><![CDATA[begin
+  // Conditions for part made is registered in program.
+  // Arm will enter mould. Close mould is not allowed.
+  if !bRobotOffAllow
+    SYS:doStartMachine[moduleIndex]=false
+  endIf
+  if SYS:doMouldFree[moduleIndex]==false or SYS:bRobotHome
+    bRobotOffAllow=true
+  endIf
+  // RESET StartMachine.......................................................
+  // handle reset according to given IMM type
+  switch nImmType
+    // standard IMM, e.g. Netstal
+    case 0
+      // reset doStartMachine when IMM is switched to manual
+      if SYS:diMachineInAuto[moduleIndex]==false
+        SYS:doStartMachine[moduleIndex]=false
+      endIf
+      // set robot off signal to IMM
+      SYS:doRobotOff[moduleIndex]=bRobotOff
+    break
+    // IMMs of type 1, that need special treatment of doStartIMM, e.g. Negri Bossi
+    case 1
+      // reset doStartMachine when IMM is switched to manual and handling is disabled
+      if SYS:diMachineInAuto[moduleIndex]==false and SYS:doRobotOff[moduleIndex]==false
+        SYS:doStartMachine[moduleIndex]=false
+      endIf
+      if bRobotOff==true
+        // Disable doStartMachine and doRobotOff if the robot is approaching the mold
+        // The distance 20mm is set in order to have a pre warning before the arm
+        // actually enters the mold area.
+        if nMouldAreaDist>-20
+          SYS:doStartMachine[moduleIndex]=false
+          SYS:doRobotOff[moduleIndex]=false
+        else
+          SYS:doStartMachine[moduleIndex]=true
+          // set robot off signal to IMM
+          SYS:doRobotOff[moduleIndex]=bRobotOff
+        endIf
+      else
+        // set robot off signal to IMM
+        SYS:doRobotOff[moduleIndex]=bRobotOff
+      endIf
+    break
+  endSwitch
+  
+  // RESET PartMade (Ejecor and "Robot OFF")..................................
+  if SYS:diMachineInAuto[moduleIndex]==false or bRobotOff==true
+    if SYS:diMachineInAuto[moduleIndex]==false
+      SYS:doEjcIn=true
+      SYS:doEjcOut=true
+    else
+      SYS:doEjcIn=false
+      SYS:doEjcOut=false
+    endIf
+    switch nStateRstPart[0]
+      case 0
+        if (SYS:diEjcOut==true and SYS:diEjcIn==false)
+          nStateRstPart[0]=1
+        endIf
+      break
+      case 1
+        if (SYS:diEjcOut==false and SYS:diEjcIn==true)
+          SYS:bPartMade[moduleIndex]=false
+          nStateRstPart[0]=0
+        endIf
+      break
+    endSwitch
+  else
+    nStateRstPart[0]=0
+  endIf
+  //
+  // RESET PartMade (Core and "Robot OFF")...................................
+  if SYS:diMachineInAuto[moduleIndex]==false or bRobotOff==true
+    if SYS:diMachineInAuto[moduleIndex]==false
+      SYS:doCore1Pos1=true
+      SYS:doCore1Pos2=true
+    else
+      SYS:doCore1Pos1=false
+      SYS:doCore1Pos2=false
+    endIf
+    switch nStateRstPart[1]
+      case 0
+        if (SYS:diCore1Pos2==true and SYS:diCore1Pos1==false)
+          nStateRstPart[1]=1
+        endIf
+      break
+      case 1
+        if (SYS:diCore1Pos2==false and SYS:diCore1Pos1==true)
+          SYS:bPartMade[moduleIndex]=false
+          nStateRstPart[1]=0
+        endIf
+      break
+    endSwitch
+  else
+    nStateRstPart[1]=0
+  endIf
+  //
+  // RESET PartMade (machine goes from manual mode to auto)..................
+  switch nStateRstPart[3]
+    case 0
+      if (SYS:diMachineInAuto[moduleIndex]==false)
+        nStateRstPart[3]=1
+      endIf
+    break
+    case 1
+      if (SYS:diMachineInAuto[moduleIndex]==true)
+        SYS:bPartMade[moduleIndex]=false
+        SYS:doEjcIn=false
+        SYS:doEjcOut=false
+        SYS:doCore1Pos1=false
+        SYS:doCore1Pos2=false
+        nStateRstPart[3]=0
+      endIf
+    break
+  endSwitch
+  //
+  // PART MADE.............................................................
+  switch nStatePartMade
+    // Mould open
+    case 0
+      if (SYS:bPartMade[moduleIndex]==false and SYS:diMouldOpen[moduleIndex]==true and SYS:diMachineInAuto[moduleIndex]==true)
+        nStatePartMade=1
+        // count parts
+        data:cyclesProduced=data:cyclesProduced+1
+        if SYS:diRejectPart==true
+          data:cyclesRejected=data:cyclesRejected+1
+        endIf
+      endIf
+    break
+    // Mould is closing
+    case 1
+      if SYS:diMouldOpen[moduleIndex]==false and SYS:diMachineInAuto[moduleIndex]==true
+        nStatePartMade=2
+      endIf
+    break
+    // Mould closed
+    case 2
+      if SYS:diMouldClosed[moduleIndex]==true and SYS:diMachineInAuto[moduleIndex]==true
+        SYS:bPartMade[moduleIndex]=true
+        // Reset of ejector signals disabled here, as some IMMs
+        // have problems when ejector signal is reset when mould is closed as the ejectors
+        // are not held in position actively anymore (due to leacking valve or similar).
+        // Instead the ejector signals are reset when the mould starts opening again
+        // (see state 3)
+        //SYS:doEjcIn=false
+        //SYS:doEjcOut=false
+        SYS:doStartMachine[moduleIndex]=false
+        nStatePartMade=3
+      endIf
+      // Mould was never closed
+      if SYS:diMouldOpen[moduleIndex]==true and SYS:diMachineInAuto[moduleIndex]==true
+        nStatePartMade=0
+      endIf
+    break
+    // Mould starts opening
+    case 3
+      if SYS:diMouldClosed[moduleIndex]==false and SYS:diMachineInAuto[moduleIndex]==true
+        SYS:doEjcIn=false
+        SYS:doEjcOut=false
+        nStatePartMade=0
+      endIf
+      // Mould was never closed
+      if SYS:diMouldOpen[moduleIndex]==true and SYS:diMachineInAuto[moduleIndex]==true
+        nStatePartMade=0
+      endIf
+    break
+  endSwitch
+end
+
+]]></Code>
+  </Program>
+</Programs>

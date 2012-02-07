@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="WaitPart">
+    <Description><![CDATA[Wait part made in machine and mould fully open]]></Description>
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="bMode_" type="bool" xsi:type="element" />
+    </Parameters>
+    <Locals>
+      <Local name="nStateWaitPart" type="num" xsi:type="array" size="1" />
+      <Local name="nCaseManAuto" type="num" xsi:type="array" size="1" />
+      <Local name="bFirstRun" type="bool" xsi:type="array" size="1" />
+      <Local name="exitCondition" type="bool" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //!brief
+  // Wait for a part being made and conditions for the robot to enter mold.
+  //
+  //!param bMode : If bMode is true, dynamic mode is used
+  //
+  //!change 07.04.06, vdg: added parameter bMode_ for dynamic wait part function.
+  //                       WaitPartDynamic() is therefore obsolete.
+  // WAIT PART....................................................................................
+  //!change 18.06.05, vdg: Prime area test
+  //call secu:primeAreaTest()
+  //
+  bRobotOffAllow=true
+  bFirstRun=true
+  //
+  call status:setEnabled(WAIT_MOULD_OPEN,true)
+  call status:setEnabled(WAIT_ROB_ENABLE,true)
+  // ignore messages if in dry run mode
+  if data:setDryRun==false
+    call status:setEnabled(WAIT_IMM_AUTO,true)
+    call status:setEnabled(WAIT_PARTMADE,true)
+  endIf
+  //
+  //!change 07.07.07, vdg: stop the robot cycle time timer
+  //call stat:stopRobotTime()
+  do
+    // Robot is running in production cycle (StateRobot==10)
+    if SYS:nStateRobot==10 and SYS:diMachineInAuto[moduleIndex]==true
+      nCaseManAuto=0
+      // Wait part produced
+      if !SYS:bPartMade[moduleIndex] or SYS:diMouldOpen[moduleIndex]==false
+        nStateWaitPart=10
+      endIf
+      // No part is produced, Start Machine
+      if !SYS:bPartMade[moduleIndex] and !SYS:CE_Requested and SYS:diMouldOpen[moduleIndex]==true and SYS:diMachineInAuto[moduleIndex]==true
+        nStateWaitPart=20
+      endIf
+      // "End Of Cycle" running and no more parts in mould
+      if SYS:CE_Requested and !SYS:bPartMade[moduleIndex] and SYS:diMachineInAuto[moduleIndex]==true
+        nStateWaitPart=30
+      endIf
+      // Robot Off called
+      if SYS:bRobotOffCalled[moduleIndex]
+        nStateWaitPart=40
+      endIf
+    else
+      // Machine not in AUTO...........................................
+      if SYS:nStateRobot!=10
+        nStateWaitPart=0
+      else
+        if SYS:CE_Requested or SYS:bRobotOffCalled[moduleIndex]
+          // "End Of Cycle" running and no more parts in mould
+          if SYS:CE_Requested and !SYS:bPartMade[moduleIndex] and SYS:CE_AtEndPos==false
+            nStateWaitPart=30
+          endIf
+          // Robot Off called
+          if SYS:bRobotOffCalled[moduleIndex] and !bAtWaitPosition
+            nStateWaitPart=40
+          endIf
+        else
+          nStateWaitPart=0
+        endIf
+      endIf
+    endIf
+    //
+    switch (nStateWaitPart)
+      //
+      // Machine not in Auto...................................................
+      case 0
+        if SYS:diMachineInAuto[moduleIndex]==false
+          //Wait Machine In Auto
+          //user:sMessage[0]=user:sMessage[0]
+        else
+          //Wait [START] Robot
+          //user:sMessage[0]=user:sMessage[0]
+        endIf
+        switch nCaseManAuto
+          // Wait machine in manual mode
+          case 0
+            if SYS:diMachineInAuto[moduleIndex]==false
+              nCaseManAuto=1
+            endIf
+          break
+          // Wait machine in Auto
+          case 1
+            if SYS:diMachineInAuto[moduleIndex]==true and !SYS:bPartMade[moduleIndex]
+              // Start machine cycle
+              //!change 08.06.06, vdg: do not start IMM in dry run mode
+              if (SYS:doMouldFree[moduleIndex]==true) and !data:setDryRun
+                SYS:doStartMachine[moduleIndex]=true
+              endIf
+              nCaseManAuto=0
+            endIf
+          break
+        endSwitch
+      break
+      //
+      // Wait part produced
+      case 10
+        //Wait PART
+        //user:sMessage[0]=user:sMessage[0]
+      break
+      //
+      // Start Machine if no part is made..............................................................................
+      case 20
+        // Start Machine
+        //user:sMessage[0]=user:sMessage[0]
+        // Gripper out of mould area
+        if (SYS:doMouldFree[moduleIndex]==true)
+          // Start machine cycle
+          if SYS:CE_Requested==false and SYS:diMachineInAuto[moduleIndex]==true
+            //!change 18.05.06, vdg: Stop robot at point where machine is being started
+            //  and ask the user if it is safe to start the IMM
+            //
+            // only stop the robot if test run is activated and this is the first
+            // cycle of WaitPart()
+            if data:setTestRun and bFirstRun
+              bFirstRun=false
+              // wait until no motion is pending in the motion stack
+              // the arm should then be at the waiting position in front of the mould
+              wait(isEmpty())
+              //!todo: make displayed message nicer
+              //!i18n 23 -> "Robot stopped approx. at point where IMM cycle is being started. Press START to continue!"
+              ///TODO
+              //call ui:popUpCond((("Robot stopped approx. at point where IMM cycle is being started. Press START to continue!")),"SYS:bBtStart==true",false)
+              // send request to robMotionCtrl to stop the arm
+              bSuspendForTest=true
+              wait(bSuspendForTest==false)
+            endIf
+            //!change 08.06.06, vdg: do not start IMM in dry run mode
+            if !data:setDryRun
+              SYS:doStartMachine[moduleIndex]=true
+            endIf
+          endIf
+        endIf
+      break
+      //
+      // "End Of Cycle" called and no more parts in mould.............................................................
+      case 30
+        if SYS:CE_Requested==true and SYS:bPartMade[moduleIndex]==false
+          SYS:CE_AtEndPos=true
+          delay(0)
+        endIf
+      break
+      //
+      // Robot Off called.................................................................................................................................................
+      case 40
+        bAtWaitPosition=true
+        delay(0)
+      break
+    endSwitch
+    //
+    // Wait until part is made and conditon to enter mould is true........................................................................................................
+    //!change 08.06.06, vdg: ignore autmatic signal and part made flag in dry run mode
+    exitCondition=(SYS:bPartMade[moduleIndex] or data:setDryRun) and ((SYS:diMouldMidOpen[moduleIndex]==true and bMode_) or SYS:diMouldOpen[moduleIndex]==true)
+    exitCondition=exitCondition and (SYS:diMachineInAuto[moduleIndex]==true or data:setDryRun) and bRobotOff==false and SYS:nStateRobot==10 and isPowered()
+  until exitCondition
+  //
+  //
+  // Reset StartMachine.................................................................................................
+  SYS:doStartMachine[moduleIndex]=false
+  //
+  // Robot is allowed to go inside mould area. Do not close mould until arm has entered mould area.
+  bRobotOffAllow=false
+  //
+  // Start measuring the take out time
+  //call stat:startTakeTime()
+  //
+  //!change 18.06.05, vdg: Start area test
+  call startAreaTest()
+  call status:setEnabled(WAIT_IMM_AUTO,false)
+  call status:setEnabled(WAIT_MOULD_OPEN,false)
+  call status:setEnabled(WAIT_ROB_ENABLE,false)
+  call status:setEnabled(WAIT_PARTMADE,false)
+  // reset move ID counter only at first IMM
+  if moduleIndex==0
+    setMoveId(0)
+  endIf
+end
+
+      ]]></Code>
+  </Program>
+</Programs>

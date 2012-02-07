@@ -45,6 +45,7 @@ public:
     QList<cs8Program*> privatePrograms();
     cs8Program* getProgramByName(const QString & name);
     void setCellPath(const QString &path);
+    void append(cs8Program *program);
 
 protected:
     QList<cs8Program*> m_programList;

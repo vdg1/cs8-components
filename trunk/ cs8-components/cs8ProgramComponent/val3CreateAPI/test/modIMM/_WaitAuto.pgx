@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="_WaitAuto" access="public">
+    <Description><![CDATA[Wait here until the machine is prepared to be started]]></Description>
+    <Code><![CDATA[begin
+  // Enable Robot Off function........................................................
+  bRobotOffAllow=true
+  //
+  //!change 18.06.05, vdg: Prime area test
+  call primeAreaTest()
+  //
+  // ignore messages if in dry run mode
+  if data:setDryRun==false
+    call status:setEnabled(WAIT_IMM_AUTO,true)
+  endIf
+  call status:setEnabled(WAIT_MOULD_OPEN,true)
+  call status:setEnabled(WAIT_ROB_ENABLE,true)
+  // Stop the robot cycle time timer
+  //call stat:stopRobotTime()
+  // Wait machine in AUTO.............................................................
+  do
+    //Robot in position to be able use the Robot Off function.
+    if SYS:diMachineInAuto[moduleIndex]==false and SYS:bRobotOffCalled[moduleIndex]
+      bAtWaitPosition=true
+    endIf
+    //!change 08.06.06, vdg: ignore automatic signal in dry run mode
+  until ((SYS:diMachineInAuto[moduleIndex]==true or data:setDryRun==true) and SYS:diMouldOpen[moduleIndex]==true and bRobotOff==false)
+  //
+  // Robot not in position to use Robot Off function..................................
+  bAtWaitPosition=false
+  //
+  call status:setEnabled(WAIT_IMM_AUTO,false)
+  call status:setEnabled(WAIT_MOULD_OPEN,false)
+  call status:setEnabled(WAIT_ROB_ENABLE,false)
+  //
+  // Start measuring the take out time
+  //call stat:startTakeTime()
+  //
+  call startAreaTest()
+end
+
+]]></Code>
+  </Program>
+</Programs>

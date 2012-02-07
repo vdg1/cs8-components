@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="getSetting" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="setting_" type="settingType" xsi:type="element" use="reference" />
+    </Parameters>
+    <Code><![CDATA[begin
+   switch setting_.sType
+        case "num"
+          $exec("setting_.nValue="+setting_.varName)
+        break
+        case "bool"
+          $exec("setting_.bValue="+setting_.varName)
+        break
+        case "string"
+          $exec("setting_.sValue="+setting_.varName)
+        break
+  endSwitch
+end]]></Code>
+  </Program>
+</Programs>

@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="IMMTiming">
+    <Locals>
+      <Local name="avg" type="num" xsi:type="array" size="1" />
+      <Local name="idx" type="num" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //!brief
+  //Measure the reaction time of the IMM from giving the permission to close the mould
+  // until the mould actually starts closing
+  //
+  if (getMonitorSpeed()>99) and (workingMode()==4) and (SYS:diMachineInAuto[moduleIndex]==true) 
+    if (SYS:doStartMachine[moduleIndex]==false) and (SYS:diMouldOpen[moduleIndex]==true)
+      mouldTimer=clock()
+      bState=false
+    endIf
+    if (SYS:doStartMachine[moduleIndex]==true) and (SYS:diMouldOpen[moduleIndex]==false) and !bState
+      bState=true
+      // save reaction time in ring buffer
+      pointer=sel(pointer+1>size(timings)-1,1,pointer+1)
+      timings[pointer-1]=reactionTime=clock()-mouldTimer      
+      // calculate average value of ring buffer
+      avg=0
+      for idx=0 to size(timings)-1
+        avg=avg+timings[idx]
+      endFor
+      avg=avg/size(timings)
+      nCloseDelayTime=avg
+      ? "Avg mold reaction time: " +toString("5.2",nCloseDelayTime)
+    endIf
+  endIf
+  if !(SYS:diMachineInAuto[moduleIndex]==true)
+    // reset ring buffer if IMM is not in AUTOMATIC mode
+    for idx=0 to size(timings)-1
+      timings[idx]=0
+    endFor
+    pointer=0
+  endIf
+end
+
+      ]]></Code>
+  </Program>
+</Programs>

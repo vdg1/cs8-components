@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="BtRobotOff" access="public">
+    <Description><![CDATA[Robot Off key function]]></Description>
+    <Code><![CDATA[begin
+//   switch SYS:nStateRobot
+//    case STATE:IDLE,STATE:RUNNING
+//     call BtRobotOff()
+//    break
+//    case STATE:PAUSED
+//      if bRobotOffAllow
+//        call BtRobotOff()
+//      else
+//        ///TODO
+//        //nStateBtEnd=0
+//      endIf
+//    break
+//  endSwitch
+  // Conditions for robot to enter mould is true in main program...............................
+  // Robot cannot be disabled if there is a part ready to be picked
+  if !bRobotOffAllow
+    //!change 20.04.07, vdg: display popup when user tries to disable robot while
+    //  a part is in the mould
+//    if SYS:bBtRobotOff[moduleIndex]
+//      call ui:popUp(("Robot can not be disabled because a part is in the mould!"),data:nMsgTimeOut,false)
+//    endIf
+    nCaseBtRobOff=0
+    SYS:bBtRobotOff[moduleIndex]=false
+    bRobotOff=false
+    SYS:bRobotOffCalled[moduleIndex]=false
+  else
+    // Sequence for Robot Off button............................................................
+    switch nCaseBtRobOff
+      // ROBOT OFF pressed.....................................................................
+      case 0
+        if SYS:bBtRobotOff[moduleIndex]==true
+          // Check conditions to enable Robot Off function.....................................
+          if (SYS:doMouldFree[moduleIndex]==true and SYS:diMachineInAuto[moduleIndex]==false)
+            bRobotOff=true
+          else
+            bRobotOff=false
+            //            //!change 20.04.07, vdg: display popup when user tries to disable robot while
+            //            //  the arm is in the mould area
+            //            if secu:bMouldFree==false
+            //              call ui:popUp("Robot can not be disabled/nbecause arm is in mould area",4,false)
+            //            endIf
+            //            //!change 20.04.07, vdg: display popup when user tries to disable robot while
+            //            //  the IMM is in automatic mode
+            //            if SYS:diMachineInAuto[moduleIndex]==true
+            //              call ui:popUp("Robot can not be disabled/nbecause IMM is in automatic mode",4,false)
+            //            endIf
+            //
+          endIf
+          nCaseBtRobOff=1
+        endIf
+      break
+      // ROBOT OFF released...................................................................
+      case 1
+        if SYS:bBtRobotOff[moduleIndex]==false
+          // Robot in cycle
+          if SYS:nStateRobot==STATE:RUNNING
+            SYS:bRobotOffCalled[moduleIndex]=true
+            nCaseBtRobOff=2
+          else
+            nCaseBtRobOff=3
+          endIf
+        endIf
+      break
+      // Wait arm in "wait" position.........................................................
+      case 2
+        // Robot in wait position
+        if bAtWaitPosition==true
+          nCaseBtRobOff=3
+        endIf
+        // Disable Robot Off function
+        if SYS:bBtRobotOff[moduleIndex]==true
+          SYS:bRobotOffCalled[moduleIndex]=false
+          nCaseBtRobOff=4
+        endIf
+      break
+      // Wait for conditions from machine.....................................................
+      case 3
+        if (bRobotOff==false and SYS:doMouldFree[moduleIndex]==true)
+          if bRobotOff==false and SYS:diMachineInAuto[moduleIndex]==false and !SYS:bPartMade[moduleIndex]
+            delay(0.05)
+            bRobotOff=true
+          endIf
+          if SYS:bBtRobotOff[moduleIndex]==true
+            nCaseBtRobOff=4
+          endIf
+        else
+          // Arm in mould area
+          if SYS:doMouldFree[moduleIndex]==true
+            nCaseBtRobOff=4
+          else
+            //!change 20.04.07, vdg: display popup when user tries to enable robot while
+            //  robot is in the mould area
+            if SYS:bBtRobotOff[moduleIndex]
+              call scr:popUp((("Robot can not be enabled while the arm is in the mould alrea!")),data:nMsgTimeOut,false)
+            endIf
+          endIf
+        endIf
+      break
+      // ROBOT OFF pressed.....................................................................
+      case 4
+        if SYS:bBtRobotOff[moduleIndex]==true or SYS:doMouldFree[moduleIndex]==false
+          // Mould in closing phase
+          if SYS:diMachineInAuto[moduleIndex]==true and SYS:diMouldOpen[moduleIndex]==false and !SYS:bPartMade[moduleIndex]
+            nCaseBtRobOff=5
+          else
+            bRobotOff=false
+            nCaseBtRobOff=6
+          endIf
+          // Arm in mould area
+          if SYS:doMouldFree[moduleIndex]==false
+            bRobotOff=false
+            nCaseBtRobOff=6
+          endIf
+        endIf
+      break
+      // Wait mould in position...............................................................
+      case 5
+        if SYS:diMouldOpen[moduleIndex]==true or SYS:diMouldClosed[moduleIndex]==true
+          bRobotOff=false
+          nCaseBtRobOff=6
+        else
+          if SYS:bBtRobotOff[moduleIndex]==true
+            //!i18n 213 -> "Robot can not be disabled because mould is neither open nor closed"
+            call scr:popUp((("Robot can not be disabled because mould is neither open nor closed")),data:nMsgTimeOut,false)
+          endIf
+        endIf
+      break
+      // ROBOT OFF released...................................................................
+      case 6
+        if SYS:bBtRobotOff[moduleIndex]==false
+          nCaseBtRobOff=0
+        endIf
+      break
+    endSwitch
+  endIf
+end
+
+
+      ]]></Code>
+  </Program>
+</Programs>

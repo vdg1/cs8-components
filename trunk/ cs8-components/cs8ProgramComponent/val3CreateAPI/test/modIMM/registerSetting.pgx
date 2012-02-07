@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="registerSetting" access="public">
+    <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+      <Parameter name="setting_" type="settingType" xsi:type="element" use="reference" />
+      <Parameter name="index_" type="num" xsi:type="element" />
+    </Parameters>
+    <Code><![CDATA[begin
+  switch index_
+    case 0
+      setting_.label="Safety Distance"
+      setting_.varName=$getName(nMouldAreaZone)
+      setting_.sType="num"
+      setting_.nValue=0
+      setting_.format="5.0"
+      setting_.sDescription="Safety Distance to Mould"
+      setting_.parentName="IMM"+toString("0.0",moduleIndex)
+    break
+    
+    case 1
+      setting_.label="IMM Type"
+      setting_.varName="nImmType"
+      setting_.sType="num"
+      setting_.nValue=0
+      setting_.sDescription="This setting changes the behaviour of the IMM: 0: Netstal, 1: Neggri Bossi"
+      setting_.parentName="IMM"+toString("0.0",moduleIndex)
+    break
+    
+    case 2
+      setting_.label="Monitor Mould Area"
+      setting_.varName="bMonitorArea"
+      setting_.sType="bool"
+      setting_.bValue=true
+      setting_.sDescription=""
+      setting_.parentName="IMM"+toString("0.0",moduleIndex)
+    break
+  endSwitch
+end]]></Code>
+  </Program>
+</Programs>

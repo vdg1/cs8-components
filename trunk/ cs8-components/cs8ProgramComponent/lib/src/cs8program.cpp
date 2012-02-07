@@ -13,6 +13,8 @@ cs8Program::cs8Program(QObject * parent) :
     QObject() {
     m_localVariableModel = new cs8VariableModel(this);
     m_parameterModel = new cs8ParameterModel(this);
+
+    createXMLSkeleton ();
 }
 //
 /*!
@@ -29,11 +31,11 @@ cs8Program::cs8Program(QObject * parent) :
 
 bool cs8Program::open(const QString & filePath) {
     qDebug() << "cs8Program::open () " << filePath;
-    QDomDocument doc("program");
+
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly))
         return false;
-    if (!doc.setContent(&file)) {
+    if (!m_doc.setContent(&file)) {
         file.close();
         return false;
     }
@@ -42,7 +44,7 @@ bool cs8Program::open(const QString & filePath) {
 
     m_filePath=filePath;
     qDebug() << "cs8Program::open ():  ok";
-    return parseProgramDoc(doc);
+    return parseProgramDoc(m_doc);
 }
 
 
@@ -52,6 +54,25 @@ void cs8Program::printChildNodes(const QDomElement & element)
     for (int i=0;i<element.childNodes().count();i++)
         qDebug() << i << element.childNodes().at(i).nodeName();
 
+}
+
+void cs8Program::createXMLSkeleton()
+{
+    qDebug () << "Create xml structure";
+    m_doc=QDomDocument();
+    m_root=m_doc.createElement ("Programs");
+    m_doc.appendChild (m_root);
+    QDomProcessingInstruction process = m_doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+    m_root.appendChild(process);
+    m_programSection=m_doc.createElement("Program");
+    m_root.appendChild (m_programSection);
+    m_paramSection=m_doc.createElement("Parameters");
+    m_programSection.appendChild (m_paramSection);
+    m_localSection=m_doc.createElement("Locals");
+    m_programSection.appendChild (m_localSection);
+    m_codeSection=m_doc.createElement("Code");
+    m_programSection.appendChild (m_codeSection);
+    qDebug () << "Create xml structure done";
 }
 
 /*!
@@ -159,6 +180,18 @@ QStringList cs8Program::variableTokens()
         }
     }
     return list;
+}
+
+void cs8Program::setCode(const QString &code)
+{
+    QDomCDATASection data=m_doc.createCDATASection(code);
+    /*
+    foreach(QDomNode element,m_codeSection.childNodes ())
+    {
+        m_codeSection.removeChild (element);
+    }
+    */
+    m_codeSection.appendChild (data);
 }
 
 QString cs8Program::extractDocumentation(const QString & code_){
@@ -399,7 +432,7 @@ QString cs8Program::cellFilePath() const
     return pth;
 }
 
-QString cs8Program::documentation(bool withPrefix) {
+QString cs8Program::documentation(bool withPrefix) const {
     qDebug() << "documentation: " << name() << ":" << m_description;
     QString out;
     QString prefix=withPrefix?"///":"";
@@ -508,12 +541,6 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
 
 bool cs8Program::save(const QString & projectPath, bool withCode) {
     qDebug() << "Saving progam " << name();
-    QDomDocument doc;
-    QDomProcessingInstruction process = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
-    doc.appendChild(process);
-    QDomNode root = m_root.cloneNode();
-    doc.appendChild(root);
-
 
     QString codeText;
     if (withCode)
@@ -536,20 +563,25 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
         }
     }
 
-    QDomCDATASection data=doc.createCDATASection(codeText);
-    QDomElement code=root.toElement().firstChildElement("Program").firstChildElement("Code");
-    code.removeChild(code.firstChild());
-    code.appendChild(data);
+    QDomCDATASection data=m_doc.createCDATASection(codeText);
+    m_codeSection.appendChild(data);
 
     QFile file(projectPath + "/" + fileName());
     if (!file.open(QIODevice::WriteOnly))
         return false;
 
     QTextStream stream(&file);
-    stream << doc.toString();
+    stream << m_doc.toString();
     file.close();
 
     return true;
+}
+
+QString cs8Program::setName(const QString &name)
+{
+    qDebug() << m_programSection.tagName ();
+    m_programSection.setAttribute ("name",name);
+    qDebug() << m_doc.toString ();
 }
 
 QString cs8Program::toDocumentedCode() {
@@ -594,7 +626,7 @@ QString cs8Program::toDocumentedCode() {
     return code;
 }
 
-QString cs8Program::definition() {
+QString cs8Program::definition() const {
 
     return name() + "(" + m_parameterModel->toString() + ")";
 }

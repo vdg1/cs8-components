@@ -42,8 +42,12 @@ bool cs8Application::open(const QString & filePath) {
 
     m_projectPath = filePath;
     m_projectName = QFileInfo(m_projectPath).baseName();
+
     //m_projectPath.chop(m_projectPath.length() - 1 - m_projectPath.lastIndexOf(QDir::separator ()));
     m_projectPath=QFileInfo(m_projectPath).absolutePath()+QDir::separator();
+    QString p=m_projectPath;
+    p.chop (m_projectName.length ()+1);
+    setCellPath (p);
     bool result=parseProject(doc);
     return result;
 }
@@ -264,6 +268,11 @@ cs8ProgramModel* cs8Application::programModel() const {
     return m_programModel;
 }
 
+cs8LibraryAliasModel *cs8Application::libraryModel() const
+{
+    return m_libraryAliasModel;
+}
+
 bool cs8Application::loadDataFile(const QString & fileName) {
     qDebug() << "Loading data file: " << fileName;
 
@@ -350,7 +359,7 @@ QString cs8Application::documentation() {
     return out;
 }
 
-QString cs8Application::checkVariables()
+QString cs8Application::checkVariables() const
 {
     QStringList output;
     // map containing information if a global variable has been referenced
@@ -375,25 +384,18 @@ QString cs8Application::checkVariables()
                                .arg(program->cellFilePath ()));
             }
             else
-            {
                 // if global variable is not hidden, check if it is used
                 if (program->variableTokens ().contains (var->name ()))
                 {
                     referencedMap[var->name ()]=true;
                 }
-
-            }
-
         }
         if (referencedMap[var->name ()]==false)
-        {
-            //output.append (QString("Warning: Global variable '" + var->name () + "' is not used"));
-            output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>1<msg>%2<file>%3")
+            output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
                            .arg ("")
                            .arg ("Warning: Global variable '" + var->name () + "' is not used")
-                           .arg(""));
-
-        }
+                           .arg(cellDataFilePath ())
+                           .arg(var->element ().lineNumber ()));
     }
     foreach(cs8Program* program, m_programModel->programList ())
     {
@@ -411,7 +413,37 @@ QString cs8Application::checkVariables()
     return output.join ("\n");
 }
 
+
+
 void cs8Application::setCellPath(const QString &path)
 {
-    m_cellPath=path;
+    QString pth=QDir::toNativeSeparators (path);
+    int pos=0;
+
+    if ((pos=pth.indexOf (QDir::toNativeSeparators ("usr/app")))!=-1)
+        m_cellPath=pth.right (pos-1);
+    else
+        m_cellPath=path;
+}
+
+QString cs8Application::cellPath() const
+{
+    return m_cellPath;
+}
+
+
+QString cs8Application::cellProjectFilePath() const
+{
+    QString pth=QDir::toNativeSeparators(m_projectPath+m_projectName+".pjx");
+    pth=pth.replace (m_cellPath+"/usr/usrapp","Disk://");
+    pth=QDir::toNativeSeparators(pth);
+    return pth;
+}
+
+QString cs8Application::cellDataFilePath() const
+{
+    QString pth=QDir::toNativeSeparators(m_projectPath+m_projectName+".dtx");
+    pth=pth.replace (m_cellPath+"/usr/usrapp","Disk://");
+    pth=QDir::toNativeSeparators(pth);
+    return pth;
 }

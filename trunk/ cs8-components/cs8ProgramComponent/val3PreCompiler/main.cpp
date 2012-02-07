@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
         // run original Val3Check.exe
         QProcess proc;
         QStringList arg=qApp->arguments ();
+        // remove the first argument as that is the path of the executable
         arg.removeAt (0);
         proc.start ("C:\\Program Files\\Staubli\\CS8\\s7.2\\Val3Check_orig.exe",arg);
         proc.waitForFinished ();
