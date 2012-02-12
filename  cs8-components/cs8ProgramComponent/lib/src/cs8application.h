@@ -42,6 +42,7 @@ public:
         QString cellPath() const;
         QString cellProjectFilePath() const;
         QString cellDataFilePath() const;
+        bool writeProjectFile();
 
 protected:
         QString m_projectName;
@@ -53,11 +54,15 @@ protected:
         QString m_documentation;
         QString m_cellPath;
 
+        QDomDocument m_XMLDocument;
         QDomElement m_parameters;
         QDomElement m_programSection;
         QDomElement m_dataSection;
         QDomElement m_aliasSection;
         QDomElement m_typesSection;
+        QDomElement m_projectSection;
+
+        void createXMLSkeleton();
 
 protected slots:
         void slotGlobalVariableDocumentationFound(const QString & name,

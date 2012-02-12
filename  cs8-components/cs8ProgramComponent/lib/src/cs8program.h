@@ -63,12 +63,13 @@ public:
 
 protected:
     bool parseProgramDoc(const QDomDocument & doc);
-    QDomDocument m_doc;
-    QDomElement m_root;
+    QDomDocument m_XMLDocument;
+    QDomElement m_programsSection;
     QDomElement m_paramSection;
     QDomElement m_programSection;
     QDomElement m_localSection;
     QDomElement m_codeSection;
+    QDomElement m_descriptionSection;
     QString m_description;
     QString m_cellPath;
     QString m_filePath;

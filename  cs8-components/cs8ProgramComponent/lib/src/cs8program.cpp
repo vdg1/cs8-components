@@ -35,7 +35,7 @@ bool cs8Program::open(const QString & filePath) {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly))
         return false;
-    if (!m_doc.setContent(&file)) {
+    if (!m_XMLDocument.setContent(&file)) {
         file.close();
         return false;
     }
@@ -44,7 +44,7 @@ bool cs8Program::open(const QString & filePath) {
 
     m_filePath=filePath;
     qDebug() << "cs8Program::open ():  ok";
-    return parseProgramDoc(m_doc);
+    return parseProgramDoc(m_XMLDocument);
 }
 
 
@@ -59,18 +59,28 @@ void cs8Program::printChildNodes(const QDomElement & element)
 void cs8Program::createXMLSkeleton()
 {
     qDebug () << "Create xml structure";
-    m_doc=QDomDocument();
-    m_root=m_doc.createElement ("Programs");
-    m_doc.appendChild (m_root);
-    QDomProcessingInstruction process = m_doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
-    m_root.appendChild(process);
-    m_programSection=m_doc.createElement("Program");
-    m_root.appendChild (m_programSection);
-    m_paramSection=m_doc.createElement("Parameters");
+    m_XMLDocument=QDomDocument();
+    QDomProcessingInstruction process = m_XMLDocument.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+    m_XMLDocument.appendChild(process);
+
+    m_programsSection=m_XMLDocument.createElement ("Programs");
+    m_programsSection.setAttribute ("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    m_programsSection.setAttribute ("xmlns", "http://www.staubli.com/robotics/VAL3/Program/2");
+    m_XMLDocument.appendChild (m_programsSection);
+
+    m_programSection=m_XMLDocument.createElement("Program");
+    m_programsSection.appendChild (m_programSection);
+
+    m_descriptionSection=m_XMLDocument.createElement ("Description");
+    m_programSection.appendChild (m_descriptionSection);
+
+    m_paramSection=m_XMLDocument.createElement("Parameters");
     m_programSection.appendChild (m_paramSection);
-    m_localSection=m_doc.createElement("Locals");
+
+    m_localSection=m_XMLDocument.createElement("Locals");
     m_programSection.appendChild (m_localSection);
-    m_codeSection=m_doc.createElement("Code");
+
+    m_codeSection=m_XMLDocument.createElement("Code");
     m_programSection.appendChild (m_codeSection);
     qDebug () << "Create xml structure done";
 }
@@ -79,11 +89,11 @@ void cs8Program::createXMLSkeleton()
  \fn cs8Program::parseProgramDoc(const QDomDocument & doc)
  */
 bool cs8Program::parseProgramDoc(const QDomDocument & doc) {
-    m_root = doc.documentElement();
+    m_programsSection = doc.documentElement();
 
 
-    printChildNodes(m_root);
-    m_programSection = m_root.firstChild().toElement();
+    printChildNodes(m_programsSection);
+    m_programSection = m_programsSection.firstChild().toElement();
 
 
     printChildNodes(m_programSection);
@@ -184,7 +194,7 @@ QStringList cs8Program::variableTokens()
 
 void cs8Program::setCode(const QString &code)
 {
-    QDomCDATASection data=m_doc.createCDATASection(code);
+    QDomCDATASection data=m_XMLDocument.createCDATASection(code);
     /*
     foreach(QDomNode element,m_codeSection.childNodes ())
     {
@@ -563,15 +573,17 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
         }
     }
 
-    QDomCDATASection data=m_doc.createCDATASection(codeText);
-    m_codeSection.appendChild(data);
+    QDomCDATASection data=m_XMLDocument.createCDATASection(codeText);
 
-    QFile file(projectPath + "/" + fileName());
+    m_codeSection.replaceChild (data, m_codeSection.firstChild ());
+
+    QString fileName_=projectPath + fileName();
+    QFile file(fileName_);
     if (!file.open(QIODevice::WriteOnly))
         return false;
 
     QTextStream stream(&file);
-    stream << m_doc.toString();
+    stream << m_XMLDocument.toString();
     file.close();
 
     return true;
@@ -581,7 +593,7 @@ QString cs8Program::setName(const QString &name)
 {
     qDebug() << m_programSection.tagName ();
     m_programSection.setAttribute ("name",name);
-    qDebug() << m_doc.toString ();
+   //qDebug() << m_doc.toString ();
 }
 
 QString cs8Program::toDocumentedCode() {
