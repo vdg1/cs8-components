@@ -303,6 +303,9 @@ bool cs8Application::loadDataFile(const QString & fileName) {
 }
 
 void cs8Application::save() {
+    QDir dir;
+    dir.mkpath (m_projectPath);
+    writeProjectFile();
     foreach(cs8Program* program, m_programModel->programList())
     {
         program->save(m_projectPath);
@@ -420,10 +423,12 @@ void cs8Application::setCellPath(const QString &path)
     QString pth=QDir::toNativeSeparators (path);
     int pos=0;
 
-    if ((pos=pth.indexOf (QDir::toNativeSeparators ("usr/app")))!=-1)
-        m_cellPath=pth.right (pos-1);
+    if ((pos=pth.indexOf (QDir::toNativeSeparators ("usr/usrapp")))!=-1)
+        m_cellPath=pth.left (pos-1)+QDir::separator ();
     else
         m_cellPath=path;
+    if (m_projectPath.isEmpty ())
+        m_projectPath=m_cellPath+"/usr/usrapp/"+m_projectName+QDir::separator ();
 }
 
 QString cs8Application::cellPath() const
@@ -446,4 +451,71 @@ QString cs8Application::cellDataFilePath() const
     pth=pth.replace (m_cellPath+"/usr/usrapp","Disk://");
     pth=QDir::toNativeSeparators(pth);
     return pth;
+}
+
+bool cs8Application::writeProjectFile()
+{
+    createXMLSkeleton ();
+    foreach(cs8Program* program, m_programModel->programList ())
+    {
+        QDomElement element=m_XMLDocument.createElement ("Program");
+        element.setAttribute ("file",program->fileName ());
+        m_programSection.appendChild (element);
+    }
+
+    QDomElement element=m_XMLDocument.createElement ("Data");
+    element.setAttribute ("file",m_projectName+".dtx");
+    m_dataSection.appendChild (element);
+
+    foreach(cs8LibraryAlias* alias, m_libraryAliasModel->aliasList ())
+    {
+        QDomElement element=m_XMLDocument.createElement ("Library");
+        element.setAttribute ("alias",alias->name ());
+        element.setAttribute ("path",alias->path ());
+        m_aliasSection.appendChild (element);
+    }
+
+    QString fileName_=m_projectPath + m_projectName + ".pjx";
+    QFile file(fileName_);
+    if (!file.open(QIODevice::WriteOnly))
+        return false;
+
+    QTextStream stream(&file);
+    stream << m_XMLDocument.toString();
+    file.close();
+
+    return true;
+}
+
+
+void cs8Application::createXMLSkeleton()
+{
+    qDebug () << "Create xml structure";
+    m_XMLDocument=QDomDocument();
+    QDomProcessingInstruction process = m_XMLDocument.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+    m_XMLDocument.appendChild(process);
+
+    m_projectSection=m_XMLDocument.createElement ("Project");
+
+    m_projectSection.setAttribute ("xmlns", "http://www.staubli.com/robotics/VAL3/Project/3");
+    m_XMLDocument.appendChild (m_projectSection);
+
+    m_parameters=m_XMLDocument.createElement("Parameters");
+    m_parameters.setAttribute ("version","7.2");
+    m_parameters.setAttribute ("stackSize","5000");
+    m_parameters.setAttribute ("millimeterUnit","true");
+    m_projectSection.appendChild (m_parameters);
+
+    m_programSection=m_XMLDocument.createElement("Programs");
+    m_projectSection.appendChild (m_programSection);
+
+    m_dataSection=m_XMLDocument.createElement("Database");
+    m_projectSection.appendChild (m_dataSection);
+
+    m_aliasSection=m_XMLDocument.createElement("Libraries");
+    m_projectSection.appendChild (m_aliasSection);
+
+    m_typesSection=m_XMLDocument.createElement("Types");
+    m_projectSection.appendChild (m_typesSection);
+    qDebug () << "Create xml structure done";
 }
