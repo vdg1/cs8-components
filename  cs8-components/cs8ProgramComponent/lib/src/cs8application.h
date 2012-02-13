@@ -18,6 +18,7 @@ public:
         QString projectPath();
         void save();
         bool loadDataFile(const QString & fileName);
+        bool saveDataFile(const QString & fileName);
         bool open(const QString & filePath);
         bool openFromPathName(const QString & filePath);
         cs8Application(QObject* parent = 0);
@@ -48,7 +49,7 @@ protected:
         QString m_projectName;
         QString m_projectPath;
         cs8ProgramModel* m_programModel;
-        cs8VariableModel* m_variableModel;
+        cs8VariableModel* m_globalVariableModel;
         cs8LibraryAliasModel* m_libraryAliasModel;
         //QDomDocument m_dataDoc;
         QString m_documentation;

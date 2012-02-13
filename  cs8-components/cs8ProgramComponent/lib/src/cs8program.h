@@ -39,6 +39,7 @@ public:
     QString extractCode(const QString & code_) const;
     QStringList variableTokens();
     void setCode(const QString & code);
+    void copyFromParameterModel(cs8ParameterModel *sourceModel);
 
 private:
     cs8VariableModel* m_localVariableModel;

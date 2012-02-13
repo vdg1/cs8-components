@@ -15,7 +15,7 @@
 cs8Application::cs8Application(QObject *parent) :
     QObject(parent) {
     m_programModel = new cs8ProgramModel(this);
-    m_variableModel = new cs8VariableModel(this);
+    m_globalVariableModel = new cs8VariableModel(this);
     m_libraryAliasModel = new cs8LibraryAliasModel(this);
     m_projectPath="";
     m_projectName="";
@@ -83,7 +83,7 @@ bool cs8Application::exportInterfacePrototype(const QString & path) {
     QTextStream stream(&file);
 
     //stream << m_dataDoc.toByteArray();
-    stream << m_variableModel->toDtxDocument();
+    stream << m_globalVariableModel->toDtxDocument();
     //qDebug() << m_dataDoc.toString();
     file.close();
     qDebug() << "saving dtx done";
@@ -147,7 +147,7 @@ QString cs8Application::exportToCSyntax() {
     out << documentation();
     out << QString("class %1{").arg(m_projectName);
     out << " public:";
-    foreach(cs8Variable* variable,m_variableModel->publicVariables())
+    foreach(cs8Variable* variable,m_globalVariableModel->publicVariables())
     {
         out << variable->documentation();
         out << QString("   %1;").arg(variable->definition());
@@ -164,7 +164,7 @@ QString cs8Application::exportToCSyntax() {
     }
 
     out << " private:";
-    foreach(cs8Variable* variable,m_variableModel->privateVariables())
+    foreach(cs8Variable* variable,m_globalVariableModel->privateVariables())
     {
         out << variable->documentation();
         out << QString("   %1;").arg(variable->definition());
@@ -208,7 +208,7 @@ void cs8Application::exportToCFile(const QString & path) {
 bool cs8Application::parseProject(const QDomDocument & doc) {
     m_programModel->clear();
     m_programModel->setCellPath(m_cellPath);
-    m_variableModel->clear();
+    m_globalVariableModel->clear();
     m_libraryAliasModel->clear();
 
     QDomElement rootElement = doc.documentElement();
@@ -247,7 +247,7 @@ void cs8Application::slotGlobalVariableDocumentationFound(const QString & name,
                                                           const QString & document) {
 
     qDebug() << "find: " << name;
-    cs8Variable*variable = m_variableModel->getVarByName(name);
+    cs8Variable*variable = m_globalVariableModel->getVarByName(name);
     if (variable != 0) {
         qDebug() << "setting doc for " << name << " to " << document;
         variable->setDescription(document);
@@ -286,7 +286,7 @@ bool cs8Application::loadDataFile(const QString & fileName) {
     }
     ///TODO: quick fix to load data
     //m_dataDoc = doc;
-    m_variableModel->clear();
+    m_globalVariableModel->clear();
     QDomElement rootElement = doc.documentElement();
     QDomNodeList sectionList = rootElement.childNodes();
     for (int i = 0; i < sectionList.count(); i++) {
@@ -295,10 +295,41 @@ bool cs8Application::loadDataFile(const QString & fileName) {
         QDomNodeList variableList = sectionElement.childNodes();
         for (int j = 0; j < variableList.count(); j++) {
             QDomElement variableElement = variableList.at(j).toElement();
-            m_variableModel->addGlobalVariable(variableElement);
+            m_globalVariableModel->addGlobalVariable(variableElement);
         }
     }
     file.close();
+    return true;
+}
+
+bool cs8Application::saveDataFile(const QString &fileName)
+{
+    qDebug() << "Saving data file: " << fileName;
+
+    qDebug () << "Create xml structure";
+    QDomDocument xmlDataDocument=QDomDocument();
+    QDomProcessingInstruction process = xmlDataDocument.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+    xmlDataDocument.appendChild(process);
+
+    QDomElement databaseSection=xmlDataDocument.createElement ("Database");
+
+    databaseSection.setAttribute ("xmlns", "http://www.staubli.com/robotics/VAL3/Data/2");
+    databaseSection.setAttribute ("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    xmlDataDocument.appendChild (databaseSection);
+
+    QDomElement datasSection=xmlDataDocument.createElement("Datas");
+    databaseSection.appendChild (datasSection);
+
+    qDebug () << "Create xml structure done";
+
+    QFile file(fileName);
+    if (!file.open (QIODevice::WriteOnly))
+        return false;
+
+    QTextStream stream(&file);
+    stream << xmlDataDocument.toString ();
+    qDebug() << xmlDataDocument.toString ();
+    file.close ();
     return true;
 }
 
@@ -306,6 +337,7 @@ void cs8Application::save() {
     QDir dir;
     dir.mkpath (m_projectPath);
     writeProjectFile();
+    saveDataFile (m_projectPath+m_projectName+".dtx");
     foreach(cs8Program* program, m_programModel->programList())
     {
         program->save(m_projectPath);
@@ -368,7 +400,7 @@ QString cs8Application::checkVariables() const
     // map containing information if a global variable has been referenced
     QMap<QString, bool> referencedMap;
     // build map
-    foreach(cs8Variable *var, m_variableModel->variableList ())
+    foreach(cs8Variable *var, m_globalVariableModel->variableList ())
     {
         qDebug() << "Checking global variable: " << var->name ();
         referencedMap.insert (var->name (),false);
@@ -439,9 +471,12 @@ QString cs8Application::cellPath() const
 
 QString cs8Application::cellProjectFilePath() const
 {
-    QString pth=QDir::toNativeSeparators(m_projectPath+m_projectName+".pjx");
-    pth=pth.replace (m_cellPath+"/usr/usrapp","Disk://");
-    pth=QDir::toNativeSeparators(pth);
+    QString pth=QDir::toNativeSeparators (m_projectPath+m_projectName+".pjx");
+    qDebug() << pth;
+    pth=pth.replace (QDir::toNativeSeparators(m_cellPath)+"usr\\usrapp\\","Disk://");
+    qDebug() << pth;
+    pth=QDir::fromNativeSeparators (pth);
+    qDebug() << pth;
     return pth;
 }
 
