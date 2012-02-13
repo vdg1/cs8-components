@@ -22,7 +22,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    cs8Application *m_cs8SourceApp;
+    QList<cs8Application *> m_cs8SourceApps;
 };
 
 #endif // MAINWINDOW_H

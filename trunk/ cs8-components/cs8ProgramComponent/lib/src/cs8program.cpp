@@ -40,7 +40,6 @@ bool cs8Program::open(const QString & filePath) {
         return false;
     }
     file.close();
-    QFileInfo info(filePath);
 
     m_filePath=filePath;
     qDebug() << "cs8Program::open ():  ok";
@@ -75,6 +74,7 @@ void cs8Program::createXMLSkeleton()
     m_programSection.appendChild (m_descriptionSection);
 
     m_paramSection=m_XMLDocument.createElement("Parameters");
+    m_paramSection.setAttribute ("xmlns", "http://www.staubli.com/robotics/VAL3/Param/1");
     m_programSection.appendChild (m_paramSection);
 
     m_localSection=m_XMLDocument.createElement("Locals");
@@ -202,6 +202,25 @@ void cs8Program::setCode(const QString &code)
     }
     */
     m_codeSection.appendChild (data);
+}
+
+void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel)
+{
+    m_parameterModel->clear ();
+    foreach(cs8Variable *param,sourceModel->variableList ())
+    {
+        QDomElement element=param->element ().cloneNode (true).toElement ();
+        cs8Variable *p=new cs8Variable(element,param->description ());
+
+       /*
+        p->setDescription (param->description ());
+        p->setName (param->name ());
+        p->setGlobal (param->isGlobal ());
+        p->setType (param->type ());
+        p->setUse (param->use ());
+        */
+        m_parameterModel->variableList ().append (p);
+    }
 }
 
 QString cs8Program::extractDocumentation(const QString & code_){
@@ -574,8 +593,8 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
     }
 
     QDomCDATASection data=m_XMLDocument.createCDATASection(codeText);
-
     m_codeSection.replaceChild (data, m_codeSection.firstChild ());
+
 
     QString fileName_=projectPath + fileName();
     QFile file(fileName_);

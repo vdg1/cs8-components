@@ -50,7 +50,9 @@ public:
         return m_element.attribute("name");
     }
     cs8Variable(QDomElement & element, const QString & descripton=QString());
-    QString toString();
+    cs8Variable();
+
+    QString toString(bool withTypeDefinition=true);
     QString documentation(bool withPrefix=true);
     bool isPublic() const {
         return m_element.attribute("access","private")=="private"?false:true;

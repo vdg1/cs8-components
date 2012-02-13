@@ -44,12 +44,12 @@ QVariant cs8ParameterModel::data ( const QModelIndex & index, int role ) const
     return cs8VariableModel::data ( index,role );
 }
 
-QString cs8ParameterModel::toString()
+QString cs8ParameterModel::toString(bool withTypeDefinition)
 {
     QString line;
     for (int idx=0;idx<rowCount(QModelIndex());idx++)
         {
-            line+=m_variableList.at(idx)->toString()+", ";
+            line+=m_variableList.at(idx)->toString(withTypeDefinition)+", ";
         }
     line.chop(2);
     return line;

@@ -20,5 +20,5 @@ FORMS += ui/mainwindow.ui
 LIBS += ../../lib/libcs8ProjectComponent.a \
     -L../../lib/ \
     -lcs8ControllerComponent
-TARGETDEPS += ../../lib/libcs8ProjectComponent.a
+POST_TARGETDEPS += ../../lib/libcs8ProjectComponent.a
 RCC_DIR = build
