@@ -6,8 +6,12 @@ QT += xml \
 TARGET = "Val3 Documentation Editor"
 TEMPLATE = app
 SOURCES += main.cpp \
-    mainwindow.cpp
-HEADERS += mainwindow.h
+    mainwindow.cpp \
+    codeeditor.cpp \
+    highlighter.cpp
+HEADERS += mainwindow.h \
+    codeeditor.h \
+    highlighter.h
 FORMS += mainwindow.ui
 INCLUDEPATH += ../lib \
     ../../cs8ControllerComponent/lib/src \

@@ -40,7 +40,6 @@ public:
     QStringList variableTokens();
     void setCode(const QString & code);
     void copyFromParameterModel(cs8ParameterModel *sourceModel);
-    ;
 
 private:
     cs8VariableModel* m_localVariableModel;
@@ -67,6 +66,7 @@ public:
 
 protected:
     bool parseProgramDoc(const QDomDocument & doc);
+    void tidyUpCode(QString & code);
     QDomDocument m_XMLDocument;
     QDomElement m_programsSection;
     QDomElement m_paramSection;

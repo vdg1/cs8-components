@@ -15,31 +15,31 @@
 #include <QTableView>
 
 /**
-	@author Volker Drewer-Gutland <volker.drewer@gmx.de>
+    @author Volker Drewer-Gutland <volker.drewer@gmx.de>
 */
 class cs8ProgramDataView : public QTableView
 {
-		Q_OBJECT
-	public:
-		cs8ProgramDataView ( QWidget * parent=0 );
+    Q_OBJECT
+public:
+    cs8ProgramDataView ( QWidget * parent=0 );
 
-		~cs8ProgramDataView();
+    ~cs8ProgramDataView();
 
-		void setMasterView ( QAbstractItemView* theValue );
+    void setMasterView ( QAbstractItemView* theValue );
 
-	void setMode ( bool theValue );
-	
-
-	bool mode() const;
-	
+    void setMode ( bool theValue );
 
 
-	protected:
-		QAbstractItemView* m_masterView;
+    bool mode() const;
+
+
+
+protected:
+    QAbstractItemView* m_masterView;
     bool m_mode;
 
-	protected slots:
-		void slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected );
+protected slots:
+    void slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected );
 };
 
 #endif

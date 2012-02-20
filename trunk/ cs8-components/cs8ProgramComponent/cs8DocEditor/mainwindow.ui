@@ -26,7 +26,7 @@
          <item>
           <widget class="QTabWidget" name="tabWidget">
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="tab">
             <attribute name="title">
@@ -70,7 +70,7 @@
         </layout>
        </widget>
       </widget>
-      <widget class="QPlainTextEdit" name="plainTextEditCode">
+      <widget class="CodeEditor" name="plainTextEditCode">
        <property name="font">
         <font>
          <family>Courier 10 Pitch</family>
@@ -91,7 +91,7 @@
      <x>0</x>
      <y>0</y>
      <width>673</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -169,6 +169,11 @@
    <extends>QWidget</extends>
    <header>cs8programheaderview.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CodeEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>codeeditor.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
