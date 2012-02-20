@@ -40,10 +40,12 @@ bool cs8LibraryAliasModel::addAlias(const QString &aliasName, const QString &pat
 }
 
 int cs8LibraryAliasModel::rowCount(const QModelIndex& index) const {
+    Q_UNUSED(index);
     return m_aliasList.count();
 }
 
 int cs8LibraryAliasModel::columnCount(const QModelIndex & index) const {
+    Q_UNUSED(index);
     return 3;
 }
 

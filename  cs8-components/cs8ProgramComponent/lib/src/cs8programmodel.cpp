@@ -124,8 +124,12 @@ void cs8ProgramModel::addProgram(const QString & filePath) {
     cs8Program* program = new cs8Program(this);
 
     m_programList.append(program);
-    connect(program, SIGNAL(globalVariableDocumentationFound(const QString & , const QString & )),this, SLOT(slotGlobalVariableDocumentationFound(const QString & , const QString & )));
-    connect(program, SIGNAL(moduleDocumentationFound(const QString & )),this, SLOT(slotModuleDocumentationFound(const QString & )));
+    connect(program, SIGNAL(globalVariableDocumentationFound(const QString & , const QString & )),
+            this, SLOT(slotGlobalVariableDocumentationFound(const QString & , const QString & )));
+    connect(program, SIGNAL(moduleDocumentationFound(const QString & )),
+            this, SLOT(slotModuleDocumentationFound(const QString & )));
+    connect(program, SIGNAL(exportDirectiveFound(QString,QString)),
+            this,SLOT(slotExportDirectiveFound(QString,QString)));
     program->setCellPath(m_cellPath);
     program->open(filePath);
     reset();
@@ -138,6 +142,11 @@ void cs8ProgramModel::slotGlobalVariableDocumentationFound(
 
 void cs8ProgramModel::slotModuleDocumentationFound(const QString & document) {
     emit moduleDocumentationFound(document);
+}
+
+void cs8ProgramModel::slotExportDirectiveFound(const QString &module, const QString &function)
+{
+    emit exportDirectiveFound (module, function);
 }
 
 void cs8ProgramModel::clear() {

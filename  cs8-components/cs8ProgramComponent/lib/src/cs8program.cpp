@@ -10,7 +10,7 @@
 #define MAX_LENGTH 40
 //
 cs8Program::cs8Program(QObject * parent) :
-    QObject() {
+    QObject(parent) {
     m_localVariableModel = new cs8VariableModel(this);
     m_parameterModel = new cs8ParameterModel(this);
 
@@ -82,7 +82,7 @@ void cs8Program::createXMLSkeleton()
 
     m_codeSection=m_XMLDocument.createElement("Code");
     m_programSection.appendChild (m_codeSection);
-    qDebug () << "Create xml structure done";
+    qDebug () << "Create xml structure done: " << m_XMLDocument.toString ();
 }
 
 /*!
@@ -211,6 +211,7 @@ void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel)
     {
         QDomElement element=param->element ().cloneNode (true).toElement ();
         cs8Variable *p=new cs8Variable(element,param->description ());
+        qDebug() << p->name () << ":" << p->definition ();
 
        /*
         p->setDescription (param->description ());
@@ -219,7 +220,7 @@ void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel)
         p->setType (param->type ());
         p->setUse (param->use ());
         */
-        m_parameterModel->variableList ().append (p);
+        m_parameterModel->addVariable (element,param->description ());
     }
 }
 
@@ -261,7 +262,7 @@ QString cs8Program::extractDocumentation(const QString & code_){
  int start = list.indexOf(QRegExp("\\s*begin\\s*"));
  int stop = start + 1;
  while (list.at(stop).contains(QRegExp("^\\s*¤//.*")))
- /*
+
  stop++;
  for (int i = stop - 1; i > start; i--)
  list.removeAt(i);
@@ -343,7 +344,7 @@ void cs8Program::parseDocumentation(const QString & code_) {
     QString tagName;
     QString tagText;
 
-    //qDebug() << "parseDocumentation: " << m_name << ":" << documentationList;
+    qDebug() << "parseDocumentation: " << name ();
     foreach(QString line,documentation.split("\n")) {
         line = line.simplified();
         // process a complete tag before starting the next tag
@@ -374,6 +375,10 @@ void cs8Program::parseDocumentation(const QString & code_) {
             else if (tagType == "module") {
                 qDebug() << "module doc: " << tagName << ":" << tagText;
                 emit moduleDocumentationFound(tagText);
+            }
+            else if (tagType == "export"){
+                qDebug() << "export directive: " << tagName << ":" << tagText;
+                emit exportDirectiveFound(tagName, tagText);
             }
             else {
                 m_description += QString("\n\\%1 %2\n%3").arg(tagType).arg(tagName).arg(tagText);
@@ -435,6 +440,9 @@ void cs8Program::parseDocumentation(const QString & code_) {
         else if (tagType == "module") {
             qDebug() << "module doc: " << tagName << ":" << tagText;
             emit moduleDocumentationFound(tagText);
+        }
+        else if (tagType =="export") {
+            emit exportDirectiveFound (tagName, tagText);
         }
         else {
             m_description += QString("\n\\%1 %2\n%3").arg(tagType).arg(tagName).arg(tagText);
@@ -596,6 +604,11 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
     m_codeSection.replaceChild (data, m_codeSection.firstChild ());
 
 
+    foreach(cs8Variable *param, m_parameterModel->variableList ())
+    {
+        m_paramSection.appendChild (param->element ());
+    }
+
     QString fileName_=projectPath + fileName();
     QFile file(fileName_);
     if (!file.open(QIODevice::WriteOnly))
@@ -608,11 +621,11 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
     return true;
 }
 
-QString cs8Program::setName(const QString &name)
+void cs8Program::setName(const QString &name)
 {
-    qDebug() << m_programSection.tagName ();
-    m_programSection.setAttribute ("name",name);
-   //qDebug() << m_doc.toString ();
+    qDebug() << "Setting program tag " << m_programSection.tagName () << " to " << name;
+    m_programSection.setAttribute ("name",QString(name));
+    qDebug() << m_XMLDocument.toString ();
 }
 
 QString cs8Program::toDocumentedCode() {

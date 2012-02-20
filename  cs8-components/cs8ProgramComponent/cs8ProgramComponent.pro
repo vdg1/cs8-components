@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 SUBDIRS = plugin \
     lib \
-    testBin \
+    #testBin \
     extractPrototype \
     extractDoc \
     doxygenFilter \

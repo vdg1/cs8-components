@@ -9,6 +9,7 @@ QT       += core gui xml
 TARGET = val3CreateAPI
 TEMPLATE = app
 
+DESTDIR = ../bin
 
 SOURCES += main.cpp\
         mainwindow.cpp
@@ -21,3 +22,5 @@ LIBS += ../../lib/libcs8ProjectComponent.a
 
 INCLUDEPATH +=  ../lib\
                 ../lib/src
+
+POST_TARGETDEPS += ../../lib/libcs8ProjectComponent.a
