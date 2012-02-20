@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
-SUBDIRS = plugin \
-    lib \
+SUBDIRS = lib \
+    # plugin \
     #testBin \
     extractPrototype \
     extractDoc \
