@@ -9,6 +9,7 @@
 #include "cs8program.h"
 #include "cs8programmodel.h"
 #include "cs8libraryaliasmodel.h"
+#include "cs8typemodel.h"
 
 //
 
@@ -18,7 +19,7 @@ Q_OBJECT
 
 public:
         QString projectPath();
-        void save();
+        bool save();
         bool loadDataFile(const QString & fileName);
         bool saveDataFile(const QString & fileName);
         bool open(const QString & filePath);
@@ -34,9 +35,7 @@ public:
         QString name() const {
                 return m_projectName;
         }
-        void setName(const QString & name){
-            m_projectName=name;
-        }
+        void setName(const QString & name);
 
         bool loadDocumentationFile(const QString & fileName);
         QString documentation();
@@ -55,6 +54,7 @@ protected:
         cs8ProgramModel* m_programModel;
         cs8VariableModel* m_globalVariableModel;
         cs8LibraryAliasModel* m_libraryAliasModel;
+        cs8TypeModel *m_typeModel;
         //QDomDocument m_dataDoc;
         QString m_documentation;
         QString m_cellPath;
