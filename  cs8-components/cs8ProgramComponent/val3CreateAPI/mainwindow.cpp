@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     m_cs8SourceApps.clear ();
+
 }
 
 MainWindow::~MainWindow()
@@ -22,7 +23,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     QString filePath;
-    filePath=QFileDialog::getExistingDirectory (this,"Select Val3 Project directory","D:\\data\\Staubli\\CS8\\CreateAPI Test\\usr\\usrapp\\SAXE Automation\\Modules");
+    filePath=QFileDialog::getExistingDirectory (this,"Select Val3 Project directory","/media/Data/data/Staubli/CS8/CreateAPI Test/usr/usrapp/SAXE Automation/Modules/");
     if (!filePath.isEmpty ())
     {
 
@@ -66,7 +67,7 @@ void MainWindow::on_pushButton_clicked()
                     if (!cs8DestApp->libraryModel ()->contains(cs8SourceApp->name ()))
                     {
                         qDebug() << "Adding library alias for " << cs8SourceApp->name ();
-                        cs8DestApp->libraryModel ()->addAlias (cs8SourceApp->name (),cs8SourceApp->cellProjectFilePath (),true);
+                        cs8DestApp->libraryModel ()->add (cs8SourceApp->name (),cs8SourceApp->cellProjectFilePath (),true);
                     }
                     cs8Program *newProgram=new cs8Program(this);
                     name=program->name ();
@@ -81,6 +82,8 @@ void MainWindow::on_pushButton_clicked()
                     cs8DestApp->programModel ()->append(newProgram);
                     newProgram->setDescription (program->description ());
                     newProgram->setName(name);
+                    newProgram->setDescription(program->description());
+                    newProgram->setDetailedDocumentation(program->detailedDocumentation());
                 }
             }
         }
