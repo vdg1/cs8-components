@@ -3,7 +3,7 @@
 # -------------------------------------------------
 QT += xml \
     xmlpatterns
-TARGET = cs8DocEditor
+TARGET = "Val3 Documentation Editor"
 TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp

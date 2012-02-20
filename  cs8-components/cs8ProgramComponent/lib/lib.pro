@@ -13,7 +13,8 @@ HEADERS += src/cs8project.h \
     src/cs8application.h \
     src/cs8libraryalias.h \
     src/cs8libraryaliasmodel.h \
-    src/formvariabledetaileditor.h
+    src/formvariabledetaileditor.h \
+    src/cs8typemodel.h
 SOURCES += src/cs8project.cpp \
     src/cs8program.cpp \
     src/cs8programmodel.cpp \
@@ -28,7 +29,8 @@ SOURCES += src/cs8project.cpp \
     src/cs8application.cpp \
     src/cs8libraryalias.cpp \
     src/cs8libraryaliasmodel.cpp  \
-    src/formvariabledetaileditor.cpp
+    src/formvariabledetaileditor.cpp \
+    src/cs8typemodel.cpp
 FORMS +=  ../lib/forms/formvariabledetaileditor.ui
 INCLUDEPATH = build
 TEMPLATE = lib

@@ -28,6 +28,12 @@ MainWindowImpl::MainWindowImpl(QWidget * parent, Qt::WFlags f) :
     //project->open ( "/home/vd/Documents/Val3/s5.2/usr/usrapp/z01_SysStacking/z01_SysStacking.pjx" );
     //project->open ( "D:/Data/Staubli/CS8/Development_533/usr/usrapp/z01_SysStacking/z01_SysStacking.pjx" );
 
+    cs8Application app;
+    app.openFromPathName("/media/Data/data/Staubli/CS8/CreateAPI Test/usr/usrapp/SAXE Automation/coreModules/modUserDisp/");
+    app.setName("testApp");
+    app.save();
+
+
     QCoreApplication::setOrganizationName("SwissSystem AB");
     QCoreApplication::setApplicationName("cs8 Document Editor");
     restoreState();

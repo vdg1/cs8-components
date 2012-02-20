@@ -29,18 +29,10 @@ bool cs8VariableModel::addVariable(QDomElement & element,
     return true;
 }
 
-bool cs8VariableModel::addGlobalVariable(QDomElement & element,
-                                         const QString & description) {
-    QString name = element.attribute("name");
-    QString type = element.attribute("type");
-    QDomNodeList valueList = element.childNodes();
-    int size = valueList.count();
-    cs8Variable * variable = new cs8Variable(element);
-
+bool cs8VariableModel::addGlobalVariable(QDomElement & element, const QString & description)
+{
+    cs8Variable * variable = new cs8Variable(element,description);
     variable->setGlobal(true);
-    // append values of global variable
-    qDebug() << variable->name() << ": adding " << valueList.count() << " elements to var";
-
     m_variableList.append(variable);
     reset();
     return true;
@@ -112,7 +104,7 @@ QString cs8VariableModel::toDtxDocument() {
 }
 
 QList<cs8Variable*> cs8VariableModel::findVariablesByType(
-    const QString & type_, bool public_) {
+        const QString & type_, bool public_) {
     QList<cs8Variable*> list;
     foreach(cs8Variable* variable,m_variableList) {
         if (variable->type() == type_ && variable->isPublic() == public_)

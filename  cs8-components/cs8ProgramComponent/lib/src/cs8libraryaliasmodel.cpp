@@ -16,13 +16,13 @@ cs8LibraryAliasModel::cs8LibraryAliasModel(QObject * parent) :
 }
 //
 
-bool cs8LibraryAliasModel::addAlias(const QDomElement & element,
-        const QString & description) {
-        QString path = element.attribute("path");
-        QString name = element.attribute("alias");
+bool cs8LibraryAliasModel::add(const QDomElement & element, const QString & description)
+{
+    QString path = element.attribute("path");
+    QString name = element.attribute("alias");
     bool autoLoad = element.attribute("autoload")=="true"?true:false;
 
-    addAlias (name,path,autoLoad);
+    add (name,path,autoLoad);
 
     //cs8LibraryAlias * alias = new cs8LibraryAlias(name, path, autoLoad);
     //m_aliasList.append(alias);
@@ -31,7 +31,7 @@ bool cs8LibraryAliasModel::addAlias(const QDomElement & element,
     return true;
 }
 
-bool cs8LibraryAliasModel::addAlias(const QString &aliasName, const QString &path, const bool autoLoad)
+bool cs8LibraryAliasModel::add(const QString &aliasName, const QString &path, const bool autoLoad)
 {
     cs8LibraryAlias * alias = new cs8LibraryAlias(aliasName, path, autoLoad);
     m_aliasList.append(alias);
@@ -92,7 +92,7 @@ QVariant cs8LibraryAliasModel::data(const QModelIndex & index, int role) const {
 }
 
 QVariant cs8LibraryAliasModel::headerData(int section,
-        Qt::Orientation orientation, int role) const {
+                                          Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
         switch (section) {
         case 0:
@@ -130,7 +130,7 @@ Qt::ItemFlags cs8LibraryAliasModel::flags(const QModelIndex & index) const {
  \fn cs8LibraryAliasModel::setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole )
  */
 bool cs8LibraryAliasModel::setData(const QModelIndex & index,
-        const QVariant & value, int role) {
+                                   const QVariant & value, int role) {
     if (role == Qt::EditRole) {
         if (index.column() == 3) {
             cs8LibraryAlias* variable = m_aliasList.at(index.row());
@@ -154,11 +154,11 @@ cs8LibraryAlias* cs8LibraryAliasModel::getAliasByName(const QString & name) {
 QString cs8LibraryAliasModel::toDocumentedCode() {
     QString header;
     foreach ( cs8LibraryAlias* var, m_aliasList ) {
-            QString descr = var->documentation();
-            descr.replace("\n", "\n  //");
-            header
-                    += QString("\n  // %3 : %2") .arg(descr) .arg(
-                            var->name());
-        }
+        QString descr = var->documentation();
+        descr.replace("\n", "\n  //");
+        header
+                += QString("\n  // %3 : %2") .arg(descr) .arg(
+                    var->name());
+    }
     return header;
 }

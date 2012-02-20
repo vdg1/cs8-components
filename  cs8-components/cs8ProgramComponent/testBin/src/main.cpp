@@ -6,7 +6,7 @@ int main ( int argc, char ** argv )
 {
 
   // register cs8 file engine to QT
-  cs8FileEngineHandler engine;
+  //cs8FileEngineHandler engine;
 
   QApplication app ( argc, argv );
   MainWindowImpl win;
