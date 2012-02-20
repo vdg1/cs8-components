@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QCoreApplication::setApplicationName("Val3 Create API");
 
     ui->setupUi(this);
-    m_cs8SourceApps.clear ();
     readSettings ();
 
     connect (this,SIGNAL(addLog(QString)),this,SLOT(slotAddLog(QString)));
