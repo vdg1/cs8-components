@@ -18,11 +18,30 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
+
+    void on_actionAdd_Folder_triggered();
+
+    void on_actionRemove_Folder_triggered();
+
+    void on_commandLinkButton_clicked();
+
+    void on_actionExit_triggered();
+
+    void slotAddLog(const QString & msg);
 
 private:
     Ui::MainWindow *ui;
-    QList<cs8Application *> m_cs8SourceApps;
+    QString m_recentLocation;
+
+
+signals:
+    void addLog(const QString & msg);
+
+protected:
+    void closeEvent(QCloseEvent *event);
+    void readSettings();
+    void writeSettings();
+    void createAPI();
 };
 
 #endif // MAINWINDOW_H
