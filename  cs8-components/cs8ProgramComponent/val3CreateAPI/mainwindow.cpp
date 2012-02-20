@@ -106,7 +106,8 @@ void MainWindow::createAPI()
     for(int i=0;i<ui->listWidget->count ();i++)
     {
         dir.setCurrent (ui->listWidget->item (i)->text ());
-        dirs << dir.entryList (QDir::NoDotAndDotDot | QDir::Dirs );
+        foreach(QString pth,dir.entryList (QDir::NoDotAndDotDot | QDir::Dirs ))
+            dirs << dir.currentPath ()+"/"+pth;
     }
 
     foreach(QString pth,dirs)

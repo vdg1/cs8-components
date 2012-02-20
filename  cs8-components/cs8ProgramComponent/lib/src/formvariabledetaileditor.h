@@ -26,8 +26,11 @@ private slots:
     void on_buttonBox_accepted();
     void on_buttonBox_rejected();
 
+    void on_textEditDocumentation_textChanged();
+
 signals:
     void done();
+    void modified();
 };
 
 #endif // FORMVARIABLEDETAILEDITOR_H

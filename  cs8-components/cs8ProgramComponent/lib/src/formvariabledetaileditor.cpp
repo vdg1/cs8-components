@@ -33,8 +33,10 @@ void formVariableDetailEditor::on_buttonBox_rejected()
 void formVariableDetailEditor::setVariable(cs8Variable *var)
 {
     m_variable=var;
+    blockSignals (true);
     ui->textEditDocumentation->setPlainText(m_variable->description());
     ui->lineEditName->setText(m_variable->name());
+    blockSignals (false);
 }
 
 void formVariableDetailEditor::on_buttonBox_accepted()
@@ -43,4 +45,9 @@ void formVariableDetailEditor::on_buttonBox_accepted()
         m_variable->setDescription(ui->textEditDocumentation->toPlainText());
     }
     emit done();
+}
+
+void formVariableDetailEditor::on_textEditDocumentation_textChanged()
+{
+    emit modified();
 }

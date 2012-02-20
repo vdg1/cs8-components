@@ -26,10 +26,10 @@ MainWindow::MainWindow(QWidget *parent) :
             this,SLOT(slotSelectionChanged(QItemSelection,QItemSelection)));
 
     connect(ui->widget,SIGNAL(modified()),this,SLOT(slotModified()));
+    connect (ui->detailEditor,SIGNAL(modified()),this,SLOT(slotModified()));
     isModified=false;
-    createRecentFilesItems();
     readSettings();
-
+    createRecentFilesItems();
 }
 
 MainWindow::~MainWindow()
