@@ -4,13 +4,15 @@
 #include <QObject>
 #include <QDomDocument>
 #include <QList>
+#include <QMultiHash>
 
 #include "cs8program.h"
 #include "cs8programmodel.h"
 #include "cs8libraryaliasmodel.h"
-//class cs8ProgramModel;
 
 //
+
+
 class cs8Application: public QObject {
 Q_OBJECT
 
@@ -44,8 +46,10 @@ public:
         QString cellProjectFilePath() const;
         QString cellDataFilePath() const;
         bool writeProjectFile();
+        QHash<QString, QString> exportDirectives() const {return m_exportDirectives;}
 
 protected:
+        QHash<QString, QString> m_exportDirectives;
         QString m_projectName;
         QString m_projectPath;
         cs8ProgramModel* m_programModel;
@@ -69,6 +73,7 @@ protected slots:
         void slotGlobalVariableDocumentationFound(const QString & name,
                         const QString & document);
         void slotModuleDocumentationFound(const QString & document);
+        void slotExportDirectiveFound(const QString & module, const QString & function);
 }	;
 #endif
 

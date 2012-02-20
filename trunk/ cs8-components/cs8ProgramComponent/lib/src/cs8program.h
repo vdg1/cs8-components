@@ -32,7 +32,7 @@ public:
     QString fileName() const {
         return name() + ".pgx";
     }
-    QString setName(const QString & name);
+    void setName(const QString &name);
     QString definition() const;
     QString documentation(bool withPrefix=true) const;
     QString extractDocumentation(const QString & code_);
@@ -79,6 +79,7 @@ signals:
     void globalVariableDocumentationFound(const QString & name,
                                           const QString & document);
     void moduleDocumentationFound(const QString & document);
+    void exportDirectiveFound(const QString & module, const QString & routine);
 
 
 };

@@ -25,12 +25,15 @@ cs8Application::cs8Application(QObject *parent) :
             ,this, SLOT(slotGlobalVariableDocumentationFound(const QString & , const QString & )));
     connect(m_programModel, SIGNAL(moduleDocumentationFound( const QString & ))
             ,this, SLOT(slotModuleDocumentationFound(const QString & )));
+    connect(m_programModel,SIGNAL(exportDirectiveFound(QString,QString))
+            ,this,SLOT(slotExportDirectiveFound(QString,QString)));
 }
 //
 
 bool cs8Application::open(const QString & filePath) {
     m_documentation = "";
     QDomDocument doc("Project");
+    m_exportDirectives.clear ();
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly))
         return false;
@@ -257,6 +260,13 @@ void cs8Application::slotGlobalVariableDocumentationFound(const QString & name,
 void cs8Application::slotModuleDocumentationFound(const QString & document) {
     m_documentation = document;
 }
+
+void cs8Application::slotExportDirectiveFound(const QString &module, const QString &function)
+{
+    qDebug() << "export " << module << ":" << function;
+    m_exportDirectives.insert (function,module);
+}
+
 bool cs8Application::loadDocumentationFile(const QString & fileName) {
     if (m_programModel->getProgramByName("_globals")) {
 
@@ -536,7 +546,7 @@ void cs8Application::createXMLSkeleton()
     m_XMLDocument.appendChild (m_projectSection);
 
     m_parameters=m_XMLDocument.createElement("Parameters");
-    m_parameters.setAttribute ("version","7.2");
+    m_parameters.setAttribute ("version","s7.2");
     m_parameters.setAttribute ("stackSize","5000");
     m_parameters.setAttribute ("millimeterUnit","true");
     m_projectSection.appendChild (m_parameters);

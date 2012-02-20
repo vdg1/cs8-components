@@ -122,10 +122,12 @@ QList<cs8Variable*> cs8VariableModel::findVariablesByType(
 }
 
 int cs8VariableModel::rowCount(const QModelIndex& index) const {
+    Q_UNUSED(index);
     return m_variableList.count();
 }
 
 int cs8VariableModel::columnCount(const QModelIndex & index) const {
+    Q_UNUSED(index);
     return 4;
 }
 

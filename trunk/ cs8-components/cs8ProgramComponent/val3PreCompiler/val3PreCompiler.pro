@@ -9,6 +9,7 @@ QT       += core gui xml
 TARGET = val3Check
 TEMPLATE = app
 
+DESTDIR = ../bin
 
 SOURCES += main.cpp\
         mainwindow.cpp
