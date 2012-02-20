@@ -40,6 +40,7 @@ public:
     QStringList variableTokens();
     void setCode(const QString & code);
     void copyFromParameterModel(cs8ParameterModel *sourceModel);
+    ;
 
 private:
     cs8VariableModel* m_localVariableModel;
@@ -57,6 +58,8 @@ public:
     void parseDocumentation(const QString & code);
 
     void setDescription(const QString& theValue);
+    void setDetailedDocumentation(const QString &doc);
+    QString detailedDocumentation() const;
 
     QString description() const;
     void setCellPath(const QString & path);
@@ -71,7 +74,7 @@ protected:
     QDomElement m_localSection;
     QDomElement m_codeSection;
     QDomElement m_descriptionSection;
-    QString m_description;
+    QString m_detailedDocumentation;
     QString m_cellPath;
     QString m_filePath;
 

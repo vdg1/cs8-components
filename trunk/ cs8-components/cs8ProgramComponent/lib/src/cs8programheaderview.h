@@ -12,32 +12,41 @@
 #ifndef CS8PROGRAMHEADERVIEW_H
 #define CS8PROGRAMHEADERVIEW_H
 
-#include <QTextEdit>
+
 #include <QAbstractItemModel>
 #include <QItemSelectionModel>
 #include <QAbstractItemView>
 
 /**
-	@author Volker Drewer-Gutland <volker.drewer@gmx.de>
+    @author Volker Drewer-Gutland <volker.drewer@gmx.de>
 */
-class cs8ProgramHeaderView : public QTextEdit
+
+class QPlainTextEdit;
+class QLineEdit;
+
+class cs8ProgramHeaderView : public QWidget
 {
-		Q_OBJECT
-	public:
-		cs8ProgramHeaderView ( QWidget *parent = 0 );
+    Q_OBJECT
+public:
+    cs8ProgramHeaderView ( QWidget *parent = 0 );
 
-		~cs8ProgramHeaderView();
+    ~cs8ProgramHeaderView();
 
-	void setMasterView ( QAbstractItemView* theValue );
-	
+    void setMasterView ( QAbstractItemView* theValue );
 
 
-	protected slots:
+
+protected slots:
     void slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected ) ;
+    void slotModified();
 
-		
-	protected:
+signals:
+    void modified();
+
+protected:
     QAbstractItemView* m_masterView;
+    QPlainTextEdit *m_documentation;
+    QLineEdit *m_description;
 };
 
 #endif

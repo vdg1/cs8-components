@@ -17,6 +17,7 @@ cs8Application::cs8Application(QObject *parent) :
     m_programModel = new cs8ProgramModel(this);
     m_globalVariableModel = new cs8VariableModel(this);
     m_libraryAliasModel = new cs8LibraryAliasModel(this);
+    m_typeModel=new cs8TypeModel(this);
     m_projectPath="";
     m_projectName="";
     m_cellPath="";
@@ -144,6 +145,17 @@ bool cs8Application::exportInterfacePrototype(const QString & path) {
     return true;
 }
 
+void cs8Application::setName(const QString &name)
+{
+    if (!m_projectName.isEmpty())
+    {
+        m_projectPath.chop(m_projectName.length()+1);
+        m_projectPath+=name+"/";
+    }
+    m_projectName=name;
+
+}
+
 QString cs8Application::exportToCSyntax() {
     QStringList out;
 
@@ -155,7 +167,7 @@ QString cs8Application::exportToCSyntax() {
         out << variable->documentation();
         out << QString("   %1;").arg(variable->definition());
     }
-    foreach(cs8LibraryAlias* alias,m_libraryAliasModel->aliasList())
+    foreach(cs8LibraryAlias* alias,m_libraryAliasModel->list())
     {
         out << alias->documentation();
         out << QString("   %1;").arg(alias->definition());
@@ -213,6 +225,7 @@ bool cs8Application::parseProject(const QDomDocument & doc) {
     m_programModel->setCellPath(m_cellPath);
     m_globalVariableModel->clear();
     m_libraryAliasModel->clear();
+    m_typeModel->clear();
 
     QDomElement rootElement = doc.documentElement();
 
@@ -236,7 +249,12 @@ bool cs8Application::parseProject(const QDomDocument & doc) {
         // load alias
         list = m_aliasSection.elementsByTagName("Library");
         for (int i = 0; i < list.count(); i++) {
-            m_libraryAliasModel->addAlias(list.at(i).toElement());
+            m_libraryAliasModel->add(list.at(i).toElement());
+        }
+        // load types
+        list = m_typesSection.elementsByTagName("Type");
+        for (int i = 0; i < list.count(); i++) {
+            m_typeModel->add(list.at(i).toElement());
         }
         return true;
     } else{
@@ -316,7 +334,6 @@ bool cs8Application::saveDataFile(const QString &fileName)
 {
     qDebug() << "Saving data file: " << fileName;
 
-    qDebug () << "Create xml structure";
     QDomDocument xmlDataDocument=QDomDocument();
     QDomProcessingInstruction process = xmlDataDocument.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
     xmlDataDocument.appendChild(process);
@@ -330,7 +347,10 @@ bool cs8Application::saveDataFile(const QString &fileName)
     QDomElement datasSection=xmlDataDocument.createElement("Datas");
     databaseSection.appendChild (datasSection);
 
-    qDebug () << "Create xml structure done";
+    foreach(cs8Variable *var,m_globalVariableModel->variableList())
+    {
+        datasSection.appendChild(var->element());
+    }
 
     QFile file(fileName);
     if (!file.open (QIODevice::WriteOnly))
@@ -343,15 +363,19 @@ bool cs8Application::saveDataFile(const QString &fileName)
     return true;
 }
 
-void cs8Application::save() {
+bool cs8Application::save() {
     QDir dir;
     dir.mkpath (m_projectPath);
-    writeProjectFile();
-    saveDataFile (m_projectPath+m_projectName+".dtx");
+    if (!writeProjectFile())
+        return false;
+    if (!saveDataFile (m_projectPath+m_projectName+".dtx"))
+        return false;
     foreach(cs8Program* program, m_programModel->programList())
     {
-        program->save(m_projectPath);
+        if (!program->save(m_projectPath))
+            return false;
     }
+    return true;
 }
 
 QString cs8Application::projectPath() {
@@ -482,11 +506,8 @@ QString cs8Application::cellPath() const
 QString cs8Application::cellProjectFilePath() const
 {
     QString pth=QDir::toNativeSeparators (m_projectPath+m_projectName+".pjx");
-    qDebug() << pth;
-    pth=pth.replace (QDir::toNativeSeparators(m_cellPath)+"usr\\usrapp\\","Disk://");
-    qDebug() << pth;
+    pth=pth.replace (QDir::toNativeSeparators(m_cellPath+"usr/usrapp/"),"Disk://");
     pth=QDir::fromNativeSeparators (pth);
-    qDebug() << pth;
     return pth;
 }
 
@@ -512,14 +533,21 @@ bool cs8Application::writeProjectFile()
     element.setAttribute ("file",m_projectName+".dtx");
     m_dataSection.appendChild (element);
 
-    foreach(cs8LibraryAlias* alias, m_libraryAliasModel->aliasList ())
+    foreach(cs8LibraryAlias* alias, m_libraryAliasModel->list ())
     {
         QDomElement element=m_XMLDocument.createElement ("Library");
-        element.setAttribute ("alias",alias->name ());
         element.setAttribute ("path",alias->path ());
+        element.setAttribute ("alias",alias->name ());
         m_aliasSection.appendChild (element);
     }
 
+    foreach(cs8LibraryAlias* type, m_typeModel->list ())
+    {
+        QDomElement element=m_XMLDocument.createElement ("Type");
+        element.setAttribute ("path",type->path ());
+        element.setAttribute ("name",type->name ());
+        m_typesSection.appendChild (element);
+    }
     QString fileName_=m_projectPath + m_projectName + ".pjx";
     QFile file(fileName_);
     if (!file.open(QIODevice::WriteOnly))

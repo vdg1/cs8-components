@@ -115,7 +115,11 @@ QVariant cs8ProgramModel::data(const QModelIndex & index, int role) const {
         return m_programList.at(index.row())->localVariableModel();
                 */
     if (role == Qt::UserRole + 10)
+        return m_programList.at(index.row())->detailedDocumentation();
+
+    if (role == Qt::UserRole + 11)
         return m_programList.at(index.row())->description();
+
     return QVariant();
 }
 
@@ -174,6 +178,9 @@ bool cs8ProgramModel::setData(const QModelIndex & index,
         return false;
 
     if (role == Qt::UserRole + 10)
+        m_programList.at(index.row())->setDetailedDocumentation(value.toString());
+
+    if (role == Qt::UserRole + 11)
         m_programList.at(index.row())->setDescription(value.toString());
 
     return true;

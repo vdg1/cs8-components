@@ -27,15 +27,15 @@ public:
     int rowCount(const QModelIndex& index) const;
     QVariant data(const QModelIndex & index, int role) const;
     int columnCount(const QModelIndex & index) const;
-    bool addAlias(const QDomElement & element, const QString & description =
-                  QString());
-    bool addAlias(const QString & aliasName, const QString &path, const bool autoLoad=true);
+    bool add(const QDomElement & element, const QString & description =
+            QString());
+    bool add(const QString & aliasName, const QString &path, const bool autoLoad=true);
     cs8LibraryAliasModel(QObject * parent = 0);
     bool setData(const QModelIndex & index, const QVariant & value, int role =
-                 Qt::EditRole);
+            Qt::EditRole);
     Qt::ItemFlags flags(const QModelIndex & index) const;
     cs8LibraryAlias* getAliasByName(const QString & name);
-    QList<cs8LibraryAlias*> aliasList() {
+    QList<cs8LibraryAlias*> list() {
         return m_aliasList;
     }
     void clear();
