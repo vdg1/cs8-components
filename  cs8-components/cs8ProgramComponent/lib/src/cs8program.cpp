@@ -134,7 +134,6 @@ bool cs8Program::parseProgramDoc(const QDomDocument & doc) {
 void cs8Program::tidyUpCode(QString &code)
 {
     // remove empty lines after "end"
-    //code=code.split ("\n",QString::SkipEmptyParts).join("\n");
     QStringList list=code.split ("\n");
     while (list.last().simplified().isEmpty())
         list.removeLast();
