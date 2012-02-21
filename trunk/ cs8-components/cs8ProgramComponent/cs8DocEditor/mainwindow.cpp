@@ -104,6 +104,7 @@ void MainWindow::on_action_Open_triggered()
 void MainWindow::on_action_Save_triggered()
 {
     m_application->save();
+    setWindowModified (false);
 }
 
 void MainWindow::slotSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected )
