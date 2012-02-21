@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFuture>
 
 namespace Ui {
 class MainWindow;
@@ -31,6 +32,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QFuture<void> future;
     QString m_recentLocation;
 
 

@@ -92,8 +92,10 @@ void MainWindow::on_actionRemove_Folder_triggered()
 
 void MainWindow::on_commandLinkButton_clicked()
 {
+
+    ui->commandLinkButton->setEnabled(false);
+    //future=QtConcurrent::run((*this),&MainWindow::createAPI );
     createAPI();
-    //QtConcurrent::run(
 }
 
 void MainWindow::createAPI()
@@ -176,6 +178,7 @@ void MainWindow::createAPI()
     }
     foreach(cs8Application* cs8DestApp, cs8DestApps)
         cs8DestApp->save ();
+    ui->commandLinkButton->setEnabled(true);
 }
 
 void MainWindow::on_actionExit_triggered()
