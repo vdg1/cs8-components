@@ -46,7 +46,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="textEditDocumentation"/>
+    <widget class="QTextEdit" name="textEditDocumentation">
+     <property name="font">
+      <font>
+       <family>Courier New</family>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

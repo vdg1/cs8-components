@@ -51,7 +51,6 @@ public:
     cs8Program(QObject * parent);
     //cs8Program(const QString & filePath);
     bool open(const QString & filePath);
-    void setVal3Code(const QString& theValue);
     QString val3Code(bool withDocumentation=true);
     QString toCSyntax();
     void parseDocumentation(const QString & code);
@@ -83,6 +82,7 @@ signals:
                                           const QString & document);
     void moduleDocumentationFound(const QString & document);
     void exportDirectiveFound(const QString & module, const QString & routine);
+    void modified();
 
 
 };

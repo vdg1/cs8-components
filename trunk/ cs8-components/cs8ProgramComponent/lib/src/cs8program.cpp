@@ -154,11 +154,6 @@ QString cs8Program::toCSyntax() {
     return val3_;
 }
 
-void cs8Program::setVal3Code(const QString& theValue) {
-    //m_codeSection.setData(theValue);
-
-}
-
 QString cs8Program::extractCode(const QString & code_) const{
     QString code=code_;
     // extract code
@@ -208,12 +203,6 @@ QStringList cs8Program::variableTokens()
 void cs8Program::setCode(const QString &code)
 {
     QDomCDATASection data=m_XMLDocument.createCDATASection(code);
-    /*
-    foreach(QDomNode element,m_codeSection.childNodes ())
-    {
-        m_codeSection.removeChild (element);
-    }
-    */
     m_codeSection.appendChild (data);
 }
 
@@ -489,6 +478,9 @@ QString cs8Program::documentation(bool withPrefix) const {
     QString out;
     QString prefix=withPrefix?"///":"";
     QStringList list = m_detailedDocumentation.split("\n");
+    list.prepend("\n");
+    list.prepend(description ());
+    list.prepend("//!brief");
     //list.removeLast();
     bool inCodeSection = false;
     int indentation=0;

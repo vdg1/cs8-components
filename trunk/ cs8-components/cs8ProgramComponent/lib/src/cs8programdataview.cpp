@@ -16,7 +16,7 @@
 #include <QDebug>
 
 cs8ProgramDataView::cs8ProgramDataView ( QWidget* parent )
-		: QTableView ( parent ), m_mode ( false )
+        : QTableView ( parent ), m_mode ( false )
 {
 }
 
@@ -30,9 +30,9 @@ cs8ProgramDataView::~cs8ProgramDataView()
 
 void cs8ProgramDataView::setMasterView ( QAbstractItemView* theValue )
 {
-	m_masterView = theValue;
-	connect ( m_masterView->selectionModel(),SIGNAL ( selectionChanged ( const QItemSelection &, const QItemSelection & ) ),
-	          this,SLOT ( slotSelectionChanged ( const QItemSelection & , const QItemSelection & ) ) );
+    m_masterView = theValue;
+    connect ( m_masterView->selectionModel(),SIGNAL ( selectionChanged ( const QItemSelection &, const QItemSelection & ) ),
+              this,SLOT ( slotSelectionChanged ( const QItemSelection & , const QItemSelection & ) ) );
 }
 
 
@@ -41,30 +41,30 @@ void cs8ProgramDataView::setMasterView ( QAbstractItemView* theValue )
  */
 void cs8ProgramDataView::slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected )
 {
-	if ( deselected.count() >0 )
-	{
+    if ( deselected.count() >0 )
+    {
 
-	}
-	if ( selected.count() >0 )
-	{
-		QAbstractItemModel* varModel;
-		if ( m_mode )
-			varModel= ( ( cs8ProgramModel* ) m_masterView->model() )->localVariableModel ( selected.indexes().at ( 0 ) );
-		else
-			varModel= ( ( cs8ProgramModel* ) m_masterView->model() )->parameterModel ( selected.indexes().at ( 0 ) );
-		setModel ( varModel );
-		resizeColumnsToContents();
-	}
+    }
+    if ( selected.count() >0 )
+    {
+        QAbstractItemModel* varModel;
+        if ( m_mode )
+            varModel= ( ( cs8ProgramModel* ) m_masterView->model() )->localVariableModel ( selected.indexes().at ( 0 ) );
+        else
+            varModel= ( ( cs8ProgramModel* ) m_masterView->model() )->parameterModel ( selected.indexes().at ( 0 ) );
+        setModel ( varModel );
+        resizeColumnsToContents();
+    }
 }
 
 
 bool cs8ProgramDataView::mode() const
 {
-	return m_mode;
+    return m_mode;
 }
 
 
 void cs8ProgramDataView::setMode ( bool theValue )
 {
-	m_mode = theValue;
+    m_mode = theValue;
 }

@@ -46,6 +46,7 @@ public:
         QString cellDataFilePath() const;
         bool writeProjectFile();
         QHash<QString, QString> exportDirectives() const {return m_exportDirectives;}
+        bool isModified() const {return m_modified;}
 
 protected:
         QHash<QString, QString> m_exportDirectives;
@@ -58,6 +59,7 @@ protected:
         //QDomDocument m_dataDoc;
         QString m_documentation;
         QString m_cellPath;
+        bool m_modified;
 
         QDomDocument m_XMLDocument;
         QDomElement m_parameters;
@@ -74,6 +76,10 @@ protected slots:
                         const QString & document);
         void slotModuleDocumentationFound(const QString & document);
         void slotExportDirectiveFound(const QString & module, const QString & function);
+        void setModified(bool modified);
+
+signals:
+        void modified(bool);
 }	;
 #endif
 

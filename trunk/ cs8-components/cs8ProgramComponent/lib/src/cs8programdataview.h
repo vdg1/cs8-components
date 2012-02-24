@@ -26,13 +26,8 @@ public:
     ~cs8ProgramDataView();
 
     void setMasterView ( QAbstractItemView* theValue );
-
     void setMode ( bool theValue );
-
-
     bool mode() const;
-
-
 
 protected:
     QAbstractItemView* m_masterView;

@@ -1,6 +1,7 @@
 #ifndef CS8VARIABLE_H
 #define CS8VARIABLE_H
 //
+#include <QObject>
 #include <QString>
 #include <QHash>
 #include <QVariant>
@@ -8,21 +9,19 @@
 #include <QDomElement>
 #include <QStringList>
 //
-class cs8Variable {
+class cs8Variable : public QObject
+{
+
+    Q_OBJECT
 
 public:
-    void setUse(QString value) {
-        m_element.setAttribute("use",value);
-    }
-    QString use() {
-        return m_element.attribute("use","reference");
-    }
-    void setDescription(QString value) {
-        m_description = value;
-    }
-    QString description() {
-        return m_description;
-    }
+    void setUse(QString value);
+
+    QString use() const;
+
+    void setDescription(QString value);
+    QString description() const;
+
     uint size(int dimension=0) {
         QStringList list=m_element.attribute("size","").split(" ");
         if (list.count()>=dimension)
@@ -30,22 +29,11 @@ public:
         else
             return 0;
     }
-    void setType(QString value) {
-        m_element.setAttribute("type",value);
-    }
-    QString type() {
-        return m_element.attribute("type");
-    }
+    void setType(QString value);
+    QString type() const;
 
-    /*
-        enum VariableTypes {
-  Point, Joint, Flange, Bool, String, Num, Config
- };
-        */
 
-    void setName(QString value) {
-        m_element.setAttribute("name",value);
-    }
+    void setName(QString value);
     QString name() {
         return m_element.attribute("name");
     }
@@ -58,9 +46,7 @@ public:
         return m_element.attribute("access","private")=="private"?false:true;
     }
 
-    void setPublic(bool m_public) {
-        m_element.setAttribute("access",m_public? "public":"private");
-    }
+    void setPublic(bool m_public);
 
     QDomNodeList values() {
         return m_element.childNodes();
@@ -68,9 +54,7 @@ public:
     QString definition();
 
 
-    void setGlobal(bool m_global){
-        this->m_global=m_global;
-    }
+    void setGlobal(bool m_global);
     bool isGlobal() const {
         //qDebug() << "var: " << m_name << " has " << m_values.count();
         return m_global;// m_values.count() > 0;
@@ -86,5 +70,10 @@ protected:
     QDomElement m_element;
     QString m_description;
     bool m_global;
+
+
+signals:
+    void modified();
+
 };
 #endif

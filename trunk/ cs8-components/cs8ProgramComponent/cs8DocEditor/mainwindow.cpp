@@ -14,20 +14,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     m_application=new cs8Application(this);
+    connect (m_application,SIGNAL(modified(bool)),this,SLOT(slotModified(bool)));
     ui->listViewProgams->setModel(m_application->programModel());
 
     ui->tableViewPars->setMode(false);
     ui->tableViewPars->setMasterView(ui->listViewProgams);
     ui->tableViewVars->setMode(true);
     ui->tableViewVars->setMasterView(ui->listViewProgams);
-    ui->widget->setMasterView(ui->listViewProgams);
+    ui->widgetDocumentation->setMasterView(ui->listViewProgams);
 
     connect(ui->listViewProgams->selectionModel(),SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this,SLOT(slotSelectionChanged(QItemSelection,QItemSelection)));
 
-    connect(ui->widget,SIGNAL(modified()),this,SLOT(slotModified()));
-    connect (ui->detailEditor,SIGNAL(modified()),this,SLOT(slotModified()));
-    isModified=false;
     readSettings();
     createRecentFilesItems();
 }
@@ -104,13 +102,13 @@ void MainWindow::on_action_Open_triggered()
 void MainWindow::on_action_Save_triggered()
 {
     m_application->save();
-    setWindowModified (false);
 }
 
 void MainWindow::slotSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected )
 {
     int index=selected.indexes().at(0).row();
     ui->plainTextEditCode->setPlainText(m_application->programModel()->programList().at(index)->toDocumentedCode());
+    ui->labelDeclaration->setText (m_application->programModel ()->programList ().at (index)->definition ());
 }
 
 void MainWindow::openRecentFile()
@@ -123,10 +121,9 @@ void MainWindow::openRecentFile()
     }
 }
 
-void MainWindow::slotModified()
+void MainWindow::slotModified(bool modified_)
 {
-    setWindowModified(true);
-    isModified=true;
+    setWindowModified(modified_);
 }
 
 void MainWindow::on_tableViewPars_doubleClicked(QModelIndex index)
@@ -142,7 +139,7 @@ void MainWindow::on_detailEditor_done(){
 
 bool MainWindow::maybeSave()
 {
-    if (isModified) {
+    if (m_application->isModified () or true) {
         QMessageBox::StandardButton ret;
         ret = QMessageBox::warning(this, tr("Application"),
                                    tr("The document has been modified.\n"
@@ -158,10 +155,8 @@ bool MainWindow::maybeSave()
 
 void MainWindow::openApplication(const QString &applicationName)
 {
-    setWindowFilePath(applicationName);
     m_application->open(applicationName);
     setCurrentFile(applicationName);
-    isModified=false;
 }
 
 void MainWindow::updateRecentFileActions()
@@ -185,6 +180,7 @@ void MainWindow::updateRecentFileActions()
 
 void MainWindow::setCurrentFile(const QString &fileName)
 {
+    setWindowFilePath(fileName);
     QSettings settings;
     QStringList files = settings.value("recentFileList").toStringList();
     files.removeAll(fileName);

@@ -21,6 +21,7 @@ cs8Application::cs8Application(QObject *parent) :
     m_projectPath="";
     m_projectName="";
     m_cellPath="";
+    setModified (false);
     //	m_programModel->setProgramList(&m_programList);
     connect(m_programModel, SIGNAL(globalVariableDocumentationFound(const QString & , const QString & ))
             ,this, SLOT(slotGlobalVariableDocumentationFound(const QString & , const QString & )));
@@ -28,6 +29,11 @@ cs8Application::cs8Application(QObject *parent) :
             ,this, SLOT(slotModuleDocumentationFound(const QString & )));
     connect(m_programModel,SIGNAL(exportDirectiveFound(QString,QString))
             ,this,SLOT(slotExportDirectiveFound(QString,QString)));
+
+    connect (m_programModel,SIGNAL(modified(bool)),this,SLOT(setModified(bool)));
+    connect (m_globalVariableModel,SIGNAL(modified(bool)),this,SLOT(setModified(bool)));
+    connect (m_libraryAliasModel,SIGNAL(modified(bool)),this,SLOT(setModified(bool)));
+    connect (m_typeModel,SIGNAL(modified(bool)),this,SLOT(setModified(bool)));
 }
 //
 
@@ -53,6 +59,7 @@ bool cs8Application::open(const QString & filePath) {
     p.chop (m_projectName.length ()+1);
     setCellPath (p);
     bool result=parseProject(doc);
+    setModified (false);
     return result;
 }
 
@@ -283,6 +290,12 @@ void cs8Application::slotExportDirectiveFound(const QString &module, const QStri
 {
     qDebug() << "export " << module << ":" << function;
     m_exportDirectives.insert (function,module);
+}
+
+void cs8Application::setModified(bool modified_)
+{
+    m_modified=modified_;
+    emit modified(modified_);
 }
 
 bool cs8Application::loadDocumentationFile(const QString & fileName) {

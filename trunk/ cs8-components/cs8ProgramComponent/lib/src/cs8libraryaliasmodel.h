@@ -41,6 +41,12 @@ public:
     void clear();
     void setProjectVersion(uint version){m_projectVersion=version;}
     bool contains(const QString &alias_);
+
+signals:
+    void modified(bool);
+
+protected slots:
+    void slotModified();
 };
 
 #endif /* CS8LIBRARYALIASMODEL_H_ */
