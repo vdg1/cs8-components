@@ -8,10 +8,12 @@ class cs8Variable;
 //
 class cs8VariableModel: public QAbstractTableModel {
     Q_OBJECT
+
 private:
     bool m_mode;
 protected:
     QList<cs8Variable*> m_variableList;
+
 
 public:
     QString toDocumentedCode();
@@ -30,10 +32,7 @@ public:
             Qt::EditRole);
     Qt::ItemFlags flags(const QModelIndex & index) const;
     cs8Variable* getVarByName(const QString & name);
-    QList<cs8Variable*> variableList()
-    {
-        return m_variableList;
-    }
+
     QString toDtxDocument();
     QList<cs8Variable*> findVariablesByType(const QString & type_, bool public_=true);
     void clear();
@@ -41,6 +40,15 @@ public:
     QList<cs8Variable*> privateVariables();
     cs8Variable* variable(QModelIndex index);
     QStringList variableNameList();
+    QList<cs8Variable*> variableList()
+    {
+        return m_variableList;
+    }
 
+signals:
+    void modified(bool);
+
+protected slots:
+    void slotModified();
 };
 #endif

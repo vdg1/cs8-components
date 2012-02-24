@@ -56,12 +56,14 @@ protected slots:
                                               const QString & document);
     void slotModuleDocumentationFound(const QString & document);
     void slotExportDirectiveFound(const QString & module, const QString & function);
+    void slotModified();
 
 signals:
     void globalVariableDocumentationFound(const QString & name,
                                           const QString & document);
     void moduleDocumentationFound(const QString & document);
     void exportDirectiveFound(const QString & module, const QString & function);
+    void modified(bool);
 };
 
 #endif

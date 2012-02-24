@@ -4,7 +4,8 @@
 #include <QStringList>
 //
 cs8VariableModel::cs8VariableModel(QObject * parent, bool mode) :
-    QAbstractTableModel(parent), m_mode(mode) {
+    QAbstractTableModel(parent), m_mode(mode)
+{
     //m_variableList = new QList<cs8Variable*>;
 }
 //
@@ -32,6 +33,7 @@ bool cs8VariableModel::addVariable(QDomElement & element,
 bool cs8VariableModel::addGlobalVariable(QDomElement & element, const QString & description)
 {
     cs8Variable * variable = new cs8Variable(element,description);
+    connect(variable,SIGNAL(modified()),this,SLOT(slotModified()));
     variable->setGlobal(true);
     m_variableList.append(variable);
     reset();
@@ -253,4 +255,9 @@ QString cs8VariableModel::toDocumentedCode() {
     }
     qDebug() << "header: " << header;
     return header;
+}
+
+void cs8VariableModel::slotModified()
+{
+    emit modified (true);
 }

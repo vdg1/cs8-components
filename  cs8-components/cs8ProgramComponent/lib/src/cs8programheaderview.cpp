@@ -43,9 +43,10 @@ cs8ProgramHeaderView::~cs8ProgramHeaderView()
 /*!
     \fn cs8ProgramHeaderView::slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected )
  */
-void cs8ProgramHeaderView::slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected ) 
+void cs8ProgramHeaderView::slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected )
 {
-    blockSignals(true);
+    m_documentation->blockSignals(true);
+    m_description->blockSignals(true);
     if (deselected.count()>0)
     {
         m_masterView->model()->setData(deselected.indexes().at(0),m_documentation->toPlainText(),Qt::UserRole+10);
@@ -56,7 +57,8 @@ void cs8ProgramHeaderView::slotSelectionChanged ( const QItemSelection & selecte
         m_documentation->setPlainText(m_masterView->model()->data(selected.indexes().at(0),Qt::UserRole+10).toString());
         m_description->setText(m_masterView->model()->data(selected.indexes().at(0),Qt::UserRole+11).toString());
     }
-    blockSignals(false);
+    m_documentation->blockSignals(false);
+    m_description->blockSignals(false);
 }
 
 void cs8ProgramHeaderView::slotModified()

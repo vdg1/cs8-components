@@ -21,3 +21,6 @@ LIBS += ../../lib/libcs8ProjectComponent.a \
     -lcs8ControllerComponent
 POST_TARGETDEPS += ../../lib/libcs8ProjectComponent.a
 CONFIG +=qcodedit
+
+OTHER_FILES += \
+    Val3copyright.txt

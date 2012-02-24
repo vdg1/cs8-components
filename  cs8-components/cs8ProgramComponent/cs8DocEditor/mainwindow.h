@@ -37,10 +37,10 @@ protected slots:
 
 private:
     Ui::MainWindow *ui;
-    bool isModified;
+
 
 private slots:
-    void slotModified();
+    void slotModified(bool modified_);
     void on_tableViewPars_doubleClicked(QModelIndex index);
     void on_detailEditor_done();
 };

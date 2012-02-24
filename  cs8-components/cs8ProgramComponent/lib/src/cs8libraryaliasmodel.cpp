@@ -34,6 +34,7 @@ bool cs8LibraryAliasModel::add(const QDomElement & element, const QString & desc
 bool cs8LibraryAliasModel::add(const QString &aliasName, const QString &path, const bool autoLoad)
 {
     cs8LibraryAlias * alias = new cs8LibraryAlias(aliasName, path, autoLoad);
+    connect (alias,SIGNAL(modified()),this,SLOT(slotModified()));
     m_aliasList.append(alias);
     reset();
     return true;
@@ -134,10 +135,12 @@ bool cs8LibraryAliasModel::setData(const QModelIndex & index,
     if (role == Qt::EditRole) {
         if (index.column() == 3) {
             cs8LibraryAlias* variable = m_aliasList.at(index.row());
-            //variable->setDocumentation(value.toString());
+            variable->setDocumentation(value.toString());
             emit (dataChanged(index, index));
         }
+        emit modified (true);
     }
+    return true;
 }
 
 /*!
@@ -161,4 +164,9 @@ QString cs8LibraryAliasModel::toDocumentedCode() {
                     var->name());
     }
     return header;
+}
+
+void cs8LibraryAliasModel::slotModified()
+{
+    emit modified (true);
 }
