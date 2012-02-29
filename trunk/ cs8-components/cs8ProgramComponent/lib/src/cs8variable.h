@@ -54,7 +54,7 @@ public:
     QString definition();
 
 
-    void setGlobal(bool m_global);
+    void setGlobal(bool global);
     bool isGlobal() const {
         //qDebug() << "var: " << m_name << " has " << m_values.count();
         return m_global;// m_values.count() > 0;

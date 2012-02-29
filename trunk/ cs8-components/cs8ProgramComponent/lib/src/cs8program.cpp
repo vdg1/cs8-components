@@ -114,6 +114,7 @@ bool cs8Program::parseProgramDoc(const QDomDocument & doc) {
         qDebug() << "Reading code section failed";
 
 
+    qDebug() << "program name: " << name () << m_programSection.attribute ("name");
     QDomNodeList childList;
 
     childList = m_localSection.elementsByTagName("Local");
@@ -203,7 +204,13 @@ QStringList cs8Program::variableTokens()
 void cs8Program::setCode(const QString &code)
 {
     QDomCDATASection data=m_XMLDocument.createCDATASection(code);
+    m_programSection.removeChild (m_codeSection);
+    m_codeSection=m_XMLDocument.createElement ("Code");
+
+    //while (m_codeSection.hasChildNodes ())
+    //    m_codeSection.removeChild (m_codeSection.firstChildElement ());
     m_codeSection.appendChild (data);
+    m_programSection.appendChild (m_codeSection);
 }
 
 void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel)
@@ -345,6 +352,7 @@ void cs8Program::parseDocumentation(const QString & code_) {
     QString tagType;
     QString tagName;
     QString tagText;
+    m_tags.clear ();
 
     qDebug() << "parseDocumentation: " << name ();
     foreach(QString line,documentation.split("\n")) {
@@ -379,15 +387,19 @@ void cs8Program::parseDocumentation(const QString & code_) {
                 emit moduleDocumentationFound(tagText);
             }
             else if (tagType == "export"){
+tagText=tagText.simplified ();
                 qDebug() << "export directive: " << tagName << ":" << tagText;
                 if (tagText.isEmpty())
                     tagText=name();
+                m_tags.insertMulti (tagType,tagName+" "+tagText);
                 emit exportDirectiveFound(tagName, tagText);
             }
             else if (tagType == "copyright"){
                 setCopyrightMessage(tagText);
             }
             else {
+                m_tags.insertMulti (tagType,tagText);
+                //unknown tag type
                 //m_description += QString("\n\\%1 %2\n%3").arg(tagType).arg(tagName).arg(tagText);
             }
         }
@@ -449,9 +461,14 @@ void cs8Program::parseDocumentation(const QString & code_) {
             emit moduleDocumentationFound(tagText);
         }
         else if (tagType =="export") {
+            tagText=tagText.simplified ();
+            if (tagText.isEmpty ())
+                tagText=name ();
+            m_tags.insertMulti (tagType,tagName+" "+tagText);
             emit exportDirectiveFound (tagName, tagText);
         }
         else {
+            m_tags.insertMulti (tagType,tagText);
             //m_description += QString("\n\\%1 %2\n%3").arg(tagType).arg(tagName).arg(tagText);
         }
     }
@@ -648,6 +665,12 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
     return true;
 }
 
+QString cs8Program::name() const
+{
+    //qDebug() << m_programSection.attribute("name");
+    return m_programSection.attribute("name");
+}
+
 void cs8Program::setName(const QString &name)
 {
     m_programSection.setAttribute ("name",QString(name));
@@ -666,6 +689,20 @@ QString cs8Program::toDocumentedCode()
     }
     documentation += m_localVariableModel->toDocumentedCode();
     documentation += m_parameterModel->toDocumentedCode();
+    if (!m_tags.isEmpty ())
+    {
+        documentation += "\n";
+        foreach(QString key,m_tags.uniqueKeys ())
+        {
+            foreach(QString value,m_tags.values (key))
+            {
+                documentation+=QString("\\%1 %2\n")
+                        .arg (key)
+                        .arg (value);
+            }
+        }
+    }
+
     if (!documentation.isEmpty())
         documentation+="\n";
     // format documentation section

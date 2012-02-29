@@ -30,6 +30,11 @@ bool cs8VariableModel::addVariable(QDomElement & element,
     return true;
 }
 
+bool cs8VariableModel::addVariable(cs8Variable *variable)
+{
+    m_variableList.append (variable);
+}
+
 bool cs8VariableModel::addGlobalVariable(QDomElement & element, const QString & description)
 {
     cs8Variable * variable = new cs8Variable(element,description);
