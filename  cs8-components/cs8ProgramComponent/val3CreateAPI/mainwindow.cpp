@@ -168,7 +168,9 @@ void MainWindow::createAPI()
                                     .arg(cs8SourceApp->name ())
                                     .arg(program->name ())
                                     .arg(program->parameterModel ()->toString (false)));
+
                 cs8DestApp->programModel ()->append(newProgram);
+                cs8DestApp->moveParamsToGlobals(newProgram);
                 newProgram->setDescription (program->description ());
                 newProgram->setName(name);
                 newProgram->setDescription(program->description());

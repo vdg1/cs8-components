@@ -59,8 +59,8 @@ QString cs8Variable::documentation(bool withPrefix) {
 
 void cs8Variable::setPublic(bool m_public)
 {
-        emit modified ();
-        m_element.setAttribute("access",m_public? "public":"private");
+    emit modified ();
+    m_element.setAttribute("access",m_public? "public":"private");
 
 }
 
@@ -70,10 +70,16 @@ QString cs8Variable::definition() {
                                                                                       "[%1]").arg(allSizes()) : "");
 }
 
-void cs8Variable::setGlobal(bool m_global)
+void cs8Variable::setGlobal(bool global)
 {
-            emit modified ();
-            this->m_global=m_global;
+    emit modified ();
+    m_global=global;
+    if (global)
+    {
+        m_element.setTagName ("Data");
+        m_element.setAttribute ("xsi:type","array");
+        m_element.setAttribute ("size","1");
+    }
 }
 
 void cs8Variable::setUse(QString value)
@@ -100,20 +106,20 @@ QString cs8Variable::description() const
 
 void cs8Variable::setType(QString value)
 {
-           emit modified ();
-           m_element.setAttribute("type",value);
+    emit modified ();
+    m_element.setAttribute("type",value);
 }
 
 QString cs8Variable::type() const
 {
-        return m_element.attribute("type");
+    return m_element.attribute("type");
 
 }
 
 void cs8Variable::setName(QString value)
 {
-           emit modified ();
-           m_element.setAttribute("name",value);
+    emit modified ();
+    m_element.setAttribute("name",value);
 }
 
 //

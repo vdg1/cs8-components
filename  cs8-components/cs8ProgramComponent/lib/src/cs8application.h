@@ -47,6 +47,7 @@ public:
         bool writeProjectFile();
         QHash<QString, QString> exportDirectives() const {return m_exportDirectives;}
         bool isModified() const {return m_modified;}
+        void moveParamsToGlobals(cs8Program *program);
         void setCopyrightMessage(const QString &text);
 
 protected:

@@ -60,6 +60,7 @@ QList<cs8Program*> cs8ProgramModel::publicPrograms() {
     QList<cs8Program*> out;
     foreach(cs8Program* program,m_programList)
     {
+        qDebug() << program->name ();
         if (program->isPublic())
             out << program;
     }
@@ -136,7 +137,8 @@ void cs8ProgramModel::addProgram(const QString & filePath) {
             this,SLOT(slotExportDirectiveFound(QString,QString)));
     connect (program,SIGNAL(modified()),this,SLOT(slotModified()));
     program->setCellPath(m_cellPath);
-    program->open(filePath);
+    if (!program->open(filePath))
+        qDebug() << "Opening program " << filePath << " failed";
     reset();
 }
 

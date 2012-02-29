@@ -3,6 +3,7 @@
 //
 #include <QObject>
 #include <QDomDocument>
+#include <QDebug>
 #include "cs8variablemodel.h"
 #include "cs8parametermodel.h"
 
@@ -26,9 +27,8 @@ public:
         return m_programSection.attribute("access","private")=="public";
     }
 
-    QString name() const {
-        return m_programSection.attribute("name");
-    }
+    QString name() const;
+
     QString fileName() const {
         return name() + ".pgx";
     }
@@ -44,6 +44,7 @@ public:
 private:
     cs8VariableModel* m_localVariableModel;
     cs8ParameterModel* m_parameterModel;
+    QMultiMap<QString,QString> m_tags;
     void printChildNodes(const QDomElement & element);
     void createXMLSkeleton();
     QString extractDocumentation(const QString & code_);

@@ -575,6 +575,32 @@ bool cs8Application::writeProjectFile()
     return true;
 }
 
+void cs8Application::moveParamsToGlobals(cs8Program *program)
+{
+    QString newName, oldName;
+    for (int i=0;i<program->parameterModel ()->variableList ().count ();i++)
+    {
+        // if name of parameter starts with '_' remove it from parameter list and add it as a
+        // global variable
+        if (program->parameterModel ()->variableList ().at (i)->name ().startsWith ("_"))
+        {
+            cs8Variable *var=program->parameterModel ()->variableList ().takeAt (i);
+            var->setGlobal (true);
+            var->setPublic (true);
+            newName=var->name ();
+            oldName=var->name ();
+            // remove trailing '_'
+            newName.remove (0,1);
+            var->setName (newName);
+            m_globalVariableModel->addVariable (var);
+            QString code=program->val3Code (true);
+            code.replace (oldName,newName);
+            program->setCode (code);
+            i--;
+        }
+    }
+}
+
 
 void cs8Application::createXMLSkeleton()
 {

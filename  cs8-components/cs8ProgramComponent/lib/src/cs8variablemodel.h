@@ -25,6 +25,7 @@ public:
     int columnCount(const QModelIndex & index) const;
     bool addVariable(QDomElement & element, const QString & description =
             QString());
+    bool addVariable (cs8Variable *variable);
     bool addGlobalVariable(QDomElement & element, const QString & description =
             QString());
     cs8VariableModel(QObject * parent = 0, bool mode = false);
@@ -40,7 +41,7 @@ public:
     QList<cs8Variable*> privateVariables();
     cs8Variable* variable(QModelIndex index);
     QStringList variableNameList();
-    QList<cs8Variable*> variableList()
+    QList<cs8Variable*>& variableList()
     {
         return m_variableList;
     }
