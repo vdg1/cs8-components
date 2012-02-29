@@ -398,7 +398,9 @@ QString cs8Application::projectPath() {
 QString cs8Application::documentation() {
 
     QString out;
-    QStringList list = m_documentation.split("\n");
+    QStringList list;
+
+    list << m_documentation.split("\n");
     bool inCodeSection = false;
     int indentation=0;
     QString indentText;
@@ -604,4 +606,12 @@ void cs8Application::createXMLSkeleton()
     m_typesSection=m_XMLDocument.createElement("Types");
     m_projectSection.appendChild (m_typesSection);
     qDebug () << "Create xml structure done";
+}
+
+void cs8Application::setCopyrightMessage(const QString &text)
+{
+    foreach(cs8Program *program,m_programModel->programList())
+    {
+        program->setCopyrightMessage(text);
+    }
 }

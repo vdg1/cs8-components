@@ -35,7 +35,7 @@ public:
     void setName(const QString &name);
     QString definition() const;
     QString documentation(bool withPrefix=true) const;
-    QString extractDocumentation(const QString & code_);
+
     QString extractCode(const QString & code_) const;
     QStringList variableTokens();
     void setCode(const QString & code);
@@ -46,6 +46,7 @@ private:
     cs8ParameterModel* m_parameterModel;
     void printChildNodes(const QDomElement & element);
     void createXMLSkeleton();
+    QString extractDocumentation(const QString & code_);
 
 public:
     cs8Program(QObject * parent);
@@ -58,6 +59,9 @@ public:
     void setDescription(const QString& theValue);
     void setDetailedDocumentation(const QString &doc);
     QString detailedDocumentation() const;
+
+    void setCopyrightMessage(const QString & text);
+    QString copyrightMessage() const;
 
     QString description() const;
     void setCellPath(const QString & path);
@@ -76,6 +80,7 @@ protected:
     QString m_detailedDocumentation;
     QString m_cellPath;
     QString m_filePath;
+    QString m_copyRightMessage;
 
 signals:
     void globalVariableDocumentationFound(const QString & name,

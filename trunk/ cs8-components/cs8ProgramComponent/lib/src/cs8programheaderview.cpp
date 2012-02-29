@@ -1,4 +1,4 @@
-//
+/*
 // C++ Implementation: cs8programheaderview
 //
 // Description:
@@ -8,7 +8,7 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
+*/
 #include "cs8programheaderview.h"
 
 #include <QVBoxLayout>
@@ -18,11 +18,17 @@
 cs8ProgramHeaderView::cs8ProgramHeaderView ( QWidget *parent )
     : QWidget ( parent )
 {
+
+    QFont m_font;
+    m_font.setFamily("courier");
+    m_font.setPointSize(11);
     m_documentation=new QPlainTextEdit(this);
     m_documentation->setWordWrapMode(QTextOption::WordWrap);
     m_documentation->document()->setTextWidth(40);
+    m_documentation->setFont(m_font);
 
     m_description=new QLineEdit(this);
+    m_description->setFont(m_font);
 
     QVBoxLayout *layout= new QVBoxLayout(this);
     layout->addWidget(m_description);
