@@ -25,6 +25,11 @@
      </item>
      <item>
       <widget class="QLineEdit" name="lineEditName">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
        <property name="frame">
         <bool>false</bool>
        </property>

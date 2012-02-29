@@ -384,6 +384,9 @@ void cs8Program::parseDocumentation(const QString & code_) {
                     tagText=name();
                 emit exportDirectiveFound(tagName, tagText);
             }
+            else if (tagType == "copyright"){
+                setCopyrightMessage(tagText);
+            }
             else {
                 //m_description += QString("\n\\%1 %2\n%3").arg(tagType).arg(tagName).arg(tagText);
             }
@@ -657,6 +660,10 @@ QString cs8Program::toDocumentedCode()
         documentation = "!doc\n";
         documentation += m_detailedDocumentation;
     }
+    if (!m_copyRightMessage.isEmpty()){
+        documentation +="!copyright\n";
+        documentation +=m_copyRightMessage;
+    }
     documentation += m_localVariableModel->toDocumentedCode();
     documentation += m_parameterModel->toDocumentedCode();
     if (!documentation.isEmpty())
@@ -666,20 +673,7 @@ QString cs8Program::toDocumentedCode()
     QRegExp rx;
     rx.setPattern("\\b");
 
-    QString subString;
-    /*
-     while (documentation.length()>MAX_LENGTH){
-         pos=documentation.lastIndexOf(rx,MAX_LENGTH);
-         if (pos==-1){
-             pos=documentation.indexOf(rx,MAX_LENGTH-1);
-             if (pos==-1)
-                 pos=documentation.length();
-         }
-        list.append(documentation.left(pos));
-        documentation.remove(0,pos);
-     }
-     list.append(documentation);
-     */
+
     list=documentation.split("\n");
     list.replaceInStrings(QRegExp("^"),"  //");
     documentation=list.join("\n")+"\n";
@@ -697,5 +691,16 @@ QString cs8Program::toDocumentedCode()
 QString cs8Program::definition() const {
 
     return name() + "(" + m_parameterModel->toString() + ")";
+}
+
+void cs8Program::setCopyrightMessage(const QString &text)
+{
+    m_copyRightMessage=text;
+    emit modified();
+}
+
+QString cs8Program::copyrightMessage() const
+{
+    return m_copyRightMessage;
 }
 
