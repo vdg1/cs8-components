@@ -89,11 +89,11 @@ bool cs8Program::parseProgramDoc(const QDomDocument & doc) {
     m_programsSection = doc.documentElement();
 
 
-    printChildNodes(m_programsSection);
+    //printChildNodes(m_programsSection);
     m_programSection = m_programsSection.firstChild().toElement();
 
 
-    printChildNodes(m_programSection);
+    //printChildNodes(m_programSection);
     if (m_programSection.isNull())
         qDebug() << "Reading program section failed";
 
@@ -108,13 +108,13 @@ bool cs8Program::parseProgramDoc(const QDomDocument & doc) {
     m_paramSection = m_programSection.elementsByTagName("Parameters").at(0).toElement();
     m_localSection = m_programSection.elementsByTagName("Locals").at(0).toElement();
 
-    qDebug() << m_programSection.elementsByTagName("Code").at(0).nodeType();
+    //qDebug() << m_programSection.elementsByTagName("Code").at(0).nodeType();
     m_codeSection =  m_programSection.elementsByTagName("Code").at(0).toElement();
     if (m_codeSection.isNull())
         qDebug() << "Reading code section failed";
 
 
-    qDebug() << "program name: " << name () << m_programSection.attribute ("name");
+    //qDebug() << "program name: " << name () << m_programSection.attribute ("name");
     QDomNodeList childList;
 
     childList = m_localSection.elementsByTagName("Local");
@@ -387,7 +387,7 @@ void cs8Program::parseDocumentation(const QString & code_) {
                 emit moduleDocumentationFound(tagText);
             }
             else if (tagType == "export"){
-tagText=tagText.simplified ();
+                tagText=tagText.simplified ();
                 qDebug() << "export directive: " << tagName << ":" << tagText;
                 if (tagText.isEmpty())
                     tagText=name();

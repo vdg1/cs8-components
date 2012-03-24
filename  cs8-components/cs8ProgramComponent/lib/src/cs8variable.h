@@ -64,7 +64,8 @@ public:
         return m_element.attribute("size").replace(" ",", ");
     }
 
-    QDomElement element() const { return m_element;}
+    QDomElement element() const {
+        return m_element;}
 
 protected:
     QDomElement m_element;
