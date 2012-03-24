@@ -78,7 +78,8 @@ void cs8Variable::setGlobal(bool global)
     {
         m_element.setTagName ("Data");
         m_element.setAttribute ("xsi:type","array");
-        m_element.setAttribute ("size","1");
+        if (!m_element.hasAttribute ("size"))
+            m_element.setAttribute ("size","1");
         m_element.removeAttribute ("use");
     }
 }
