@@ -24,3 +24,5 @@ CONFIG +=qcodedit
 
 OTHER_FILES += \
     Val3copyright.txt
+
+DESTDIR = ../bin

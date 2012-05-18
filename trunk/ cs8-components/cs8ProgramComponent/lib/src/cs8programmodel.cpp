@@ -135,7 +135,10 @@ void cs8ProgramModel::addProgram(const QString & filePath) {
             this, SLOT(slotModuleDocumentationFound(const QString & )));
     connect(program, SIGNAL(exportDirectiveFound(QString,QString)),
             this,SLOT(slotExportDirectiveFound(QString,QString)));
+    connect(program, SIGNAL(unknownTagFound(QString,QString,QString)),
+            this,SLOT(slotUnknownTagFound(QString,QString,QString)));
     connect (program,SIGNAL(modified()),this,SLOT(slotModified()));
+
     program->setCellPath(m_cellPath);
     if (!program->open(filePath))
         qDebug() << "Opening program " << filePath << " failed";
@@ -154,6 +157,11 @@ void cs8ProgramModel::slotModuleDocumentationFound(const QString & document) {
 void cs8ProgramModel::slotExportDirectiveFound(const QString &module, const QString &function)
 {
     emit exportDirectiveFound (module, function);
+}
+
+void cs8ProgramModel::slotUnknownTagFound(const QString &tagType, const QString &tagName, const QString &tagText)
+{
+    emit unknownTagFound (tagType, tagName, tagText);
 }
 
 void cs8ProgramModel::slotModified()

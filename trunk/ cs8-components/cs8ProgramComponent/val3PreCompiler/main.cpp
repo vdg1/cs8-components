@@ -13,15 +13,15 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     if (qApp->arguments ().count ()>1)
     {
-//
-  //cs8Application app;
+        //
+        //cs8Application app;
         QString cellPath;
         foreach(QString arg,qApp->arguments ())
         {
             if (arg.startsWith ("-R"))
             {
-                               cellPath=arg.remove ("-R");
-                               cellPath=cellPath.remove ("\"");
+                cellPath=arg.remove ("-R");
+                cellPath=cellPath.remove ("\"");
             }
 
         }

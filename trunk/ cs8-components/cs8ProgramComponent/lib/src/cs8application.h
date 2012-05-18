@@ -52,6 +52,7 @@ public:
 
 protected:
         QHash<QString, QString> m_exportDirectives;
+        QHash<QString, QString> m_pragmaList;
         QString m_projectName;
         QString m_projectPath;
         cs8ProgramModel* m_programModel;
@@ -78,6 +79,7 @@ protected slots:
                         const QString & document);
         void slotModuleDocumentationFound(const QString & document);
         void slotExportDirectiveFound(const QString & module, const QString & function);
+        void slotUnknownTagFound(const QString & tagType, const QString & tagName, const QString & tagText);
         void setModified(bool modified);
 
 signals:

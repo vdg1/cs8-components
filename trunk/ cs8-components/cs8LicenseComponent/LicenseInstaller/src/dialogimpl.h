@@ -3,7 +3,7 @@
 //
 #include <QDialog>
 #include <QDomDocument>
-#include "ui_dialog.h"
+#include "../ui_dialog.h"
 //
 class DialogImpl : public QDialog, public Ui::LicenseInstallerWidgetBase
 {

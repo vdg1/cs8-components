@@ -29,6 +29,8 @@ cs8Application::cs8Application(QObject *parent) :
             ,this, SLOT(slotModuleDocumentationFound(const QString & )));
     connect(m_programModel,SIGNAL(exportDirectiveFound(QString,QString))
             ,this,SLOT(slotExportDirectiveFound(QString,QString)));
+    connect(m_programModel,SIGNAL(unknownTagFound(QString,QString,QString)),
+            this,SLOT(slotUnknownTagFound(QString,QString,QString)));
 
     connect (m_programModel,SIGNAL(modified(bool)),this,SLOT(setModified(bool)));
     connect (m_globalVariableModel,SIGNAL(modified(bool)),this,SLOT(setModified(bool)));
@@ -245,7 +247,7 @@ bool cs8Application::parseProject(const QDomDocument & doc) {
 
     // load data file
     QDomElement data = m_dataSection.elementsByTagName("Data").at(0).toElement();
-    if (loadDataFile(m_projectPath+data.attribute("file"))) {
+    if (loadDataFile(m_projectPath+QDir::separator()+data.attribute("file"))) {
 
         // load programs
         QDomNodeList list = m_programSection.elementsByTagName("Program");
@@ -290,6 +292,12 @@ void cs8Application::slotExportDirectiveFound(const QString &module, const QStri
 {
     qDebug() << "export " << module << ":" << function;
     m_exportDirectives.insert (function,module);
+}
+
+void cs8Application::slotUnknownTagFound(const QString &tagType, const QString &tagName, const QString &tagText)
+{
+    if (tagType=="pragma")
+        m_pragmaList.insert(tagName,tagText);
 }
 
 void cs8Application::setModified(bool modified_)
@@ -449,37 +457,40 @@ QString cs8Application::checkVariables() const
     // map containing information if a global variable has been referenced
     QMap<QString, bool> referencedMap;
     // build map
-    foreach(cs8Variable *var, m_globalVariableModel->variableList ())
+    foreach(cs8Variable *globalVariable, m_globalVariableModel->variableList ())
     {
-        qDebug() << "Checking global variable: " << var->name ();
-        referencedMap.insert (var->name (),false);
+        qDebug() << "Checking global variable: " << globalVariable->name ();
+        referencedMap.insert (globalVariable->name (),false);
+        // ignore variable if it is listed in a pragma statement
+        if (m_pragmaList.contains (globalVariable->name ()))
+            referencedMap[globalVariable->name ()]=true;
         // check if a local variable hides the global variable
         foreach(cs8Program* program, m_programModel->programList ())
         {
             qDebug() << "  Checking program: " << program->name ();
             // check if global variable name is also declared as local variable
-            if (program->localVariableModel ()->variableNameList ().contains (var->name ()))
+            if (program->localVariableModel ()->variableNameList ().contains (globalVariable->name ()))
             {
-                qDebug() << "Warning: Global variable '" << var->name () << "'' is hidden in program " << program->name();
+                qDebug() << "Warning: Global variable '" << globalVariable->name () << "'' is hidden in program " << program->name();
                 //output.append (QString("Warning: Global variable '" + var->name () + "' is hidden in program " + program->name()+" by a local variable of the same name"));
                 output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>1<msg>%2<file>%3")
                                .arg (program->name ())
-                               .arg ("Warning: Global variable '" + var->name () + "' is hidden in program by a local variable of the same name")
+                               .arg ("Warning: Global variable '" + globalVariable->name () + "' is hidden in program by a local variable of the same name")
                                .arg(program->cellFilePath ()));
             }
             else
                 // if global variable is not hidden, check if it is used
-                if (program->variableTokens ().contains (var->name ()))
+                if (program->variableTokens ().contains (globalVariable->name ()))
                 {
-                    referencedMap[var->name ()]=true;
+                    referencedMap[globalVariable->name ()]=true;
                 }
         }
-        if (referencedMap[var->name ()]==false)
+        if (referencedMap[globalVariable->name ()]==false)
             output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
                            .arg ("")
-                           .arg ("Warning: Global variable '" + var->name () + "' is not used")
+                           .arg ("Warning: Global variable '" + globalVariable->name () + "' is not used")
                            .arg(cellDataFilePath ())
-                           .arg(var->element ().lineNumber ()));
+                           .arg(globalVariable->element ().lineNumber ()));
     }
     foreach(cs8Program* program, m_programModel->programList ())
     {
@@ -521,8 +532,11 @@ QString cs8Application::cellPath() const
 QString cs8Application::cellProjectFilePath() const
 {
     QString pth=QDir::toNativeSeparators (m_projectPath+m_projectName+".pjx");
+    qDebug() << pth;
     pth=pth.replace (QDir::toNativeSeparators(m_cellPath+"usr/usrapp/"),"Disk://");
+    qDebug() << pth;
     pth=QDir::fromNativeSeparators (pth);
+    qDebug() << pth;
     return pth;
 }
 

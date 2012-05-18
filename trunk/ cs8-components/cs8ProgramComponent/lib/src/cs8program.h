@@ -88,6 +88,7 @@ signals:
                                           const QString & document);
     void moduleDocumentationFound(const QString & document);
     void exportDirectiveFound(const QString & module, const QString & routine);
+    void unknownTagFound(const QString & tagType, const QString & tagName, const QString & tagText);
     void modified();
 
 

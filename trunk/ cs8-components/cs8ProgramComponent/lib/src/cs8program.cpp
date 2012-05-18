@@ -398,7 +398,10 @@ void cs8Program::parseDocumentation(const QString & code_) {
                 setCopyrightMessage(tagText);
             }
             else {
+                if (tagText.isEmpty ())
+                    tagText=tagName;
                 m_tags.insertMulti (tagType,tagText);
+                emit unknownTagFound(tagType,tagName, tagText);
                 //unknown tag type
                 //m_description += QString("\n\\%1 %2\n%3").arg(tagType).arg(tagName).arg(tagText);
             }
@@ -468,7 +471,10 @@ void cs8Program::parseDocumentation(const QString & code_) {
             emit exportDirectiveFound (tagName, tagText);
         }
         else {
+            if (tagText.isEmpty ())
+                tagText=tagName;
             m_tags.insertMulti (tagType,tagText);
+            emit unknownTagFound(tagType,tagName, tagText);
             //m_description += QString("\n\\%1 %2\n%3").arg(tagType).arg(tagName).arg(tagText);
         }
     }

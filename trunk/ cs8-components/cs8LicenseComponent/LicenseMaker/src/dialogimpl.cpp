@@ -15,7 +15,7 @@ DialogImpl::DialogImpl ( QWidget * parent, Qt::WFlags f )
   connect ( btPrint,SIGNAL ( clicked() ),this,SLOT ( slotPrint() ) );
   connect ( leMachineNumber,SIGNAL ( textEdited ( QString ) ),this,SLOT ( slotMachineNumberChanged() ) );
   connect ( leKey,SIGNAL ( textChanged ( QString ) ),this,SLOT ( slotKeyChanged() ) );
-  
+
   /*
   QFile file ( ":/template.htm" );
   if ( file.open ( QIODevice::ReadOnly | QIODevice::Text ) )
@@ -40,12 +40,14 @@ void DialogImpl::slotCreateLicense()
 {
   QString license=cs8License::createLicense ( leMachineNumber->text() );
   leKey->setText ( license );
-  QString license_=licenseText;
-  license_.replace ( "%Software%","Plastics Innovation" );
+  QFile file(":\\LicenseTemp.txt");
+  file.open (QFile::ReadOnly);
+  QString license_=file.readAll ();
+  license_.replace ( "%Software%","SAXE Automation System" );
   license_.replace ( "%MachineNumber%",leMachineNumber->text() );
   license_.replace ( "%LicenseKey%",license );
   textEdit->setText ( license_ );
-  
+
 }
 
 void DialogImpl::slotMachineNumberChanged()
@@ -56,7 +58,7 @@ void DialogImpl::slotMachineNumberChanged()
 void DialogImpl::slotPrint()
 {
   QPrinter printer;
-  
+
   QPrintDialog *dialog = new QPrintDialog ( &printer, this );
   dialog->setWindowTitle ( tr ( "Print Document" ) );
   if ( textEdit->textCursor().hasSelection() )
