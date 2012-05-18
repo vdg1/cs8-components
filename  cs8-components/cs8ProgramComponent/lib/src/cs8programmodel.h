@@ -56,6 +56,7 @@ protected slots:
                                               const QString & document);
     void slotModuleDocumentationFound(const QString & document);
     void slotExportDirectiveFound(const QString & module, const QString & function);
+    void slotUnknownTagFound(const QString & tagType, const QString & tagName, const QString & tagText);
     void slotModified();
 
 signals:
@@ -63,6 +64,7 @@ signals:
                                           const QString & document);
     void moduleDocumentationFound(const QString & document);
     void exportDirectiveFound(const QString & module, const QString & function);
+    void unknownTagFound(const QString & tagType, const QString & tagName, const QString & tagText);
     void modified(bool);
 };
 

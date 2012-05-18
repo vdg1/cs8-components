@@ -18,6 +18,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void createAPIs(QList<cs8Application *> cs8SourceApps);
 private slots:
 
     void on_actionAdd_Folder_triggered();

@@ -98,35 +98,8 @@ void MainWindow::on_commandLinkButton_clicked()
     createAPI();
 }
 
-void MainWindow::createAPI()
+void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps)
 {
-    ui->plainTextEdit->clear ();
-    QStringList dirs;
-    QDir dir;
-    QList<cs8Application *> cs8SourceApps;
-
-    for(int i=0;i<ui->listWidget->count ();i++)
-    {
-        dir.setCurrent (ui->listWidget->item (i)->text ());
-        foreach(QString pth,dir.entryList (QDir::NoDotAndDotDot | QDir::Dirs ))
-            dirs << dir.currentPath ()+"/"+pth;
-    }
-
-    foreach(QString pth,dirs)
-    {
-        cs8Application *cs8SourceApp=new cs8Application(this);
-        if (cs8SourceApp->openFromPathName (pth))
-        {
-            emit addLog (tr("Opened source app %1").arg(pth));
-            cs8SourceApps.append (cs8SourceApp);
-        }
-        else
-        {
-             emit addLog (tr("Opened source app %1 failed").arg(pth));
-            delete cs8SourceApp;
-        }
-    }
-
     QMap<QString, cs8Application *> cs8DestApps;
     cs8Application* cs8DestApp;
     QString name;
@@ -180,6 +153,39 @@ void MainWindow::createAPI()
     }
     foreach(cs8Application* cs8DestApp, cs8DestApps)
         cs8DestApp->save ();
+}
+
+void MainWindow::createAPI()
+{
+    ui->plainTextEdit->clear ();
+    QStringList dirs;
+    QDir dir;
+
+
+    for(int i=0;i<ui->listWidget->count ();i++)
+    {
+        dir.setCurrent (ui->listWidget->item (i)->text ());
+        foreach(QString pth,dir.entryList (QDir::NoDotAndDotDot | QDir::Dirs ))
+            dirs << dir.currentPath ()+"/"+pth;
+    }
+
+    QList<cs8Application *> cs8SourceApps;
+    foreach(QString pth,dirs)
+    {
+        cs8Application *cs8SourceApp=new cs8Application(this);
+        if (cs8SourceApp->openFromPathName (pth))
+        {
+            emit addLog (tr("Opened source app %1").arg(pth));
+            cs8SourceApps.append (cs8SourceApp);
+        }
+        else
+        {
+             emit addLog (tr("Opened source app %1 failed").arg(pth));
+            delete cs8SourceApp;
+        }
+    }
+
+    createAPIs(cs8SourceApps);
     ui->commandLinkButton->setEnabled(true);
 }
 

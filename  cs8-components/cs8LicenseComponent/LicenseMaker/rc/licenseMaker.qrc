@@ -1,6 +1,6 @@
 <RCC>
-    <qresource prefix="/" >
+    <qresource prefix="/">
         <file>splash.png</file>
-        <file>template.htm</file>
+        <file>LicenseTemp.txt</file>
     </qresource>
 </RCC>

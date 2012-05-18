@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>licenseMakerWidget</class>
- <widget class="QDialog" name="licenseMakerWidget" >
-  <property name="geometry" >
+ <widget class="QDialog" name="licenseMakerWidget">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,52 +10,56 @@
     <height>500</height>
    </rect>
   </property>
-  <property name="windowTitle" >
-   <string>Plastics Innovation License Creator</string>
+  <property name="windowTitle">
+   <string>SAXE Swiss System AB License Creator</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <property name="windowIcon">
+   <iconset resource="../../../resources/cs8ComponentsResources.qrc">
+    <normaloff>:/images/appicon.png</normaloff>:/images/appicon.png</iconset>
+  </property>
+  <layout class="QVBoxLayout">
    <item>
-    <layout class="QGridLayout" >
-     <item row="0" column="0" >
-      <widget class="QLabel" name="label" >
-       <property name="text" >
+    <layout class="QGridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
         <string>Machine Number:</string>
        </property>
-       <property name="buddy" >
+       <property name="buddy">
         <cstring>leMachineNumber</cstring>
        </property>
       </widget>
      </item>
-     <item row="0" column="1" >
-      <widget class="QLineEdit" name="leMachineNumber" >
-       <property name="inputMask" >
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="leMachineNumber">
+       <property name="inputMask">
         <string>F99_NNNNNN_A_99; </string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1" >
-      <widget class="QPushButton" name="btCreate" >
-       <property name="enabled" >
+     <item row="1" column="1">
+      <widget class="QPushButton" name="btCreate">
+       <property name="enabled">
         <bool>false</bool>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>&amp;Calculate Key</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0" >
-      <widget class="QLabel" name="label_2" >
-       <property name="text" >
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
         <string>License</string>
        </property>
-       <property name="buddy" >
+       <property name="buddy">
         <cstring>leKey</cstring>
        </property>
       </widget>
      </item>
-     <item row="2" column="1" >
-      <widget class="QLineEdit" name="leKey" >
-       <property name="readOnly" >
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="leKey">
+       <property name="readOnly">
         <bool>true</bool>
        </property>
       </widget>
@@ -62,26 +67,27 @@
     </layout>
    </item>
    <item>
-    <widget class="QTextEdit" name="textEdit" >
-     <property name="readOnly" >
+    <widget class="QTextEdit" name="textEdit">
+     <property name="readOnly">
       <bool>true</bool>
      </property>
-     <property name="html" >
-      <string>&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+     <property name="html">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -90,11 +96,11 @@ p, li { white-space: pre-wrap; }
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btPrint" >
-       <property name="enabled" >
+      <widget class="QPushButton" name="btPrint">
+       <property name="enabled">
         <bool>false</bool>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>&amp;Print</string>
        </property>
       </widget>
@@ -102,15 +108,15 @@ p, li { white-space: pre-wrap; }
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line" >
-     <property name="orientation" >
+    <widget class="Line" name="line">
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox" >
-     <property name="standardButtons" >
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
       <set>QDialogButtonBox::Close</set>
      </property>
     </widget>
@@ -118,7 +124,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="../rc/licenseMaker.qrc" />
+  <include location="../../../resources/cs8ComponentsResources.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -127,11 +133,11 @@ p, li { white-space: pre-wrap; }
    <receiver>licenseMakerWidget</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>347</x>
      <y>357</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>397</x>
      <y>89</y>
     </hint>
@@ -143,11 +149,11 @@ p, li { white-space: pre-wrap; }
    <receiver>licenseMakerWidget</receiver>
    <slot>update()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>232</x>
      <y>48</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>398</x>
      <y>55</y>
     </hint>
