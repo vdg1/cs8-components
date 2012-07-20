@@ -17,7 +17,7 @@ QString cs8Variable::toString(bool withTypeDefinition) {
     if (withTypeDefinition)
         return QString("%1 %2%3")
                 .arg(type())
-                .arg(use() == "reference" ? "" : "& ")
+                .arg(use() == "reference" ? "& " : "")
                 .arg(name());
     else
         return QString("%1")

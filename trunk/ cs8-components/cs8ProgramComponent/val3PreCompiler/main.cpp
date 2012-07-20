@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         QStringList arg=qApp->arguments ();
         // remove the first argument as that is the path of the executable
         arg.removeAt (0);
-        proc.start ("C:\\Program Files\\Staubli\\CS8\\s7.2\\Val3Check_orig.exe",arg);
+        proc.start ("Val3Check_orig.exe",arg);
         proc.waitForFinished ();
         QString out=proc.readAll ();
         cout << qPrintable(out);
