@@ -685,8 +685,12 @@ void cs8Program::setName(const QString &name)
 QString cs8Program::toDocumentedCode()
 {
     QString documentation;
+    if (!description().isEmpty()){
+        documentation = "!brief\n";
+        documentation += description()+"\n";
+    }
     if (!m_detailedDocumentation.isEmpty()) {
-        documentation = "!doc\n";
+        documentation += "!doc\n";
         documentation += m_detailedDocumentation;
     }
     if (!m_copyRightMessage.isEmpty()){
@@ -722,8 +726,9 @@ QString cs8Program::toDocumentedCode()
     documentation=list.join("\n")+"\n";
     QString code = val3Code(false);
     rx.setPattern("\\s*begin\\s*");
+    rx.setMinimal(true);
     int start = rx.indexIn(code, 0);
-    start += rx.matchedLength();
+    start += rx.matchedLength()+1;
 
     code.insert(start++, documentation);
 

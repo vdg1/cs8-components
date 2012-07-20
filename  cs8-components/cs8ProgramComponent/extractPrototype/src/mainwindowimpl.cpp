@@ -83,7 +83,6 @@ void MainWindowImpl::on_pushButtonExecute_clicked() {
             QString addFile=addFiles.at(0);
             addFile.chop(4);
             sourceFiles.append(addFile);
-
         }
         lineEditLog->appendPlainText("applications: " + sourceFiles.join(", "));
         QString sourceApp;

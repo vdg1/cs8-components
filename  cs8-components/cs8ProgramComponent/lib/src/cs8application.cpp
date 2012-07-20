@@ -124,7 +124,7 @@ bool cs8Application::exportInterfacePrototype(const QString & path) {
         programElement.setAttribute("file", program->fileName());
         programSection.appendChild(programElement);
 
-        program->save(path + "/" + m_projectName, false);
+        program->save(path + "/" + m_projectName+ "/", false);
     }
 
     QDomNode dataSection = m_dataSection.cloneNode();
@@ -485,12 +485,23 @@ QString cs8Application::checkVariables() const
                     referencedMap[globalVariable->name ()]=true;
                 }
         }
-        if (referencedMap[globalVariable->name ()]==false)
-            output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
-                           .arg ("")
-                           .arg ("Warning: Global variable '" + globalVariable->name () + "' is not used")
-                           .arg(cellDataFilePath ())
-                           .arg(globalVariable->element ().lineNumber ()));
+        if (referencedMap[globalVariable->name ()]==false){
+            if (!globalVariable->isPublic()){
+                output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
+                               .arg ("")
+                               .arg ("Warning: Global variable '" + globalVariable->name () + "' is not used")
+                               .arg(cellDataFilePath ())
+                               .arg(globalVariable->element ().lineNumber ()));
+            }
+            else {
+                output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
+                               .arg ("")
+                               .arg ("Warning: Global variable '" + globalVariable->name () + "' is not used, but is set as PUBLIC")
+                               .arg(cellDataFilePath ())
+                               .arg(globalVariable->element ().lineNumber ()));
+            }
+        }
+
     }
     foreach(cs8Program* program, m_programModel->programList ())
     {
