@@ -126,6 +126,10 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps)
                              .arg(program->name ())
                              .arg(cs8SourceApp->name ())
                              .arg(destAppName));
+                qDebug() << (tr("Exporting function %1 from application %2 to module %3")
+                             .arg(program->name ())
+                             .arg(cs8SourceApp->name ())
+                             .arg(destAppName));
                 if (!cs8DestApp->libraryModel ()->contains(cs8SourceApp->name ()))
                 {
                     qDebug() << "Adding library alias for " << cs8SourceApp->name ();
