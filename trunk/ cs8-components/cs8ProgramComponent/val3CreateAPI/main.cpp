@@ -12,12 +12,16 @@ int main(int argc, char *argv[])
         QStringList dirs;
         QDir dir;
 
+        QString workingPath=dir.currentPath();
 
         for(int i=1;i<qApp->arguments ().count ();i++)
         {
-            dir.setCurrent (qApp->arguments ().at (i));
+            QString dirTxt=qApp->arguments ().at (i);
+            qDebug() << "Dir: " <<   workingPath+"/"+dirTxt;
+            dir.setPath (dirTxt);
+            qDebug() << dir.absolutePath();
             foreach(QString pth,dir.entryList (QDir::NoDotAndDotDot | QDir::Dirs ))
-                dirs << dir.currentPath ()+"/"+pth;
+                dirs << dir.absolutePath()+"/"+pth;
         }
 
         QList<cs8Application *> cs8SourceApps;
