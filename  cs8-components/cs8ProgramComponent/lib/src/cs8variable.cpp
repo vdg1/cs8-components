@@ -11,6 +11,10 @@ cs8Variable::cs8Variable(QDomElement & element, const QString & description)
 cs8Variable::cs8Variable()
     :QObject()
 {
+    QDomDocument doc;
+    m_docFragment=doc.createDocumentFragment();
+    m_element=doc.createElement("Data");
+    m_docFragment.appendChild(m_element);
 }
 
 QString cs8Variable::toString(bool withTypeDefinition) {
@@ -104,6 +108,17 @@ void cs8Variable::setDescription(QString value)
 QString cs8Variable::description() const
 {
     return m_description;
+}
+
+QString cs8Variable::dimension() const
+{
+    return m_element.attribute("size","");
+}
+
+void cs8Variable::setDimension(const QString &dim)
+{
+    if (m_element.hasAttribute("size"))
+        m_element.setAttribute("size",dim);
 }
 
 void cs8Variable::setType(QString value)

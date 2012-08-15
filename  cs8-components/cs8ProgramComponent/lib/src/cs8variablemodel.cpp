@@ -30,7 +30,7 @@ bool cs8VariableModel::addVariable(QDomElement & element,
     return true;
 }
 
-bool cs8VariableModel::addVariable(cs8Variable *variable)
+void cs8VariableModel::addVariable(cs8Variable *variable)
 {
     m_variableList.append (variable);
 }
@@ -79,6 +79,14 @@ QStringList cs8VariableModel::variableNameList()
         list << variable->name ();
     }
     return list;
+}
+
+cs8Variable *cs8VariableModel::createVariable(const QString &name)
+{
+    cs8Variable *variable=new cs8Variable();
+    variable->setName(name);
+    variableList().append(variable);
+    return variable;
 }
 
 QString cs8VariableModel::toDtxDocument() {

@@ -666,3 +666,8 @@ void cs8Application::setCopyrightMessage(const QString &text)
         program->setCopyrightMessage(text);
     }
 }
+
+cs8VariableModel *cs8Application::globalVariableModel() const
+{
+    return m_globalVariableModel;
+}
