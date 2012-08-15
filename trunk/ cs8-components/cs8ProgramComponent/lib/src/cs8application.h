@@ -49,6 +49,7 @@ public:
         bool isModified() const {return m_modified;}
         void moveParamsToGlobals(cs8Program *program);
         void setCopyrightMessage(const QString &text);
+        cs8VariableModel *globalVariableModel() const;
 
 protected:
         QHash<QString, QString> m_exportDirectives;

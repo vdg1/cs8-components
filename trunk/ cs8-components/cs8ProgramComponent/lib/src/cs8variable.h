@@ -29,6 +29,9 @@ public:
         else
             return 0;
     }
+
+    QString dimension() const;
+    void setDimension(const QString & dim);
     void setType(QString value);
     QString type() const;
 
@@ -70,6 +73,7 @@ public:
 protected:
     QDomElement m_element;
     QString m_description;
+    QDomDocumentFragment m_docFragment;
     bool m_global;
 
 
