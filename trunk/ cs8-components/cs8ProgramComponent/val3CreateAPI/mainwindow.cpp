@@ -179,6 +179,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps)
                 cs8Program *initProgram=new cs8Program(this);
                 initProgram->setName("init");
                 initProgram->setPublic(true);
+                initProgram->localVariableModel()->createVariable("i");
                 cs8DestApp->programModel()->append(initProgram);
                 QString code;
 
@@ -188,7 +189,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps)
                     {
                         qDebug() << "Getting link for " << variable->name();
                         // create dio Variable
-                        cs8Variable *dioVar=cs8DestApp->globalVariableModel()->createVariable(variable->name());
+                        cs8Variable *dioVar=cs8DestApp->globalVariableModel()->createVariable(variable->name().remove(0,1));
 
                         dioVar->setPublic(true);
                         dioVar->setType("dio");
@@ -196,18 +197,21 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps)
                         dioVar->setDimension(variable->dimension());
 
                         cs8DestApp->globalVariableModel()->addVariable(dioVar);
-
-                        // add dioLink code
-                        code += QString("  dioLink(%1,%2:%3)\n")
-                                .arg(dioVar->name())
-                                .arg(ioMapApplication.name())
-                                .arg(variable->name());
+                        for (int i=0;i<variable->size();i++)
+                        {
+                            // add dioLink code
+                            code += QString("  dioLink(%1[%4],%2:%3[%4])\n")
+                                    .arg(dioVar->name())
+                                    .arg(ioMapApplication.name())
+                                    .arg(variable->name())
+                                    .arg(i);
+                        }
                     }
                     if (variable->type()=="aio" && variable->name().startsWith("_"))
                     {
                         qDebug() << "Getting link for " << variable->name();
                         // create dio Variable
-                        cs8Variable *dioVar=cs8DestApp->globalVariableModel()->createVariable(variable->name());
+                        cs8Variable *dioVar=cs8DestApp->globalVariableModel()->createVariable(variable->name().remove(0,1));
 
                         dioVar->setPublic(true);
                         dioVar->setType("aio");
@@ -216,11 +220,15 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps)
 
                         cs8DestApp->globalVariableModel()->addVariable(dioVar);
 
-                        // add dioLink code
-                        code += QString("  aioLink(%1,%2:%3)\n")
-                                .arg(dioVar->name())
-                                .arg(ioMapApplication.name())
-                                .arg(variable->name());
+                        for (int i=0;i<variable->size();i++)
+                        {
+                            // add dioLink code
+                            code += QString("  aioLink(%1[%4],%2:%3[%4])\n")
+                                    .arg(dioVar->name())
+                                    .arg(ioMapApplication.name())
+                                    .arg(variable->name())
+                                    .arg(i);
+                        }
                     }
                 }
                 initProgram->setCode("begin\n"+code+"end");

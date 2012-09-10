@@ -11,11 +11,12 @@
 #include "cs8variablemodel.h"
 #include "cs8libraryaliasmodel.h"
 #include "cs8variable.h"
+#include <qregexp.h>
 //
 cs8Application::cs8Application(QObject *parent) :
     QObject(parent) {
     m_programModel = new cs8ProgramModel(this);
-    m_globalVariableModel = new cs8VariableModel(this);
+    m_globalVariableModel = new cs8GlobalVariableModel(this);
     m_libraryAliasModel = new cs8LibraryAliasModel(this);
     m_typeModel=new cs8TypeModel(this);
     m_projectPath="";
@@ -451,11 +452,12 @@ QString cs8Application::documentation() {
     return out;
 }
 
-QString cs8Application::checkVariables() const
+QString cs8Application::checkVariables()
 {
     QStringList output;
     // map containing information if a global variable has been referenced
     QMap<QString, bool> referencedMap;
+
     // build map
     foreach(cs8Variable *globalVariable, m_globalVariableModel->variableList ())
     {
@@ -503,6 +505,52 @@ QString cs8Application::checkVariables() const
         }
 
     }
+    //
+    QRegExp rx;
+    rx.setPattern("([A-Z]+)(_[A-Z0-9]*)");
+    QMap<QString, QString> *constSet;
+    QMap<QString, QMap<QString, QString>*> constSets;
+    QString prefix;
+    foreach(cs8Variable *var,m_globalVariableModel->variableList())
+    {
+        if (rx.indexIn(var->name())==0)
+        {
+            prefix=rx.cap(1);
+            qDebug() << "Found prefix " << prefix << ": " << var->name();
+            if (!constSets.contains(prefix))
+            {
+                constSet = new QMap<QString, QString>();
+                constSets.insert(prefix,constSet);
+            }
+            QString value=var->varValue("0").toString();
+            constSets.value(prefix)->insertMulti(value, var->name());
+        }
+    }
+    foreach(constSet, constSets)
+    {
+        QMapIterator<QString, QString> i(*constSet);
+        while (i.hasNext())
+        {
+            i.next();
+            if (constSet->values(i.key()).count()>1)
+            {
+                QString msg;
+                foreach(QString key, constSet->values(i.key()))
+                {
+                    msg+=key+", ";
+                }
+                msg.chop(2);
+                output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
+                               .arg ("")
+                               .arg ("Warning: Global variables '" + msg + "' have the same value '"+i.key()+"'")
+                               .arg(cellDataFilePath ())
+                               .arg(0));
+                break;
+            }
+        }
+    }
+
+    //
     foreach(cs8Program* program, m_programModel->programList ())
     {
         foreach(cs8Variable* lvar,program->localVariableModel ()->variableList ())

@@ -70,10 +70,13 @@ public:
     QDomElement element() const {
         return m_element;}
 
+    QVariant varValue(QString index=0);
+
 protected:
     QDomElement m_element;
     QString m_description;
     QDomDocumentFragment m_docFragment;
+     QDomDocument m_doc;
     bool m_global;
 
 

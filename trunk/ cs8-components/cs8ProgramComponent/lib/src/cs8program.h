@@ -6,6 +6,7 @@
 #include <QDebug>
 #include "cs8variablemodel.h"
 #include "cs8parametermodel.h"
+#include "cs8localvariablemodel.h"
 
 //
 class cs8Program: public QObject {

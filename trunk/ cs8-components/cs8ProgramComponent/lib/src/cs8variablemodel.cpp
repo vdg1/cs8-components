@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QStringList>
 //
-cs8VariableModel::cs8VariableModel(QObject * parent, bool mode) :
+cs8VariableModel::cs8VariableModel(QObject * parent, modelType mode) :
     QAbstractTableModel(parent), m_mode(mode)
 {
     //m_variableList = new QList<cs8Variable*>;

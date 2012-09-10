@@ -2,7 +2,7 @@
 #include "cs8variable.h"
 //
 cs8ParameterModel::cs8ParameterModel ( QObject * parent )
-    : cs8VariableModel ( parent, true )
+    : cs8VariableModel ( parent, cs8VariableModel::Parameter )
 {
     // TODO
 }

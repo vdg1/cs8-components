@@ -20,7 +20,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     QString filePath;
-    filePath=QFileDialog::getOpenFileName (this,"Select Val3 Project directory","D:\\data\\Staubli\\CS8\\Development_72\\usr\\usrapp","*.pjx");
+    filePath=QFileDialog::getOpenFileName (this,"Select Val3 Project directory","D:\\data\\Staubli\\CS8\\Development_7.4\\usr\\usrapp","*.pjx");
        if (!filePath.isEmpty ())
     {
         cs8Application app;
