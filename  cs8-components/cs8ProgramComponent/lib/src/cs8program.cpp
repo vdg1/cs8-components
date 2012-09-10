@@ -444,7 +444,7 @@ void cs8Program::parseDocumentation(const QString & code_) {
             if (m_parameterModel->getVarByName(tagName) != 0)
                 m_parameterModel->getVarByName(tagName)->setDescription(tagText);
         }
-        else if (tagType == "local" or tagType=="var") {
+        else if (tagType == "local" || tagType=="var") {
             if (m_localVariableModel->getVarByName(tagName) != 0)
                 m_localVariableModel->getVarByName(tagName)->setDescription(
                             tagText);
