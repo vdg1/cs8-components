@@ -22,3 +22,9 @@ LIBS += ../../lib/libcs8ProjectComponent.a
 
 INCLUDEPATH +=  ../lib\
                 ../lib/src
+
+
+win32:RC_FILE = val3Compiler.rc
+
+OTHER_FILES += \
+    val3Compiler.rc

@@ -11,7 +11,7 @@
 //
 cs8Program::cs8Program(QObject * parent) :
     QObject(parent) {
-    m_localVariableModel = new cs8VariableModel(this);
+    m_localVariableModel = new cs8LocalVariableModel(this);
     m_parameterModel = new cs8ParameterModel(this);
 
     createXMLSkeleton ();
@@ -162,7 +162,7 @@ QString cs8Program::extractCode(const QString & code_) const{
     QStringList list = code.split("\n");
     int start = list.indexOf(QRegExp("\\s*begin\\s*"));
     int stop = start + 1;
-    while (list.at(stop).contains(QRegExp("^\\s*//.*")) or list.at(stop).simplified().isEmpty())
+    while (list.at(stop).contains(QRegExp("^\\s*//.*")) || list.at(stop).simplified().isEmpty())
         stop++;
     for (int i = stop - 1; i > start; i--)
         list.removeAt(i);
@@ -367,7 +367,7 @@ void cs8Program::parseDocumentation(const QString & code_) {
                     m_parameterModel->getVarByName(tagName)->setDescription(
                                 tagText);
             }
-            else if (tagType == "local" or tagType=="var") {
+            else if (tagType == "local" || tagType=="var") {
                 if (m_localVariableModel->getVarByName(tagName) != 0)
                     m_localVariableModel->getVarByName(tagName)->setDescription(
                                 tagText);

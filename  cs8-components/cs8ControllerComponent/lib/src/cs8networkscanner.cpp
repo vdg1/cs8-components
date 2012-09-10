@@ -32,7 +32,7 @@ bool controllerIsAvailable(const cs8NetworkItem & item) {
         {
             //emit removeHost(address);
             qDebug() << item.address << " not a CS8 controller";
-            // return false;
+            return false;
         }
 
         socket.close();

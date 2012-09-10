@@ -9,13 +9,13 @@ class cs8Variable;
 class cs8VariableModel: public QAbstractTableModel {
     Q_OBJECT
 
-private:
-    bool m_mode;
+
 protected:
     QList<cs8Variable*> m_variableList;
 
 
 public:
+     enum modelType { Global, Local, Parameter };
     QString toDocumentedCode();
     QDomNode document(QDomDocument & doc);
     QVariant headerData(int section, Qt::Orientation orientation, int role =
@@ -28,7 +28,7 @@ public:
     void addVariable (cs8Variable *variable);
     bool addGlobalVariable(QDomElement & element, const QString & description =
             QString());
-    cs8VariableModel(QObject * parent = 0, bool mode = false);
+    cs8VariableModel(QObject * parent = 0, modelType mode = Local);
     bool setData(const QModelIndex & index, const QVariant & value, int role =
             Qt::EditRole);
     Qt::ItemFlags flags(const QModelIndex & index) const;
@@ -52,5 +52,8 @@ signals:
 
 protected slots:
     void slotModified();
+
+private:
+    modelType m_mode;
 };
 #endif

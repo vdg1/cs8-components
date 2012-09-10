@@ -11,9 +11,8 @@ cs8Variable::cs8Variable(QDomElement & element, const QString & description)
 cs8Variable::cs8Variable()
     :QObject()
 {
-    QDomDocument doc;
-    m_docFragment=doc.createDocumentFragment();
-    m_element=doc.createElement("Data");
+    m_docFragment=m_doc.createDocumentFragment();
+    m_element=m_doc.createElement("Data");
     m_docFragment.appendChild(m_element);
 }
 
@@ -86,6 +85,20 @@ void cs8Variable::setGlobal(bool global)
             m_element.setAttribute ("size","1");
         m_element.removeAttribute ("use");
     }
+}
+
+QVariant cs8Variable::varValue(QString index)
+{
+    QDomElement e;
+    for (int i=0;i<m_element.childNodes().count();i++)
+    {
+        if (m_element.childNodes().at(i).toElement().attribute("key")==index)
+        {
+            return m_element.childNodes().at(i).toElement().attribute("value");
+        }
+    }
+
+    return QVariant();
 }
 
 void cs8Variable::setUse(QString value)

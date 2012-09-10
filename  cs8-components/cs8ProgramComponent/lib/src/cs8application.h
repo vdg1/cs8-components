@@ -9,6 +9,7 @@
 #include "cs8program.h"
 #include "cs8programmodel.h"
 #include "cs8libraryaliasmodel.h"
+#include "cs8globalvariablemodel.h"
 #include "cs8typemodel.h"
 
 //
@@ -39,7 +40,7 @@ public:
 
         bool loadDocumentationFile(const QString & fileName);
         QString documentation();
-        QString checkVariables() const;
+        QString checkVariables();
         void setCellPath(const QString & path);
         QString cellPath() const;
         QString cellProjectFilePath() const;
@@ -57,7 +58,7 @@ protected:
         QString m_projectName;
         QString m_projectPath;
         cs8ProgramModel* m_programModel;
-        cs8VariableModel* m_globalVariableModel;
+        cs8GlobalVariableModel* m_globalVariableModel;
         cs8LibraryAliasModel* m_libraryAliasModel;
         cs8TypeModel *m_typeModel;
         //QDomDocument m_dataDoc;
