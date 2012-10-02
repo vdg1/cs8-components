@@ -98,7 +98,13 @@ QVariant cs8Variable::varValue(QString index)
         }
     }
 
-    return QVariant();
+    // return empty variable
+    if(type()=="num")
+        return QVariant(0);
+    else if (type()=="string")
+        return QVariant("");
+    else
+        return QVariant();
 }
 
 void cs8Variable::setUse(QString value)

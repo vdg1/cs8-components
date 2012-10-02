@@ -220,7 +220,7 @@ void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel)
     {
         QDomElement element=param->element ().cloneNode (true).toElement ();
         cs8Variable *p=new cs8Variable(element,param->description ());
-        qDebug() << p->name () << ":" << p->definition ();
+        //qDebug() << p->name () << ":" << p->definition ();
 
         /*
         p->setDescription (param->description ());
