@@ -32,11 +32,11 @@ SolidCompression=yes
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "D:\data\Cpp\cs8-components\cs8ProgramComponent\bin\extractPrototype.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\data\Cpp\cs8-components\cs8ProgramComponent\bin\Val3 Documentation Editor.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\data\Cpp\cs8-components\cs8ProgramComponent\bin\val3Check.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\data\Cpp\cs8-components\cs8ProgramComponent\bin\val3CreateAPI.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\data\Cpp\cs8-components\cs8ProgramComponent\bin\extractDoc.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\extractPrototype.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\Val3 Documentation Editor.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\val3Check.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\val3CreateAPI.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\extractDoc.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MINGW}\bin\mingwm10.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MINGW}\bin\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
