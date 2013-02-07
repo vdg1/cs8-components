@@ -10,11 +10,20 @@
 #include <QNetworkAddressEntry>
 #include <QAbstractTableModel>
 
+#ifdef WIN32
+# if DLLEXPORT
+#  define MYDLLAPI __declspec(dllexport)
+# else
+#  define MYDLLAPI __declspec(dllimport)
+# endif
+#endif
+
+
 class QTimer;
 class QTcpSocket;
 
 
-struct cs8NetworkItem
+struct MYDLLAPI cs8NetworkItem
 {
         QString serialNumber;
         QString address;
@@ -22,15 +31,15 @@ struct cs8NetworkItem
 };
 
 
-class cs8NetworkScanner : public QAbstractTableModel
+class MYDLLAPI cs8NetworkScanner : public QAbstractTableModel
 {
         Q_OBJECT
     public:
         cs8NetworkScanner(QObject * parent=0);
         ~cs8NetworkScanner();
 
-        int rowCount(const QModelIndex & index) const;
-        int columnCount (const QModelIndex & index) const;
+        int rowCount(const QModelIndex & /*index*/) const;
+        int columnCount (const QModelIndex &) const;
         QVariant data(const QModelIndex & index, int role=Qt::DisplayRole) const;
         QVariant headerData(int section, Qt::Orientation, int role=Qt::DisplayRole) const;
         QString serialNumber(const QString & host);

@@ -160,7 +160,7 @@ void P_cs8FTPInstance::slotRawCommandReply ( int replyCode, const QString & deta
 /*!
     \fn P_cs8FTPInstance::slotCommandStarted(int id)
  */
-void P_cs8FTPInstance::slotCommandStarted ( int id )
+void P_cs8FTPInstance::slotCommandStarted ( int /*id*/ )
 {
     m_aborted=false;
     m_lastTransferedBytes=0;
@@ -172,7 +172,7 @@ void P_cs8FTPInstance::slotCommandStarted ( int id )
 /*!
     \fn P_cs8FTPInstance::slotCommandFinished(int id, bool error)
  */
-void P_cs8FTPInstance::slotCommandFinished ( int id, bool error )
+void P_cs8FTPInstance::slotCommandFinished ( int /*id*/, bool /*error*/ )
 {
 
     //qDebug() << "P_cs8FTPInstance::slotCommandFinished() id " <<  id << " error: " << error;
