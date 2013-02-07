@@ -32,7 +32,7 @@ DESTDIR = ../../lib/
 #MOC_DIR = build
 
 FORMS += ui/cs8logindatadialog.ui
-
+DEFINES += DLLEXPORT
 win32 {
  build_pass:CONFIG(debug, debug|release) {
     TARGET = cs8ControllerComponentd

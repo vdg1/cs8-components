@@ -86,15 +86,15 @@ bool cs8FileEngine::mkdir ( const QString& dirName, bool createParentDirectories
     if ( !createParentDirectories )
         m_ftp->ftp()->mkdir ( dirName );
     else
+    {
+        QString buildPath=QString ( "/" );
+        foreach ( QString dir, dirs )
         {
-            QString buildPath=QString ( "/" );
-            foreach ( QString dir, dirs )
-                {
-                    buildPath+=dir+"/";
-                    m_ftp->ftp()->mkdir ( buildPath );
-                    waitFtp();
-                }
+            buildPath+=dir+"/";
+            m_ftp->ftp()->mkdir ( buildPath );
+            waitFtp();
         }
+    }
     return waitFtp();
 }
 
@@ -131,27 +131,27 @@ bool cs8FileEngine::setSize ( qint64 size )
 QAbstractFileEngine::FileFlags cs8FileEngine::fileFlags ( FileFlags type ) const
 {
     if ( ( m_url.path() =="/usr" ) || ( m_url.path() =="/sys" ) || ( m_url.path() =="/log" ) || ( m_url.path().isEmpty() ) )
-        {
-            return QAbstractFileEngine::DirectoryType |
-                    QAbstractFileEngine::ReadOwnerPerm |
-                    QAbstractFileEngine::WriteOwnerPerm |
-                    QAbstractFileEngine::ReadUserPerm|
-                    QAbstractFileEngine::WriteUserPerm|
-                    QAbstractFileEngine::ReadGroupPerm|
-                    QAbstractFileEngine::WriteGroupPerm |
-                    QAbstractFileEngine::ExistsFlag;
-        }
+    {
+        return QAbstractFileEngine::DirectoryType |
+                QAbstractFileEngine::ReadOwnerPerm |
+                QAbstractFileEngine::WriteOwnerPerm |
+                QAbstractFileEngine::ReadUserPerm|
+                QAbstractFileEngine::WriteUserPerm|
+                QAbstractFileEngine::ReadGroupPerm|
+                QAbstractFileEngine::WriteGroupPerm |
+                QAbstractFileEngine::ExistsFlag;
+    }
     if ( type && QAbstractFileEngine::Refresh!=0 )
         //qDebug() << "refresh requested";
 
         if ( !m_ftp->cacheContains ( m_url.toString() ) )
-            {
-                QString url=m_url.toString();
-                if ( !m_url.path().isEmpty() )
-                    url=url.left ( url.lastIndexOf ( "/" ) );
-                QDir dir ( url );
-                dir.entryList();
-            }
+        {
+            QString url=m_url.toString();
+            if ( !m_url.path().isEmpty() )
+                url=url.left ( url.lastIndexOf ( "/" ) );
+            QDir dir ( url );
+            dir.entryList();
+        }
     QUrlInfo* info=m_ftp->cachedInfo ( m_url.toString() );
     QAbstractFileEngine::FileFlags flags;
     //qDebug() << " file flags for " <<  m_url.toString() << " : " << flags;
@@ -174,24 +174,28 @@ QDateTime cs8FileEngine::fileTime ( FileTime time ) const
 {
     //qDebug() << "Return date information of " << m_url.toString ();
     if (m_ftp->urlInfoCache ()->contains (m_url.toString ()))
+    {
+        QCache< QString, QUrlInfo >* cache=m_ftp->urlInfoCache ();
+        switch (time)
         {
-            QCache< QString, QUrlInfo >* cache=m_ftp->urlInfoCache ();
-            switch (time)
-                {
-                case CreationTime:
-                    return cache->object (m_url.toString ())->lastModified ();
-                    break;
+        case CreationTime:
+            return cache->object (m_url.toString ())->lastModified ();
+            break;
 
-                case ModificationTime:
-                    return cache->object (m_url.toString ())->lastModified ();
-                    break;
+        case ModificationTime:
+            return cache->object (m_url.toString ())->lastModified ();
+            break;
 
-                case AccessTime:
-                    return cache->object (m_url.toString ())->lastRead ();
-                    break;
+        case AccessTime:
+            return cache->object (m_url.toString ())->lastRead ();
+            break;
 
-                }
+        default:
+            return QAbstractFileEngine::fileTime ( time );
+            break;
+
         }
+    }
     else
         return QAbstractFileEngine::fileTime ( time );
 }
@@ -200,21 +204,21 @@ qint64 cs8FileEngine::size() const
 {
     qDebug() << "cs8FileEngine::size(): " << m_url.toString();
     if ( m_cached )
-        {
-            qDebug() << "returning cached size information: " << m_buffer.size();
-            return m_buffer.size();//QAbstractFileEngine::size();
-        }
+    {
+        qDebug() << "returning cached size information: " << m_buffer.size();
+        return m_buffer.size();//QAbstractFileEngine::size();
+    }
     else
-        {
-            qDebug() << "querying size information: ";
-            primeFtp();
-            m_ftp->size ( m_url.path() );
-            bool ok=waitFtp();
-            if ( ok )
-                return m_ftp->fileSize();
-            else
-                return -1;
-        }
+    {
+        qDebug() << "querying size information: ";
+        primeFtp();
+        m_ftp->size ( m_url.path() );
+        bool ok=waitFtp();
+        if ( ok )
+            return m_ftp->fileSize();
+        else
+            return -1;
+    }
 }
 
 QString cs8FileEngine::fileName ( FileName file ) const
@@ -222,31 +226,31 @@ QString cs8FileEngine::fileName ( FileName file ) const
     //qDebug() << "cs8FileEngine::fileName (): " << file;
     QString ret;
     switch ( file )
-        {
-        case QAbstractFileEngine::BaseName:
-            ret= QFileInfo ( m_url.path() ).fileName();
-            break;
+    {
+    case QAbstractFileEngine::BaseName:
+        ret= QFileInfo ( m_url.path() ).fileName();
+        break;
 
-        case QAbstractFileEngine::PathName:
-            ret= QFileInfo ( m_url.path() ).absolutePath();
-            break;
+    case QAbstractFileEngine::PathName:
+        ret= QFileInfo ( m_url.path() ).absolutePath();
+        break;
 
-        case QAbstractFileEngine::AbsoluteName:
-            ret= m_url.path();
-            break;
+    case QAbstractFileEngine::AbsoluteName:
+        ret= m_url.path();
+        break;
 
-        case QAbstractFileEngine::AbsolutePathName:
-            ret= QFileInfo ( m_url.path() ).absolutePath();
-            break;
+    case QAbstractFileEngine::AbsolutePathName:
+        ret= QFileInfo ( m_url.path() ).absolutePath();
+        break;
 
-        case QAbstractFileEngine::LinkName:
-            ret= QString();
-            break;
+    case QAbstractFileEngine::LinkName:
+        ret= QString();
+        break;
 
-        default:
-            ret= m_url.toString();
-            break;
-        }
+    default:
+        ret= m_url.toString();
+        break;
+    }
     //qDebug() << "           " << ret;
     return ret;
 }
@@ -267,18 +271,18 @@ QStringList cs8FileEngine::entryList ( QDir::Filters filters, const QStringList&
     //qDebug() << "				" << filters;
 
     if ( !m_url.path().isEmpty() )
-        {
-            connect ( m_ftp->ftp(),SIGNAL ( listInfo ( const QUrlInfo& ) ),this,SLOT ( slotListInfo ( const QUrlInfo& ) ) );
-            primeFtp();
-            m_ftp->ftp()->list ( m_url.path() );
-            waitFtp();
-            disconnect ( m_ftp->ftp(),SIGNAL ( listInfo ( const QUrlInfo& ) ) );
-            entries= m_entryList;
-        }
+    {
+        connect ( m_ftp->ftp(),SIGNAL ( listInfo ( const QUrlInfo& ) ),this,SLOT ( slotListInfo ( const QUrlInfo& ) ) );
+        primeFtp();
+        m_ftp->ftp()->list ( m_url.path() );
+        waitFtp();
+        disconnect ( m_ftp->ftp(),SIGNAL ( listInfo ( const QUrlInfo& ) ) );
+        entries= m_entryList;
+    }
     else
-        {
-            entries= QStringList()  << "sys" << "usr" << "log";
-        }
+    {
+        entries= QStringList()  << "sys" << "usr" << "log";
+    }
     qDebug() << entries;
     return entries;
 }
@@ -316,24 +320,24 @@ bool cs8FileEngine::open ( QIODevice::OpenMode mode )
 
 
     switch ( mode & ( QIODevice::WriteOnly|QIODevice::Append ) )
-        {
-        case QIODevice::ReadOnly:
-            break;
+    {
+    case QIODevice::ReadOnly:
+        break;
 
-        case QIODevice::ReadWrite:
-            break;
+    case QIODevice::ReadWrite:
+        break;
 
-        case QIODevice::Append:
-            break;
+    case QIODevice::Append:
+        break;
 
-            // download of file is not needed if opened with WRITEONLY flag
-        case QIODevice::WriteOnly:
-            m_cached = true;
-            m_buffer.open ( m_mode | QIODevice::ReadOnly );
-            m_buffer.seek ( 0 );
-            break;
+        // download of file is not needed if opened with WRITEONLY flag
+    case QIODevice::WriteOnly:
+        m_cached = true;
+        m_buffer.open ( m_mode | QIODevice::ReadOnly );
+        m_buffer.seek ( 0 );
+        break;
 
-        }
+    }
 
     m_buffer.buffer().clear();
     int size_=size();
@@ -401,15 +405,15 @@ void cs8FileEngine::primeFtp() const
     //qDebug() << "cs8FileEngine::primeFtp() " << m_url.toString();
     //qDebug() << "                   state: " << m_ftp->ftp()->state();
     if ( m_url.host() !=m_ftp->host() || m_ftp->ftp()->state() ==QFtp::Unconnected )
+    {
+        if ( m_ftp->ftp()->state() >= QFtp::Connected )
         {
-            if ( m_ftp->ftp()->state() >= QFtp::Connected )
-                {
-                    m_ftp->ftp()->close();
-                    waitFtp();
-                }
-            m_ftp->connectToHost ( m_url.host() );
-            m_ftp->login ( m_url.userName(),m_url.password().isEmpty() ? QString ( "" ) :m_url.password() );
+            m_ftp->ftp()->close();
+            waitFtp();
         }
+        m_ftp->connectToHost ( m_url.host() );
+        m_ftp->login ( m_url.userName(),m_url.password().isEmpty() ? QString ( "" ) :m_url.password() );
+    }
 }
 
 
@@ -453,22 +457,22 @@ qint64 cs8FileEngine::write ( const char * data, qint64 len )
 bool cs8FileEngine::retrieveFile()
 {
     if ( !m_cached )
+    {
+        m_buffer.buffer().clear();
+        m_buffer.open ( QIODevice::ReadWrite );
+        m_buffer.seek ( 0 );
+        primeFtp();
+        m_ftp->ftp()->get ( m_url.path(),&m_buffer );
+        bool status=waitFtp();
+        m_buffer.close();
+        if ( status )
         {
-            m_buffer.buffer().clear();
-            m_buffer.open ( QIODevice::ReadWrite );
+            m_cached=true;
+            m_buffer.open ( m_mode | QIODevice::ReadOnly );
             m_buffer.seek ( 0 );
-            primeFtp();
-            m_ftp->ftp()->get ( m_url.path(),&m_buffer );
-            bool status=waitFtp();
-            m_buffer.close();
-            if ( status )
-                {
-                    m_cached=true;
-                    m_buffer.open ( m_mode | QIODevice::ReadOnly );
-                    m_buffer.seek ( 0 );
-                }
-            return status;
         }
+        return status;
+    }
     else
         return true;
 }
