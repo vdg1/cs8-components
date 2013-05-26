@@ -307,7 +307,7 @@ void cs8Application::setModified(bool modified_)
     emit modified(modified_);
 }
 
-bool cs8Application::loadDocumentationFile(const QString & fileName) {
+bool cs8Application::loadDocumentationFile(const QString & /*fileName*/) {
     if (m_programModel->getProgramByName("_globals")) {
 
     }
@@ -718,4 +718,9 @@ void cs8Application::setCopyrightMessage(const QString &text)
 cs8VariableModel *cs8Application::globalVariableModel() const
 {
     return m_globalVariableModel;
+}
+
+cs8TypeModel *cs8Application::typeModel() const
+{
+    return m_typeModel;
 }

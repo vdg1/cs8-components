@@ -139,7 +139,7 @@ void MainWindow::on_detailEditor_done(){
 
 bool MainWindow::maybeSave()
 {
-    if (m_application->isModified () or true) {
+    if (m_application->isModified () || true) {
         QMessageBox::StandardButton ret;
         ret = QMessageBox::warning(this, tr("Application"),
                                    tr("The document has been modified.\n"

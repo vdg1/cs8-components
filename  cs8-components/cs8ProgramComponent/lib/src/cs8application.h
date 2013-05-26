@@ -38,7 +38,7 @@ public:
         }
         void setName(const QString & name);
 
-        bool loadDocumentationFile(const QString & fileName);
+        bool loadDocumentationFile(const QString &);
         QString documentation();
         QString checkVariables();
         void setCellPath(const QString & path);
@@ -51,6 +51,7 @@ public:
         void moveParamsToGlobals(cs8Program *program);
         void setCopyrightMessage(const QString &text);
         cs8VariableModel *globalVariableModel() const;
+        cs8TypeModel *typeModel() const;
 
 protected:
         QHash<QString, QString> m_exportDirectives;

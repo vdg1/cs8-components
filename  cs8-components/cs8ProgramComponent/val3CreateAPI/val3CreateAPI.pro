@@ -18,9 +18,8 @@ HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui
 
-LIBS += ../../lib/libcs8ProjectComponent.a
+LIBS += ../../lib/cs8ProjectComponent.lib
 
 INCLUDEPATH +=  ../lib\
                 ../lib/src
 
-POST_TARGETDEPS += ../../lib/libcs8ProjectComponent.a
