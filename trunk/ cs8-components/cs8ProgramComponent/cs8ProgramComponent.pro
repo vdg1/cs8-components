@@ -8,4 +8,4 @@ SUBDIRS = lib \
     cs8DocEditor \
     val3PreCompiler \
     val3CreateAPI \
-    val3CompilerDeployment
+    #val3CompilerDeployment

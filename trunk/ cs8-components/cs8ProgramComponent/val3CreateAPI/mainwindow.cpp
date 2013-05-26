@@ -171,6 +171,11 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps)
 
             if (cs8DestApp)
             {
+                // copy user type from source app to dest app
+                foreach (cs8LibraryAlias *type, cs8SourceApp->typeModel ()->list ()) {
+                    cs8DestApp->typeModel ()->add (type->name (),type->path (), true);
+                }
+
                 // create an init program in the API library
                 cs8Program *initProgram=new cs8Program(this);
                 initProgram->setName("init");

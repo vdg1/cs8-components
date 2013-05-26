@@ -14,10 +14,10 @@ INCLUDEPATH += ../lib \
     ../../cs8ControllerComponent/lib/src \
     ../lib/src \
     build
-LIBS += ../../lib/libcs8ProjectComponent.a \
-    -L../../lib/ \
-    -lcs8ControllerComponent
-#TARGETDEPS += ../../lib/libcs8ProjectComponent.a
+LIBS +=   -L../../lib/ \
+    -lcs8ControllerComponent \
+    -lcs8ProjectComponent
+
 RCC_DIR = build
 FORMS = ui/mainwindowimpl.ui
 HEADERS = src/mainwindowimpl.h

@@ -16,7 +16,9 @@ HEADERS += src/cs8project.h \
     src/formvariabledetaileditor.h \
     src/cs8typemodel.h \
     src/cs8localvariablemodel.h \
-    src/cs8globalvariablemodel.h
+    src/cs8globalvariablemodel.h \
+    src/cs8usertypemodel.h \
+    src/cs8usertype.h
 SOURCES += src/cs8project.cpp \
     src/cs8program.cpp \
     src/cs8programmodel.cpp \
@@ -34,16 +36,34 @@ SOURCES += src/cs8project.cpp \
     src/formvariabledetaileditor.cpp \
     src/cs8typemodel.cpp \
     src/cs8localvariablemodel.cpp \
-    src/cs8globalvariablemodel.cpp
+    src/cs8globalvariablemodel.cpp \
+    src/cs8usertypemodel.cpp \
+    src/cs8usertype.cpp
 FORMS +=  ../lib/forms/formvariabledetaileditor.ui
 INCLUDEPATH = build
 TEMPLATE = lib
 CONFIG += console \
     staticlib
-TARGET = cs8ProjectComponent
+
 DESTDIR = ../../lib
 OBJECTS_DIR = build
 UI_DIR = build
 MOC_DIR = build
 QT += xml \
     core
+
+win32 {
+ build_pass:CONFIG(debug, debug|release) {
+    TARGET = cs8ProjectComponentd
+    OBJECTS_DIR = buildd
+    UI_DIR = build
+    MOC_DIR = buildd
+
+ } else {
+    TARGET = cs8ProjectComponent
+    OBJECTS_DIR = build
+    UI_DIR = build
+    MOC_DIR = build
+
+  }
+}

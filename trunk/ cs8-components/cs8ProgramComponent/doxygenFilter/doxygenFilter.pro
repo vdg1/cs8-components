@@ -12,9 +12,9 @@ SOURCES = src/main.cpp
 INCLUDEPATH += ../lib \
     ../../cs8ControllerComponent/lib/src \
     ../lib/src
-LIBS += ../../lib/libcs8ProjectComponent.a \
-    -L../../lib/ \
-    -lcs8ControllerComponent
-POST_TARGETDEPS += ../../lib/libcs8ProjectComponent.a
+LIBS +=   -L../../lib/ \
+    -lcs8ControllerComponent \
+    -lcs8ProjectComponent
+
 RCC_DIR = build
 HEADERS =
