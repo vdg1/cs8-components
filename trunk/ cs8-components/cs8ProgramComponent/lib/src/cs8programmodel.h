@@ -36,8 +36,8 @@ public:
     cs8ProgramModel(QObject *parent = 0);
 
     ~cs8ProgramModel();
-    virtual int rowCount(const QModelIndex & index) const;
-    virtual int colCount(const QModelIndex & index) const;
+    virtual int rowCount(const QModelIndex &) const;
+    virtual int colCount(const QModelIndex &) const;
     virtual QVariant data(const QModelIndex & index, int role) const;
     bool setData(const QModelIndex & index, const QVariant & value, int role =
                  Qt::EditRole);

@@ -2,11 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "1.5"
+#define MyAppVersion "1.6"
 #define MyAppPublisher "SAXE Swiss System AB"
 #define MyAppURL "http://www.swiss-system.se"
-#define QT "D:\QT\QtSDK\Desktop\Qt\4.8.1\mingw"
-#define MINGW "C:\MinGW"
+#define QT "D:\qt\4.8.4_MSVC2008\"
+;#define MINGW "C:\MinGW"
 
 
 [Setup]
@@ -24,7 +24,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\Saxe Swiss System Val3 Tools
 DefaultGroupName={#MyAppName}
 OutputDir=D:\data\Cpp\cs8-components\Installer
-OutputBaseFilename=setup
+OutputBaseFilename=setup-{#MyAppVersion}
 Compression=lzma
 SolidCompression=yes
 
@@ -37,9 +37,6 @@ Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramCompon
 Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\val3Check.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\val3CreateAPI.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\extractDoc.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MINGW}\bin\mingwm10.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MINGW}\bin\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\QtCore4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\QtGui4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\QtXml4.dll"; DestDir: "{app}"; Flags: ignoreversion

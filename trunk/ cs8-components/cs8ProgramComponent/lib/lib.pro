@@ -17,7 +17,7 @@ HEADERS += src/cs8project.h \
     src/cs8typemodel.h \
     src/cs8localvariablemodel.h \
     src/cs8globalvariablemodel.h \
-    src/cs8usertypemodel.h \
+    #src/cs8usertypemodel.h \
     src/cs8usertype.h
 SOURCES += src/cs8project.cpp \
     src/cs8program.cpp \
@@ -37,7 +37,7 @@ SOURCES += src/cs8project.cpp \
     src/cs8typemodel.cpp \
     src/cs8localvariablemodel.cpp \
     src/cs8globalvariablemodel.cpp \
-    src/cs8usertypemodel.cpp \
+    #src/cs8usertypemodel.cpp \
     src/cs8usertype.cpp
 FORMS +=  ../lib/forms/formvariabledetaileditor.ui
 INCLUDEPATH = build
