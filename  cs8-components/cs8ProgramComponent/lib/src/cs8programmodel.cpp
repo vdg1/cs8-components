@@ -26,14 +26,14 @@ cs8ProgramModel::~cs8ProgramModel() {
 /*!
  \fn cs8ProgramModel::rowCount(const QModelIndex & index)
  */
-int cs8ProgramModel::rowCount(const QModelIndex & index) const {
+int cs8ProgramModel::rowCount(const QModelIndex & /*index*/) const {
     return m_programList.count();
 }
 
 /*!
  \fn cs8ProgramModel::colCount(const QModelIndex & index)
  */
-int cs8ProgramModel::colCount(const QModelIndex & index) const {
+int cs8ProgramModel::colCount(const QModelIndex & /*index*/) const {
     return 2;//m_programList.count();
 }
 
