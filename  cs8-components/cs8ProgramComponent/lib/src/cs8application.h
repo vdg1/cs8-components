@@ -87,6 +87,9 @@ protected slots:
 
 signals:
         void modified(bool);
+
+    private:
+        bool reportUnusedPublicGlobalVariables;
 }	;
 #endif
 

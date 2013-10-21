@@ -6,6 +6,7 @@
 #include <QStringList>
 #include <QDebug>
 #include <QDir>
+#include <QSettings>
 
 #include "cs8programmodel.h"
 #include "cs8variablemodel.h"
@@ -23,6 +24,9 @@ cs8Application::cs8Application(QObject *parent) :
     m_projectName="";
     m_cellPath="";
     setModified (false);
+
+    QSettings settings;
+    reportUnusedPublicGlobalVariables=settings.value ("reportUnusedPublicGlobalVariables",true).toBool ();
     //	m_programModel->setProgramList(&m_programList);
     connect(m_programModel, SIGNAL(globalVariableDocumentationFound(const QString & , const QString & ))
             ,this, SLOT(slotGlobalVariableDocumentationFound(const QString & , const QString & )));
@@ -496,11 +500,12 @@ QString cs8Application::checkVariables()
                                .arg(globalVariable->element ().lineNumber ()));
             }
             else {
-                output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
-                               .arg ("")
-                               .arg ("Warning: Global variable '" + globalVariable->name () + "' is not used, but is set as PUBLIC")
-                               .arg(cellDataFilePath ())
-                               .arg(globalVariable->element ().lineNumber ()));
+                if (reportUnusedPublicGlobalVariables)
+                    output.append (QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
+                                   .arg ("")
+                                   .arg ("Warning: Global variable '" + globalVariable->name () + "' is not used, but is set as PUBLIC")
+                                   .arg(cellDataFilePath ())
+                                   .arg(globalVariable->element ().lineNumber ()));
             }
         }
 

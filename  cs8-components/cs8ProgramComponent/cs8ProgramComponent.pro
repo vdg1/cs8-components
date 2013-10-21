@@ -9,3 +9,4 @@ SUBDIRS = lib \
     val3PreCompiler \
     val3CreateAPI \
     #val3CompilerDeployment
+    val3PreCompilerSettings

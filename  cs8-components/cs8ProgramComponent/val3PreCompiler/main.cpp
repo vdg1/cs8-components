@@ -11,6 +11,9 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QCoreApplication::setApplicationName ("Val3PreCompiler");
+    QCoreApplication::setOrganizationName("SAXE Swiss System");
+
     if (qApp->arguments ().count ()>1)
     {
         //
