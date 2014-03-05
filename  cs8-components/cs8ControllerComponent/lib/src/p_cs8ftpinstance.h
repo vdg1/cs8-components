@@ -31,7 +31,7 @@ protected slots:
     void slotStateChanged ( int state );
     void slotRawCommandReply ( int replyCode, const QString & detail ) ;
     void slotCommandStarted (int);
-    void slotCommandFinished (int, bool);
+    void slotCommandFinished (int id, bool error);
     void slotDataTransferProgress(qint64,qint64);
 
 signals:
