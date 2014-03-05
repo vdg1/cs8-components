@@ -82,6 +82,7 @@ class MYDLLAPI cs8NetworkScanner : public QAbstractTableModel
             }
 
 
+        void cancel();
 };
 
 #endif // CS8NETWORKSCANNER_H

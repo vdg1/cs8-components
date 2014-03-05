@@ -5,7 +5,7 @@
 #include <QtNetwork>
 #include <QTcpSocket>
 
-#define SCANTIMEOUT 40
+#define SCANTIMEOUT 2000
 
 
 bool controllerIsAvailable(const cs8NetworkItem & item) {
@@ -80,7 +80,8 @@ cs8NetworkScanner::cs8NetworkScanner(QObject * parent): QAbstractTableModel(pare
     connect(&m_watcherControllerSerialNumber,SIGNAL(finished()),this, SLOT(slotScanForSerialNumberFinished()));
 }
 
-cs8NetworkScanner::~cs8NetworkScanner(){
+void cs8NetworkScanner::cancel()
+{
     if (m_futureControllerDetection.isRunning())
     {
         qDebug() << "canceling pending network scan";
@@ -88,6 +89,10 @@ cs8NetworkScanner::~cs8NetworkScanner(){
         m_futureControllerDetection.waitForFinished();
         qDebug() << "scan is canceled";
     }
+}
+
+cs8NetworkScanner::~cs8NetworkScanner(){
+    cancel();
 }
 
 void cs8NetworkScanner::slotTimeOut()
@@ -181,6 +186,7 @@ void cs8NetworkScanner::slotScanForControllersFinished(){
  */
 void cs8NetworkScanner::stop(bool waitForStop)
 {
+    qDebug() << "stopping scanner";
     scanTimer->stop();
     m_enabled=false;
     m_futureControllerDetection.cancel();

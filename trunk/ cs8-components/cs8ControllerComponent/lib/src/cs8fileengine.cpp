@@ -383,6 +383,7 @@ bool cs8FileEngine::close()
  */
 void cs8FileEngine::slotListInfo ( const QUrlInfo & i )
 {
+    qDebug() << "Retrieved url info:" << i.name() << i.lastModified () << i.lastRead ();
     if ( !m_filterNames.isEmpty() ) {}
     m_entryList.append ( i.name() );
     m_ftp->addCachedInfo ( m_entryListPath+"/"+i.name(),i );
