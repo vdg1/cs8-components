@@ -49,6 +49,7 @@ private:
     void printChildNodes(const QDomElement & element);
     void createXMLSkeleton();
     QString extractDocumentation(const QString & code_);
+    QString m_briefDescription;
 
 public:
     cs8Program(QObject * parent);
@@ -69,7 +70,8 @@ public:
     void setCellPath(const QString & path);
     QString cellFilePath() const;
 
-protected:
+    void setDescriptionSection();
+    protected:
     bool parseProgramDoc(const QDomDocument & doc);
     void tidyUpCode(QString & code);
     QDomDocument m_XMLDocument;

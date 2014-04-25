@@ -6,15 +6,17 @@
 
 //
 
-void printUsage() {
-    fprintf(stderr, "Usage:\n"
-            "    \n");
+void printUsage()
+{
+    fprintf( stderr, "Usage:\n"
+             "    \n" );
 
 }
 
-int main(int argc, char ** argv) {
+int main( int argc, char **argv )
+{
 
-    QCoreApplication app(argc, argv);
+    QCoreApplication app( argc, argv );
 
 
     QString sourceDir;
@@ -25,32 +27,46 @@ int main(int argc, char ** argv) {
     QStringList arguments = app.arguments();
     //qDebug() << arguments;
 
-    foreach (QString argument,arguments) {
-        if (!sourceFlag && !destFlag) {
-            if (argument == "-help") {
+    foreach( QString argument, arguments )
+    {
+        if ( !sourceFlag && !destFlag )
+        {
+            if ( argument == "-help" )
+            {
                 printUsage();
                 return 0;
-            } else if (argument == "-version") {
-                fprintf(stderr, "extractDoc version %s\n",
-                        QT_VERSION_STR );
+            }
+            else if ( argument == "-version" )
+            {
+                fprintf( stderr, "extractDoc version %s\n",
+                         QT_VERSION_STR );
                 return 0;
-            } else if (argument == "-source") {
+            }
+            else if ( argument == "-source" )
+            {
                 sourceFlag = true;
-            } else if (argument == "-dest") {
+            }
+            else if ( argument == "-dest" )
+            {
                 destFlag = true;
             }
-        } else {
-            if (sourceFlag && !argument.startsWith("-")) {
+        }
+        else
+        {
+            if ( sourceFlag && !argument.startsWith( "-" ) )
+            {
                 sourceDir = argument;
                 sourceFlag = false;
             }
-            if (destFlag && !argument.startsWith("-")) {
+            if ( destFlag && !argument.startsWith( "-" ) )
+            {
                 destDir = argument;
                 destFlag = false;
             }
         }
     }
-    if (destDir.isEmpty() || sourceDir.isEmpty()) {
+    if ( destDir.isEmpty() || sourceDir.isEmpty() )
+    {
         printUsage();
         return 0;
     }
@@ -58,22 +74,25 @@ int main(int argc, char ** argv) {
     qDebug() << "source: " << sourceDir;
     qDebug() << "dest:   " << destDir;
 
-    QDir dir(sourceDir);
+    QDir dir( sourceDir );
     cs8Application application;
-    QStringList sourceFiles = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    sourceFiles.append("");
-    QStringList addFiles = dir.entryList(QStringList() << "*.pjx", QDir::Files);
-    if (addFiles.count() > 0){
-        QString addFile=addFiles.at(0);
-        addFile.chop(4);
-        sourceFiles.append(addFile);
+    QStringList sourceFiles = dir.entryList( QDir::Dirs | QDir::NoDotAndDotDot );
+    sourceFiles.append( "" );
+    QStringList addFiles = dir.entryList( QStringList() << "*.pjx", QDir::Files );
+    if ( addFiles.count() > 0 )
+    {
+        QString addFile = addFiles.at( 0 );
+        addFile.chop( 4 );
+        sourceFiles.append( addFile );
     }
-   qDebug() << ("applications: " + sourceFiles.join(", "));
-    foreach(QString sourceApp,sourceFiles) {
+    qDebug() << ( "applications: " + sourceFiles.join( ", " ) );
+    foreach( QString sourceApp, sourceFiles )
+    {
         qDebug() << sourceDir + "/" + sourceApp;
-        if (application.openFromPathName(sourceDir + "/" + sourceApp)) {
-            qDebug() << (sourceApp + " open ok");
-            application.exportToCFile(destDir);
+        if ( application.openFromPathName( sourceDir + "/" + sourceApp ) )
+        {
+            qDebug() << ( sourceApp + " open ok" );
+            application.exportToCFile( destDir );
 
         }
         qDebug() << "Done";

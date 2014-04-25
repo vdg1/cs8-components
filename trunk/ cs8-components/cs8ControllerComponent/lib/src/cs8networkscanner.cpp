@@ -5,7 +5,7 @@
 #include <QtNetwork>
 #include <QTcpSocket>
 
-#define SCANTIMEOUT 2000
+#define SCANTIMEOUT 1000
 
 
 bool controllerIsAvailable(const cs8NetworkItem & item) {

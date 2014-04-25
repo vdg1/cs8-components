@@ -13,12 +13,14 @@ HEADERS += mainwindow.h \
     codeeditor.h \
     highlighter.h
 FORMS += mainwindow.ui
+
+
 INCLUDEPATH += ../lib \
     ../../cs8ControllerComponent/lib/src \
     ../lib/src
 LIBS +=   -L../../lib/ \
-    -lcs8ControllerComponent \
-    -lcs8ProjectComponent
+    -lcs8ControllerComponentd \
+    -lcs8ProjectComponentd
 
 CONFIG +=qcodedit
 
@@ -26,3 +28,4 @@ OTHER_FILES += \
     Val3copyright.txt
 
 DESTDIR = ../bin
+
