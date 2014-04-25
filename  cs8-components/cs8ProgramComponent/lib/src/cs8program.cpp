@@ -9,12 +9,13 @@
 
 #define MAX_LENGTH 40
 //
-cs8Program::cs8Program(QObject * parent) :
-    QObject(parent) {
-    m_localVariableModel = new cs8LocalVariableModel(this);
-    m_parameterModel = new cs8ParameterModel(this);
+cs8Program::cs8Program( QObject *parent ) :
+    QObject( parent )
+{
+    m_localVariableModel = new cs8LocalVariableModel( this );
+    m_parameterModel = new cs8ParameterModel( this );
 
-    createXMLSkeleton ();
+    createXMLSkeleton();
 }
 //
 /*!
@@ -29,63 +30,66 @@ cs8Program::cs8Program(QObject * parent) :
  }
  */
 
-bool cs8Program::open(const QString & filePath) {
+bool cs8Program::open( const QString &filePath )
+{
     qDebug() << "cs8Program::open () " << filePath;
 
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly))
+    QFile file( filePath );
+    if ( !file.open( QIODevice::ReadOnly ) )
         return false;
-    if (!m_XMLDocument.setContent(&file)) {
+    if ( !m_XMLDocument.setContent( &file ) )
+    {
         file.close();
         return false;
     }
     file.close();
 
-    m_filePath=filePath;
-    return parseProgramDoc(m_XMLDocument);
+    m_filePath = filePath;
+    return parseProgramDoc( m_XMLDocument );
 }
 
 
-void cs8Program::printChildNodes(const QDomElement & element)
+void cs8Program::printChildNodes( const QDomElement &element )
 {
     qDebug() << "Child nodes of: " << element.tagName();
-    for (int i=0;i<element.childNodes().count();i++)
-        qDebug() << i << element.childNodes().at(i).nodeName();
+    for ( int i = 0; i < element.childNodes().count(); i++ )
+        qDebug() << i << element.childNodes().at( i ).nodeName();
 
 }
 
 void cs8Program::createXMLSkeleton()
 {
-    m_XMLDocument=QDomDocument();
-    QDomProcessingInstruction process = m_XMLDocument.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
-    m_XMLDocument.appendChild(process);
+    m_XMLDocument = QDomDocument();
+    QDomProcessingInstruction process = m_XMLDocument.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"utf-8\"" );
+    m_XMLDocument.appendChild( process );
 
-    m_programsSection=m_XMLDocument.createElement ("Programs");
-    m_programsSection.setAttribute ("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-    m_programsSection.setAttribute ("xmlns", "http://www.staubli.com/robotics/VAL3/Program/2");
-    m_XMLDocument.appendChild (m_programsSection);
+    m_programsSection = m_XMLDocument.createElement( "Programs" );
+    m_programsSection.setAttribute( "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" );
+    m_programsSection.setAttribute( "xmlns", "http://www.staubli.com/robotics/VAL3/Program/2" );
+    m_XMLDocument.appendChild( m_programsSection );
 
-    m_programSection=m_XMLDocument.createElement("Program");
-    m_programsSection.appendChild (m_programSection);
+    m_programSection = m_XMLDocument.createElement( "Program" );
+    m_programsSection.appendChild( m_programSection );
 
-    m_descriptionSection=m_XMLDocument.createElement ("Description");
-    m_programSection.appendChild (m_descriptionSection);
+    m_descriptionSection = m_XMLDocument.createElement( "Description" );
+    m_programSection.appendChild( m_descriptionSection );
 
-    m_paramSection=m_XMLDocument.createElement("Parameters");
-    m_paramSection.setAttribute ("xmlns", "http://www.staubli.com/robotics/VAL3/Param/1");
-    m_programSection.appendChild (m_paramSection);
+    m_paramSection = m_XMLDocument.createElement( "Parameters" );
+    m_paramSection.setAttribute( "xmlns", "http://www.staubli.com/robotics/VAL3/Param/1" );
+    m_programSection.appendChild( m_paramSection );
 
-    m_localSection=m_XMLDocument.createElement("Locals");
-    m_programSection.appendChild (m_localSection);
+    m_localSection = m_XMLDocument.createElement( "Locals" );
+    m_programSection.appendChild( m_localSection );
 
-    m_codeSection=m_XMLDocument.createElement("Code");
-    m_programSection.appendChild (m_codeSection);
+    m_codeSection = m_XMLDocument.createElement( "Code" );
+    m_programSection.appendChild( m_codeSection );
 }
 
 /*!
  \fn cs8Program::parseProgramDoc(const QDomDocument & doc)
  */
-bool cs8Program::parseProgramDoc(const QDomDocument & doc) {
+bool cs8Program::parseProgramDoc( const QDomDocument &doc )
+{
     m_programsSection = doc.documentElement();
 
 
@@ -94,132 +98,137 @@ bool cs8Program::parseProgramDoc(const QDomDocument & doc) {
 
 
     //printChildNodes(m_programSection);
-    if (m_programSection.isNull())
+    if ( m_programSection.isNull() )
         qDebug() << "Reading program section failed";
 
 
 
-    m_descriptionSection=m_programsSection.elementsByTagName("Description").at(0).toElement();
-    if (m_descriptionSection.isNull())
+    m_descriptionSection = m_programsSection.elementsByTagName( "Description" ).at( 0 ).toElement();
+    if ( m_descriptionSection.isNull() )
     {
-        m_descriptionSection=m_XMLDocument.createElement("Description");
-        m_programSection.insertBefore(m_descriptionSection,m_programSection.firstChild());
+        m_descriptionSection = m_XMLDocument.createElement( "Description" );
+        m_programSection.insertBefore( m_descriptionSection, m_programSection.firstChild() );
     }
-    m_paramSection = m_programSection.elementsByTagName("Parameters").at(0).toElement();
-    m_localSection = m_programSection.elementsByTagName("Locals").at(0).toElement();
+    m_paramSection = m_programSection.elementsByTagName( "Parameters" ).at( 0 ).toElement();
+    m_localSection = m_programSection.elementsByTagName( "Locals" ).at( 0 ).toElement();
 
     //qDebug() << m_programSection.elementsByTagName("Code").at(0).nodeType();
-    m_codeSection =  m_programSection.elementsByTagName("Code").at(0).toElement();
-    if (m_codeSection.isNull())
+    m_codeSection =  m_programSection.elementsByTagName( "Code" ).at( 0 ).toElement();
+    if ( m_codeSection.isNull() )
         qDebug() << "Reading code section failed";
 
 
     //qDebug() << "program name: " << name () << m_programSection.attribute ("name");
     QDomNodeList childList;
 
-    childList = m_localSection.elementsByTagName("Local");
-    for (int i = 0; i < childList.count(); i++) {
-        QDomElement item = childList.at(i).toElement();
-        m_localVariableModel->addVariable(item);
+    childList = m_localSection.elementsByTagName( "Local" );
+    for ( int i = 0; i < childList.count(); i++ )
+    {
+        QDomElement item = childList.at( i ).toElement();
+        m_localVariableModel->addVariable( item );
     }
 
-    childList = m_paramSection.elementsByTagName("Parameter");
-    for (int i = 0; i < childList.count(); i++) {
-        QDomElement item = childList.at(i).toElement();
-        m_parameterModel->addVariable(item);
+    childList = m_paramSection.elementsByTagName( "Parameter" );
+    for ( int i = 0; i < childList.count(); i++ )
+    {
+        QDomElement item = childList.at( i ).toElement();
+        m_parameterModel->addVariable( item );
     }
-    parseDocumentation(val3Code());
+    parseDocumentation( val3Code() );
     return true;
 }
 
-void cs8Program::tidyUpCode(QString &code)
+void cs8Program::tidyUpCode( QString &code )
 {
     // remove empty lines after "end"
-    QStringList list=code.split ("\n");
-    while (list.last().simplified().isEmpty())
+    QStringList list = code.split( "\n" );
+    while ( list.last().simplified().isEmpty() )
         list.removeLast();
 
-    code=list.join("\n");
+    code = list.join( "\n" );
 }
 
 
 // returns the code without documentation header
-QString cs8Program::val3Code(bool withDocumentation) {
+QString cs8Program::val3Code( bool withDocumentation )
+{
     // qDebug() << m_codeSection.text();
-    return withDocumentation? m_codeSection.text():extractCode(m_codeSection.text());
+    return withDocumentation ? m_codeSection.text() : extractCode( m_codeSection.text() );
 }
 
-QString cs8Program::toCSyntax() {
-    QString val3_=val3Code();
-    val3_=val3_.replace(QString("call "),QString(""),Qt::CaseSensitive);
+QString cs8Program::toCSyntax()
+{
+    QString val3_ = val3Code();
+    val3_ = val3_.replace( QString( "call " ), QString( "" ), Qt::CaseSensitive );
     return val3_;
 }
 
-QString cs8Program::extractCode(const QString & code_) const{
-    QString code=code_;
+QString cs8Program::extractCode( const QString &code_ ) const
+{
+    QString code = code_;
     // extract code
-    code.replace("\r\n", "\n");
-    QStringList list = code.split("\n");
-    int start = list.indexOf(QRegExp("\\s*begin\\s*"));
+    code.replace( "\r\n", "\n" );
+    QStringList list = code.split( "\n" );
+    int start = list.indexOf( QRegExp( "\\s*begin\\s*" ) );
     int stop = start + 1;
-    while (list.at(stop).contains(QRegExp("^\\s*//.*")) || list.at(stop).simplified().isEmpty())
+    while ( list.at( stop ).contains( QRegExp( "^\\s*//.*" ) ) || list.at( stop ).simplified().isEmpty() )
         stop++;
-    for (int i = stop - 1; i > start; i--)
-        list.removeAt(i);
-    return list.join("\n");
+    for ( int i = stop - 1; i > start; i-- )
+        list.removeAt( i );
+    return list.join( "\n" );
 }
 
 // return a list of variable tokens
 QStringList cs8Program::variableTokens()
 {
     QStringList list;
-    QString code=val3Code (true);
-    foreach(QString line, code.split ("\n"))
+    QString code = val3Code( true );
+    foreach( QString line, code.split( "\n" ) )
     {
-        QString l=line.trimmed ();
+        QString l = line.trimmed();
         // ignore comment lines
-        if (!l.startsWith ("//"))
+        if ( !l.startsWith( "//" ) )
         {
             // remove string from code line
             QRegExp rx;
-            rx.setPattern ("\\\".*\\\"");
-            rx.setMinimal (true);
-            int pos=0;
-            while (rx.indexIn (l,pos)!=-1)
-                l.replace (rx," ");
+            rx.setPattern( "\\\".*\\\"" );
+            rx.setMinimal( true );
+            int pos = 0;
+            while ( rx.indexIn( l, pos ) != -1 )
+                l.replace( rx, " " );
             //
-            rx.setPattern ("(\\w+)");
-            rx.setMinimal (false);
-            pos=0;
-            while((pos=rx.indexIn (l,pos))!=-1)
+            rx.setPattern( "(\\w+)" );
+            rx.setMinimal( false );
+            pos = 0;
+            while ( ( pos = rx.indexIn( l, pos ) ) != -1 )
             {
-                list << rx.cap(1);
-                pos+=rx.matchedLength ();
+                list << rx.cap( 1 );
+                pos += rx.matchedLength();
             }
         }
     }
     return list;
 }
 
-void cs8Program::setCode(const QString &code)
+void cs8Program::setCode( const QString &code )
 {
-    QDomCDATASection data=m_XMLDocument.createCDATASection(code);
-    m_programSection.removeChild (m_codeSection);
-    m_codeSection=m_XMLDocument.createElement ("Code");
+    QDomCDATASection data = m_XMLDocument.createCDATASection( code );
+    m_programSection.removeChild( m_codeSection );
+    m_codeSection = m_XMLDocument.createElement( "Code" );
 
     //while (m_codeSection.hasChildNodes ())
     //    m_codeSection.removeChild (m_codeSection.firstChildElement ());
-    m_codeSection.appendChild (data);
-    m_programSection.appendChild (m_codeSection);
+    m_codeSection.appendChild( data );
+    m_programSection.appendChild( m_codeSection );
 }
 
-void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel)
+void cs8Program::copyFromParameterModel( cs8ParameterModel *sourceModel )
 {
-    m_parameterModel->clear ();
-    foreach(cs8Variable *param,sourceModel->variableList ())
+    m_parameterModel->clear();
+    foreach( cs8Variable * param, sourceModel->variableList() )
     {
-        QDomElement element=param->element ().cloneNode (true).toElement ();
-        cs8Variable *p=new cs8Variable(element,param->description ());
+        QDomElement element = param->element().cloneNode( true ).toElement();
+        cs8Variable *p = new cs8Variable( element, param->description() );
         //qDebug() << p->name () << ":" << p->definition ();
 
         /*
@@ -229,30 +238,31 @@ void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel)
         p->setType (param->type ());
         p->setUse (param->use ());
         */
-        m_parameterModel->addVariable (element,param->description ());
+        m_parameterModel->addVariable( element, param->description() );
     }
 }
 
-QString cs8Program::extractDocumentation(const QString & code_){
+QString cs8Program::extractDocumentation( const QString &code_ )
+{
     //
     //extract documentation section
     QString documentationSection = code_;
-    documentationSection.replace("\r\n", "\n");
+    documentationSection.replace( "\r\n", "\n" );
     // revert automatic correction done by Val3 Studio
-    documentationSection.replace("//\\endIf","//\\endif");
-    documentationSection.remove(0, documentationSection.indexOf("begin\n") + 8);
-    QStringList documentationList = documentationSection.split("\n");
+    documentationSection.replace( "//\\endIf", "//\\endif" );
+    documentationSection.remove( 0, documentationSection.indexOf( "begin\n" ) + 8 );
+    QStringList documentationList = documentationSection.split( "\n" );
     //
     // remove code section
     // search first non comment line
     int i = 0;
-    while (documentationList.at(i).simplified().startsWith(("//")) || documentationList.at(i).simplified().isEmpty() )
+    while ( documentationList.at( i ).simplified().startsWith( ( "//" ) ) || documentationList.at( i ).simplified().isEmpty() )
         i++;
     // remove lines starting from found first non comment line
-    while (documentationList.count() > i)
+    while ( documentationList.count() > i )
         documentationList.removeLast();
 
-    return documentationList.join("\n");
+    return documentationList.join( "\n" );
 }
 
 /*!
@@ -346,135 +356,159 @@ QString cs8Program::extractDocumentation(const QString & code_){
  }
  */
 
-void cs8Program::parseDocumentation(const QString & code_) {
+void cs8Program::parseDocumentation( const QString &code_ )
+{
 
-    QString documentation=extractDocumentation(code_);
+    QString documentation = extractDocumentation( code_ );
     QString tagType;
     QString tagName;
     QString tagText;
-    m_tags.clear ();
+    m_tags.clear();
 
-    qDebug() << "parseDocumentation: " << name ();
-    foreach(QString line,documentation.split("\n")) {
+    qDebug() << "parseDocumentation: " << name();
+    foreach( QString line, documentation.split( "\n" ) )
+    {
         line = line.simplified();
         // process a complete tag before starting the next tag
-        if ((line.startsWith("//!") || line.startsWith("//\\")) && !tagType.isEmpty()) {
+        if ( ( line.startsWith( "//!" ) || line.startsWith( "//\\" ) ) && !tagType.isEmpty() )
+        {
             // remove trailing array indexes from tag name
-            tagName=tagName.remove(QRegExp("\\[\\d*\\]"));
+            tagName = tagName.remove( QRegExp( "\\[\\d*\\]" ) );
             //qDebug() << "process tag:" << tagType << ":" << tagName << ":" << tagText;
-            if (tagType == "param") {
-                if (m_parameterModel->getVarByName(tagName) != 0)
-                    m_parameterModel->getVarByName(tagName)->setDescription(
-                                tagText);
+            if ( tagType == "param" )
+            {
+                if ( m_parameterModel->getVarByName( tagName ) != 0 )
+                    m_parameterModel->getVarByName( tagName )->setDescription(
+                        tagText );
             }
-            else if (tagType == "local" || tagType=="var") {
-                if (m_localVariableModel->getVarByName(tagName) != 0)
-                    m_localVariableModel->getVarByName(tagName)->setDescription(
-                                tagText);
+            else if ( tagType == "local" || tagType == "var" )
+            {
+                if ( m_localVariableModel->getVarByName( tagName ) != 0 )
+                    m_localVariableModel->getVarByName( tagName )->setDescription(
+                        tagText );
             }
-            else if (tagType == "global") {
+            else if ( tagType == "global" )
+            {
                 //qDebug() << "global var: " << tagName << ":" << tagText;
-                emit globalVariableDocumentationFound(tagName, tagText);
+                emit globalVariableDocumentationFound( tagName, tagText );
             }
-            else if (tagType == "brief") {
-                setDescription( tagText);
+            else if ( tagType == "brief" )
+            {
+                setDescription( tagText );
             }
-            else if (tagType == "doc") {
-                setDetailedDocumentation(tagText);
+            else if ( tagType == "doc" )
+            {
+                setDetailedDocumentation( tagText );
             }
-            else if (tagType == "module") {
+            else if ( tagType == "module" )
+            {
                 qDebug() << "module doc: " << tagName << ":" << tagText;
-                emit moduleDocumentationFound(tagText);
+                emit moduleDocumentationFound( tagText );
             }
-            else if (tagType == "export"){
-                tagText=tagText.simplified ();
+            else if ( tagType == "export" )
+            {
+                tagText = tagText.simplified();
                 qDebug() << "export directive: " << tagName << ":" << tagText;
-                if (tagText.isEmpty())
-                    tagText=name();
-                m_tags.insertMulti (tagType,tagName+" "+tagText);
-                emit exportDirectiveFound(tagName, tagText);
+                if ( tagText.isEmpty() )
+                    tagText = name();
+                m_tags.insertMulti( tagType, tagName + " " + tagText );
+                emit exportDirectiveFound( tagName, tagText );
             }
-            else if (tagType == "copyright"){
-                setCopyrightMessage(tagText);
+            else if ( tagType == "copyright" )
+            {
+                setCopyrightMessage( tagText );
             }
-            else {
-                if (tagText.isEmpty ())
-                    tagText=tagName;
-                m_tags.insertMulti (tagType,tagText);
-                emit unknownTagFound(tagType,tagName, tagText);
+            else
+            {
+                if ( tagText.isEmpty() )
+                    tagText = tagName;
+                m_tags.insertMulti( tagType, tagText );
+                emit unknownTagFound( tagType, tagName, tagText );
                 //unknown tag type
                 //m_description += QString("\n\\%1 %2\n%3").arg(tagType).arg(tagName).arg(tagText);
             }
         }
         // a new tag
-        if (line.startsWith("//!") || line.startsWith("//\\")) {
+        if ( line.startsWith( "//!" ) || line.startsWith( "//\\" ) )
+        {
 
             tagText = "";
             tagName = "";
             // set tag type
-            tagType = line.remove("//!").remove("//\\").simplified();
-            tagType = tagType.left(tagType.indexOf(" ")).simplified();
+            tagType = line.remove( "//!" ).remove( "//\\" ).simplified();
+            tagType = tagType.left( tagType.indexOf( " " ) ).simplified();
             // set tag name
             QRegExp rx;
-            rx.setPattern("^\\s*" + tagType);
-            tagText = line.remove(rx).simplified();
-            rx.setPattern("^\\w*(\\s|$)");
-            int pos = rx.indexIn(tagText);
-            if (pos != -1)
+            rx.setPattern( "^\\s*" + tagType );
+            tagText = line.remove( rx ).simplified();
+            rx.setPattern( "^\\w*(\\s|$)" );
+            int pos = rx.indexIn( tagText );
+            if ( pos != -1 )
                 tagName = rx.cap().simplified();
             else
                 tagName = "";
             // set tag text
-            tagText.remove(rx);
-            rx.setPattern("^:\\s*");
-            tagText.remove(rx);
+            tagText.remove( rx );
+            rx.setPattern( "^:\\s*" );
+            tagText.remove( rx );
             qDebug() << "new tag:" << tagType << ":" << tagName << ":"
                      << tagText;
-        } else {
+        }
+        else
+        {
             // Read tag text from code lines and prepend a \n at end of each read line.
             // However, do not prepend a \n if it is the first line.
-            tagText += (tagText.isEmpty()?"":"\n")+line.remove(0,2);//"\n" + line.remove(0, 2);
+            tagText += ( tagText.isEmpty() ? "" : "\n" ) + line.remove( 0, 2 ); //"\n" + line.remove(0, 2);
         }
 
     }
     // process a complete tag if there is one available at the end
-    if (!tagType.isEmpty()) {
+    if ( !tagType.isEmpty() )
+    {
         qDebug() << "process remaining tag:" << tagType << ":" << tagName << ":" << tagText;
-        if (tagType == "param") {
-            if (m_parameterModel->getVarByName(tagName) != 0)
-                m_parameterModel->getVarByName(tagName)->setDescription(tagText);
+        if ( tagType == "param" )
+        {
+            if ( m_parameterModel->getVarByName( tagName ) != 0 )
+                m_parameterModel->getVarByName( tagName )->setDescription( tagText );
         }
-        else if (tagType == "local" || tagType=="var") {
-            if (m_localVariableModel->getVarByName(tagName) != 0)
-                m_localVariableModel->getVarByName(tagName)->setDescription(
-                            tagText);
+        else if ( tagType == "local" || tagType == "var" )
+        {
+            if ( m_localVariableModel->getVarByName( tagName ) != 0 )
+                m_localVariableModel->getVarByName( tagName )->setDescription(
+                    tagText );
         }
-        else if (tagType == "global") {
+        else if ( tagType == "global" )
+        {
             qDebug() << "global var: " << tagName << ":" << tagText;
-            emit globalVariableDocumentationFound(tagName, tagText);
+            emit globalVariableDocumentationFound( tagName, tagText );
         }
-        else if (tagType == "brief") {
-            setDescription(tagText);
+        else if ( tagType == "brief" )
+        {
+            setDescription( tagText );
         }
-        else if (tagType == "doc") {
-            setDetailedDocumentation(tagText);
+        else if ( tagType == "doc" )
+        {
+            setDetailedDocumentation( tagText );
         }
-        else if (tagType == "module") {
+        else if ( tagType == "module" )
+        {
             qDebug() << "module doc: " << tagName << ":" << tagText;
-            emit moduleDocumentationFound(tagText);
+            emit moduleDocumentationFound( tagText );
         }
-        else if (tagType =="export") {
-            tagText=tagText.simplified ();
-            if (tagText.isEmpty ())
-                tagText=name ();
-            m_tags.insertMulti (tagType,tagName+" "+tagText);
-            emit exportDirectiveFound (tagName, tagText);
+        else if ( tagType == "export" )
+        {
+            tagText = tagText.simplified();
+            if ( tagText.isEmpty() )
+                tagText = name();
+            m_tags.insertMulti( tagType, tagName + " " + tagText );
+            emit exportDirectiveFound( tagName, tagText );
         }
-        else {
-            if (tagText.isEmpty ())
-                tagText=tagName;
-            m_tags.insertMulti (tagType,tagText);
-            emit unknownTagFound(tagType,tagName, tagText);
+        else
+        {
+            if ( tagText.isEmpty() )
+                tagText = tagName;
+            m_tags.insertMulti( tagType, tagText );
+            emit unknownTagFound( tagType, tagName, tagText );
             //m_description += QString("\n\\%1 %2\n%3").arg(tagType).arg(tagName).arg(tagText);
         }
     }
@@ -482,81 +516,107 @@ void cs8Program::parseDocumentation(const QString & code_) {
 
 }
 
-QString cs8Program::description() const {
-    return m_descriptionSection.text();
+QString cs8Program::description() const
+{
+    return m_briefDescription;
 }
 
-void cs8Program::setCellPath(const QString &path)
+void cs8Program::setCellPath( const QString &path )
 {
-    m_cellPath=path;
+    m_cellPath = path;
 }
 
 QString cs8Program::cellFilePath() const
 {
-    QString pth=QDir::toNativeSeparators(m_filePath);
-    pth=pth.replace (m_cellPath+"/usr/usrapp","Disk://");
-    pth=QDir::toNativeSeparators(pth);
+    QString pth = QDir::toNativeSeparators( m_filePath );
+    pth = pth.replace( m_cellPath + "/usr/usrapp", "Disk://" );
+    pth = QDir::toNativeSeparators( pth );
     return pth;
 }
 
-QString cs8Program::documentation(bool withPrefix) const {
+QString cs8Program::documentation( bool withPrefix ) const
+{
     qDebug() << "documentation: " << name();
     QString out;
-    QString prefix=withPrefix?"///":"";
-    QStringList list = m_detailedDocumentation.split("\n");
-    list.prepend("\n");
-    list.prepend(description ());
-    list.prepend("//!brief");
+    QString prefix = withPrefix ? "///" : "";
+    QStringList list = m_detailedDocumentation.split( "\n" );
+    list.prepend( "\n" );
+    list.prepend( description() );
+    list.prepend( "//!brief" );
     //list.removeLast();
     bool inCodeSection = false;
-    int indentation=0;
-    foreach (QString str,list)
+    int indentation = 0;
+    foreach( QString str, list )
     {
-        if (str.contains("<code>")) {
+        if ( str.contains( "<code>" ) )
+        {
             inCodeSection = true;
-            out += prefix+"<br>\n";
+            out += prefix + "<br>\n";
         }
-        if (str.contains("</code>")) {
+        if ( str.contains( "</code>" ) )
+        {
             inCodeSection = false;
-            out += prefix+"<br>\n";
+            out += prefix + "<br>\n";
         }
-        if (inCodeSection)
+        if ( inCodeSection )
         {
             qDebug() << str << "indent: " << indentation;
-            if (str.simplified().indexOf(QRegExp("begin |if |for | while |do |switch| case"))==0){
-                str=QString().fill(QChar(' '),indentation*4)+str.simplified();
+            if ( str.simplified().indexOf( QRegExp( "begin |if |for | while |do |switch| case" ) ) == 0 )
+            {
+                str = QString().fill( QChar( ' ' ), indentation * 4 ) + str.simplified();
                 indentation++;
             }
-            if (str.simplified().indexOf(QRegExp("end|until |break"))==0){
+            if ( str.simplified().indexOf( QRegExp( "end|until |break" ) ) == 0 )
+            {
                 indentation--;
-                indentation=qMax(0,indentation);
-                str=QString().fill(QChar(' '),indentation*4)+str.simplified();
+                indentation = qMax( 0, indentation );
+                str = QString().fill( QChar( ' ' ), indentation * 4 ) + str.simplified();
             }
         }
-        out += prefix + str + (inCodeSection ? "<br>" : "") + "\n";
+        out += prefix + str + ( inCodeSection ? "<br>" : "" ) + "\n";
     }
     //out += "\n";
     //out =list.join("\n");
-    foreach(cs8Variable* parameter,m_parameterModel->variableList()) {
+    foreach( cs8Variable * parameter, m_parameterModel->variableList() )
+    {
         out += parameter->documentation();
     }
     return out;
 }
 
-void cs8Program::setDescription(const QString& theValue) {
-    QDomNode node;
-    while (m_descriptionSection.childNodes().count()>0)
+void cs8Program::setDescriptionSection()
+{
+    QString txt;
+    txt = m_briefDescription;
+    while (txt.endsWith ("\n"))
+        txt.chop (1);
+    // retrieve documentation of parameters
+    for ( int i = 0; i < m_parameterModel->variableList().count() - 1; i++ )
     {
-        node=m_descriptionSection.childNodes().at(0);
-        m_descriptionSection.removeChild(node);
+        if ( i == 0 )
+            txt += "\n";
+        if (m_parameterModel->variableList ().at (i)->documentation (false).length ()>2)
+        txt += m_parameterModel->variableList().at( i )->name ()+": "+m_parameterModel->variableList().at( i )->documentation ( false ) + "\\n";
     }
-    QDomCDATASection data=m_XMLDocument.createCDATASection(theValue);
-    m_descriptionSection.appendChild(data);
+
+    QDomNode node;
+    while ( m_descriptionSection.childNodes().count() > 0 )
+    {
+        node = m_descriptionSection.childNodes().at( 0 );
+        m_descriptionSection.removeChild( node );
+    }
+    QDomCDATASection data = m_XMLDocument.createCDATASection( txt );
+    m_descriptionSection.appendChild( data );
 }
 
-void cs8Program::setDetailedDocumentation(const QString &doc)
+void cs8Program::setDescription( const QString &theValue )
 {
-    m_detailedDocumentation=doc;
+    m_briefDescription = theValue;
+}
+
+void cs8Program::setDetailedDocumentation( const QString &doc )
+{
+    m_detailedDocumentation = doc;
 }
 
 QString cs8Program::detailedDocumentation() const
@@ -626,45 +686,46 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
 */
 
 
-bool cs8Program::save(const QString & projectPath, bool withCode) {
+bool cs8Program::save( const QString &projectPath, bool withCode )
+{
     qDebug() << "Saving progam " << name();
-
+    setDescriptionSection();
     QString codeText;
-    if (withCode)
+    if ( withCode )
     {
         codeText = toDocumentedCode();
     }
     else
     {
-        if (name()!="stop")
+        if ( name() != "stop" )
         {
-            codeText = ("begin\n"
-                        "logMsg(libPath())\n"
-                        "put(sqrt(-1))\n"
-                        "end");
+            codeText = ( "begin\n"
+                         "logMsg(libPath())\n"
+                         "put(sqrt(-1))\n"
+                         "end" );
         }
         else
         {
-            codeText = ("begin\n"
-                        "end");
+            codeText = ( "begin\n"
+                         "end" );
         }
     }
 
-    QDomCDATASection data=m_XMLDocument.createCDATASection(codeText);
-    m_codeSection.replaceChild (data, m_codeSection.firstChild ());
+    QDomCDATASection data = m_XMLDocument.createCDATASection( codeText );
+    m_codeSection.replaceChild( data, m_codeSection.firstChild() );
 
 
-    foreach(cs8Variable *param, m_parameterModel->variableList ())
+    foreach( cs8Variable * param, m_parameterModel->variableList() )
     {
-        m_paramSection.appendChild (param->element ());
+        m_paramSection.appendChild( param->element() );
     }
 
-    QString fileName_=projectPath + fileName();
-    QFile file(fileName_);
-    if (!file.open(QIODevice::WriteOnly))
+    QString fileName_ = projectPath + fileName();
+    QFile file( fileName_ );
+    if ( !file.open( QIODevice::WriteOnly ) )
         return false;
 
-    QTextStream stream(&file);
+    QTextStream stream( &file );
     stream << m_XMLDocument.toString();
     file.close();
 
@@ -674,76 +735,81 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
 QString cs8Program::name() const
 {
     //qDebug() << m_programSection.attribute("name");
-    return m_programSection.attribute("name");
+    return m_programSection.attribute( "name" );
 }
 
-void cs8Program::setName(const QString &name)
+void cs8Program::setName( const QString &name )
 {
-    m_programSection.setAttribute ("name",QString(name));
+    m_programSection.setAttribute( "name", QString( name ) );
 }
 
 QString cs8Program::toDocumentedCode()
 {
     QString documentation;
-    if (!description().isEmpty()){
+    if ( !description().isEmpty() )
+    {
         documentation = "!brief\n";
-        documentation += description()+"\n";
+        documentation += description() + "\n";
     }
-    if (!m_detailedDocumentation.isEmpty()) {
+    if ( !m_detailedDocumentation.isEmpty() )
+    {
         documentation += "!doc\n";
         documentation += m_detailedDocumentation;
     }
-    if (!m_copyRightMessage.isEmpty()){
-        documentation +="!copyright\n";
-        documentation +=m_copyRightMessage;
+    if ( !m_copyRightMessage.isEmpty() )
+    {
+        documentation += "!copyright\n";
+        documentation += m_copyRightMessage;
     }
-    documentation += m_localVariableModel->toDocumentedCode();
+
     documentation += m_parameterModel->toDocumentedCode();
-    if (!m_tags.isEmpty ())
+    documentation += m_localVariableModel->toDocumentedCode();
+    if ( !m_tags.isEmpty() )
     {
         documentation += "\n";
-        foreach(QString key,m_tags.uniqueKeys ())
+        foreach( QString key, m_tags.uniqueKeys() )
         {
-            foreach(QString value,m_tags.values (key))
+            foreach( QString value, m_tags.values( key ) )
             {
-                documentation+=QString("\\%1 %2\n")
-                        .arg (key)
-                        .arg (value);
+                documentation += QString( "\\%1 %2\n" )
+                                 .arg( key )
+                                 .arg( value );
             }
         }
     }
 
-    if (!documentation.isEmpty())
-        documentation+="\n";
+    if ( !documentation.isEmpty() )
+        documentation += "\n";
     // format documentation section
     QStringList list;
     QRegExp rx;
-    rx.setPattern("\\b");
+    rx.setPattern( "\\b" );
 
 
-    list=documentation.split("\n");
-    list.replaceInStrings(QRegExp("^"),"  //");
-    documentation=list.join("\n")+"\n";
-    QString code = val3Code(false);
-    rx.setPattern("\\s*begin\\s*");
-    rx.setMinimal(true);
-    int start = rx.indexIn(code, 0);
-    start += rx.matchedLength()+1;
+    list = documentation.split( "\n" );
+    list.replaceInStrings( QRegExp( "^" ), "  //" );
+    documentation = list.join( "\n" ) + "\n";
+    QString code = val3Code( false );
+    rx.setPattern( "\\s*begin\\s*" );
+    rx.setMinimal( true );
+    int start = rx.indexIn( code, 0 );
+    start += rx.matchedLength() + 1;
 
-    code.insert(start++, documentation);
+    code.insert( start++, documentation );
 
-    tidyUpCode(code);
+    tidyUpCode( code );
     return code;
 }
 
-QString cs8Program::definition() const {
+QString cs8Program::definition() const
+{
 
     return name() + "(" + m_parameterModel->toString() + ")";
 }
 
-void cs8Program::setCopyrightMessage(const QString &text)
+void cs8Program::setCopyrightMessage( const QString &text )
 {
-    m_copyRightMessage=text;
+    m_copyRightMessage = text;
     emit modified();
 }
 
