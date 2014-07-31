@@ -124,9 +124,9 @@ QVariant cs8ProgramModel::data(const QModelIndex & index, int role) const {
     return QVariant();
 }
 
-void cs8ProgramModel::addProgram(const QString & filePath) {
-    //qDebug() << "cs8ProgramModel::addProgram () " << filePath;
-    cs8Program* program = new cs8Program(this);
+cs8Program * cs8ProgramModel::createProgram(const QString & programName)
+{
+    cs8Program* program = new cs8Program(QObject::parent ());
 
     m_programList.append(program);
     connect(program, SIGNAL(globalVariableDocumentationFound(const QString & , const QString & )),
@@ -140,6 +140,15 @@ void cs8ProgramModel::addProgram(const QString & filePath) {
     connect (program,SIGNAL(modified()),this,SLOT(slotModified()));
 
     program->setCellPath(m_cellPath);
+    if (!programName.isEmpty ())
+    program->setName (programName);
+
+    return program;
+}
+
+void cs8ProgramModel::addProgram(const QString & filePath) {
+    //qDebug() << "cs8ProgramModel::addProgram () " << filePath;
+    cs8Program* program = createProgram("");
     if (!program->open(filePath))
         qDebug() << "Opening program " << filePath << " failed";
     reset();
@@ -184,6 +193,14 @@ cs8VariableModel* cs8ProgramModel::localVariableModel(const QModelIndex & index)
 cs8VariableModel* cs8ProgramModel::parameterModel(const QModelIndex & index) {
     if (index.isValid())
         return m_programList.at(index.row())->parameterModel();
+    else
+        return 0;
+}
+
+cs8VariableModel *cs8ProgramModel::referencedGlobalVriableModel(const QModelIndex &index)
+{
+    if (index.isValid())
+        return m_programList.at(index.row())->referencedGlobalVariables ();
     else
         return 0;
 }

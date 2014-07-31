@@ -4,9 +4,11 @@
 #include <QObject>
 #include <QDomDocument>
 #include <QDebug>
+#include <QStringList>
 #include "cs8variablemodel.h"
 #include "cs8parametermodel.h"
 #include "cs8localvariablemodel.h"
+#include "cs8globalvariablemodel.h"
 
 //
 class cs8Program: public QObject {
@@ -20,6 +22,9 @@ public:
     }
     cs8VariableModel* localVariableModel() const {
         return m_localVariableModel;
+    }
+    cs8VariableModel* referencedGlobalVariables() const {
+        return m_referencedGlobalVarModel;
     }
     void setPublic(bool value) {
         m_programSection.setAttribute("access",value?"public":"private");
@@ -38,18 +43,27 @@ public:
     QString documentation(bool withPrefix=true) const;
 
     QString extractCode(const QString & code_) const;
-    QStringList variableTokens();
+
     void setCode(const QString & code);
     void copyFromParameterModel(cs8ParameterModel *sourceModel);
+    void addTag(const QString &tagType, const QString & tagName, const QString & tagText);
+    void clearDocumentationTags();
+    void setWithUndocumentedSymbols(bool withUndocumentedSymbols);
+    QStringList referencedVariables() const;
+    QMap<int, QString> todos();
 
 private:
     cs8VariableModel* m_localVariableModel;
     cs8ParameterModel* m_parameterModel;
+    cs8VariableModel* m_referencedGlobalVarModel;
     QMultiMap<QString,QString> m_tags;
     void printChildNodes(const QDomElement & element);
     void createXMLSkeleton();
     QString extractDocumentation(const QString & code_);
     QString m_briefDescription;
+    bool m_globalDocContainer;
+     QStringList variableTokens(bool onlyModifiedVars);
+     QStringList m_variableTokens;
 
 public:
     cs8Program(QObject * parent);
@@ -71,6 +85,9 @@ public:
     QString cellFilePath() const;
 
     void setDescriptionSection();
+    bool globalDocContainer() const;
+    void setGlobalDocContainer(bool globalDocContainer);
+
     protected:
     bool parseProgramDoc(const QDomDocument & doc);
     void tidyUpCode(QString & code);

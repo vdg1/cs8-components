@@ -69,7 +69,7 @@ void cs8ProgramHeaderView::slotSelectionChanged ( const QItemSelection & selecte
 
 void cs8ProgramHeaderView::slotModified()
 {
-    emit modified();
+    emit modified(true);
 }
 
 
