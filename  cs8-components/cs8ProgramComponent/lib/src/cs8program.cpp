@@ -1,3 +1,4 @@
+#include "cs8application.h"
 #include "cs8program.h"
 #include "cs8variable.h"
 
@@ -14,7 +15,8 @@ cs8Program::cs8Program( QObject *parent ) :
 {
     m_localVariableModel = new cs8LocalVariableModel( this );
     m_parameterModel = new cs8ParameterModel( this );
-
+    m_referencedGlobalVarModel= new cs8VariableModel(this, cs8VariableModel::ReferencedGlobal);
+    m_globalDocContainer=false;
     createXMLSkeleton();
 }
 //
@@ -83,6 +85,7 @@ void cs8Program::createXMLSkeleton()
 
     m_codeSection = m_XMLDocument.createElement( "Code" );
     m_programSection.appendChild( m_codeSection );
+    setCode ("begin\nend");
 }
 
 /*!
@@ -134,7 +137,32 @@ bool cs8Program::parseProgramDoc( const QDomDocument &doc )
         QDomElement item = childList.at( i ).toElement();
         m_parameterModel->addVariable( item );
     }
+
+    //
+    QStringList referencedVariables=variableTokens (true);
+    cs8Application* app=qobject_cast<cs8Application*>(parent ());
+    if (app)
+    {
+        foreach(QString var,referencedVariables)
+        {
+            if (app->globalVariableModel ()->variableNameList ().contains (var) &&
+                    !m_localVariableModel->variableNameList ().contains (var) &&
+                    !m_referencedGlobalVarModel->variableNameList ().contains (var))
+            {
+                cs8Variable *refVar=new cs8Variable();
+                cs8Variable *globalVar=app->globalVariableModel ()->getVarByName (var);
+
+                refVar->setGlobal (true);
+                refVar->setName (globalVar->name ());
+                refVar->setType (globalVar->type ());
+                refVar->setAllSizes (globalVar->allSizes ());
+                m_referencedGlobalVarModel->addVariable (refVar);
+            }
+        }
+    }
     parseDocumentation( val3Code() );
+    // update token list
+    m_variableTokens=variableTokens (false);
     return true;
 }
 
@@ -175,11 +203,12 @@ QString cs8Program::extractCode( const QString &code_ ) const
         stop++;
     for ( int i = stop - 1; i > start; i-- )
         list.removeAt( i );
+
     return list.join( "\n" );
 }
 
 // return a list of variable tokens
-QStringList cs8Program::variableTokens()
+QStringList cs8Program::variableTokens(bool onlyModifiedVars)
 {
     QStringList list;
     QString code = val3Code( true );
@@ -197,7 +226,10 @@ QStringList cs8Program::variableTokens()
             while ( rx.indexIn( l, pos ) != -1 )
                 l.replace( rx, " " );
             //
-            rx.setPattern( "(\\w+)" );
+            if (onlyModifiedVars)
+            rx.setPattern( "(\\w+)\\s*=" );
+            else
+                rx.setPattern( "(\\w+)" );
             rx.setMinimal( false );
             pos = 0;
             while ( ( pos = rx.indexIn( l, pos ) ) != -1 )
@@ -242,6 +274,44 @@ void cs8Program::copyFromParameterModel( cs8ParameterModel *sourceModel )
     }
 }
 
+void cs8Program::addTag(const QString &tagType, const QString &tagName, const QString &tagText)
+{
+    m_tags.insertMulti( tagType, tagName + " " + tagText );
+}
+
+void cs8Program::clearDocumentationTags()
+{
+    m_tags.clear ();
+}
+
+void cs8Program::setWithUndocumentedSymbols(bool withUndocumentedSymbols)
+{
+    m_parameterModel->setWithUndocumentedSymbols (withUndocumentedSymbols);
+    m_localVariableModel->setWithUndocumentedSymbols (withUndocumentedSymbols);
+}
+
+QStringList cs8Program::referencedVariables() const
+{
+    return m_variableTokens;
+}
+
+QMap<int, QString> cs8Program::todos()
+{
+    QString code=val3Code (true);
+    QMap<int, QString> todos;
+qDebug() << "Check todos in " << name ();
+    QRegExp rx;
+    rx.setPattern ("^\\s*//[/\\\\]{1}\\s*TODO.*");
+    int codeLine=0;
+    foreach(QString line,code.split ("\n"))
+    {
+        if (rx.indexIn (line)!=-1)
+            todos.insert (codeLine,line);
+        codeLine++;
+    }
+             return todos;
+}
+
 QString cs8Program::extractDocumentation( const QString &code_ )
 {
     //
@@ -264,6 +334,16 @@ QString cs8Program::extractDocumentation( const QString &code_ )
 
     return documentationList.join( "\n" );
 }
+bool cs8Program::globalDocContainer() const
+{
+    return m_globalDocContainer;
+}
+
+void cs8Program::setGlobalDocContainer(bool globalDocContainer)
+{
+    m_globalDocContainer = globalDocContainer;
+}
+
 
 /*!
  \fn cs8Program::parseDocumentation( QString & code)
@@ -379,13 +459,19 @@ void cs8Program::parseDocumentation( const QString &code_ )
             {
                 if ( m_parameterModel->getVarByName( tagName ) != 0 )
                     m_parameterModel->getVarByName( tagName )->setDescription(
-                        tagText );
+                                tagText );
             }
             else if ( tagType == "local" || tagType == "var" )
             {
                 if ( m_localVariableModel->getVarByName( tagName ) != 0 )
                     m_localVariableModel->getVarByName( tagName )->setDescription(
-                        tagText );
+                                tagText );
+            }
+            else if ( tagType == "refGlobal" )
+            {
+                if ( m_referencedGlobalVarModel->getVarByName( tagName ) != 0 )
+                    m_referencedGlobalVarModel->getVarByName( tagName )->setDescription(
+                                tagText );
             }
             else if ( tagType == "global" )
             {
@@ -459,6 +545,9 @@ void cs8Program::parseDocumentation( const QString &code_ )
             // Read tag text from code lines and prepend a \n at end of each read line.
             // However, do not prepend a \n if it is the first line.
             tagText += ( tagText.isEmpty() ? "" : "\n" ) + line.remove( 0, 2 ); //"\n" + line.remove(0, 2);
+            // remove double \n at end of tag text
+            while (tagText.right (2)=="\n\n")
+                tagText.chop (1);
         }
 
     }
@@ -475,12 +564,18 @@ void cs8Program::parseDocumentation( const QString &code_ )
         {
             if ( m_localVariableModel->getVarByName( tagName ) != 0 )
                 m_localVariableModel->getVarByName( tagName )->setDescription(
-                    tagText );
+                            tagText );
         }
         else if ( tagType == "global" )
         {
             qDebug() << "global var: " << tagName << ":" << tagText;
             emit globalVariableDocumentationFound( tagName, tagText );
+        }
+        else if ( tagType == "refGlobal" )
+        {
+            if ( m_referencedGlobalVarModel->getVarByName( tagName ) != 0 )
+                m_referencedGlobalVarModel->getVarByName( tagName )->setDescription(
+                            tagText );
         }
         else if ( tagType == "brief" )
         {
@@ -502,6 +597,10 @@ void cs8Program::parseDocumentation( const QString &code_ )
                 tagText = name();
             m_tags.insertMulti( tagType, tagName + " " + tagText );
             emit exportDirectiveFound( tagName, tagText );
+        }
+        else if ( tagType == "copyright" )
+        {
+            setCopyrightMessage( tagText );
         }
         else
         {
@@ -596,7 +695,7 @@ void cs8Program::setDescriptionSection()
         if ( i == 0 )
             txt += "\n";
         if (m_parameterModel->variableList ().at (i)->documentation (false).length ()>2)
-        txt += m_parameterModel->variableList().at( i )->name ()+": "+m_parameterModel->variableList().at( i )->documentation ( false ) + "\\n";
+            txt += m_parameterModel->variableList().at( i )->name ()+": "+m_parameterModel->variableList().at( i )->documentation ( false ) + "\\n";
     }
 
     QDomNode node;
@@ -688,6 +787,7 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
 
 bool cs8Program::save( const QString &projectPath, bool withCode )
 {
+    Q_ASSERT(!name ().isEmpty ());
     qDebug() << "Saving progam " << name();
     setDescriptionSection();
     QString codeText;
@@ -748,22 +848,19 @@ QString cs8Program::toDocumentedCode()
     QString documentation;
     if ( !description().isEmpty() )
     {
-        documentation = "!brief\n";
+        documentation = "\\brief\n";
         documentation += description() + "\n";
     }
     if ( !m_detailedDocumentation.isEmpty() )
     {
-        documentation += "!doc\n";
-        documentation += m_detailedDocumentation;
-    }
-    if ( !m_copyRightMessage.isEmpty() )
-    {
-        documentation += "!copyright\n";
-        documentation += m_copyRightMessage;
+        documentation += "\\doc\n";
+        documentation += m_detailedDocumentation+"\n";
     }
 
     documentation += m_parameterModel->toDocumentedCode();
     documentation += m_localVariableModel->toDocumentedCode();
+    documentation += m_referencedGlobalVarModel->toDocumentedCode ();
+
     if ( !m_tags.isEmpty() )
     {
         documentation += "\n";
@@ -777,6 +874,13 @@ QString cs8Program::toDocumentedCode()
             }
         }
     }
+
+    if ( !m_copyRightMessage.isEmpty() )
+    {
+        documentation += "\n\\copyright\n";
+        documentation += m_copyRightMessage+"\n";
+    }
+
 
     if ( !documentation.isEmpty() )
         documentation += "\n";

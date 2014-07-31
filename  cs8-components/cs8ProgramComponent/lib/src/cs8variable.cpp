@@ -91,6 +91,16 @@ void cs8Variable::setGlobal( bool global )
     }
 }
 
+QString cs8Variable::allSizes(){
+    return m_element.attribute("size").replace(" ",", ");
+}
+
+void cs8Variable::setAllSizes(const QString &sizes)
+{
+    emit modified ();
+    m_element.setAttribute ("size",sizes);
+}
+
 QVariant cs8Variable::varValue( QString index )
 {
     QDomElement e;

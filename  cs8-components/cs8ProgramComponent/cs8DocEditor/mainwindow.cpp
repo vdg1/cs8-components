@@ -1,3 +1,4 @@
+#include "dialogcopyrighteditor.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QFileDialog>
@@ -17,11 +18,21 @@ MainWindow::MainWindow( QWidget *parent ) :
     connect( m_application, SIGNAL( modified( bool ) ), this, SLOT( slotModified( bool ) ) );
     ui->listViewProgams->setModel( m_application->programModel() );
 
-    ui->tableViewPars->setMode( false );
+    ui->tableViewPars->setMode( cs8ProgramDataView::ParameterData );
     ui->tableViewPars->setMasterView( ui->listViewProgams );
-    ui->tableViewVars->setMode( true );
+
+    ui->tableViewVars->setMode( cs8ProgramDataView::LocalData );
     ui->tableViewVars->setMasterView( ui->listViewProgams );
+
+    ui->tableViewReferencedGlobalVaribales->setMode (cs8ProgramDataView::ReferencedGlobalData);
+    ui->tableViewReferencedGlobalVaribales->setMasterView (ui->listViewProgams);
+
+    ui->globalDataView->setMode(cs8ProgramDataView::GlobalData);
+    ui->globalDataView->setMasterView (ui->listViewProgams);
+
     ui->widgetDocumentation->setMasterView( ui->listViewProgams );
+
+    connect(ui->widgetDocumentation,SIGNAL(modified(bool)),this,SLOT(slotModified(bool)));
 
     connect( ui->listViewProgams->selectionModel(), SIGNAL( selectionChanged( QItemSelection, QItemSelection ) ),
              this, SLOT( slotSelectionChanged( QItemSelection, QItemSelection ) ) );
@@ -92,6 +103,7 @@ void MainWindow::createRecentFilesItems()
     }
     for ( int i = 0; i < MaxRecentFiles; ++i )
         ui->menuRecent->addAction( recentFileActs[i] );
+    updateRecentFileActions ();
 }
 
 
@@ -145,7 +157,7 @@ void MainWindow::on_detailEditor_done()
 
 bool MainWindow::maybeSave()
 {
-    if ( m_application->isModified() || true )
+    if ( m_application->isModified() )
     {
         QMessageBox::StandardButton ret;
         ret = QMessageBox::warning( this, tr( "Application" ),
@@ -162,8 +174,9 @@ bool MainWindow::maybeSave()
 
 void MainWindow::openApplication( const QString &applicationName )
 {
-    m_application->open( applicationName );
     setCurrentFile( applicationName );
+    m_application->open( applicationName );
+     ui->actionAdd_tags_for_undocumented_symbols->setChecked (m_application->withUndocumentedSymbols ());
 }
 
 void MainWindow::updateRecentFileActions()
@@ -188,7 +201,7 @@ void MainWindow::updateRecentFileActions()
 
 void MainWindow::setCurrentFile( const QString &fileName )
 {
-    setWindowFilePath( fileName );
+    setWindowTitle ( fileName+ " [*]" );
     QSettings settings;
     QStringList files = settings.value( "recentFileList" ).toStringList();
     files.removeAll( fileName );
@@ -204,4 +217,19 @@ void MainWindow::setCurrentFile( const QString &fileName )
         if ( mainWin )
             mainWin->updateRecentFileActions();
     }
+}
+
+void MainWindow::on_actionEdit_Copy_Right_Message_triggered()
+{
+    QString msg=m_application->copyRightMessage();
+    DialogCopyRightEditor dlg;
+    dlg.setCopyRightText (msg);
+    if (dlg.exec ()==QDialog::Accepted)
+        m_application->setCopyrightMessage (dlg.copyRightText ());
+
+}
+
+void MainWindow::on_actionAdd_tags_for_undocumented_symbols_triggered(bool checked)
+{
+   m_application->setWithUndocumentedSymbols (checked);
 }

@@ -30,6 +30,7 @@ public:
     }
     cs8VariableModel* localVariableModel(const QModelIndex & index);
     cs8VariableModel* parameterModel(const QModelIndex & index);
+    cs8VariableModel *referencedGlobalVriableModel(const QModelIndex & index);
 
     void clear();
     void addProgram(const QString & filePath);
@@ -47,7 +48,9 @@ public:
     void setCellPath(const QString &path);
     void append(cs8Program *program);
 
-protected:
+    void createProgram(cs8Program* program);
+    cs8Program * createProgram(const QString &programName);
+    protected:
     QList<cs8Program*> m_programList;
     QString m_cellPath;
 

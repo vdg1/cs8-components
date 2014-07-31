@@ -21,17 +21,25 @@ class cs8ProgramDataView : public QTableView
 {
     Q_OBJECT
 public:
+
+        enum Mode{
+                    GlobalData,
+                    LocalData,
+            ParameterData,
+            ReferencedGlobalData
+                };
+
     cs8ProgramDataView ( QWidget * parent=0 );
 
     ~cs8ProgramDataView();
 
     void setMasterView ( QAbstractItemView* theValue );
-    void setMode ( bool theValue );
-    bool mode() const;
+    void setMode ( Mode theValue );
+    int mode() const;
 
 protected:
     QAbstractItemView* m_masterView;
-    bool m_mode;
+    int m_mode;
 
 protected slots:
     void slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected );

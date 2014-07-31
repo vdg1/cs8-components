@@ -43,6 +43,8 @@ private slots:
     void slotModified(bool modified_);
     void on_tableViewPars_doubleClicked(QModelIndex index);
     void on_detailEditor_done();
+    void on_actionEdit_Copy_Right_Message_triggered();
+    void on_actionAdd_tags_for_undocumented_symbols_triggered(bool checked);
 };
 
 #endif // MAINWINDOW_H

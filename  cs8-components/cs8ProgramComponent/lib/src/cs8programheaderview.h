@@ -41,7 +41,7 @@ protected slots:
     void slotModified();
 
 signals:
-    void modified();
+    void modified(bool);
 
 protected:
     QAbstractItemView* m_masterView;

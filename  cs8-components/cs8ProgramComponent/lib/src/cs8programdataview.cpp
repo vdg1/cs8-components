@@ -12,6 +12,7 @@
 #include "cs8programdataview.h"
 #include "cs8variablemodel.h"
 #include "cs8programmodel.h"
+#include "cs8application.h"
 
 #include <QDebug>
 
@@ -48,23 +49,38 @@ void cs8ProgramDataView::slotSelectionChanged ( const QItemSelection & selected,
     if ( selected.count() >0 )
     {
         QAbstractItemModel* varModel;
-        if ( m_mode )
+        switch(m_mode){
+        case LocalData:
+        {
             varModel= ( ( cs8ProgramModel* ) m_masterView->model() )->localVariableModel ( selected.indexes().at ( 0 ) );
-        else
+            break;
+}
+        case ParameterData:
+        {
             varModel= ( ( cs8ProgramModel* ) m_masterView->model() )->parameterModel ( selected.indexes().at ( 0 ) );
+            break;
+}
+        case GlobalData:
+            varModel= ( ( cs8Application* ) m_masterView->model()->parent ())->  globalVariableModel ( );
+            break;
+
+        case ReferencedGlobalData:
+            varModel= ( ( cs8ProgramModel* ) m_masterView->model() )->referencedGlobalVriableModel ( selected.indexes().at ( 0 ) );
+            break;
+        }
         setModel ( varModel );
         resizeColumnsToContents();
     }
 }
 
 
-bool cs8ProgramDataView::mode() const
+int cs8ProgramDataView::mode() const
 {
     return m_mode;
 }
 
 
-void cs8ProgramDataView::setMode ( bool theValue )
+void cs8ProgramDataView::setMode (Mode theValue )
 {
     m_mode = theValue;
 }

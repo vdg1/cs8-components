@@ -63,9 +63,8 @@ public:
         return m_global;// m_values.count() > 0;
     }
 
-    QString allSizes(){
-        return m_element.attribute("size").replace(" ",", ");
-    }
+    QString allSizes();
+    void setAllSizes(const QString & sizes);
 
     QDomElement element() const {
         return m_element;}

@@ -33,6 +33,7 @@ bool cs8VariableModel::addVariable(QDomElement & element,
 void cs8VariableModel::addVariable(cs8Variable *variable)
 {
     m_variableList.append (variable);
+    variable->setParent (this);
 }
 
 bool cs8VariableModel::addGlobalVariable(QDomElement & element, const QString & description)
@@ -87,6 +88,16 @@ cs8Variable *cs8VariableModel::createVariable(const QString &name)
     variable->setName(name);
     variableList().append(variable);
     return variable;
+}
+
+bool cs8VariableModel::hasDocumentation()
+{
+    foreach(cs8Variable* var,m_variableList)
+    {
+        if (!var->documentation ().isEmpty ())
+            return true;
+    }
+    return false;
 }
 
 QString cs8VariableModel::toDtxDocument() {
@@ -240,8 +251,8 @@ cs8Variable* cs8VariableModel::getVarByName(const QString & name) {
 
 QDomNode cs8VariableModel::document(QDomDocument & doc) {
     QDomDocumentFragment fragment = doc.createDocumentFragment();
-    QDomElement section = doc.createElement(m_mode ? "paramSection"
-                                                   : "localSection");
+    QDomElement section = doc.createElement(m_mode==Parameter ? "paramSection"
+                                                              : "localSection");
     fragment.appendChild(section);
     foreach ( cs8Variable* var, m_variableList ) {
         QDomElement varElement = doc.createElement(m_mode ? "param"
@@ -258,13 +269,35 @@ QDomNode cs8VariableModel::document(QDomDocument & doc) {
     return fragment;
 }
 
-QString cs8VariableModel::toDocumentedCode() {
+QString cs8VariableModel::toDocumentedCode()
+{
     QString header;
-    QString prefix = m_mode ? "param" : "var";
+
+    QString prefix;
+    switch (m_mode)
+    {
+    case Parameter:
+        prefix="param";
+        break;
+
+    case Local:
+        prefix="var";
+        break;
+
+    case Global:
+        prefix="global";
+        break;
+
+    case ReferencedGlobal:
+        prefix="refGlobal";
+        break;
+
+    }
+
     foreach ( cs8Variable* var, m_variableList ) {
         QString descr = var->description();
-        header+= QString("\n\\%1 %3 %2") .arg(prefix) .arg(descr) .arg(
-                    var->name());
+        if (!descr.isEmpty () || m_withUndocumentedSymbols)
+            header+= QString("\n\\%1 %3 %2\n") .arg(prefix) .arg(descr) .arg(var->name());
     }
     qDebug() << "header: " << header;
     return header;
@@ -274,3 +307,13 @@ void cs8VariableModel::slotModified()
 {
     emit modified (true);
 }
+bool cs8VariableModel::withUndocumentedSymbols() const
+{
+    return m_withUndocumentedSymbols;
+}
+
+void cs8VariableModel::setWithUndocumentedSymbols(bool withUndocumentedSymbols)
+{
+    m_withUndocumentedSymbols = withUndocumentedSymbols;
+}
+
