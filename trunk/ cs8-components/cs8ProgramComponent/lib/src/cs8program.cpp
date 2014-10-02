@@ -826,7 +826,10 @@ bool cs8Program::save( const QString &projectPath, bool withCode )
         return false;
 
     QTextStream stream( &file );
-    stream << m_XMLDocument.toString();
+    stream.setCodec ("UTF-8");
+    stream.setGenerateByteOrderMark (true);
+    m_XMLDocument.save (stream,4,QDomNode::EncodingFromDocument);
+    //stream << m_XMLDocument.toString();
     file.close();
 
     return true;
