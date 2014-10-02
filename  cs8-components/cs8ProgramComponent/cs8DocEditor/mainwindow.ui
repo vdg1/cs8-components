@@ -165,8 +165,15 @@
     <addaction name="actionEdit_Copy_Right_Message"/>
     <addaction name="actionAdd_tags_for_undocumented_symbols"/>
    </widget>
+   <widget class="QMenu" name="menuTools_2">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionApply_project_data_to_all_sub_projects"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuTools"/>
+   <addaction name="menuTools_2"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -231,6 +238,11 @@
    </property>
    <property name="text">
     <string>Add tags for undocumented symbols</string>
+   </property>
+  </action>
+  <action name="actionApply_project_data_to_all_sub_projects">
+   <property name="text">
+    <string>Apply project data to all sub projects</string>
    </property>
   </action>
  </widget>
