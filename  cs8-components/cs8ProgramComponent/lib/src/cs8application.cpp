@@ -401,9 +401,14 @@ bool cs8Application::saveDataFile(const QString &fileName)
         return false;
 
     QTextStream stream(&file);
-    stream << xmlDataDocument.toString ();
+
+    stream.setCodec ("UTF-8");
+    stream.setGenerateByteOrderMark (true);
+    xmlDataDocument.save (stream,4,QDomNode::EncodingFromDocument);
+    //stream << xmlDataDocument.toString ();
     qDebug() << xmlDataDocument.toString ();
     file.close ();
+
     return true;
 }
 

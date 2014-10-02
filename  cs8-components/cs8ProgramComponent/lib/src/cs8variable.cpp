@@ -20,12 +20,12 @@ QString cs8Variable::toString( bool withTypeDefinition )
 {
     if ( withTypeDefinition )
         return QString( "%1 %2%3" )
-               .arg( type() )
-               .arg( use() == "reference" ? "& " : "" )
-               .arg( name() );
+                .arg( type() )
+                .arg( use() == "reference" ? "& " : "" )
+                .arg( name() );
     else
         return QString( "%1" )
-               .arg( name() );
+                .arg( name() );
 }
 
 
@@ -74,7 +74,7 @@ QString cs8Variable::definition()
 {
 
     return ( QString( "%1 %2" ).arg( type() ).arg( name() ) ) + ( allSizes() != QString() ? QString(
-                "[%1]" ).arg( allSizes() ) : "" );
+                                                                                                "[%1]" ).arg( allSizes() ) : "" );
 }
 
 void cs8Variable::setGlobal( bool global )
@@ -84,10 +84,13 @@ void cs8Variable::setGlobal( bool global )
     if ( global )
     {
         m_element.setTagName( "Data" );
-        m_element.setAttribute( "xsi:type", "array" );
+        if ( !m_element.hasAttribute( "xsi:type" ) )
+            m_element.setAttribute( "xsi:type", "array" );
         if ( !m_element.hasAttribute( "size" ) )
             m_element.setAttribute( "size", "1" );
         m_element.removeAttribute( "use" );
+        if (m_element.attribute ("xsi:type")=="collection" && m_element.hasAttribute ("size"))
+            m_element.removeAttribute ("size");
     }
 }
 
