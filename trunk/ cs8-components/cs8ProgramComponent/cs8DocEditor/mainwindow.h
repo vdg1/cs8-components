@@ -45,6 +45,7 @@ private slots:
     void on_detailEditor_done();
     void on_actionEdit_Copy_Right_Message_triggered();
     void on_actionAdd_tags_for_undocumented_symbols_triggered(bool checked);
+    void on_actionApply_project_data_to_all_sub_projects_triggered();
 };
 
 #endif // MAINWINDOW_H
