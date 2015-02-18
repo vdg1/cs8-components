@@ -13,4 +13,6 @@ public:
     static QString GetVersionString(const QString& filePath);
 };
 
+bool getProductNamme(const QString & fileName, QString &productName, QString &fileVersion);
+
 #endif // VERSIONINFO_H

@@ -82,6 +82,24 @@ QStringList cs8VariableModel::variableNameList()
     return list;
 }
 
+QList<cs8Variable *> &cs8VariableModel::variableList(const QString &type)
+{
+    if (type.isEmpty())
+    {
+        return m_variableList;
+    }
+    else
+    {
+        QList<cs8Variable *> list;
+        foreach(cs8Variable *var,m_variableList)
+        {
+            if (var->type()==type)
+                list.append(var);
+        }
+        return list;
+    }
+}
+
 cs8Variable *cs8VariableModel::createVariable(const QString &name)
 {
     cs8Variable *variable=new cs8Variable();
@@ -94,7 +112,7 @@ bool cs8VariableModel::hasDocumentation()
 {
     foreach(cs8Variable* var,m_variableList)
     {
-        if (!var->documentation ().isEmpty ())
+        if (!var->documentation (true,false).isEmpty ())
             return true;
     }
     return false;
@@ -257,7 +275,7 @@ QDomNode cs8VariableModel::document(QDomDocument & doc) {
     foreach ( cs8Variable* var, m_variableList ) {
         QDomElement varElement = doc.createElement(m_mode ? "param"
                                                           : "local");
-        if (m_mode)
+        if (m_mode==Parameter)
             varElement.setAttribute("byVal", var->use());
         else
             varElement.setAttribute("size", var->size());

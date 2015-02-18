@@ -164,6 +164,7 @@
     </property>
     <addaction name="actionEdit_Copy_Right_Message"/>
     <addaction name="actionAdd_tags_for_undocumented_symbols"/>
+    <addaction name="actionEdit_Project_Documentation"/>
    </widget>
    <widget class="QMenu" name="menuTools_2">
     <property name="title">
@@ -245,6 +246,11 @@
     <string>Apply project data to all sub projects</string>
    </property>
   </action>
+  <action name="actionEdit_Project_Documentation">
+   <property name="text">
+    <string>Edit Project Documentation</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -321,8 +327,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionEdit_Project_Documentation</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>editProjectDocumenation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>260</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>editParameterDetail(QModelIndex)</slot>
+  <slot>editProjectDocumenation()</slot>
  </slots>
 </ui>

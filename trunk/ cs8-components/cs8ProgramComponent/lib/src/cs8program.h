@@ -11,31 +11,40 @@
 #include "cs8globalvariablemodel.h"
 
 //
-class cs8Program: public QObject {
+class cs8Program: public QObject
+{
     Q_OBJECT
 
 public:
     QString toDocumentedCode();
     bool save(const QString & projectPath, bool withCode = true);
-    cs8ParameterModel* parameterModel() {
+    cs8ParameterModel* parameterModel()
+    {
         return m_parameterModel;
     }
-    cs8VariableModel* localVariableModel() const {
+    cs8VariableModel* localVariableModel() const
+    {
         return m_localVariableModel;
     }
-    cs8VariableModel* referencedGlobalVariables() const {
+    cs8VariableModel* referencedGlobalVariables() const
+    {
         return m_referencedGlobalVarModel;
     }
-    void setPublic(bool value) {
+
+    void setPublic(bool value)
+    {
         m_programSection.setAttribute("access",value?"public":"private");
     }
-    bool isPublic() const {
+
+    bool isPublic() const
+    {
         return m_programSection.attribute("access","private")=="public";
     }
 
     QString name() const;
 
-    QString fileName() const {
+    QString fileName() const
+    {
         return name() + ".pgx";
     }
     void setName(const QString &name);
@@ -44,7 +53,7 @@ public:
 
     QString extractCode(const QString & code_) const;
 
-    void setCode(const QString & code);
+    void setCode(const QString & code, bool parseDoc_=false);
     void copyFromParameterModel(cs8ParameterModel *sourceModel);
     void addTag(const QString &tagType, const QString & tagName, const QString & tagText);
     void clearDocumentationTags();
@@ -62,8 +71,8 @@ private:
     QString extractDocumentation(const QString & code_);
     QString m_briefDescription;
     bool m_globalDocContainer;
-     QStringList variableTokens(bool onlyModifiedVars);
-     QStringList m_variableTokens;
+    QStringList variableTokens(bool onlyModifiedVars);
+    QStringList m_variableTokens;
 
 public:
     cs8Program(QObject * parent);
@@ -88,7 +97,12 @@ public:
     bool globalDocContainer() const;
     void setGlobalDocContainer(bool globalDocContainer);
 
-    protected:
+    void setApplicationDocumentation(const QString &applicationDocumentation);
+
+    QDomElement programsSection() const;
+    void setProgramsSection(const QDomElement &programsSection);
+    
+protected:
     bool parseProgramDoc(const QDomDocument & doc);
     void tidyUpCode(QString & code);
     QDomDocument m_XMLDocument;
@@ -102,6 +116,7 @@ public:
     QString m_cellPath;
     QString m_filePath;
     QString m_copyRightMessage;
+    QString m_applicationDocumentation;
 
 signals:
     void globalVariableDocumentationFound(const QString & name,

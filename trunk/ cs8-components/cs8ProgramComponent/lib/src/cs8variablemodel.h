@@ -45,10 +45,8 @@ class cs8VariableModel: public QAbstractTableModel {
         QList<cs8Variable*> privateVariables();
         cs8Variable* variable(QModelIndex index);
         QStringList variableNameList();
-        QList<cs8Variable*>& variableList()
-        {
-            return m_variableList;
-        }
+        QList<cs8Variable*>& variableList(const QString & type=QString());
+
         cs8Variable *createVariable(const QString & name);
         bool hasDocumentation();
 

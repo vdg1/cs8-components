@@ -6,6 +6,7 @@ cs8Variable::cs8Variable( QDomElement &element, const QString &description )
 {
     m_element = element;
     m_description = description;
+    setGlobal(false);
 }
 
 cs8Variable::cs8Variable()
@@ -14,22 +15,23 @@ cs8Variable::cs8Variable()
     m_docFragment = m_doc.createDocumentFragment();
     m_element = m_doc.createElement( "Data" );
     m_docFragment.appendChild( m_element );
+    setGlobal(false);
 }
 
 QString cs8Variable::toString( bool withTypeDefinition )
 {
     if ( withTypeDefinition )
         return QString( "%1 %2%3" )
-                .arg( type() )
-                .arg( use() == "reference" ? "& " : "" )
-                .arg( name() );
+               .arg( type() )
+               .arg( use() == "reference" ? "& " : "" )
+               .arg( name() );
     else
         return QString( "%1" )
-                .arg( name() );
+               .arg( name() );
 }
 
 
-QString cs8Variable::documentation( bool withPrefix )
+QString cs8Variable::documentation( bool withPrefix, bool forCOutput )
 {
     QString out;
     QString prefix = withPrefix ? "///" : "";
@@ -42,25 +44,43 @@ QString cs8Variable::documentation( bool withPrefix )
     bool inCodeSection = false;
     bool firstLine = true;
     foreach( QString str, list )
-    {
-        if ( str.contains( "<code>" ) )
         {
-            inCodeSection = true;
-            out += prefix + "<br>\n";
+            if ( str.contains( "<code>" ) )
+                {
+                    inCodeSection = true;
+                    out += prefix + "<br>\n";
+                }
+            if ( str.contains( "</code>" ) )
+                {
+                    inCodeSection = false;
+                    out += prefix + "<br>\n";
+                }
+            out += (firstLine ? "" : prefix) + str + ( inCodeSection ? "<br>" : "" ) + "\n";
+            firstLine = false;
         }
-        if ( str.contains( "</code>" ) )
-        {
-            inCodeSection = false;
-            out += prefix + "<br>\n";
-        }
-        out += /*(firstLine ? "" : prefix)*/ prefix + str + ( inCodeSection ? "<br>" : "" ) + "\n";
-        firstLine = false;
-    }
     //qDebug() << "processed: " << out;
     if ( !isGlobal() )
-        return prefix + "\\param " + name() + " " + out + "\n";
+        return prefix + (forCOutput ? "@param " : "\\param ") + name() + " " + out + "\n";
     else
-        return out;
+        return prefix+out;
+}
+
+QStringList cs8Variable::father()
+{
+    QStringList list;
+    QDomNode element=m_element.firstChildElement("Value");
+    while (!element.isNull())
+        {
+            QString father=element.toElement().attribute("fatherId");
+            if (!father.isEmpty())
+                {
+                    father.remove(QRegExp("\\[(\\d*)\\]"));
+                    list << father;
+                }
+            element=element.nextSiblingElement("Value");
+        }
+    list.removeDuplicates();
+    return list;
 }
 
 void cs8Variable::setPublic( bool m_public )
@@ -74,7 +94,7 @@ QString cs8Variable::definition()
 {
 
     return ( QString( "%1 %2" ).arg( type() ).arg( name() ) ) + ( allSizes() != QString() ? QString(
-                                                                                                "[%1]" ).arg( allSizes() ) : "" );
+                "[%1]" ).arg( allSizes() ) : "" );
 }
 
 void cs8Variable::setGlobal( bool global )
@@ -82,19 +102,27 @@ void cs8Variable::setGlobal( bool global )
     emit modified();
     m_global = global;
     if ( global )
-    {
-        m_element.setTagName( "Data" );
-        if ( !m_element.hasAttribute( "xsi:type" ) )
-            m_element.setAttribute( "xsi:type", "array" );
-        if ( !m_element.hasAttribute( "size" ) )
-            m_element.setAttribute( "size", "1" );
-        m_element.removeAttribute( "use" );
-        if (m_element.attribute ("xsi:type")=="collection" && m_element.hasAttribute ("size"))
-            m_element.removeAttribute ("size");
-    }
+        {
+            m_element.setTagName( "Data" );
+            if ( !m_element.hasAttribute( "xsi:type" ) )
+                {
+                    m_element.setAttribute( "xsi:type", "array" );
+                }
+            else
+                {
+                    if (m_element.attribute("xsi:type")=="element")
+                        m_element.setAttribute( "xsi:type", "array" );
+                }
+            if ( !m_element.hasAttribute( "size" ) )
+                m_element.setAttribute( "size", "1" );
+            m_element.removeAttribute( "use" );
+            if (m_element.attribute ("xsi:type")=="collection" && m_element.hasAttribute ("size"))
+                m_element.removeAttribute ("size");
+        }
 }
 
-QString cs8Variable::allSizes(){
+QString cs8Variable::allSizes()
+{
     return m_element.attribute("size").replace(" ",", ");
 }
 
@@ -108,12 +136,12 @@ QVariant cs8Variable::varValue( QString index )
 {
     QDomElement e;
     for ( int i = 0; i < m_element.childNodes().count(); i++ )
-    {
-        if ( m_element.childNodes().at( i ).toElement().attribute( "key" ) == index )
         {
-            return m_element.childNodes().at( i ).toElement().attribute( "value" );
+            if ( m_element.childNodes().at( i ).toElement().attribute( "key" ) == index )
+                {
+                    return m_element.childNodes().at( i ).toElement().attribute( "value" );
+                }
         }
-    }
 
     // return empty variable
     if ( type() == "num" )

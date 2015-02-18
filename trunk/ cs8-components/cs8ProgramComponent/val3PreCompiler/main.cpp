@@ -1,8 +1,9 @@
-#include <QtGui/QApplication>
+
 #include <QProcess>
-#include "mainwindow.h"
+#include <QCoreApplication>
 #include <cs8application.h>
 #include <iostream>
+
 using namespace std;
 
 
@@ -10,7 +11,7 @@ using namespace std;
 // <level>Error<CLASS>PRG<P1>execLow<P2>CODE<line>10<msg>? : unexpected trailing characters<file>Disk://dispatcher/execLow.pgx
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
     QCoreApplication::setApplicationName ("Val3PreCompiler");
     QCoreApplication::setOrganizationName("SAXE Swiss System");
 
@@ -29,16 +30,16 @@ int main(int argc, char *argv[])
 
         }
 
-        for(int i=qApp->arguments ().count ();i--;i>1)
+        for(int i=qApp->arguments ().count (); i--; i>1)
         {
             if (qApp->arguments ().at(i).startsWith ("-"))
                 break;
-            else{
+            else {
                 qDebug () << qApp->arguments ().at(i);
                 cs8Application app;
                 app.setCellPath(cellPath);
                 app.openFromPathName (qApp->arguments ().at(i));
-                cout << qPrintable(app.checkVariables ()+"\n");
+                cout << qPrintable(app.performPrecompilerChecks ()+"\n");
             }
 
         }
@@ -57,10 +58,11 @@ int main(int argc, char *argv[])
     }
     else
     {
+        /*
+                MainWindow w;
+                w.show();
 
-        MainWindow w;
-        w.show();
-
-        return a.exec();
+                return a.exec();
+                */
     }
 }

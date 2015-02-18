@@ -3,25 +3,35 @@
 # -------------------------------------------------
 QT += xml \
     xmlpatterns
+
 TARGET = "Val3 Documentation Editor"
+
 TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
     codeeditor.cpp \
     highlighter.cpp \
-    dialogcopyrighteditor.cpp
+    dialogcopyrighteditor.cpp \
+    dialogprojectdocumentationeditor.cpp
+
 HEADERS += mainwindow.h \
     codeeditor.h \
     highlighter.h \
-    dialogcopyrighteditor.h
-FORMS += mainwindow.ui \
-    dialogcopyrighteditor.ui
+    dialogcopyrighteditor.h \
+    dialogprojectdocumentationeditor.h
 
+FORMS += mainwindow.ui \
+    dialogcopyrighteditor.ui \
+    dialogprojectdocumentationeditor.ui
+
+RC_FILE += \
+    cs8DocEditor.rc \
 
 
 CONFIG +=qcodedit
 
 OTHER_FILES += \
+    cs8DocEditor.rc \
     Val3copyright.txt
 
 DESTDIR = ../bin
@@ -36,3 +46,6 @@ win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/libcs8ProjectComponentd.a
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/cs8ProjectComponent.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/cs8ProjectComponentd.lib
+
+DISTFILES += \
+    cs8DocEditor.rc

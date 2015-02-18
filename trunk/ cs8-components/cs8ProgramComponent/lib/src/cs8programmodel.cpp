@@ -20,7 +20,7 @@ cs8ProgramModel::cs8ProgramModel(QObject *parent) :
 
 cs8ProgramModel::~cs8ProgramModel() {
     foreach(cs8Program *program, m_programList)
-        delete program;
+        program->deleteLater();
 }
 
 /*!
@@ -126,7 +126,7 @@ QVariant cs8ProgramModel::data(const QModelIndex & index, int role) const {
 
 cs8Program * cs8ProgramModel::createProgram(const QString & programName)
 {
-    cs8Program* program = new cs8Program(QObject::parent ());
+    cs8Program* program = new cs8Program(this);
 
     m_programList.append(program);
     connect(program, SIGNAL(globalVariableDocumentationFound(const QString & , const QString & )),
@@ -141,7 +141,7 @@ cs8Program * cs8ProgramModel::createProgram(const QString & programName)
 
     program->setCellPath(m_cellPath);
     if (!programName.isEmpty ())
-    program->setName (programName);
+        program->setName (programName);
 
     return program;
 }

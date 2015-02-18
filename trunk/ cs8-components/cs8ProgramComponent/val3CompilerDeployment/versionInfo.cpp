@@ -8,154 +8,74 @@
 #include "windows.h"
 #include "versionInfo.h"
 #include "tchar.h"
+#include "Strsafe.h"
 
 #include <QTextStream>
 
+bool getProductNamme(const QString & fileName, QString & productName, QString & fileVersion)
+{
+    DWORD DWD;
+    // Read size of info block.
+    DWORD VerInfoSize = GetFileVersionInfoSize(fileName.utf16(),&DWD);
+    if (VerInfoSize)
+        {
+            char *VerInfo = new char[VerInfoSize];
+            // Read info block.
+            if (!GetFileVersionInfo(fileName.utf16(),0,VerInfoSize,VerInfo))
+                return false;
 
-QString VersionInfo::GetFileDescription(const QString& filePath) {
-    QString outputString;
+            struct LANGANDCODEPAGE
+            {
+                WORD wLanguage;
+                WORD wCodePage;
+            } *lpTranslate;
 
+            UINT cbTranslate;
 
-    TCHAR fullpath[MAX_PATH + 10];
-
-    int success;
-
-    for (int i = 0; i < (int)filePath.length(); i++) {
-        fullpath[i] = filePath[i].toAscii();
-    }
-    fullpath[filePath.size()] = _T('\0');
-
-    //TCHAR *str = new TCHAR[_tcslen(fullpath) + 1];
-    //_tcscpy(str, fullpath);
-    DWORD tmp = 0;
-    //DWORD len = GetFileVersionInfoSize(str, &tmp);
-
-    DWORD len = GetFileVersionInfoSize((LPCWSTR)filePath.utf16(), &tmp);
-    LPVOID pBlock = new char[len];
-    success = GetFileVersionInfo((LPCWSTR)filePath.utf16(), 0, len, pBlock);
-
-    if (success) {
-
-        TCHAR SubBlock[50];
-
-        UINT cbTranslate;
-
-        // Structure used to store enumerated languages and code pages.
-
-        HRESULT hr;
-
-        struct LANGANDCODEPAGE {
-            WORD wLanguage;
-            WORD wCodePage;
-        } *lpTranslate;
-
-        // Read the list of languages and code pages.
-
-        QString text("\\VarFileInfo\\Translation");
-        success = VerQueryValue(pBlock,
-                                (LPCWSTR)text.utf16(),
-                                (LPVOID*)&lpTranslate,
-                                &cbTranslate);
-
-        if (success) {
+            // Read the list of languages and code pages.
+            VerQueryValue(VerInfo,
+                          TEXT("\\VarFileInfo\\Translation"),
+                          (LPVOID*)&lpTranslate,
+                          &cbTranslate);
 
             // Read the file description for each language and code page.
+            QString SubBlock;
+            char *LangInfo;
+            LPSTR   lpVersion;
 
-            for(int i=0; i < (int)(cbTranslate/sizeof(struct LANGANDCODEPAGE)); i++ )
-            {
-                QString text("\\StringFileInfo\\%04x%04x\\FileDescription");
-                hr = wsprintf(SubBlock,
-                              (LPCWSTR)text.utf16(),
-                              lpTranslate[i].wLanguage,
-                              lpTranslate[i].wCodePage);
-                if (FAILED(hr))
+            UINT LangSize;
+            for( UINT i=0; i < (cbTranslate/sizeof(struct LANGANDCODEPAGE)); i++ )
                 {
-                    continue;
+                    SubBlock=QString("\\StringFileInfo\\%1%2\\ProductName")
+                             .arg((uint)lpTranslate[i].wLanguage,4,16,QChar('0'))
+                             .arg((uint)lpTranslate[i].wCodePage,4,16,QChar('0'));
+                    VerQueryValue(VerInfo,SubBlock.utf16(), (LPVOID *)&lpVersion,&LangSize);
+                    if (LangSize>0)
+                        productName=QString::fromWCharArray((const wchar_t*)lpVersion,LangSize);
+                    else
+                        productName=QString("");
+
+                    SubBlock=QString("\\StringFileInfo\\%1%2\\FileVersion")
+                             .arg((uint)lpTranslate[i].wLanguage,4,16,QChar('0'))
+                             .arg((uint)lpTranslate[i].wCodePage,4,16,QChar('0'));
+                    VerQueryValue(VerInfo,SubBlock.utf16(), (LPVOID *)&lpVersion,&LangSize);
+                    if (LangSize>0)
+                        fileVersion=QString::fromWCharArray((const wchar_t*)lpVersion,LangSize);
+                    else
+                        fileVersion=QString("");
+
+                    /*
+                    SubBlock=QString("\\StringFileInfo\\%1%2\\FileVersion")
+                            .arg((uint)lpTranslate[i].wLanguage,4,16,QChar('0'))
+                            .arg((uint)lpTranslate[i].wCodePage,4,16,QChar('0'));
+                    VerQueryValue(VerInfo,SubBlock.utf16(),(LPVOID *)&lpVersion,&LangSize);
+                    SubBlock=QString("\\StringFileInfo\\%1%2\\Comments")
+                            .arg((uint)lpTranslate[i].wLanguage,4,16,QChar('0'))
+                            .arg((uint)lpTranslate[i].wCodePage,4,16,QChar('0'));
+                    VerQueryValue(VerInfo,SubBlock.utf16(),(LPVOID *)&lpVersion,&LangSize);
+                    */
                 }
-
-                LPVOID lpBuffer;
-                UINT dwBytes;
-                // Retrieve file description for language and code page "i".
-                int result = VerQueryValue(pBlock,
-                                           SubBlock,
-                                           &lpBuffer,
-                                           &dwBytes);
-
-                if (result <= 0) continue;
-
-                outputString = QString::fromWCharArray((TCHAR*)lpBuffer);
-
-                break;
-
-            } // for
-
-        } // if success
-
-    } // if success
-
-    if (pBlock) delete pBlock; pBlock = NULL;
-    //if (str) delete str; str = NULL;
-
-
-    return outputString;
-}
-
-
-QString VersionInfo::GetVersionString(const QString& filePath) {
-
-    //Fill the version info
-    TCHAR fullpath[MAX_PATH + 10];
-
-    if (filePath == "") {
-        GetModuleFileName(0, fullpath, MAX_PATH + 10);
-    } else {
-        for (int i = 0; i < filePath.length(); i++) {
-            fullpath[i] = filePath[i].toAscii();
+            delete[] VerInfo;
         }
-        fullpath[filePath.length()] = _T('\0');
-    }
-
-    //TCHAR *str = new TCHAR[_tcslen(fullpath) + 1];
-    //_tcscpy(str, fullpath);
-    DWORD tmp = 0;
-    DWORD len = GetFileVersionInfoSize((LPCWSTR)filePath.utf16(), &tmp);
-    LPVOID pBlock = new char[len];
-    GetFileVersionInfo((LPCWSTR)filePath.utf16(), 0, len, pBlock);
-    LPVOID ptr;
-    UINT ptrlen;
-
-    // Structure used to store enumerated languages and code pages.
-    struct LANGANDCODEPAGE {
-        WORD wLanguage;
-        WORD wCodePage;
-    } *lpTranslate;
-
-    UINT cbTranslate;
-
-    // Read the list of languages and code pages.
-    QString text("\\VarFileInfo\\Translation");
-    if (VerQueryValue(pBlock,
-                      (LPCWSTR)text.utf16(),
-                      (LPVOID*)&lpTranslate,
-                      &cbTranslate))
-    {
-    }
-    QString version;
-
-    //Format the versionstring
-    text="\\";
-    if (VerQueryValue(pBlock, (LPCWSTR)text.utf16(), &ptr, &ptrlen)) {
-        VS_FIXEDFILEINFO *fi = (VS_FIXEDFILEINFO*)ptr;
-        QTextStream(&version) << HIWORD(fi->dwFileVersionMS) << "." << LOWORD(fi->dwFileVersionMS) << "." << HIWORD(fi->dwFileVersionLS) << "." << LOWORD(fi->dwFileVersionLS);
-    }
-
-
-    delete [] pBlock;
-
-    return version;
-
-
-    return "";
+    return true;
 }
-
-
