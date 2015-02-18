@@ -44,10 +44,12 @@ public:
     cs8Variable();
 
     QString toString(bool withTypeDefinition=true);
-    QString documentation(bool withPrefix=true);
+    QString documentation(bool withPrefix, bool forCOutput);
     bool isPublic() const {
         return m_element.attribute("access","private")=="private"?false:true;
     }
+
+    QStringList father();
 
     void setPublic(bool m_public);
 

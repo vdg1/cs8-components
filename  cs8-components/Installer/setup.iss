@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "1.6"
+#define MyAppVersion "1.7.7"
 #define MyAppPublisher "SAXE Swiss System AB"
 #define MyAppURL "http://www.swiss-system.se"
-#define QT "D:\qt\4.8.4_MSVC2008\"
+#define QT "D:\Qt\4.8.5"
 ;#define MINGW "C:\MinGW"
 
 
@@ -23,8 +23,8 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\Saxe Swiss System Val3 Tools
 DefaultGroupName={#MyAppName}
-OutputDir=D:\data\Cpp\cs8-components\Installer
-OutputBaseFilename=setup-{#MyAppVersion}
+OutputDir=.
+OutputBaseFilename={#MyAppName}-setup-{#MyAppVersion}
 Compression=lzma
 SolidCompression=yes
 
@@ -32,11 +32,16 @@ SolidCompression=yes
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\extractPrototype.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\Val3 Documentation Editor.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\val3Check.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\val3CreateAPI.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\data\Cpp\_SAXESwissSystem\_Libraries\cs8-components\cs8ProgramComponent\bin\extractDoc.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\extractPrototype.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\val3PreCompilerSettings.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\Val3 Documentation Editor.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\val3CompilerDeployment.exe"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "..\cs8ProgramComponent\bin\val3Check.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\val3CreateAPI.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\extractDoc.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\preCompilerPackage\*.exe"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\preCompilerPackage\*.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
+
 Source: "{#QT}\bin\QtCore4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\QtGui4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\QtXml4.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -45,6 +50,8 @@ Source: "{#QT}\bin\QtNetwork4.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\Val3 Documentation Editor"; Filename: "{app}\Val3 Documentation Editor.exe"
+Name: "{group}\Val3 Compiler Deployment"; Filename: "{app}\val3CompilerDeployment.exe"
 Name: "{group}\Val3 Create API"; Filename: "{app}\val3CreateAPI.exe"
+Name: "{group}\Val3 Compiler Settings"; Filename: "{app}\val3PreCompilerSettings.exe"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 

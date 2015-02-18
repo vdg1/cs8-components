@@ -9,7 +9,7 @@
 void printUsage()
 {
     fprintf( stderr, "Usage:\n"
-             "    \n" );
+                     "    \n" );
 
 }
 
@@ -77,14 +77,14 @@ int main( int argc, char **argv )
     QDir dir( sourceDir );
     cs8Application application;
     QStringList sourceFiles = dir.entryList( QDir::Dirs | QDir::NoDotAndDotDot );
-    sourceFiles.append( "" );
-    QStringList addFiles = dir.entryList( QStringList() << "*.pjx", QDir::Files );
-    if ( addFiles.count() > 0 )
-    {
-        QString addFile = addFiles.at( 0 );
-        addFile.chop( 4 );
-        sourceFiles.append( addFile );
-    }
+    //sourceFiles.append( "" );
+    // QStringList addFiles = dir.entryList( QStringList() << "*.pjx", QDir::Files );
+    //if ( addFiles.count() > 0 )
+    //{
+    //   QString addFile = addFiles.at( 0 );
+    //  addFile.chop( 4 );
+    // sourceFiles.append( addFile );
+    // }
     qDebug() << ( "applications: " + sourceFiles.join( ", " ) );
     foreach( QString sourceApp, sourceFiles )
     {
@@ -93,7 +93,6 @@ int main( int argc, char **argv )
         {
             qDebug() << ( sourceApp + " open ok" );
             application.exportToCFile( destDir );
-
         }
         qDebug() << "Done";
 

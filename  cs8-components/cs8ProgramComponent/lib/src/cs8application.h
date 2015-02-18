@@ -42,7 +42,7 @@ public:
 
     bool loadDocumentationFile(const QString &);
     QString documentation();
-    QString checkVariables();
+    QString performPrecompilerChecks();
     void setCellPath(const QString & path);
     QString cellPath() const;
     QString cellProjectFilePath() const;
@@ -69,7 +69,15 @@ public:
     void setWithUndocumentedSymbols(bool withUndocumentedSymbols);
 
     QMap<QString, QMap<QString, QString> *> getEnumerations();
-    protected:
+    void checkPrograms(QStringList &output);
+    void checkEnumerations(QStringList &output);
+    void checkGlobalData(QStringList &output);
+    void checkObsoleteProgramFiles(QStringList &output);
+    QString applicationDocumentation() const;
+    void setApplicationDocumentation(const QString &applicationDocumentation);
+
+    void initPrecompilerSettings();
+protected:
     QHash<QString, QString> m_exportDirectives;
     QHash<QString, QString> m_pragmaList;
     QString m_projectName;
@@ -79,7 +87,7 @@ public:
     cs8LibraryAliasModel* m_libraryAliasModel;
     cs8TypeModel *m_typeModel;
     //QDomDocument m_dataDoc;
-    QString m_documentation;
+    QString m_applicationDocumentation;
     QString m_cellPath;
     QString m_copyRightMessage;
     bool m_modified;
@@ -107,6 +115,9 @@ signals:
 
 private:
     bool reportUnusedPublicGlobalVariables;
+    bool reportHiddenGlobalVariables;
+    bool reportParametersPostfix;
+    bool reportToDos;
 }	;
 #endif
 

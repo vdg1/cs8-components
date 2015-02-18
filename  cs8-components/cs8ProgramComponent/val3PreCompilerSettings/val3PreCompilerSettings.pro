@@ -1,28 +1,24 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2012-02-02T18:54:55
+# Project created by QtCreator 2013-10-21T15:43:19
 #
 #-------------------------------------------------
 
-QT       += core xml gui
+QT       += core gui xml
 
-TARGET = val3Check
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+TARGET = val3PreCompilerSettings
 TEMPLATE = app
 
-DESTDIR = ../bin/preCompilerPackage
+DESTDIR = ../bin
 
-SOURCES += main.cpp
+SOURCES += main.cpp\
+        mainwindow.cpp
 
-EXTRA_FILES.path    = $${DESTDIR}
-EXTRA_FILES.files   += $$(QTDIR)/bin/QtCore4.dll
-EXTRA_FILES.files   += $$(QTDIR)/bin/QtGui4.dll
-EXTRA_FILES.files   += $$(QTDIR)/bin/QtXml4.dll
-INSTALLS       += EXTRA_FILES
+HEADERS  += mainwindow.h
 
-win32:RC_FILE = val3Compiler.rc
-
-OTHER_FILES += \
-    val3Compiler.rc
+FORMS    += mainwindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/ -lcs8ProjectComponent
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/ -lcs8ProjectComponentd
