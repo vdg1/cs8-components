@@ -98,6 +98,7 @@ public:
     void setGlobalDocContainer(bool globalDocContainer);
 
     void setApplicationDocumentation(const QString &applicationDocumentation);
+    void setMainPageDocumentation(const QString &applicationDocumentation);
 
     QDomElement programsSection() const;
     void setProgramsSection(const QDomElement &programsSection);
@@ -116,12 +117,13 @@ protected:
     QString m_cellPath;
     QString m_filePath;
     QString m_copyRightMessage;
-    QString m_applicationDocumentation;
+    QString m_applicationDocumentation, m_mainPageDocumentation;
 
 signals:
     void globalVariableDocumentationFound(const QString & name,
                                           const QString & document);
     void moduleDocumentationFound(const QString & document);
+    void mainPageDocumentationFound(const QString & document);
     void exportDirectiveFound(const QString & module, const QString & routine);
     void unknownTagFound(const QString & tagType, const QString & tagName, const QString & tagText);
     void modified();

@@ -92,8 +92,8 @@ void MainWindowImpl::on_pushButtonExecute_clicked() {
                 lineEditLog->appendPlainText(sourceApp + " open ok");
                 if (checkBoxActivatePrototypes->checkState() == Qt::Checked)
                     application.exportInterfacePrototype(destDir);
-                if (checkBoxActivateCExport->checkState() == Qt::Checked)
-                    application.exportToCFile(destCDir);
+                //if (checkBoxActivateCExport->checkState() == Qt::Checked)
+                //    application.exportToCClass(destCDir);
 
             } else
                 lineEditLog->appendPlainText(sourceApp + " failed");

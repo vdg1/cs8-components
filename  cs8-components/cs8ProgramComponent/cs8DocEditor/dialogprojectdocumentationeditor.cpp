@@ -23,3 +23,8 @@ QString DialogProjectDocumentationEditor::text() const
 {
     return ui->plainTextEdit->toPlainText();
 }
+
+void DialogProjectDocumentationEditor::setTitle(const QString & text)
+{
+    setWindowTitle(text);
+}

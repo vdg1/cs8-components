@@ -2,9 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "1.7.7"
+#define MyAppVersion "1.7.9"
 #define MyAppPublisher "SAXE Swiss System AB"
-#define MyAppURL "http://www.swiss-system.se"
+#define MyAppURL "http://www.saxe-group.com"
 #define QT "D:\Qt\4.8.5"
 ;#define MINGW "C:\MinGW"
 
@@ -33,7 +33,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 Source: "..\cs8ProgramComponent\bin\extractPrototype.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\cs8ProgramComponent\bin\val3PreCompilerSettings.exe"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "..\cs8ProgramComponent\bin\val3PreCompilerSettings.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\Val3 Documentation Editor.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\val3CompilerDeployment.exe"; DestDir: "{app}"; Flags: ignoreversion
 ;Source: "..\cs8ProgramComponent\bin\val3Check.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -54,4 +54,7 @@ Name: "{group}\Val3 Compiler Deployment"; Filename: "{app}\val3CompilerDeploymen
 Name: "{group}\Val3 Create API"; Filename: "{app}\val3CreateAPI.exe"
 Name: "{group}\Val3 Compiler Settings"; Filename: "{app}\val3PreCompilerSettings.exe"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+
+[Run]
+Filename: "{app}\val3CompilerDeployment.EXE"; Parameters: "--install"; Description: "Install Precompiler for SRC7.x versions"; Flags: postinstall nowait shellexec
 

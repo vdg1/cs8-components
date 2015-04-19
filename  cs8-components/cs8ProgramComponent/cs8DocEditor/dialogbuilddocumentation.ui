@@ -1,33 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogProjectDocumentationEditor</class>
- <widget class="QDialog" name="DialogProjectDocumentationEditor">
+ <class>DialogBuildDocumentation</class>
+ <widget class="QDialog" name="DialogBuildDocumentation">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>797</width>
-    <height>544</height>
+    <width>400</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Editor</string>
+   <string>Building Documentation</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QPlainTextEdit" name="plainTextEdit">
-     <property name="tabChangesFocus">
+     <property name="readOnly">
       <bool>true</bool>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Close</set>
      </property>
     </widget>
    </item>
@@ -38,7 +41,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>DialogProjectDocumentationEditor</receiver>
+   <receiver>DialogBuildDocumentation</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -54,7 +57,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>DialogProjectDocumentationEditor</receiver>
+   <receiver>DialogBuildDocumentation</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

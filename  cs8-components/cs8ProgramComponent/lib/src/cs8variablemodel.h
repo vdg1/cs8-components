@@ -48,6 +48,7 @@ class cs8VariableModel: public QAbstractTableModel {
         QList<cs8Variable*>& variableList(const QString & type=QString());
 
         cs8Variable *createVariable(const QString & name);
+        cs8Variable *getByName(const QString & name) const;
         bool hasDocumentation();
 
         bool withUndocumentedSymbols() const;

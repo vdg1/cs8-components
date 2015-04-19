@@ -133,6 +133,8 @@ cs8Program * cs8ProgramModel::createProgram(const QString & programName)
             this, SLOT(slotGlobalVariableDocumentationFound(const QString & , const QString & )));
     connect(program, SIGNAL(moduleDocumentationFound(const QString & )),
             this, SLOT(slotModuleDocumentationFound(const QString & )));
+    connect(program, SIGNAL(mainPageDocumentationFound(const QString & )),
+            this, SLOT(slotMainPageDocumentationFound(const QString & )));
     connect(program, SIGNAL(exportDirectiveFound(QString,QString)),
             this,SLOT(slotExportDirectiveFound(QString,QString)));
     connect(program, SIGNAL(unknownTagFound(QString,QString,QString)),
@@ -162,6 +164,11 @@ void cs8ProgramModel::slotGlobalVariableDocumentationFound(
 void cs8ProgramModel::slotModuleDocumentationFound(const QString & document) {
     emit moduleDocumentationFound(document);
 }
+
+void cs8ProgramModel::slotMainPageDocumentationFound(const QString & document) {
+    emit mainPageDocumentationFound(document);
+}
+
 
 void cs8ProgramModel::slotExportDirectiveFound(const QString &module, const QString &function)
 {

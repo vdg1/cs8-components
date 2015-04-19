@@ -16,6 +16,7 @@ public:
     ~DialogProjectDocumentationEditor();
     void setText(const QString & text);
     QString text() const;
+    void setTitle(const QString &text);
 
 private:
     Ui::DialogProjectDocumentationEditor *ui;

@@ -37,6 +37,8 @@ class val3PrecompilerSettings : public QDialog
 
         void on_cpReportsToDos_toggled(bool checked);
 
+        void slotStartup();
+
 private:
         Ui::val3PrecompilerSettings *ui;
 

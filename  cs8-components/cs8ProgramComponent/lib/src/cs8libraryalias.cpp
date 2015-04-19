@@ -9,13 +9,15 @@
 #include <QStringList>
 
 cs8LibraryAlias::cs8LibraryAlias(const QString & name, const QString & path,
-                                 bool autoLoad) {
+                                 bool autoLoad)
+{
     m_name = name;
     m_path = path;
     m_autoLoad = autoLoad;
 }
 
-cs8LibraryAlias::~cs8LibraryAlias() {
+cs8LibraryAlias::~cs8LibraryAlias()
+{
     // TODO Auto-generated destructor stub
 }
 
@@ -36,14 +38,18 @@ void cs8LibraryAlias::setAutoLoad(bool m_autoLoad)
     emit modified();
 }
 
-QString cs8LibraryAlias::documentation() const {
+QString cs8LibraryAlias::documentation() const
+{
 
     return m_documentation;
 }
 
-QString cs8LibraryAlias::definition() const {
+QString cs8LibraryAlias::definition() const
+{
     qDebug() << "alias: " << m_name << ":" << m_path.split("/").last();
-    return QString("%1 %2").arg(m_path.split("/").last()).arg(m_name);
+    QString pth=m_path.split("/").last();
+    pth.chop(4);
+    return QString("%1 %2").arg(pth).arg(m_name);
 }
 
 void cs8LibraryAlias::setDocumentation(const QString doc)
