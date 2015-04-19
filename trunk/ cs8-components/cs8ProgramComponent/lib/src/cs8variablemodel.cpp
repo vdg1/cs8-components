@@ -108,6 +108,18 @@ cs8Variable *cs8VariableModel::createVariable(const QString &name)
     return variable;
 }
 
+cs8Variable *cs8VariableModel::getByName(const QString &name) const
+{
+    foreach(cs8Variable *var,m_variableList)
+    {
+        QString n=name;
+        n.remove(QRegExp("\\[.*\\]"));
+        if (var->name()==n)
+            return var;
+    }
+    return 0;
+}
+
 bool cs8VariableModel::hasDocumentation()
 {
     foreach(cs8Variable* var,m_variableList)

@@ -81,7 +81,7 @@ void DialogDeploy::activatePreCompiler(bool activate)
                 {
                     QMessageBox::critical(this,
                                           tr("Error"),
-                                          tr("The original VAL3Check.exe (called VAL3Check_Orig.exe) already not exist!"));
+                                          tr("The original VAL3Check.exe (called VAL3Check_Orig.exe) already exists!"));
                     return;
                 }
             if (!QFile::rename(val3Dir.absolutePath()+"/"+VAL3CHECK,

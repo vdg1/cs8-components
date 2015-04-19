@@ -92,7 +92,7 @@ int main( int argc, char **argv )
         if ( application.openFromPathName( sourceDir + "/" + sourceApp ) )
         {
             qDebug() << ( sourceApp + " open ok" );
-            application.exportToCFile( destDir );
+            application.exportToCClass(destDir );
         }
         qDebug() << "Done";
 

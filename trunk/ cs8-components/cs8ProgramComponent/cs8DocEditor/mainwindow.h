@@ -47,6 +47,10 @@ private slots:
     void on_actionAdd_tags_for_undocumented_symbols_triggered(bool checked);
     void on_actionApply_project_data_to_all_sub_projects_triggered();
     void on_actionEdit_Project_Documentation_triggered();
+    void on_actionEdit_Main_Page_triggered();
+    void on_actionBuild_Documentation_triggered();
+    void on_actionSettings_triggered();
+    void on_actionInclude_documentation_of_Libraries_triggered(bool checked);
 };
 
 #endif // MAINWINDOW_H

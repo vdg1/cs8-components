@@ -2,6 +2,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "dialogprojectdocumentationeditor.h"
+#include "dialogsettings.h"
+#include "dialogbuilddocumentation.h"
 
 #include <QFileDialog>
 #include <QSettings>
@@ -52,27 +54,27 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent( QCloseEvent *event )
 {
     if ( maybeSave() )
-        {
-            writeSettings();
-            event->accept();
-        }
+    {
+        writeSettings();
+        event->accept();
+    }
     else
-        {
-            event->ignore();
-        }
+    {
+        event->ignore();
+    }
 }
 
 void MainWindow::changeEvent( QEvent *e )
 {
     QMainWindow::changeEvent( e );
     switch ( e->type() )
-        {
-        case QEvent::LanguageChange:
-            ui->retranslateUi( this );
-            break;
-        default:
-            break;
-        }
+    {
+    case QEvent::LanguageChange:
+        ui->retranslateUi( this );
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::readSettings()
@@ -98,12 +100,12 @@ void MainWindow::writeSettings()
 void MainWindow::createRecentFilesItems()
 {
     for ( int i = 0; i < MaxRecentFiles; ++i )
-        {
-            recentFileActs[i] = new QAction( this );
-            recentFileActs[i]->setVisible( false );
-            connect( recentFileActs[i], SIGNAL( triggered() ),
-                     this, SLOT( openRecentFile() ) );
-        }
+    {
+        recentFileActs[i] = new QAction( this );
+        recentFileActs[i]->setVisible( false );
+        connect( recentFileActs[i], SIGNAL( triggered() ),
+                 this, SLOT( openRecentFile() ) );
+    }
     for ( int i = 0; i < MaxRecentFiles; ++i )
         ui->menuRecent->addAction( recentFileActs[i] );
     updateRecentFileActions ();
@@ -114,9 +116,9 @@ void MainWindow::on_action_Open_triggered()
 {
     QString applicationName = QFileDialog::getOpenFileName( this, tr( "Open a Val3 project" ), m_application->name(), "(*.pjx)" );
     if ( !applicationName.isEmpty() )
-        {
-            openApplication( applicationName );
-        }
+    {
+        openApplication( applicationName );
+    }
 }
 
 void MainWindow::on_action_Save_triggered()
@@ -134,11 +136,11 @@ void MainWindow::slotSelectionChanged( const QItemSelection &selected, const QIt
 void MainWindow::openRecentFile()
 {
     if ( maybeSave() )
-        {
-            QAction *action = qobject_cast<QAction *>( sender() );
-            if ( action )
-                openApplication( action->data().toString() );
-        }
+    {
+        QAction *action = qobject_cast<QAction *>( sender() );
+        if ( action )
+            openApplication( action->data().toString() );
+    }
 }
 
 void MainWindow::slotModified( bool modified_ )
@@ -161,17 +163,17 @@ void MainWindow::on_detailEditor_done()
 bool MainWindow::maybeSave()
 {
     if ( m_application->isModified() )
-        {
-            QMessageBox::StandardButton ret;
-            ret = QMessageBox::warning( this, tr( "Application" ),
-                                        tr( "The document has been modified.\n"
-                                            "Do you want to save your changes?" ),
-                                        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
-            if ( ret == QMessageBox::Save )
-                return m_application->save();
-            else if ( ret == QMessageBox::Cancel )
-                return false;
-        }
+    {
+        QMessageBox::StandardButton ret;
+        ret = QMessageBox::warning( this, tr( "Application" ),
+                                    tr( "The document has been modified.\n"
+                                        "Do you want to save your changes?" ),
+                                    QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
+        if ( ret == QMessageBox::Save )
+            return m_application->save();
+        else if ( ret == QMessageBox::Cancel )
+            return false;
+    }
     return true;
 }
 
@@ -180,6 +182,7 @@ void MainWindow::openApplication( const QString &applicationName )
     setCurrentFile( applicationName );
     m_application->open( applicationName );
     ui->actionAdd_tags_for_undocumented_symbols->setChecked (m_application->withUndocumentedSymbols ());
+    ui->actionInclude_documentation_of_Libraries->setChecked(m_application->includeLibraryDocuments());
 }
 
 void MainWindow::updateRecentFileActions()
@@ -190,12 +193,12 @@ void MainWindow::updateRecentFileActions()
     int numRecentFiles = qMin( files.size(), ( int )MaxRecentFiles );
 
     for ( int i = 0; i < numRecentFiles; ++i )
-        {
-            QString text = tr( "&%1 %2" ).arg( i + 1 ).arg( files[i] );
-            recentFileActs[i]->setText( text );
-            recentFileActs[i]->setData( files[i] );
-            recentFileActs[i]->setVisible( true );
-        }
+    {
+        QString text = tr( "&%1 %2" ).arg( i + 1 ).arg( files[i] );
+        recentFileActs[i]->setText( text );
+        recentFileActs[i]->setData( files[i] );
+        recentFileActs[i]->setVisible( true );
+    }
     for ( int j = numRecentFiles; j < MaxRecentFiles; ++j )
         recentFileActs[j]->setVisible( false );
 
@@ -215,11 +218,11 @@ void MainWindow::setCurrentFile( const QString &fileName )
     settings.setValue( "recentFileList", files );
 
     foreach( QWidget * widget, QApplication::topLevelWidgets() )
-        {
-            MainWindow *mainWin = qobject_cast<MainWindow *>( widget );
-            if ( mainWin )
-                mainWin->updateRecentFileActions();
-        }
+    {
+        MainWindow *mainWin = qobject_cast<MainWindow *>( widget );
+        if ( mainWin )
+            mainWin->updateRecentFileActions();
+    }
 }
 
 void MainWindow::on_actionEdit_Copy_Right_Message_triggered()
@@ -242,20 +245,20 @@ QStringList scanDirIter(QDir dir)
     QStringList projects;
     QDirIterator iterator(dir.absolutePath(), QDirIterator::Subdirectories);
     while (iterator.hasNext())
+    {
+        iterator.next();
+        //qDebug() << iterator.fileInfo ().absoluteFilePath ();
+        if (!iterator.fileInfo().isDir())
         {
-            iterator.next();
-            //qDebug() << iterator.fileInfo ().absoluteFilePath ();
-            if (!iterator.fileInfo().isDir())
-                {
-                    QString filename = iterator.fileName();
-                    if (filename.endsWith(".pjx"))
-                        {
-                            qDebug("Found %s matching pattern.", qPrintable(filename));
-                            projects<< iterator.fileInfo ().absoluteFilePath ();
-                        }
-                }
-
+            QString filename = iterator.fileName();
+            if (filename.endsWith(".pjx"))
+            {
+                qDebug("Found %s matching pattern.", qPrintable(filename));
+                projects<< iterator.fileInfo ().absoluteFilePath ();
+            }
         }
+
+    }
     return projects;
 }
 
@@ -266,24 +269,58 @@ void MainWindow::on_actionApply_project_data_to_all_sub_projects_triggered()
     QStringList projects=scanDirIter (QDir(projectPath));
 
     foreach(QString projectPath,projects)
+    {
+        cs8Application app;
+        if (app.open (projectPath))
         {
-            cs8Application app;
-            if (app.open (projectPath))
-                {
-                    app.setCopyrightMessage (m_application->copyRightMessage ());
-                    app.setWithUndocumentedSymbols (m_application->withUndocumentedSymbols ());
-                    app.save ();
-                }
+            app.setCopyrightMessage (m_application->copyRightMessage ());
+            app.setWithUndocumentedSymbols (m_application->withUndocumentedSymbols ());
+            app.save ();
         }
+    }
 }
 
 
 void MainWindow::on_actionEdit_Project_Documentation_triggered()
 {
     DialogProjectDocumentationEditor dlg;
+    dlg.setTitle(tr("Project/Module Documentation"));
     dlg.setText(m_application->applicationDocumentation());
     if (dlg.exec()==QDialog::Accepted)
-        {
-            m_application->setApplicationDocumentation(dlg.text());
-        }
+    {
+        m_application->setApplicationDocumentation(dlg.text());
+    }
+}
+
+void MainWindow::on_actionEdit_Main_Page_triggered()
+{
+    DialogProjectDocumentationEditor dlg;
+    dlg.setTitle(tr("Main Page Documentation"));
+    dlg.setText(m_application->mainPageDocumentation());
+    if (dlg.exec()==QDialog::Accepted)
+    {
+        m_application->setMainPageDocumentation(dlg.text());
+    }
+}
+
+void MainWindow::on_actionBuild_Documentation_triggered()
+{
+    //qDebug() << m_application->exportToCSyntax();
+    // launch doxygen
+    DialogBuildDocumentation dlg;
+    dlg.show();
+    dlg.build(m_application);
+    dlg.exec();
+}
+
+void MainWindow::on_actionSettings_triggered()
+{
+    DialogSettings dlg;
+    dlg.exec();
+}
+
+
+void MainWindow::on_actionInclude_documentation_of_Libraries_triggered(bool checked)
+{
+    m_application->setIncludeLibraryDocuments(checked);
 }

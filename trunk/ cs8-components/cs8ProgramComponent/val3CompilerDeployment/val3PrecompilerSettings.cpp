@@ -1,3 +1,4 @@
+#include <QTimer>
 #include <cs8application.h>
 
 #include "val3PrecompilerSettings.h"
@@ -19,6 +20,7 @@ val3PrecompilerSettings::val3PrecompilerSettings(QDialog *parent) :
     ui->cpHiddenGlobalVariables->setChecked (settings.value ("reportHiddenGlobalVariables",true).toBool ());
     ui->cpParametersPostfix->setChecked (settings.value ("reportParametersPostfix",true).toBool ());
     ui->cpReportsToDos->setChecked (settings.value ("reportToDos",true).toBool ());
+
 }
 
 val3PrecompilerSettings::~val3PrecompilerSettings()
@@ -73,4 +75,9 @@ void val3PrecompilerSettings::on_cpReportsToDos_toggled(bool checked)
 {
     QSettings settings;
     settings.setValue ("reportToDos",checked);
+}
+
+void val3PrecompilerSettings::slotStartup()
+{
+
 }

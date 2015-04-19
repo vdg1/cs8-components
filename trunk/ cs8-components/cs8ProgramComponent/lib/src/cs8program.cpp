@@ -192,6 +192,11 @@ void cs8Program::setApplicationDocumentation(const QString &applicationDocumenta
     m_applicationDocumentation = applicationDocumentation;
 }
 
+void cs8Program::setMainPageDocumentation(const QString &applicationDocumentation)
+{
+    m_mainPageDocumentation = applicationDocumentation;
+}
+
 
 
 // returns the code without documentation header
@@ -203,8 +208,9 @@ QString cs8Program::val3Code( bool withDocumentation )
 
 QString cs8Program::toCSyntax()
 {
-    QString val3_ = val3Code();
+    QString val3_ = val3Code(false);
     val3_ = val3_.replace( QString( "call " ), QString( "" ), Qt::CaseSensitive );
+    val3_ = val3_.replace( ":", "." );
     return val3_;
 }
 
@@ -345,7 +351,7 @@ QString cs8Program::extractDocumentation( const QString &code_ )
     // remove code section
     // search first non comment line
     int i = 0;
-    while ( documentationList.at( i ).simplified().startsWith( ( "//" ) ) || documentationList.at( i ).simplified().isEmpty() )
+    while ( !documentationList.at( i ).simplified().startsWith( ( "//_" ) ) && (documentationList.at( i ).simplified().startsWith( ( "//" ) ) || documentationList.at( i ).simplified().isEmpty() ))
         i++;
     // remove lines starting from found first non comment line
     while ( documentationList.count() > i )
@@ -510,6 +516,11 @@ void cs8Program::parseDocumentation( const QString &code_ )
                             qDebug() << "module doc: " << tagName << ":" << tagText;
                             emit moduleDocumentationFound( tagText );
                         }
+                    else if ( tagType == "mainpage" )
+                        {
+                            qDebug() << "main page doc: " << tagName << ":" << tagText;
+                            emit mainPageDocumentationFound( tagText );
+                        }
                     else if ( tagType == "export" )
                         {
                             tagText = tagText.simplified();
@@ -608,6 +619,11 @@ void cs8Program::parseDocumentation( const QString &code_ )
                 {
                     qDebug() << "module doc: " << tagName << ":" << tagText;
                     emit moduleDocumentationFound( tagText );
+                }
+            else if ( tagType == "mainpage" )
+                {
+                    qDebug() << "mainpage doc: " << tagName << ":" << tagText;
+                    emit mainPageDocumentationFound( tagText );
                 }
             else if ( tagType == "export" )
                 {
@@ -716,9 +732,9 @@ void cs8Program::setDescriptionSection()
     for ( int i = 0; i < m_parameterModel->variableList().count() - 1; i++ )
         {
             if ( i == 0 )
-                txt += "\n";
+               txt += "\n";
             if (m_parameterModel->variableList ().at (i)->documentation (false,false).length ()>2)
-                txt += m_parameterModel->variableList().at( i )->name ()+": "+m_parameterModel->variableList().at( i )->documentation ( false, false ) + "\\n";
+                txt += m_parameterModel->variableList().at( i )->name ()+": "+m_parameterModel->variableList().at( i )->description();
         }
 
     QDomNode node;
@@ -891,6 +907,12 @@ QString cs8Program::toDocumentedCode()
         {
             documentation += "\\module\n";
             documentation += m_applicationDocumentation+"\n";
+        }
+
+    if (!m_mainPageDocumentation.isEmpty())
+        {
+            documentation += "\\mainpage\n";
+            documentation += m_mainPageDocumentation+"\n";
         }
 
     if ( !m_tags.isEmpty() )

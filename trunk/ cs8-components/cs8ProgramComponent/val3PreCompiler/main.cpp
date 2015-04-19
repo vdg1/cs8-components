@@ -48,11 +48,13 @@ int main(int argc, char *argv[])
         // run original Val3Check.exe
         QProcess proc;
         QStringList arg=qApp->arguments ();
+        qDebug() << "Arguments " << arg;
         // remove the first argument as that is the path of the executable
         arg.removeAt (0);
         proc.start ("Val3Check_orig.exe",arg);
         proc.waitForFinished ();
         QString out=proc.readAll ();
+        qDebug() << "Result " << out;
         cout << qPrintable(out);
         return proc.exitCode ();
     }

@@ -52,7 +52,7 @@ int main(int argc, char ** argv) {
             qDebug() << (sourceFile + " open ok");
 
             QTextStream out(stdout);
-            out << application.exportToCSyntax();
+            //out << application.exportToCClass();
 
         }
         qDebug() << "Done";

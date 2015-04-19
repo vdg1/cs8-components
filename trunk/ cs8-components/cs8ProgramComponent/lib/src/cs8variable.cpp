@@ -197,6 +197,36 @@ QString cs8Variable::type() const
 
 }
 
+QString cs8Variable::prefix() const
+{
+    QString typeName=type();
+    if (typeName=="tool")
+        return 't';
+    else if (typeName.startsWith("point"))
+        return 'p';
+    else if (typeName.startsWith("frame"))
+        return 'f';
+    else if (typeName.startsWith("joint"))
+        return 'j';
+    else if (typeName.startsWith("bool"))
+        return 'b';
+    else if (typeName.startsWith("mdesc"))
+        return 'm';
+    else if (typeName.startsWith("num"))
+        return 'n';
+    else if (typeName.startsWith("string"))
+        return 's';
+    else
+        return QString();
+}
+
+bool cs8Variable::isConst() const
+{
+    QRegExp rx;
+    rx.setPattern("([A-Z]+)(_[A-Z0-9]*)");
+    return rx.indexIn(name())==0;
+}
+
 void cs8Variable::setName( QString value )
 {
     emit modified();

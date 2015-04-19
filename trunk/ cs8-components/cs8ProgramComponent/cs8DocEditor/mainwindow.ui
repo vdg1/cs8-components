@@ -10,6 +10,10 @@
     <height>522</height>
    </rect>
   </property>
+  <property name="windowIcon">
+   <iconset resource="cs8doceditor.qrc">
+    <normaloff>:/icons/kword.png</normaloff>:/icons/kword.png</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
@@ -160,17 +164,23 @@
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
-     <string>Project Settings</string>
+     <string>Project</string>
     </property>
     <addaction name="actionEdit_Copy_Right_Message"/>
-    <addaction name="actionAdd_tags_for_undocumented_symbols"/>
     <addaction name="actionEdit_Project_Documentation"/>
+    <addaction name="actionEdit_Main_Page"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdd_tags_for_undocumented_symbols"/>
+    <addaction name="actionInclude_documentation_of_Libraries"/>
+    <addaction name="separator"/>
+    <addaction name="actionBuild_Documentation"/>
    </widget>
    <widget class="QMenu" name="menuTools_2">
     <property name="title">
      <string>Tools</string>
     </property>
     <addaction name="actionApply_project_data_to_all_sub_projects"/>
+    <addaction name="actionSettings"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuTools"/>
@@ -251,6 +261,29 @@
     <string>Edit Project Documentation</string>
    </property>
   </action>
+  <action name="actionEdit_Main_Page">
+   <property name="text">
+    <string>Edit Main Page</string>
+   </property>
+  </action>
+  <action name="actionBuild_Documentation">
+   <property name="text">
+    <string>Build Documentation</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionInclude_documentation_of_Libraries">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Include documentation of Libraries</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -277,7 +310,9 @@
    <header>codeeditor.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="cs8doceditor.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>action_Exit</sender>

@@ -12,17 +12,23 @@ SOURCES += main.cpp \
     codeeditor.cpp \
     highlighter.cpp \
     dialogcopyrighteditor.cpp \
-    dialogprojectdocumentationeditor.cpp
+    dialogprojectdocumentationeditor.cpp \
+    dialogsettings.cpp \
+    dialogbuilddocumentation.cpp
 
 HEADERS += mainwindow.h \
     codeeditor.h \
     highlighter.h \
     dialogcopyrighteditor.h \
-    dialogprojectdocumentationeditor.h
+    dialogprojectdocumentationeditor.h \
+    dialogsettings.h \
+    dialogbuilddocumentation.h
 
 FORMS += mainwindow.ui \
     dialogcopyrighteditor.ui \
-    dialogprojectdocumentationeditor.ui
+    dialogprojectdocumentationeditor.ui \
+    dialogsettings.ui \
+    dialogbuilddocumentation.ui
 
 RC_FILE += \
     cs8DocEditor.rc \
@@ -49,3 +55,6 @@ else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/
 
 DISTFILES += \
     cs8DocEditor.rc
+
+RESOURCES += \
+    cs8doceditor.qrc

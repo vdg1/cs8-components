@@ -20,7 +20,7 @@ class cs8Application: public QObject
     Q_OBJECT
 
 public:
-    QString projectPath();
+    QString projectPath(bool cs8Format=false);
     bool save();
     bool loadDataFile(const QString & fileName);
     bool saveDataFile(const QString & fileName);
@@ -31,8 +31,9 @@ public:
 
     cs8ProgramModel* programModel() const;
     cs8LibraryAliasModel* libraryModel() const;
-    void exportToCFile(const QString & path);
-    QString exportToCSyntax();
+
+    QString exportToCImplementation();
+    QString exportToCDefinition();
     bool exportInterfacePrototype(const QString & path);
     QString name() const
     {
@@ -41,12 +42,13 @@ public:
     void setName(const QString & name);
 
     bool loadDocumentationFile(const QString &);
-    QString documentation();
+    QString moduleDocumentationFormatted(QString withSlashes=QString("///"));
+    QString mainPageDocumentationFromatted(QString withSlashes=QString("///"));
     QString performPrecompilerChecks();
     void setCellPath(const QString & path);
     QString cellPath() const;
     QString cellProjectFilePath() const;
-    QString cellDataFilePath() const;
+    QString cellDataFilePath(bool cs8Format=false) const;
     bool writeProjectFile();
     QHash<QString, QString> exportDirectives() const
     {
@@ -62,6 +64,7 @@ public:
     cs8TypeModel *typeModel() const;
     bool loadProjectData();
     bool saveProjectData();
+    void exportToCClass(const QString path);
 
     QString copyRightMessage() const;
 
@@ -77,6 +80,15 @@ public:
     void setApplicationDocumentation(const QString &applicationDocumentation);
 
     void initPrecompilerSettings();
+    QString mainPageDocumentation() const;
+    void setMainPageDocumentation(const QString &mainPageDocumentation);
+
+    QString version() const;
+
+
+    bool includeLibraryDocuments() const;
+    void setIncludeLibraryDocuments(bool includeLibraryDocuments);
+
 protected:
     QHash<QString, QString> m_exportDirectives;
     QHash<QString, QString> m_pragmaList;
@@ -87,11 +99,13 @@ protected:
     cs8LibraryAliasModel* m_libraryAliasModel;
     cs8TypeModel *m_typeModel;
     //QDomDocument m_dataDoc;
-    QString m_applicationDocumentation;
+    QString m_moduleDocumentation, m_mainPageDocumentation;
     QString m_cellPath;
     QString m_copyRightMessage;
+    QString m_version;
     bool m_modified;
     bool m_withUndocumentedSymbols;
+    bool m_includeLibraryDocuments;
 
     QDomDocument m_XMLDocument;
     QDomElement m_parameters;
@@ -106,6 +120,7 @@ protected:
 protected slots:
     void slotGlobalVariableDocumentationFound(const QString & name, const QString & document);
     void slotModuleDocumentationFound(const QString & document);
+    void slotMainPageDocumentationFound(const QString & document);
     void slotExportDirectiveFound(const QString & module, const QString & function);
     void slotUnknownTagFound(const QString & tagType, const QString & tagName, const QString & tagText);
     void setModified(bool modified);
@@ -118,6 +133,8 @@ private:
     bool reportHiddenGlobalVariables;
     bool reportParametersPostfix;
     bool reportToDos;
+    void exportToCppFile(const QString & path);
+    void exportToHFile(const QString & path);
 }	;
 #endif
 
