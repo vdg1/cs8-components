@@ -21,6 +21,7 @@ public:
     void setPath(const QString &path);
 
     void activatePreCompiler(bool activate);
+    void activateHelpFile(bool activate);
 
 private:
     Ui::Dialog *ui;
@@ -29,5 +30,7 @@ private:
 
 extern QString VAL3CHECKORIG;
 extern QString VAL3CHECK;
+extern QString HELPCHECKORIG;
+extern QString HELPCHECK;
 
 #endif // DIALOGDEPLOY_H
