@@ -1,0 +1,192 @@
+#include "cs8codevalidation.h"
+#include "cs8variable.h"
+
+#include <QDir>
+#include <QFile>
+#include <QMessageBox>
+
+cs8CodeValidation::cs8CodeValidation(QObject *parent) : QObject(parent)
+{
+
+}
+
+bool cs8CodeValidation::loadRuleFile(const QString &fileName)
+{
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+        return false;
+    QString errorMessage;
+    int errorColumn, errorLine;
+    if (!rules.setContent(&file, &errorMessage, &errorLine, &errorColumn)) {
+        file.close();
+        QString message=QString("The rule file %1 could not be loaded: %2, line %3, column %4")
+                .arg(fileName)
+                .arg(errorMessage)
+                .arg(errorLine)
+                .arg(errorColumn);
+        return false;
+    }
+    file.close();
+
+    // print out the element names of all elements that are direct children
+    // of the outermost element.
+    globalDataRules = rules.documentElement().elementsByTagName("globalData").at(0).childNodes();
+    parameterRules = rules.documentElement().elementsByTagName("parameter").at(0).childNodes();
+    localDataRules = rules.documentElement().elementsByTagName("localData").at(0).childNodes();
+    return true;
+}
+
+QStringList cs8CodeValidation::runDataValidationRule(cs8Application *app, cs8Program *program, QList<cs8Variable *> variableList,  QDomNodeList ruleList)
+{
+    QStringList validationMessages;
+    for (int i=0;i<ruleList.count();i++)
+    {
+        QDomElement ruleNode=ruleList.at(i).toElement();
+        if (ruleNode.nodeName()=="variable")
+        {
+            QString checkProperty=ruleNode.attribute("checkProperty");
+            QString varType=ruleNode.attribute("type");
+            QRegExp rx(ruleNode.attribute("expression"));
+            QString message=ruleNode.elementsByTagName("message").at(0).toElement().text();
+            //
+            foreach(cs8Variable *var,variableList)
+            {
+                if (checkProperty=="name" && (varType==var->type() || varType.isEmpty()))
+                {
+                    // apply name rule on variable name
+                    if (rx.indexIn(var->name())==-1 || rx.pattern().isEmpty())
+                    {
+                        QString msg=message;
+                        msg.replace("%varType%",var->type());
+                        msg.replace("%varName%",var->name());
+                        if (program==0)
+                        {
+                            msg.replace("%fileName%",app->cellDataFilePath(true));
+                        }
+                        else
+                        {
+                            msg.replace("%progName%",program->name());
+                            msg.replace("%fileName%",program->cellFilePath());
+                        }
+                        validationMessages << msg;
+                    }
+                }
+            }
+        }
+        else if (ruleNode.nodeName()=="reference")
+        {
+            QString checkProperty=ruleNode.attribute("checkProperty");
+            QString scope=ruleNode.attribute("scope","");
+            int variableScope=0;
+            if (scope=="public")
+                variableScope=1;
+            if (scope=="private")
+                variableScope=2;
+
+            QRegExp rx(ruleNode.attribute("expression"));
+            QString message=ruleNode.elementsByTagName("message").at(0).toElement().text();
+            //
+            foreach(cs8Variable *var,variableList)
+            {
+                // apply name rule on variable name
+                if (rx.indexIn(var->name())!=-1 || rx.pattern().isEmpty())
+                {
+                    if (checkProperty=="notReferenced")
+                    {
+                        bool referenced=program==0 ? app->getReferencedMap()[var->name()]==true : program->referencedVariables().contains(var->name());
+                        if ((var->isPublic() && (variableScope<2) || !var->isPublic() && variableScope==1) && !referenced)
+                        {
+                            // apply name rule on variable name
+                            if (rx.indexIn(var->name())==-1 || rx.pattern().isEmpty())
+                            {
+                                QString msg=message;
+                                msg.replace("%varType%",var->type());
+                                msg.replace("%varName%",var->name());
+                                if (program==0)
+                                {
+                                    msg.replace("%fileName%",app->cellDataFilePath(true));
+                                }
+                                else
+                                {
+                                    msg.replace("%progName%",program->name());
+                                    msg.replace("%fileName%",program->cellFilePath());
+                                }
+                                validationMessages << msg;
+                            }
+                        }
+                    }
+                    else if (checkProperty=="hidden")
+                    {
+
+                        foreach(cs8Program *prog,app->programModel()->programList())
+                        {
+                            if (prog->localVariableModel ()->variableNameList ().contains (var->name ()) )
+                            {
+
+                                QString msg=message;
+                                msg.replace("%progName%",prog->name ());
+                                msg.replace("%varName%",var->name());
+
+                                    msg.replace("%progName%",prog->name());
+                                    msg.replace("%fileName%",prog->cellFilePath());
+                                validationMessages << msg;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return validationMessages;
+}
+
+QStringList cs8CodeValidation::runValidation(cs8Application *app)
+{
+    QStringList validationMessages;
+    // run global data rules
+
+    validationMessages <<  runDataValidationRule(app, 0, app->globalVariableModel()->variableList(), globalDataRules);
+    foreach(cs8Program *program,app->programModel()->programList())
+    {
+        validationMessages <<  runDataValidationRule(app, program, program->parameterModel()->variableList(), parameterRules);
+        validationMessages <<  runDataValidationRule(app, program, program->localVariableModel()->variableList(), localDataRules);
+
+        QMapIterator<int, QString> i(program->todos ());
+        while (i.hasNext())
+        {
+            i.next();
+            validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
+                                  .arg (program->name ())
+                                  .arg ("Warning: " + i.value ())
+                                  .arg(program->cellFilePath ())
+                                  .arg(i.key ());
+        }
+    }
+
+    // check for obsolete PGX files
+    // retrieve list of pgx files from file system
+
+    QDir dir;
+    dir.setPath(app->projectPath());
+    QStringList pgxFileList=dir.entryList(QStringList() << "*.pgx");
+    foreach (QString pgxFileName, pgxFileList)
+    {
+        bool found=false;
+        foreach(cs8Program *program,app->programModel()->programList())
+        {
+            if (program->fileName()==pgxFileName)
+                found=true;
+        }
+        if (!found)
+        {
+            validationMessages <<  QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
+                                   .arg (pgxFileName)
+                                   .arg ("Warning: Program file is obsolete")
+                                   .arg("")
+                                   .arg("");
+        }
+    }
+    return validationMessages;
+}
+

@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <cs8application.h>
 #include <iostream>
+#include <cs8codevalidation.h>
 
 using namespace std;
 
@@ -30,20 +31,24 @@ int main(int argc, char *argv[])
 
         }
 
-        for(int i=qApp->arguments ().count (); i--; i>1)
+        cs8CodeValidation validator;
+        if (validator.loadRuleFile(":/rules/compilerRules.xml"))
         {
-            if (qApp->arguments ().at(i).startsWith ("-"))
-                break;
-            else {
-                qDebug () << qApp->arguments ().at(i);
-                cs8Application app;
-                app.setCellPath(cellPath);
-                app.openFromPathName (qApp->arguments ().at(i));
-                cout << qPrintable(app.performPrecompilerChecks ()+"\n");
+            for(int i=qApp->arguments ().count (); i--; i>1)
+            {
+                if (qApp->arguments ().at(i).startsWith ("-"))
+                    break;
+                else {
+                    qDebug () << qApp->arguments ().at(i);
+                    cs8Application app;
+                    app.setCellPath(cellPath);
+                    app.openFromPathName (qApp->arguments ().at(i));
+                    //cout << qPrintable(app.performPrecompilerChecks ()+"\n");
+                    cout << qPrintable(validator.runValidation(&app).join("\n")+"\n");
+                }
+
             }
-
         }
-
 
         // run original Val3Check.exe
         QProcess proc;

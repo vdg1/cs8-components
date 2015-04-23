@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<rules version="1.0">
+  <globalData>
+    <variable type="num" checkProperty="name" expression="^([A-Z]|n|state|tm|hnd|cnt).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'n'<file>%fileName%]]></message>
+    </variable>
+    <variable type="string" checkProperty="name" expression="^([A-Z]|s).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 's'<file>%fileName%]]></message>
+    </variable>
+    <variable type="pointRx" checkProperty="name" expression="^([A-Z]|p|z).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'p'<file>%fileName%]]></message>
+    </variable>
+    <variable type="jointRx" checkProperty="name" expression="^([A-Z]|j).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'j'<file>%fileName%]]></message>
+    </variable>
+    <variable type="trsf" checkProperty="name" expression="^([A-Z]|tr).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'tr'<file>%fileName%]]></message>
+    </variable>
+    <variable type="bool" checkProperty="name" expression="^([A-Z]|b|mtx|fl).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'b'<file>%fileName%]]></message>
+    </variable>
+    <variable type="mdesc" checkProperty="name" expression="^([A-Z]|m).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'm'<file>%fileName%]]></message>
+    </variable>
+    <variable type="frame" checkProperty="name" expression="^([A-Z]|f).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'f'<file>%fileName%]]></message>
+    </variable>
+    <variable type="tool" checkProperty="name" expression="^([A-Z]|t).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 't'<file>%fileName%]]></message>
+    </variable>
+    <variable type="dio" checkProperty="name" expression="^([A-Z]|di|do).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'di' or 'do'<file>%fileName%]]></message>
+    </variable>
+    <variable type="aio" checkProperty="name" expression="^([A-Z]|ai|ao|wi|wo|fi|fo).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'ai' or 'ao'<file>%fileName%]]></message>
+    </variable>
+    <reference checkProperty="notReferenced">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% is not used<file>%fileName%]]></message>
+    </reference>
+    <reference checkProperty="hidden">
+      <message><![CDATA[<level>Warning<CLASS>PRG<P1>%progName%<P2>CODE<line>1<msg>Global variable %varName% is hidden in program by a local variable of the same name<file>%fileName%]]></message>
+    </reference>
+  </globalData>
+  <parameter>
+    <variable checkProperty="name" expression="^.*_$">
+      <message><![CDATA[<level>Warning<CLASS>PRG<P1>%progName%<P2>CODE<line>1<msg>Parameter %varName% does not end with '_'<file>%fileName%]]></message>
+    </variable>
+    <reference checkProperty="notReferenced" scope="public">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Program parameter %varName% is not used in program %progName%<file>%fileName%]]></message>
+    </reference>
+  </parameter>
+  <localData>
+    <variable checkProperty="name_" expression="^.*_$">
+      <message><![CDATA[<level>Warning<CLASS>PRG<P1>%progName%<P2>CODE<line>1<msg>Local variable %varName% does not end with '_'<file>%fileName%]]></message>
+    </variable>
+    <reference checkProperty="notReferenced" scope="public">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Local variable %varName% is not used in program %progName%<file>%fileName%]]></message>
+    </reference>
+  </localData>
+</rules>

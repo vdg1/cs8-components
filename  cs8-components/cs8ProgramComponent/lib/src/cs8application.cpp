@@ -106,6 +106,8 @@ bool cs8Application::open(const QString & filePath)
 
     m_projectPath = pth;
     m_projectName = QFileInfo(m_projectPath).baseName();
+    m_pragmaList.clear();
+    m_referencedMap.clear();
 
     //m_projectPath.chop(m_projectPath.length() - 1 - m_projectPath.lastIndexOf(QDir::separator ()));
     m_projectPath=QFileInfo(m_projectPath).absolutePath()+"/";
@@ -459,6 +461,8 @@ bool cs8Application::parseProject(const QDomDocument & doc)
                 m_version=m_version+"r"+build.simplified();
             }
         }
+        //
+        m_referencedMap=buildGlobalDataReferenceMap();
         return true;
     }
     else
@@ -795,7 +799,7 @@ QMap<QString, QMap<QString, QString>*> cs8Application::getEnumerations()
             }
             if (var->size(0)>1)
             {
-                for (int i=0; i<var->size(0); i++)
+                for (uint i=0; i<var->size(0); i++)
                 {
                     QString value=var->varValue(QString("%1").arg(i)).toString();
                     constSets.value(prefix)->insertMulti(value, var->name()+QString("[%1]").arg(i));
@@ -896,7 +900,7 @@ void cs8Application::checkEnumerations(QStringList &output)
     }
 }
 
-void cs8Application::checkGlobalData(QStringList &output)
+QMap<QString, bool> cs8Application::buildGlobalDataReferenceMap()
 {
     QMap<QString, bool> referencedMap;
 
@@ -905,16 +909,6 @@ void cs8Application::checkGlobalData(QStringList &output)
     {
         qDebug() << "Checking global variable: " << globalVariable->name ();
 
-        if (!globalVariable->isConst() && !globalVariable->name().startsWith(globalVariable->prefix()) && !globalVariable->name().startsWith('z'))
-        {
-            qDebug() << "Warning: Global variable '" << globalVariable->name () << "'' does not start with recommended prefix " << globalVariable->prefix();
-            //output.append (QString("Warning: Global variable '" + var->name () + "' is hidden in program " + program->name()+" by a local variable of the same name"));
-            output.append (QString("<level>Warning<CLASS>DATA<P1>%1<P2>%4<line>1<msg>%2<file>%3")
-                           .arg(globalVariable->type())
-                           .arg ("Warning: Global variable '" + globalVariable->name () + "'' does not start with recommended prefix " + globalVariable->prefix())
-                           .arg(cellDataFilePath (true))
-                           .arg(globalVariable->name()+"[0]"));
-        }
 
         referencedMap.insert (globalVariable->name (),false);
         // ignore variable if it is listed in a pragma statement
@@ -938,6 +932,38 @@ void cs8Application::checkGlobalData(QStringList &output)
             }
         }
 
+        // check if a local variable hides the global variable
+        foreach(cs8Program* program, m_programModel->programList ())
+        {
+            //qDebug() << "  Checking program: " << program->name ();
+            // check if global variable name is also declared as local variable
+            if (program->localVariableModel ()->variableNameList ().contains (globalVariable->name ()) )
+            {
+
+            }
+            else
+                // if global variable is not hidden, check if it is used
+                if (program->referencedVariables ().contains (globalVariable->name ()))
+                {
+                    referencedMap[globalVariable->name ()]=true;
+                }
+        }
+    }
+    return referencedMap;
+}
+
+QMap<QString, bool> cs8Application::getReferencedMap() const
+{
+    return m_referencedMap;
+}
+
+
+void cs8Application::checkGlobalData(QStringList &output)
+{
+    //QMap<QString, bool> referencedMap = buildGlobalDataReferenceMap();
+
+    foreach(cs8Variable *globalVariable, m_globalVariableModel->variableList ())
+    {
 
         // check if a local variable hides the global variable
         foreach(cs8Program* program, m_programModel->programList ())
@@ -960,10 +986,10 @@ void cs8Application::checkGlobalData(QStringList &output)
                 // if global variable is not hidden, check if it is used
                 if (program->referencedVariables ().contains (globalVariable->name ()))
                 {
-                    referencedMap[globalVariable->name ()]=true;
+                    m_referencedMap[globalVariable->name ()]=true;
                 }
         }
-        if (referencedMap[globalVariable->name ()]==false)
+        if (m_referencedMap[globalVariable->name ()]==false)
         {
             if (!globalVariable->isPublic())
             {
@@ -1214,7 +1240,7 @@ bool cs8Application::loadProjectData()
     file.close ();
     QSettings setting(m_projectPath+".projectData",QSettings::IniFormat,this);
     m_withUndocumentedSymbols=setting.value ("AddTagForNotDocumentedSymbols",true).toBool ();
-     m_includeLibraryDocuments=setting.value ("WithLibraryDocuments",false).toBool ();
+    m_includeLibraryDocuments=setting.value ("WithLibraryDocuments",false).toBool ();
     return true;
 }
 

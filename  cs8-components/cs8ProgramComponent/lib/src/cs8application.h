@@ -89,9 +89,13 @@ public:
     bool includeLibraryDocuments() const;
     void setIncludeLibraryDocuments(bool includeLibraryDocuments);
 
+    QMap<QString, bool> buildGlobalDataReferenceMap();
+    QMap<QString, bool> getReferencedMap() const;
+
 protected:
     QHash<QString, QString> m_exportDirectives;
     QHash<QString, QString> m_pragmaList;
+    QMap<QString, bool> m_referencedMap;
     QString m_projectName;
     QString m_projectPath;
     cs8ProgramModel* m_programModel;
