@@ -17,12 +17,13 @@ class DialogBuildDocumentation : public QDialog
 public:
     explicit DialogBuildDocumentation(QWidget *parent = 0);
     ~DialogBuildDocumentation();
-    void build(cs8Application *application);
+    bool build(cs8Application *application);
 
 private:
     Ui::DialogBuildDocumentation *ui;
     QProcess *doxygenProcess;
     QTemporaryFile *configFile;
+    QString m_outputPath;
 
 private slots:
     void slotProcessError(QProcess::ProcessError);

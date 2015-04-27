@@ -146,7 +146,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps, bool copyInPr
                     if (!cs8DestApp->libraryModel ()->contains(cs8SourceApp->name ()))
                     {
                         qDebug() << "Adding library alias for " << cs8SourceApp->name ();
-                        cs8DestApp->libraryModel ()->add (cs8SourceApp->name (),cs8SourceApp->cellProjectFilePath (),true);
+                        cs8DestApp->libraryModel ()->add (cs8SourceApp->name (),cs8SourceApp->cellProjectFilePath (true),true);
                     }
 
                     cs8Program *newProgram=cs8DestApp->programModel()->createProgram(program->name());

@@ -28,13 +28,13 @@
     <variable type="tool" checkProperty="name" expression="^([A-Z]|t).*$">
       <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 't'<file>%fileName%]]></message>
     </variable>
-    <variable type="dio" checkProperty="name" expression="^([A-Z]|di|do).*$">
+    <variable type="dio" checkProperty="name" expression="^(di|do).*$">
       <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'di' or 'do'<file>%fileName%]]></message>
     </variable>
-    <variable type="aio" checkProperty="name" expression="^([A-Z]|ai|ao|wi|wo|fi|fo).*$">
+    <variable type="aio" checkProperty="name" expression="^(ai|ao|wi|wo|fi|fo).*$">
       <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'ai' or 'ao'<file>%fileName%]]></message>
     </variable>
-    <reference checkProperty="notReferenced">
+    <reference checkProperty="notReferenced" scope="private">
       <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% is not used<file>%fileName%]]></message>
     </reference>
     <reference checkProperty="hidden">
@@ -57,4 +57,9 @@
       <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Local variable %varName% is not used in program %progName%<file>%fileName%]]></message>
     </reference>
   </localData>
+  <program>
+    <reference checkProperty="notReferenced" scope="private">
+      <message><![CDATA[<level>Warning<CLASS>PRG<P1>%progName%<P2>CODE<line>1<msg>Program %progName% is not called<file>%fileName%]]></message>
+    </reference>
+  </program>
 </rules>

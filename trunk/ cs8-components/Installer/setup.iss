@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "1.8.0"
+#define MyAppVersion "1.8.2"
 #define MyAppPublisher "SAXE Swiss System AB"
 #define MyAppURL "http://www.saxe-group.com"
 #define QT "D:\Qt\4.8.5"
@@ -42,6 +42,7 @@ Source: "..\cs8ProgramComponent\bin\extractDoc.exe"; DestDir: "{app}"; Flags: ig
 Source: "..\cs8ProgramComponent\bin\preCompilerPackage\*.exe"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\preCompilerPackage\*.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\helpFilePackage\*.chm"; DestDir: "{app}\helpFilePackage"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\doxygenTemplateData\*.*"; DestDir: "{app}\doxygenTemplateData"; Flags: ignoreversion recursesubdirs
 
 Source: "{#QT}\bin\QtCore4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\QtGui4.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -53,7 +54,7 @@ Source: "{#QT}\bin\QtNetwork4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Name: "{group}\Val3 Documentation Editor"; Filename: "{app}\Val3 Documentation Editor.exe"
 Name: "{group}\Val3 Compiler Deployment"; Filename: "{app}\val3CompilerDeployment.exe"
 Name: "{group}\Val3 Create API"; Filename: "{app}\val3CreateAPI.exe"
-Name: "{group}\Val3 Compiler Settings"; Filename: "{app}\val3PreCompilerSettings.exe"
+;Name: "{group}\Val3 Compiler Settings"; Filename: "{app}\val3PreCompilerSettings.exe"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 
 [Run]

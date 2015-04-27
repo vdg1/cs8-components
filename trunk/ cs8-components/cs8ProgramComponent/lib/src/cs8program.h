@@ -60,6 +60,7 @@ public:
     void setWithUndocumentedSymbols(bool withUndocumentedSymbols);
     QStringList referencedVariables() const;
     QMap<int, QString> todos();
+    QStringList getCalls();
 
 private:
     cs8VariableModel* m_localVariableModel;
