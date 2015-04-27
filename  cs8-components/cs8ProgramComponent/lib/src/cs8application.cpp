@@ -107,7 +107,7 @@ bool cs8Application::open(const QString & filePath)
     m_projectPath = pth;
     m_projectName = QFileInfo(m_projectPath).baseName();
     m_pragmaList.clear();
-    m_referencedMap.clear();
+    m_globalDataReferencedMap.clear();
 
     //m_projectPath.chop(m_projectPath.length() - 1 - m_projectPath.lastIndexOf(QDir::separator ()));
     m_projectPath=QFileInfo(m_projectPath).absolutePath()+"/";
@@ -462,7 +462,8 @@ bool cs8Application::parseProject(const QDomDocument & doc)
             }
         }
         //
-        m_referencedMap=buildGlobalDataReferenceMap();
+        m_globalDataReferencedMap=buildGlobalDataReferenceMap();
+        m_callList=buildCallList();
         return true;
     }
     else
@@ -952,10 +953,50 @@ QMap<QString, bool> cs8Application::buildGlobalDataReferenceMap()
     return referencedMap;
 }
 
+QMap<QString, QList<cs8Program *> > cs8Application::buildCallList()
+{
+    QMap<QString, QList<cs8Program *> > callList;
+    // check if a local variable hides the global variable
+    foreach(cs8Program* program, m_programModel->programList ())
+    {
+        QStringList list=program->getCalls();
+
+
+        foreach(QString callName,list)
+        {
+            callList[program->name()] << programModel()->getProgramByName(callName);
+        }
+    }
+
+    return callList;
+}
+
+QStringList cs8Application::getCallList(cs8Program *program)
+{
+    QStringList list;
+    //
+    QMapIterator<QString, QList<cs8Program *> > i(m_callList);
+    while (i.hasNext()) {
+        i.next();
+        foreach (cs8Program *prog, i.value()) {
+            if (prog==program)
+                list << i.key();
+
+        }
+    }
+    list.removeDuplicates();
+    return list;
+}
+
 QMap<QString, bool> cs8Application::getReferencedMap() const
 {
-    return m_referencedMap;
+    return m_globalDataReferencedMap;
 }
+QString cs8Application::getProjectPath() const
+{
+    return m_projectPath;
+}
+
 
 
 void cs8Application::checkGlobalData(QStringList &output)
@@ -986,10 +1027,10 @@ void cs8Application::checkGlobalData(QStringList &output)
                 // if global variable is not hidden, check if it is used
                 if (program->referencedVariables ().contains (globalVariable->name ()))
                 {
-                    m_referencedMap[globalVariable->name ()]=true;
+                    m_globalDataReferencedMap[globalVariable->name ()]=true;
                 }
         }
-        if (m_referencedMap[globalVariable->name ()]==false)
+        if (m_globalDataReferencedMap[globalVariable->name ()]==false)
         {
             if (!globalVariable->isPublic())
             {
@@ -1083,11 +1124,12 @@ QString cs8Application::cellPath() const
 }
 
 
-QString cs8Application::cellProjectFilePath() const
+QString cs8Application::cellProjectFilePath(bool cs8Format) const
 {
     QString pth=QDir::toNativeSeparators (m_projectPath+m_projectName+".pjx");
     qDebug() << pth;
-    pth=pth.replace (QDir::toNativeSeparators(m_cellPath+"usr/usrapp/"),"Disk://");
+    if (cs8Format)
+        pth=pth.replace (QDir::toNativeSeparators(m_cellPath+"usr/usrapp/"),"Disk://");
     qDebug() << pth;
     pth=QDir::fromNativeSeparators (pth);
     qDebug() << pth;
@@ -1240,7 +1282,7 @@ bool cs8Application::loadProjectData()
     file.close ();
     QSettings setting(m_projectPath+".projectData",QSettings::IniFormat,this);
     m_withUndocumentedSymbols=setting.value ("AddTagForNotDocumentedSymbols",true).toBool ();
-    m_includeLibraryDocuments=setting.value ("WithLibraryDocuments",false).toBool ();
+    m_includeLibraryDocuments=setting.value ("WithLibraryDocuments",true).toBool ();
     return true;
 }
 

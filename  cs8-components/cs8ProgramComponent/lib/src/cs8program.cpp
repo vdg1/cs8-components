@@ -337,6 +337,22 @@ QMap<int, QString> cs8Program::todos()
     return todos;
 }
 
+QStringList cs8Program::getCalls()
+{
+    QString code=val3Code (true);
+    qDebug() << "Check todos in " << name ();
+    QRegExp rx;
+    rx.setPattern ("^\\s*call (\\w*)\\(");
+    QStringList list;
+    foreach(QString line,code.split ("\n"))
+        {
+            if (rx.indexIn (line)!=-1)
+               if (rx.captureCount()==1)
+                  list << rx.cap(1);
+    }
+ return list;
+}
+
 QString cs8Program::extractDocumentation( const QString &code_ )
 {
     //
@@ -385,7 +401,7 @@ void cs8Program::setGlobalDocContainer(bool globalDocContainer)
  QStringList list = code.split("\n");
  int start = list.indexOf(QRegExp("\\s*begin\\s*"));
  int stop = start + 1;
- while (list.at(stop).contains(QRegExp("^\\s*¤//.*")))
+ while (list.at(stop).contains(QRegExp("^\\s*ï¿½//.*")))
 
  stop++;
  for (int i = stop - 1; i > start; i--)

@@ -309,8 +309,8 @@ void MainWindow::on_actionBuild_Documentation_triggered()
     // launch doxygen
     DialogBuildDocumentation dlg;
     dlg.show();
-    dlg.build(m_application);
-    dlg.exec();
+    if (dlg.build(m_application))
+        dlg.exec();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -323,4 +323,9 @@ void MainWindow::on_actionSettings_triggered()
 void MainWindow::on_actionInclude_documentation_of_Libraries_triggered(bool checked)
 {
     m_application->setIncludeLibraryDocuments(checked);
+}
+
+void MainWindow::on_actionInclude_documentation_of_Libraries_triggered()
+{
+
 }

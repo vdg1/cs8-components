@@ -6,6 +6,8 @@
 #include <QDesktopServices>
 #include <QDateTime>
 #include <QDir>
+#include <QMessageBox>
+#include <QUrl>
 
 DialogBuildDocumentation::DialogBuildDocumentation(QWidget *parent) :
     QDialog(parent),
@@ -32,11 +34,26 @@ DialogBuildDocumentation::~DialogBuildDocumentation()
     delete ui;
 }
 
-void DialogBuildDocumentation::build(cs8Application *application)
+bool DialogBuildDocumentation::build(cs8Application *application)
 {
-
-    qApp->setOverrideCursor(Qt::WaitCursor);
     QSettings settings;
+    // check requirements
+    if (!QFile::exists(settings.value("doxygenBin").toString()))
+    {
+        QMessageBox::critical(this,tr("Critical Error"),tr("The doxygen executable could not be foud. Please make sure that doxygen is installed and check the settings!"));
+        close();
+        return false;
+
+    }
+    if (!QFile::exists(settings.value("hhcBin").toString()))
+    {
+        QMessageBox::critical(this,tr("Critical Error"),tr("The help file compiler hhc.exe could not be foud. Please make sure Microsoft Help Workshop is installed and check the settings!"));
+        close();
+        return false;
+
+    }
+    qApp->setOverrideCursor(Qt::WaitCursor);
+
     QString tempPath=QDesktopServices::storageLocation(QDesktopServices::TempLocation)
             +"/Val3"+QDateTime::currentDateTime().toString("hh-mm-ss");
     QDir dir;
@@ -57,25 +74,32 @@ void DialogBuildDocumentation::build(cs8Application *application)
         }
         // generate doxygen file
 
-        QDir templateDir(QDir::currentPath()+"/doxygenTemplateData");
+        QDir templateDir(qApp->applicationDirPath()+"/doxygenTemplateData");
         QFile sourceFile(templateDir.absolutePath()+"/DoxyfileVal3");
 
         if (sourceFile.open(QFile::ReadOnly) && configFile->open())
         {
-            QString outputPath=QDir::toNativeSeparators(dir.absolutePath()+"/documentation");
-            dir.mkpath(outputPath);
-            QString outputFileName=outputPath+"/"+application->name()+(application->version().isEmpty()?"":"_"+application->version())+".chm";
+            dir.setPath(application->getProjectPath());
+            m_outputPath=QDir::toNativeSeparators(dir.absolutePath()+"/documentation");
+            if (!dir.mkpath(m_outputPath))
+            {
+                ui->plainTextEdit->appendPlainText(tr("Failed to create output path: %1").arg(m_outputPath));
+                ui->buttonBox->setEnabled(true);
+                qApp->restoreOverrideCursor();
+            }
+            QString outputFileName=m_outputPath+"/"+application->name()+(application->version().isEmpty()?"":"_"+application->version())+".chm";
             QFile file(outputFileName);
 
             if (file.remove() || !file.exists())
             {
                 QString configText=sourceFile.readAll();
                 configText.replace("#Temp#",QDir::toNativeSeparators(tempPath));
-                configText.replace("#OutputDir#",outputPath);
+                configText.replace("#OutputDir#",m_outputPath);
                 configText.replace("#projectName#",application->name());
                 configText.replace("#chmFile#",outputFileName);
                 configText.replace("#templateDir#",templateDir.absolutePath()+"/");
                 configText.replace("#Version#",application->version());
+                configText.replace("#hhcLocation#",QDir::fromNativeSeparators(settings.value("hhcBin").toString()));
                 configFile->write(configText.toLatin1());
                 //ui->plainTextEdit->appendPlainText(configText);
                 configFile->close();
@@ -90,6 +114,10 @@ void DialogBuildDocumentation::build(cs8Application *application)
             }
 
         }
+        else
+        {
+            qDebug() << "Failed to open:" << sourceFile.fileName() << " or " << configFile->fileName();
+        }
 
 
     }
@@ -99,7 +127,7 @@ void DialogBuildDocumentation::build(cs8Application *application)
         ui->buttonBox->setEnabled(true);
         qApp->restoreOverrideCursor();
     }
-
+    return true;
 }
 
 void DialogBuildDocumentation::slotProcessError(QProcess::ProcessError)
@@ -112,9 +140,19 @@ void DialogBuildDocumentation::slotProcessError(QProcess::ProcessError)
 
 void DialogBuildDocumentation::slotFinished(int)
 {
-    ui->plainTextEdit->appendPlainText("doxygen finished: "+doxygenProcess->errorString());
+    if (doxygenProcess->error()!=QProcess::UnknownError)
+        ui->plainTextEdit->appendPlainText("doxygen finished: "+doxygenProcess->errorString());
     ui->buttonBox->setEnabled(true);
     qApp->restoreOverrideCursor();
+    if (QMessageBox::question(this,
+                              tr("Question"),("Would you like to open the path containing the documentation?"),
+                              QMessageBox::Yes,QMessageBox::No)
+            ==QMessageBox::Yes)
+    {
+        QString f=QString("file:///%1").arg(QDir::fromNativeSeparators(m_outputPath));
+        if (!QDesktopServices::openUrl(QUrl(f)))
+            qDebug() << "failed to open url " << f;
+    }
 }
 
 void DialogBuildDocumentation::slotReadyRead()

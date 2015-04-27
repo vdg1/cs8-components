@@ -51,14 +51,14 @@ PROJECT_BRIEF          =
 # and the maximum width should not exceed 200 pixels. Doxygen will copy the logo
 # to the output directory.
 
-PROJECT_LOGO           = #templateDir#gfx/top_logo_small.png
+PROJECT_LOGO           = "#templateDir#gfx/top_logo_small.png"
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = #OutputDir#
+OUTPUT_DIRECTORY       = "#OutputDir#"
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -672,7 +672,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            = #templateDir#DoxygenLayout.xml
+LAYOUT_FILE            = "#templateDir#DoxygenLayout.xml"
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -1065,7 +1065,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            = #templateDir#header.html
+HTML_HEADER            = "#templateDir#header.html"
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1075,7 +1075,7 @@ HTML_HEADER            = #templateDir#header.html
 # that doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = #templateDir#footer.html
+HTML_FOOTER            = "#templateDir#footer.html"
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1087,7 +1087,7 @@ HTML_FOOTER            = #templateDir#footer.html
 # obsolete.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_STYLESHEET        = #templateDir#doxygen.css
+HTML_STYLESHEET        = "#templateDir#doxygen.css"
 
 # The HTML_EXTRA_STYLESHEET tag can be used to specify additional user-defined
 # cascading style sheets that are included after the standard style sheets
@@ -1238,7 +1238,7 @@ GENERATE_HTMLHELP      = YES
 # written to the html output directory.
 # This tag requires that the tag GENERATE_HTMLHELP is set to YES.
 
-CHM_FILE               = #chmFile#
+CHM_FILE               = "#chmFile#"
 
 # The HHC_LOCATION tag can be used to specify the location (absolute path
 # including file name) of the HTML help compiler ( hhc.exe). If non-empty
@@ -1246,7 +1246,7 @@ CHM_FILE               = #chmFile#
 # The file has to be specified with full path.
 # This tag requires that the tag GENERATE_HTMLHELP is set to YES.
 
-HHC_LOCATION           = "C:/Program Files (x86)/HTML Help Workshop/hhc.exe"
+HHC_LOCATION           = "#hhcLocation#"
 
 # The GENERATE_CHI flag controls if a separate .chi index file is generated (
 # YES) or that it should be included in the master .chm file ( NO).

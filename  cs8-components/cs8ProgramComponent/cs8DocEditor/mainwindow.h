@@ -51,6 +51,7 @@ private slots:
     void on_actionBuild_Documentation_triggered();
     void on_actionSettings_triggered();
     void on_actionInclude_documentation_of_Libraries_triggered(bool checked);
+    void on_actionInclude_documentation_of_Libraries_triggered();
 };
 
 #endif // MAINWINDOW_H

@@ -18,7 +18,8 @@ public:
 private slots:
     void on_toolButton_clicked();
 
-    void on_cbIncludeLibraries_toggled(bool checked);
+
+    void on_toolButtonHHC_clicked();
 
 private:
     Ui::DialogSettings *ui;

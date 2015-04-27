@@ -47,7 +47,7 @@ public:
     QString performPrecompilerChecks();
     void setCellPath(const QString & path);
     QString cellPath() const;
-    QString cellProjectFilePath() const;
+    QString cellProjectFilePath(bool cs8Format=false) const;
     QString cellDataFilePath(bool cs8Format=false) const;
     bool writeProjectFile();
     QHash<QString, QString> exportDirectives() const
@@ -90,12 +90,17 @@ public:
     void setIncludeLibraryDocuments(bool includeLibraryDocuments);
 
     QMap<QString, bool> buildGlobalDataReferenceMap();
+    QMap<QString, QList<cs8Program *> > buildCallList();
+    QStringList getCallList(cs8Program *program);
     QMap<QString, bool> getReferencedMap() const;
+
+    QString getProjectPath() const;
 
 protected:
     QHash<QString, QString> m_exportDirectives;
     QHash<QString, QString> m_pragmaList;
-    QMap<QString, bool> m_referencedMap;
+    QMap<QString, bool> m_globalDataReferencedMap;
+    QMap<QString, QList<cs8Program *> > m_callList;
     QString m_projectName;
     QString m_projectPath;
     cs8ProgramModel* m_programModel;
