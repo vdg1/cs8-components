@@ -9,6 +9,8 @@
 #include <QDomElement>
 #include <QStringList>
 //
+
+
 class cs8Variable : public QObject
 {
 
@@ -80,15 +82,19 @@ public:
     }
 
     QVariant varValue(QString index="0");
+    bool isBuildInType()const ;
+    QStringList buildInTypes();
+
 
 protected:
+    QStringList m_buildInTypes;
     QDomElement m_element;
     QString m_description;
     QDomDocumentFragment m_docFragment;
     QDomDocument m_doc;
     bool m_global;
 
-
+    void setBuildInTypes();
 signals:
     void modified();
 

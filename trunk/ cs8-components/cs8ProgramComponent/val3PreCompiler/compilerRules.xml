@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<rules version="1.0">
+<rules>
   <globalData>
     <variable type="num" checkProperty="name" expression="^([A-Z]|n|state|tm|hnd|cnt).*$">
       <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'n'<file>%fileName%]]></message>
@@ -34,6 +34,9 @@
     <variable type="aio" checkProperty="name" expression="^(ai|ao|wi|wo|fi|fo).*$">
       <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix 'ai' or 'ao'<file>%fileName%]]></message>
     </variable>
+    <variable type="%USER%" checkProperty="name" expression="^(%PREFIX(2)%).*$">
+      <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% does not start with recommended prefix (2 letters of var type name)<file>%fileName%]]></message>
+    </variable>
     <reference checkProperty="notReferenced" scope="private">
       <message><![CDATA[<level>Warning<CLASS>DATA<P1>%varType%<P2>%varName%<line>1<msg>Global variable %varName% is not used<file>%fileName%]]></message>
     </reference>
@@ -58,7 +61,7 @@
     </reference>
   </localData>
   <program>
-    <reference checkProperty="notReferenced" scope="private">
+    <reference checkProperty="notReferenced" scope="private" expression="(?! (start|stop))">
       <message><![CDATA[<level>Warning<CLASS>PRG<P1>%progName%<P2>CODE<line>1<msg>Program %progName% is not called<file>%fileName%]]></message>
     </reference>
   </program>
