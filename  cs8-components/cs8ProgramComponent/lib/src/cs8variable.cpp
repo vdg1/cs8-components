@@ -6,7 +6,13 @@ cs8Variable::cs8Variable( QDomElement &element, const QString &description )
 {
     m_element = element;
     m_description = description;
+    setBuildInTypes();
     setGlobal(false);
+}
+
+void cs8Variable::setBuildInTypes()
+{
+    m_buildInTypes << "pointRx" << "pointRs" << "mdesc" << "bool" << "string" << "tool" << "jointRx" << "jointRs" << "frame" << "dio" << "sio" << "aio" << "num" << "config" << "trsf";
 }
 
 cs8Variable::cs8Variable()
@@ -15,6 +21,7 @@ cs8Variable::cs8Variable()
     m_docFragment = m_doc.createDocumentFragment();
     m_element = m_doc.createElement( "Data" );
     m_docFragment.appendChild( m_element );
+    setBuildInTypes();
     setGlobal(false);
 }
 
@@ -22,12 +29,12 @@ QString cs8Variable::toString( bool withTypeDefinition )
 {
     if ( withTypeDefinition )
         return QString( "%1 %2%3" )
-               .arg( type() )
-               .arg( use() == "reference" ? "& " : "" )
-               .arg( name() );
+                .arg( type() )
+                .arg( use() == "reference" ? "& " : "" )
+                .arg( name() );
     else
         return QString( "%1" )
-               .arg( name() );
+                .arg( name() );
 }
 
 
@@ -44,20 +51,20 @@ QString cs8Variable::documentation( bool withPrefix, bool forCOutput )
     bool inCodeSection = false;
     bool firstLine = true;
     foreach( QString str, list )
+    {
+        if ( str.contains( "<code>" ) )
         {
-            if ( str.contains( "<code>" ) )
-                {
-                    inCodeSection = true;
-                    out += prefix + "<br>\n";
-                }
-            if ( str.contains( "</code>" ) )
-                {
-                    inCodeSection = false;
-                    out += prefix + "<br>\n";
-                }
-            out += (firstLine ? "" : prefix) + str + ( inCodeSection ? "<br>" : "" ) + "\n";
-            firstLine = false;
+            inCodeSection = true;
+            out += prefix + "<br>\n";
         }
+        if ( str.contains( "</code>" ) )
+        {
+            inCodeSection = false;
+            out += prefix + "<br>\n";
+        }
+        out += (firstLine ? "" : prefix) + str + ( inCodeSection ? "<br>" : "" ) + "\n";
+        firstLine = false;
+    }
     //qDebug() << "processed: " << out;
     if ( !isGlobal() )
         return prefix + (forCOutput ? "@param " : "\\param ") + name() + " " + out + "\n";
@@ -70,15 +77,15 @@ QStringList cs8Variable::father()
     QStringList list;
     QDomNode element=m_element.firstChildElement("Value");
     while (!element.isNull())
+    {
+        QString father=element.toElement().attribute("fatherId");
+        if (!father.isEmpty())
         {
-            QString father=element.toElement().attribute("fatherId");
-            if (!father.isEmpty())
-                {
-                    father.remove(QRegExp("\\[(\\d*)\\]"));
-                    list << father;
-                }
-            element=element.nextSiblingElement("Value");
+            father.remove(QRegExp("\\[(\\d*)\\]"));
+            list << father;
         }
+        element=element.nextSiblingElement("Value");
+    }
     list.removeDuplicates();
     return list;
 }
@@ -94,7 +101,7 @@ QString cs8Variable::definition()
 {
 
     return ( QString( "%1 %2" ).arg( type() ).arg( name() ) ) + ( allSizes() != QString() ? QString(
-                "[%1]" ).arg( allSizes() ) : "" );
+                                                                                                "[%1]" ).arg( allSizes() ) : "" );
 }
 
 void cs8Variable::setGlobal( bool global )
@@ -102,23 +109,23 @@ void cs8Variable::setGlobal( bool global )
     emit modified();
     m_global = global;
     if ( global )
+    {
+        m_element.setTagName( "Data" );
+        if ( !m_element.hasAttribute( "xsi:type" ) )
         {
-            m_element.setTagName( "Data" );
-            if ( !m_element.hasAttribute( "xsi:type" ) )
-                {
-                    m_element.setAttribute( "xsi:type", "array" );
-                }
-            else
-                {
-                    if (m_element.attribute("xsi:type")=="element")
-                        m_element.setAttribute( "xsi:type", "array" );
-                }
-            if ( !m_element.hasAttribute( "size" ) )
-                m_element.setAttribute( "size", "1" );
-            m_element.removeAttribute( "use" );
-            if (m_element.attribute ("xsi:type")=="collection" && m_element.hasAttribute ("size"))
-                m_element.removeAttribute ("size");
+            m_element.setAttribute( "xsi:type", "array" );
         }
+        else
+        {
+            if (m_element.attribute("xsi:type")=="element")
+                m_element.setAttribute( "xsi:type", "array" );
+        }
+        if ( !m_element.hasAttribute( "size" ) )
+            m_element.setAttribute( "size", "1" );
+        m_element.removeAttribute( "use" );
+        if (m_element.attribute ("xsi:type")=="collection" && m_element.hasAttribute ("size"))
+            m_element.removeAttribute ("size");
+    }
 }
 
 QString cs8Variable::allSizes()
@@ -136,12 +143,12 @@ QVariant cs8Variable::varValue( QString index )
 {
     QDomElement e;
     for ( int i = 0; i < m_element.childNodes().count(); i++ )
+    {
+        if ( m_element.childNodes().at( i ).toElement().attribute( "key" ) == index )
         {
-            if ( m_element.childNodes().at( i ).toElement().attribute( "key" ) == index )
-                {
-                    return m_element.childNodes().at( i ).toElement().attribute( "value" );
-                }
+            return m_element.childNodes().at( i ).toElement().attribute( "value" );
         }
+    }
 
     // return empty variable
     if ( type() == "num" )
@@ -150,6 +157,18 @@ QVariant cs8Variable::varValue( QString index )
         return QVariant( "" );
     else
         return QVariant();
+}
+
+bool cs8Variable::isBuildInType() const
+{
+    // check if variable type is a build in type
+    QStringList types=m_buildInTypes;
+    QString type_=type();
+    return types.contains(type_);
+}
+
+ QStringList cs8Variable::buildInTypes() {
+    return m_buildInTypes;
 }
 
 void cs8Variable::setUse( QString value )

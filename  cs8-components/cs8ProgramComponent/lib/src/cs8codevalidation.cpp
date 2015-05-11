@@ -29,8 +29,6 @@ bool cs8CodeValidation::loadRuleFile(const QString &fileName)
     }
     file.close();
 
-    // print out the element names of all elements that are direct children
-    // of the outermost element.
     globalDataRules = rules.documentElement().elementsByTagName("globalData").at(0).childNodes();
     parameterRules = rules.documentElement().elementsByTagName("parameter").at(0).childNodes();
     localDataRules = rules.documentElement().elementsByTagName("localData").at(0).childNodes();
@@ -44,16 +42,41 @@ QStringList cs8CodeValidation::runDataValidationRule(cs8Application *app, cs8Pro
     for (int i=0;i<ruleList.count();i++)
     {
         QDomElement ruleNode=ruleList.at(i).toElement();
+        QString expressionString=ruleNode.attribute("expression");
+
+
+        QRegExp rx(expressionString);
+        QString checkProperty=ruleNode.attribute("checkProperty");
+        QString message=ruleNode.elementsByTagName("message").at(0).toElement().text();
+
+
         if (ruleNode.nodeName()=="variable")
         {
-            QString checkProperty=ruleNode.attribute("checkProperty");
             QString varType=ruleNode.attribute("type");
-            QRegExp rx(ruleNode.attribute("expression"));
-            QString message=ruleNode.elementsByTagName("message").at(0).toElement().text();
+            qDebug() << "Check rule " << varType;
+
             //
             if (variableList!=0)
                 foreach(cs8Variable *var,*variableList)
                 {
+                    qDebug() << "apply rule to var:" << var->name() << ":" << var->type();
+
+                    if (varType=="%USER%")
+                        if (!var->isBuildInType())
+                    {
+                        varType=var->type();
+                        QRegExp r("%(\\w*)\\((\\d*)\\)%");
+                        int pos=r.indexIn(expressionString);
+                        int matchedLength=r.matchedLength();
+                        if (pos!=-1 && r.captureCount()==2)
+                        {
+                            if (r.cap(1)=="PREFIX")
+                            {
+                                qDebug() << r.pattern();
+                                expressionString.replace(pos,matchedLength,var->type().left(r.cap(2).toInt()));
+                            }
+                        }
+                    }
                     if (checkProperty=="name" && (varType==var->type() || varType.isEmpty()))
                     {
                         // apply name rule on variable name
@@ -62,6 +85,7 @@ QStringList cs8CodeValidation::runDataValidationRule(cs8Application *app, cs8Pro
                             QString msg=message;
                             msg.replace("%varType%",var->type());
                             msg.replace("%varName%",var->name());
+
                             if (program==0)
                             {
                                 msg.replace("%fileName%",app->cellDataFilePath(true));
@@ -78,7 +102,6 @@ QStringList cs8CodeValidation::runDataValidationRule(cs8Application *app, cs8Pro
         }
         else if (ruleNode.nodeName()=="reference")
         {
-            QString checkProperty=ruleNode.attribute("checkProperty");
             QString scope=ruleNode.attribute("scope","");
             int variableScope=0;
             if (scope=="public")
@@ -86,8 +109,6 @@ QStringList cs8CodeValidation::runDataValidationRule(cs8Application *app, cs8Pro
             if (scope=="private")
                 variableScope=2;
 
-            QRegExp rx(ruleNode.attribute("expression"));
-            QString message=ruleNode.elementsByTagName("message").at(0).toElement().text();
             // check if variable list is passed
             if (variableList!=0)
             {
@@ -154,7 +175,7 @@ QStringList cs8CodeValidation::runDataValidationRule(cs8Application *app, cs8Pro
                         if (((program->isPublic() && (variableScope<2)) || (!program->isPublic() && variableScope==2)) && !referenced)
                         {
                             // apply name rule on variable name
-                            if (rx.indexIn(program->name())==-1 || rx.pattern().isEmpty())
+                            //if (rx.indexIn(program->name())==-1 || rx.pattern().isEmpty())
                             {
                                 QString msg=message;
                                 msg.replace("%progName%",program->name());
