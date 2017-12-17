@@ -13,8 +13,8 @@ INCLUDEPATH += ../lib \
     ../../cs8ControllerComponent/lib/src \
     ../lib/src
 LIBS +=   -L../../lib/ \
-    -lcs8ControllerComponent \
-    -lcs8ProjectComponent
+    -lcs8ControllerComponentd \
+    -lcs8ProjectComponentd
 
 RCC_DIR = build
 HEADERS =

@@ -32,8 +32,7 @@ cs8ProgramDataView::~cs8ProgramDataView()
 void cs8ProgramDataView::setMasterView ( QAbstractItemView* theValue )
 {
     m_masterView = theValue;
-    connect ( m_masterView->selectionModel(),SIGNAL ( selectionChanged ( const QItemSelection &, const QItemSelection & ) ),
-              this,SLOT ( slotSelectionChanged ( const QItemSelection & , const QItemSelection & ) ) );
+    connect ( m_masterView->selectionModel(),&QItemSelectionModel::selectionChanged, this,&cs8ProgramDataView::slotSelectionChanged );
 }
 
 

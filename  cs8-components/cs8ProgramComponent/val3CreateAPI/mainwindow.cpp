@@ -8,7 +8,7 @@
 #include <QSettings>
 #include <QCloseEvent>
 #include <QMessageBox>
-#include <QtConcurrentRun>
+//#include <QtConcurrentRun>
 #include <cs8variable.h>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -132,6 +132,13 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps, bool copyInPr
                         cs8DestApp=new cs8Application(this);
                         cs8DestApp->setName(destAppName);
                         cs8DestApp->setCellPath (cs8SourceApps.at (0)->cellPath());
+                        // create version variable
+                        cs8Variable *var=cs8DestApp->globalVariableModel()->createVariable("sVersion");
+                        var->setPublic(true);
+                        var->setGlobal(true);
+                        var->setType("string");
+                        var->setDimension("1");
+                        cs8DestApp->globalVariableModel()->addVariable(var);
                     }
 
                     qDebug() << program->name ();
@@ -217,6 +224,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps, bool copyInPr
                         globalVar->setType(var->type());
                         globalVar->setGlobal(true);
                         globalVar->setDimension(var->dimension());
+                        cs8DestApp->globalVariableModel()->addVariable(globalVar);
                         for (uint i=0; i<var->size(); i++)
                         {
 

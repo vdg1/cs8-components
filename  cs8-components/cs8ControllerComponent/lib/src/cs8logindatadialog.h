@@ -1,7 +1,7 @@
 #ifndef CS8LOGINDATADIALOG_H
 #define CS8LOGINDATADIALOG_H
 
-#include <QtGui/QDialog>
+#include <QDialog>
 #include "../build/ui_cs8logindatadialog.h"
 
 class cs8LoginDataDialog : public QDialog

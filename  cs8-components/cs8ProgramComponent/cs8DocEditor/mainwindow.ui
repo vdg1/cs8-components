@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowIcon">
-   <iconset resource="cs8doceditor.qrc">
+   <iconset>
     <normaloff>:/icons/kword.png</normaloff>:/icons/kword.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -100,7 +100,7 @@
               </widget>
               <widget class="QWidget" name="tab_4">
                <attribute name="title">
-                <string>Referenced Globasl Variables</string>
+                <string>Referenced Global Variables</string>
                </attribute>
                <layout class="QVBoxLayout" name="verticalLayout_5">
                 <item>
@@ -302,9 +302,7 @@
    <header>codeeditor.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="cs8doceditor.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>action_Exit</sender>
@@ -319,54 +317,6 @@
     <hint type="destinationlabel">
      <x>299</x>
      <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>tableViewPars</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>editParameterDetail(QModelIndex)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>472</x>
-     <y>106</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>336</x>
-     <y>260</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>tableViewVars</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>editParameterDetail(QModelIndex)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>472</x>
-     <y>106</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>336</x>
-     <y>260</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionEdit_Project_Documentation</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>editProjectDocumenation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>336</x>
-     <y>260</y>
     </hint>
    </hints>
   </connection>

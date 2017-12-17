@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+ <Parameters millimeterUnit="true" stackSize="5000" version="s7.2"/>
+ <Programs/>
+ <Database>
+  <Data file="Vplus.dtx"/>
+ </Database>
+ <Libraries/>
+ <Types/>
+</Project>

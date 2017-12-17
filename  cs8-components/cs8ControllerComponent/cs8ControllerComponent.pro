@@ -1,3 +1,2 @@
-SUBDIRS = lib \
-    errorLogBin
+SUBDIRS = lib errorLogBin
 TEMPLATE = subdirs

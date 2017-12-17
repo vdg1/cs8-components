@@ -15,11 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QPlainTextEdit" name="plainTextEdit">
-     <property name="tabChangesFocus">
-      <bool>true</bool>
-     </property>
-    </widget>
+    <widget class="FormMarkDownEditor" name="plainTextEdit" native="true"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -33,6 +29,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FormMarkDownEditor</class>
+   <extends>QWidget</extends>
+   <header>formmarkdowneditor.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

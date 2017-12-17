@@ -2,7 +2,7 @@
 #include "cs8highlighter.h"
 //
 cs8ProgramCodeView::cs8ProgramCodeView ( QWidget * parent )
-    : QTextEdit()
+    : QTextEdit(parent)
 {
   m_highlighter = new cs8Highlighter ( this->document() );
 }
@@ -11,8 +11,8 @@ cs8ProgramCodeView::cs8ProgramCodeView ( QWidget * parent )
 void cs8ProgramCodeView::setMasterView ( QAbstractItemView* value )
 {
   m_masterView = value;
-  connect ( m_masterView->selectionModel(),SIGNAL ( selectionChanged ( const QItemSelection &, const QItemSelection & ) ),
-            this,SLOT ( slotSelectionChanged ( const QItemSelection & , const QItemSelection & ) ) );
+  connect ( m_masterView->selectionModel(),&QItemSelectionModel::selectionChanged,
+            this,&cs8ProgramCodeView::slotSelectionChanged );
             
 }
 

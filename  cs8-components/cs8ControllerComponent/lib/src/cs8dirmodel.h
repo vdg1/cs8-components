@@ -26,7 +26,7 @@
 
 #include <QtCore/qabstractitemmodel.h>
 #include <QtCore/qdir.h>
-#include <QtGui/qfileiconprovider.h>
+#include <QFileIconProvider>
 
 
 class cs8DirModelPrivate;

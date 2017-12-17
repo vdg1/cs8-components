@@ -39,7 +39,7 @@
 ****************************************************************************/
 
 #include <QtGui>
-
+#include <QToolTip>
 
 #include "codeeditor.h"
 #include "highlighter.h"

@@ -25,7 +25,7 @@ protected:
     void createRecentFilesItems();
     void setCurrentFile(const QString &fileName);
     cs8Application* m_application;
-    enum { MaxRecentFiles = 5 };
+    enum { MaxRecentFiles = 10 };
     QAction *recentFileActs[MaxRecentFiles];
     void updateRecentFileActions();
 

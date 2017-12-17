@@ -1,7 +1,7 @@
 #ifndef MAINWINDOWIMPL_H
 #define MAINWINDOWIMPL_H
 
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 #include "ui_mainwindowimpl.h"
 
 class MainWindowImpl: public QMainWindow, private Ui::MainWindowImplClass {

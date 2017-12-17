@@ -17,11 +17,11 @@
         BEGIN
             BLOCK   "040904b0"
             BEGIN
-                VALUE   "CompanyName",      "SAXE Swiss System AB\0"
+                VALUE   "CompanyName",      "SAXE Process AB\0"
                 VALUE   "FileDescription",  "SAXE Val3PreCompiler\0"
-                VALUE   "FileVersion",      "1.4.1\0"
+                VALUE   "FileVersion",      "1.5.0\0"
                 VALUE   "InternalName",     "Filename\0"
-                VALUE   "LegalCopyright",   "Copyright 2014 by SAXE Swiss System AB\0"
+                VALUE   "LegalCopyright",   "Copyright 2016 by SAXE Process AB\0"
                 VALUE   "OriginalFilename", "Val3Check.exe\0"
                 VALUE   "ProductName",      "SAXE Val3PreCompiler\0"
                 VALUE   "ProductVersion",   "1.8.2\0"

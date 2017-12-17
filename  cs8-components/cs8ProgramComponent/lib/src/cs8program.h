@@ -18,35 +18,17 @@ class cs8Program: public QObject
 public:
     QString toDocumentedCode();
     bool save(const QString & projectPath, bool withCode = true);
-    cs8ParameterModel* parameterModel()
-    {
-        return m_parameterModel;
-    }
-    cs8VariableModel* localVariableModel() const
-    {
-        return m_localVariableModel;
-    }
-    cs8VariableModel* referencedGlobalVariables() const
-    {
-        return m_referencedGlobalVarModel;
-    }
+    cs8ParameterModel* parameterModel() const;
+    cs8VariableModel* localVariableModel() const;
+    cs8VariableModel* referencedGlobalVariables() const;
 
-    void setPublic(bool value)
-    {
-        m_programSection.setAttribute("access",value?"public":"private");
-    }
+    void setPublic(bool value);
 
-    bool isPublic() const
-    {
-        return m_programSection.attribute("access","private")=="public";
-    }
+    bool isPublic() const;
 
     QString name() const;
 
-    QString fileName() const
-    {
-        return name() + ".pgx";
-    }
+    QString fileName() const;
     void setName(const QString &name);
     QString definition() const;
     QString documentation(bool withPrefix=true) const;
@@ -69,7 +51,7 @@ private:
     QMultiMap<QString,QString> m_tags;
     void printChildNodes(const QDomElement & element);
     void createXMLSkeleton();
-    QString extractDocumentation(const QString & code_);
+    QString extractDocumentation(const QString & code_, int &headerLinesCount) const;
     QString m_briefDescription;
     bool m_globalDocContainer;
     QStringList variableTokens(bool onlyModifiedVars);
@@ -119,6 +101,7 @@ protected:
     QString m_filePath;
     QString m_copyRightMessage;
     QString m_applicationDocumentation, m_mainPageDocumentation;
+    bool m_withIfBlock;
 
 signals:
     void globalVariableDocumentationFound(const QString & name,

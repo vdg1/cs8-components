@@ -52,10 +52,24 @@ bool DialogBuildDocumentation::build(cs8Application *application)
         return false;
 
     }
+    if (!QFile::exists(settings.value("graphviz").toString()))
+    {
+        QMessageBox::critical(this,tr("Critical Error"),tr("The Graphviz dot.exe could not be foud. Please make sure Graphviz is installed and check the settings!"));
+        close();
+        return false;
+
+    }
     qApp->setOverrideCursor(Qt::WaitCursor);
 
+#if QT_VERSION >= 0x050000
+    QString tempPath=QStandardPaths::writableLocation(QStandardPaths::TempLocation)
+            +"/Val3"+QDateTime::currentDateTime().toString("hh-mm-ss");
+#else
     QString tempPath=QDesktopServices::storageLocation(QDesktopServices::TempLocation)
             +"/Val3"+QDateTime::currentDateTime().toString("hh-mm-ss");
+
+#endif
+
     QDir dir;
     if ( dir.mkpath(tempPath))
 
@@ -99,6 +113,7 @@ bool DialogBuildDocumentation::build(cs8Application *application)
                 configText.replace("#chmFile#",outputFileName);
                 configText.replace("#templateDir#",templateDir.absolutePath()+"/");
                 configText.replace("#Version#",application->version());
+                configText.replace("#graphvizPath#",QDir::fromNativeSeparators(settings.value("graphviz").toString()));
                 configText.replace("#hhcLocation#",QDir::fromNativeSeparators(settings.value("hhcBin").toString()));
                 configFile->write(configText.toLatin1());
                 //ui->plainTextEdit->appendPlainText(configText);

@@ -14,13 +14,17 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     QCoreApplication::setApplicationName ("Val3PreCompiler");
-    QCoreApplication::setOrganizationName("SAXE Swiss System");
+    QCoreApplication::setOrganizationName("SAXE Process AB");
+
+    cout << qPrintable("SAXE Process AB: Val3 Pre Compiler\n");
+    qDebug() << "SAXE Process AB: Val3 Pre Compiler\n";
 
     if (qApp->arguments ().count ()>1)
     {
         //
         //cs8Application app;
         QString cellPath;
+
         foreach(QString arg,qApp->arguments ())
         {
             if (arg.startsWith ("-R"))
@@ -28,6 +32,7 @@ int main(int argc, char *argv[])
                 cellPath=arg.remove ("-R");
                 cellPath=cellPath.remove ("\"");
             }
+
 
         }
 

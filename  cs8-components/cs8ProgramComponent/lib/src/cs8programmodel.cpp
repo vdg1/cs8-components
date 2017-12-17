@@ -53,7 +53,12 @@ void cs8ProgramModel::setCellPath(const QString &path)
 void cs8ProgramModel::append(cs8Program *program)
 {
     m_programList.append (program);
-    reset ();
+#if QT_VERSION >= 0x050000
+    beginResetModel();
+    endResetModel();
+#else
+    reset();
+#endif
 }
 
 QList<cs8Program*> cs8ProgramModel::publicPrograms() {
@@ -105,7 +110,7 @@ QVariant cs8ProgramModel::data(const QModelIndex & index, int role) const {
     }
 
     if (role == Qt::UserRole)
-        return m_programList.at(index.row())->val3Code(false);
+        return m_programList.at(index.row())->val3Code(true);
 
     ///TODO why compiler error here?
     /*
@@ -129,17 +134,17 @@ cs8Program * cs8ProgramModel::createProgram(const QString & programName)
     cs8Program* program = new cs8Program(this);
 
     m_programList.append(program);
-    connect(program, SIGNAL(globalVariableDocumentationFound(const QString & , const QString & )),
-            this, SLOT(slotGlobalVariableDocumentationFound(const QString & , const QString & )));
-    connect(program, SIGNAL(moduleDocumentationFound(const QString & )),
-            this, SLOT(slotModuleDocumentationFound(const QString & )));
-    connect(program, SIGNAL(mainPageDocumentationFound(const QString & )),
-            this, SLOT(slotMainPageDocumentationFound(const QString & )));
-    connect(program, SIGNAL(exportDirectiveFound(QString,QString)),
-            this,SLOT(slotExportDirectiveFound(QString,QString)));
-    connect(program, SIGNAL(unknownTagFound(QString,QString,QString)),
-            this,SLOT(slotUnknownTagFound(QString,QString,QString)));
-    connect (program,SIGNAL(modified()),this,SLOT(slotModified()));
+    connect(program, &cs8Program::globalVariableDocumentationFound,
+            this, &cs8ProgramModel::slotGlobalVariableDocumentationFound);
+    connect(program, &cs8Program::moduleDocumentationFound,
+            this, &cs8ProgramModel::slotModuleDocumentationFound);
+    connect(program, &cs8Program::mainPageDocumentationFound,
+            this, &cs8ProgramModel::slotMainPageDocumentationFound);
+    connect(program, &cs8Program::exportDirectiveFound,
+            this,&cs8ProgramModel::slotExportDirectiveFound);
+    connect(program, &cs8Program::unknownTagFound,
+            this,&cs8ProgramModel::slotUnknownTagFound);
+    connect (program,&cs8Program::modified,this,&cs8ProgramModel::slotModified);
 
     program->setCellPath(m_cellPath);
     if (!programName.isEmpty ())
@@ -153,7 +158,12 @@ void cs8ProgramModel::addProgram(const QString & filePath) {
     cs8Program* program = createProgram("");
     if (!program->open(filePath))
         qDebug() << "Opening program " << filePath << " failed";
+#if QT_VERSION >= 0x050000
+    beginResetModel();
+    endResetModel();
+#else
     reset();
+#endif
 }
 
 void cs8ProgramModel::slotGlobalVariableDocumentationFound(
@@ -187,7 +197,12 @@ void cs8ProgramModel::slotModified()
 
 void cs8ProgramModel::clear() {
     m_programList.clear();
+#if QT_VERSION >= 0x050000
+    beginResetModel();
+    endResetModel();
+#else
     reset();
+#endif
 }
 
 cs8VariableModel* cs8ProgramModel::localVariableModel(const QModelIndex & index) {

@@ -15,7 +15,7 @@
 //
 
 
-class cs8Application: public QObject
+class cs8Application : public QObject
 {
     Q_OBJECT
 
@@ -24,7 +24,7 @@ public:
     bool save();
     bool loadDataFile(const QString & fileName);
     bool saveDataFile(const QString & fileName);
-    bool open(const QString & filePath);
+    bool open(const QString & pfxFilePath);
     bool openFromPathName(const QString & filePath);
     cs8Application(QObject* parent = 0);
     bool parseProject(const QDomDocument & doc);
@@ -35,10 +35,8 @@ public:
     QString exportToCImplementation();
     QString exportToCDefinition();
     bool exportInterfacePrototype(const QString & path);
-    QString name() const
-    {
-        return m_projectName;
-    }
+    bool integrateInterface(cs8Application *sourceApplication);
+    QString name() const;
     void setName(const QString & name);
 
     bool loadDocumentationFile(const QString &);
@@ -50,14 +48,8 @@ public:
     QString cellProjectFilePath(bool cs8Format=false) const;
     QString cellDataFilePath(bool cs8Format=false) const;
     bool writeProjectFile();
-    QHash<QString, QString> exportDirectives() const
-    {
-        return m_exportDirectives;
-    }
-    bool isModified() const
-    {
-        return m_modified;
-    }
+    QHash<QString, QString> exportDirectives() const;
+    bool isModified() const;
     void moveParamsToGlobals(cs8Program *program);
     void setCopyrightMessage(const QString &text);
     cs8VariableModel *globalVariableModel() const;
@@ -95,6 +87,9 @@ public:
     QMap<QString, bool> getReferencedMap() const;
 
     QString getProjectPath() const;
+
+    void setProjectPath(const QString &pth);
+    bool importVPlusFile(const QString & fileName);
 
 protected:
     QHash<QString, QString> m_exportDirectives;
@@ -144,6 +139,8 @@ private:
     bool reportToDos;
     void exportToCppFile(const QString & path);
     void exportToHFile(const QString & path);
-}	;
+
+    QString sanitizeVarName(const QString & varName);
+};
 #endif
 

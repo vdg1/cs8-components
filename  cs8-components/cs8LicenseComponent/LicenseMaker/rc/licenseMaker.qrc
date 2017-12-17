@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>splash.png</file>
-        <file>LicenseTemp.txt</file>
-    </qresource>
-</RCC>

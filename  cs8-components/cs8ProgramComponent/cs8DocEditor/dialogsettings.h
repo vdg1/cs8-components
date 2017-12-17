@@ -21,6 +21,8 @@ private slots:
 
     void on_toolButtonHHC_clicked();
 
+    void on_toolButtonGraphviz_clicked();
+
 private:
     Ui::DialogSettings *ui;
 };

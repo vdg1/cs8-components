@@ -12,7 +12,7 @@
 #ifndef CS8PROGRAMHEADERVIEW_H
 #define CS8PROGRAMHEADERVIEW_H
 
-
+#include "formmarkdowneditor.h"
 #include <QAbstractItemModel>
 #include <QItemSelectionModel>
 #include <QAbstractItemView>
@@ -36,6 +36,8 @@ public:
 
 
 
+    FormMarkDownEditor *documentation() const;
+
 protected slots:
     void slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected ) ;
     void slotModified();
@@ -45,8 +47,8 @@ signals:
 
 protected:
     QAbstractItemView* m_masterView;
-    QPlainTextEdit *m_documentation;
-    QLineEdit *m_description;
+    FormMarkDownEditor *m_documentation;
+    QLineEdit *m_briefText;
 };
 
 #endif

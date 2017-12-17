@@ -16,12 +16,12 @@ bool getProductNamme(const QString & fileName, QString & productName, QString & 
 {
     DWORD DWD;
     // Read size of info block.
-    DWORD VerInfoSize = GetFileVersionInfoSize(fileName.utf16(),&DWD);
+    DWORD VerInfoSize = GetFileVersionInfoSize(reinterpret_cast<LPCWSTR>(fileName.utf16()),&DWD);
     if (VerInfoSize)
         {
             char *VerInfo = new char[VerInfoSize];
             // Read info block.
-            if (!GetFileVersionInfo(fileName.utf16(),0,VerInfoSize,VerInfo))
+            if (!GetFileVersionInfo(reinterpret_cast<LPCWSTR>(fileName.utf16()),0,VerInfoSize,VerInfo))
                 return false;
 
             struct LANGANDCODEPAGE
@@ -40,7 +40,7 @@ bool getProductNamme(const QString & fileName, QString & productName, QString & 
 
             // Read the file description for each language and code page.
             QString SubBlock;
-            char *LangInfo;
+            //char *LangInfo;
             LPSTR   lpVersion;
 
             UINT LangSize;
@@ -49,7 +49,7 @@ bool getProductNamme(const QString & fileName, QString & productName, QString & 
                     SubBlock=QString("\\StringFileInfo\\%1%2\\ProductName")
                              .arg((uint)lpTranslate[i].wLanguage,4,16,QChar('0'))
                              .arg((uint)lpTranslate[i].wCodePage,4,16,QChar('0'));
-                    VerQueryValue(VerInfo,SubBlock.utf16(), (LPVOID *)&lpVersion,&LangSize);
+                    VerQueryValue(VerInfo,reinterpret_cast<LPCWSTR>(SubBlock.utf16()), (LPVOID *)&lpVersion,&LangSize);
                     if (LangSize>0)
                         productName=QString::fromWCharArray((const wchar_t*)lpVersion,LangSize);
                     else
@@ -58,7 +58,7 @@ bool getProductNamme(const QString & fileName, QString & productName, QString & 
                     SubBlock=QString("\\StringFileInfo\\%1%2\\FileVersion")
                              .arg((uint)lpTranslate[i].wLanguage,4,16,QChar('0'))
                              .arg((uint)lpTranslate[i].wCodePage,4,16,QChar('0'));
-                    VerQueryValue(VerInfo,SubBlock.utf16(), (LPVOID *)&lpVersion,&LangSize);
+                    VerQueryValue(VerInfo,reinterpret_cast<LPCWSTR>(SubBlock.utf16()), (LPVOID *)&lpVersion,&LangSize);
                     if (LangSize>0)
                         fileVersion=QString::fromWCharArray((const wchar_t*)lpVersion,LangSize);
                     else

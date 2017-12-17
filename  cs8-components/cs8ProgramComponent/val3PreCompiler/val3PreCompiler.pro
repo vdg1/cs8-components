@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core xml gui
+QT       += core xml 3dcore
 
 TARGET = val3Check
 TEMPLATE = app
@@ -14,9 +14,9 @@ DESTDIR = ../bin/preCompilerPackage
 SOURCES += main.cpp
 
 EXTRA_FILES.path    = $${DESTDIR}
-EXTRA_FILES.files   += $$(QTDIR)/bin/QtCore4.dll
-EXTRA_FILES.files   += $$(QTDIR)/bin/QtGui4.dll
-EXTRA_FILES.files   += $$(QTDIR)/bin/QtXml4.dll
+EXTRA_FILES.files   += $$(QTDIR)/bin/Qt5Core.dll
+EXTRA_FILES.files   += $$(QTDIR)/bin/Qt5Gui.dll
+EXTRA_FILES.files   += $$(QTDIR)/bin/Qt5Xml.dll
 INSTALLS       += EXTRA_FILES
 
 win32:RC_FILE = val3Compiler.rc

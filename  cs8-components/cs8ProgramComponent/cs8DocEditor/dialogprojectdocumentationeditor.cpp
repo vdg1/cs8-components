@@ -15,13 +15,12 @@ DialogProjectDocumentationEditor::~DialogProjectDocumentationEditor()
 
 void DialogProjectDocumentationEditor::setText(const QString &text)
 {
-    ui->plainTextEdit->clear();
-    ui->plainTextEdit->appendPlainText(text);
+    ui->plainTextEdit->setText(text,true);
 }
 
 QString DialogProjectDocumentationEditor::text() const
 {
-    return ui->plainTextEdit->toPlainText();
+    return ui->plainTextEdit->text();
 }
 
 void DialogProjectDocumentationEditor::setTitle(const QString & text)

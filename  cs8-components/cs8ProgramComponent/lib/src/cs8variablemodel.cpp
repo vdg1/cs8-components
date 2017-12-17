@@ -18,13 +18,23 @@ bool cs8VariableModel::addVariable(QDomElement & element,
 
         variable->setDescription(description);
         m_variableList.append(variable);
+#if QT_VERSION >= 0x050000
+        beginResetModel();
+        endResetModel();
+#else
         reset();
+#endif
     } else if (element.tagName() == "Parameter") {
         cs8Variable * variable = new cs8Variable(element);
 
         variable->setDescription(description);
         m_variableList.append(variable);
+#if QT_VERSION >= 0x050000
+        beginResetModel();
+        endResetModel();
+#else
         reset();
+#endif
     } else
         return false;
     return true;
@@ -42,7 +52,12 @@ bool cs8VariableModel::addGlobalVariable(QDomElement & element, const QString & 
     connect(variable,SIGNAL(modified()),this,SLOT(slotModified()));
     variable->setGlobal(true);
     m_variableList.append(variable);
+#if QT_VERSION >= 0x050000
+    beginResetModel();
+    endResetModel();
+#else
     reset();
+#endif
     return true;
 }
 
@@ -82,7 +97,7 @@ QStringList cs8VariableModel::variableNameList()
     return list;
 }
 
-QList<cs8Variable *> &cs8VariableModel::variableList(const QString &type)
+QList<cs8Variable *>& cs8VariableModel::variableList(const QString &type)
 {
     if (type.isEmpty())
     {
@@ -104,21 +119,11 @@ cs8Variable *cs8VariableModel::createVariable(const QString &name)
 {
     cs8Variable *variable=new cs8Variable();
     variable->setName(name);
-    variableList().append(variable);
+    variable->setParent (this);
+    m_variableList.append(variable);
     return variable;
 }
 
-cs8Variable *cs8VariableModel::getByName(const QString &name) const
-{
-    foreach(cs8Variable *var,m_variableList)
-    {
-        QString n=name;
-        n.remove(QRegExp("\\[.*\\]"));
-        if (var->name()==n)
-            return var;
-    }
-    return 0;
-}
 
 bool cs8VariableModel::hasDocumentation()
 {
@@ -160,7 +165,7 @@ QString cs8VariableModel::toDtxDocument() {
 }
 
 QList<cs8Variable*> cs8VariableModel::findVariablesByType(
-        const QString & type_, bool public_) {
+    const QString & type_, bool public_) {
     QList<cs8Variable*> list;
     foreach(cs8Variable* variable,m_variableList) {
         if (variable->type() == type_ && variable->isPublic() == public_)
@@ -240,7 +245,7 @@ QVariant cs8VariableModel::headerData(int section, Qt::Orientation orientation,
 }
 
 /*!
- \fn cs8VariableModel::flags ( const QModelIndex & index ) const
+   \fn cs8VariableModel::flags ( const QModelIndex & index ) const
  */
 Qt::ItemFlags cs8VariableModel::flags(const QModelIndex & index) const {
     if (!index.isValid())
@@ -254,13 +259,15 @@ Qt::ItemFlags cs8VariableModel::flags(const QModelIndex & index) const {
 }
 
 /*!
- \fn cs8VariableModel::setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole )
+   \fn cs8VariableModel::setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole )
  */
 bool cs8VariableModel::setData(const QModelIndex & index,
                                const QVariant & value, int role) {
     if (role == Qt::EditRole) {
         if (index.column() == 3) {
             cs8Variable* variable = m_variableList.at(index.row());
+            if (variable->description()!=value.toString())
+                emit documentationChanged(value.toString());
             variable->setDescription(value.toString());
             emit (dataChanged(index, index));
         }
@@ -269,24 +276,28 @@ bool cs8VariableModel::setData(const QModelIndex & index,
 }
 
 /*!
- \fn cs8VariableModel::getVarByName(const QString & name)
+   \fn cs8VariableModel::getVarByName(const QString & name)
  */
 cs8Variable* cs8VariableModel::getVarByName(const QString & name) {
-    for (int i = 0; i < m_variableList.count(); i++) {
-        if (m_variableList.at(i)->name().compare(name) == 0)
-            return m_variableList.at(i);
+    foreach(cs8Variable *var,m_variableList)
+    {
+        QString n=name;
+        n.remove(QRegExp("\\[.*\\]"));
+        if (var->name().compare(n)==0)
+            return var;
     }
     return 0;
 }
 
+
 QDomNode cs8VariableModel::document(QDomDocument & doc) {
     QDomDocumentFragment fragment = doc.createDocumentFragment();
     QDomElement section = doc.createElement(m_mode==Parameter ? "paramSection"
-                                                              : "localSection");
+                        : "localSection");
     fragment.appendChild(section);
     foreach ( cs8Variable* var, m_variableList ) {
         QDomElement varElement = doc.createElement(m_mode ? "param"
-                                                          : "local");
+                               : "local");
         if (m_mode==Parameter)
             varElement.setAttribute("byVal", var->use());
         else
@@ -327,7 +338,7 @@ QString cs8VariableModel::toDocumentedCode()
     foreach ( cs8Variable* var, m_variableList ) {
         QString descr = var->description();
         if (!descr.isEmpty () || m_withUndocumentedSymbols)
-            header+= QString("\n\\%1 %3 %2\n") .arg(prefix) .arg(descr) .arg(var->name());
+            header+= QString("\n\\%1 %3 %2\n").arg(prefix).arg(descr).arg(var->name());
     }
     qDebug() << "header: " << header;
     return header;

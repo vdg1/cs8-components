@@ -4,9 +4,12 @@ SUBDIRS = lib \
     #testBin \
     extractPrototype \
     extractDoc \
-    doxygenFilter \
     cs8DocEditor \
     val3PreCompiler \
     val3CreateAPI \
-    val3CompilerDeployment
+    val3CompilerDeployment \
+    chmlib \
+    importVPlus
+
+
     # val3PreCompilerSettings

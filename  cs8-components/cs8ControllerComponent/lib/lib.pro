@@ -1,37 +1,39 @@
 TEMPLATE = lib
-HEADERS += src/cs8controller.h \
-    src/cs8fileengine.h \
-    src/cs8fileenginehandler.h \
+HEADERS +=  src/cs8controller.h \
+  #  src/cs8fileinfo.h \
+  #  src/cs8dirmodel.h \
+    src/cs8networkscanner.h \
+    src/qftp.h \
+    src/qurlinfo.h \
+    src/qttelnet.h \
+    src/cs8telnet.h \
     src/cs8ControllerComponent.h \
-    src/ftpengine.h \
-    src/p_cs8ftpinstance.h \
-    src/cs8fileengineiterator.h \
-    src/cs8fileinfo.h \
-    src/cs8dirmodel.h \
-    src/cs8logindatadialog.h \
-    src/cs8networkscanner.h
+    src/cs8loginterface.h
+
 SOURCES += src/cs8controller.cpp \
-    src/cs8fileengine.cpp \
-    src/cs8fileenginehandler.cpp \
-    src/ftpengine.cpp \
-    src/p_cs8ftpinstance.cpp \
-    src/cs8fileengineiterator.cpp \
-    src/cs8fileinfo.cpp \
-    src/cs8dirmodel.cpp \
-    src/cs8logindatadialog.cpp \
-    src/cs8networkscanner.cpp
+   #  src/cs8fileinfo.cpp \
+   # src/cs8dirmodel.cpp \
+    src/cs8networkscanner.cpp \
+    src/qftp.cpp \
+    src/qurlinfo.cpp \
+    src/qttelnet.cpp \
+    src/cs8telnet.cpp \
+    src/cs8loginterface.cpp
 
 QT += core \
     network \
- xml
-CONFIG += staticlib build_all
-#TARGET = cs8ControllerComponent
-DESTDIR = ../../lib/
-#OBJECTS_DIR = build
-#UI_DIR = build
-#MOC_DIR = build
+    xml \
+concurrent\
+printsupport
 
-FORMS += ui/cs8logindatadialog.ui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += staticlib
+
+DESTDIR = ../../lib/
+
+
+
 DEFINES += DLLEXPORT
 win32 {
  build_pass:CONFIG(debug, debug|release) {
@@ -47,4 +49,11 @@ win32 {
     MOC_DIR = build
 
   }
+
 }
+
+LIBS += -lWs2_32
+
+headers.path    = ../../include
+headers.files   += $$HEADERS
+INSTALLS       += headers

@@ -19,7 +19,10 @@ HEADERS += src/cs8project.h \
     src/cs8globalvariablemodel.h \
     #src/cs8usertypemodel.h \
     src/cs8usertype.h \
-    src/cs8codevalidation.h
+    src/cs8codevalidation.h \
+    src/formmarkdowneditor.h \
+    src/document.h \
+    src/previewpage.h
 
 SOURCES += src/cs8project.cpp \
     src/cs8program.cpp \
@@ -41,9 +44,14 @@ SOURCES += src/cs8project.cpp \
     src/cs8globalvariablemodel.cpp \
     #src/cs8usertypemodel.cpp \
     src/cs8usertype.cpp \
-    src/cs8codevalidation.cpp
+    src/cs8codevalidation.cpp \
+    src/formmarkdowneditor.cpp \
+    src/document.cpp \
+    src/previewpage.cpp
 
-FORMS +=  ../lib/forms/formvariabledetaileditor.ui
+FORMS +=  ../lib/forms/formvariabledetaileditor.ui \
+    ../lib/forms/formmarkdowneditor.ui
+	
 INCLUDEPATH = build
 TEMPLATE = lib
 CONFIG += console \
@@ -54,7 +62,12 @@ OBJECTS_DIR = build
 UI_DIR = build
 MOC_DIR = build
 QT += xml \
-    core
+      core
+
+CONFIG += c++11
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets webchannel webengine webenginewidgets 3dcore
+
 
 win32 {
  build_pass:CONFIG(debug, debug|release) {
@@ -71,3 +84,11 @@ win32 {
 
   }
 }
+
+RESOURCES += \
+    resources/markdowneditor.qrc
+
+
+headers.path    = ../../include
+headers.files   += $$HEADERS
+INSTALLS       += headers

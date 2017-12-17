@@ -4,9 +4,7 @@
 //
 int main(int argc, char ** argv)
 {
-	QApplication app( argc, argv );
-	// register cs8 file engine to QT
-	cs8FileEngineHandler engine;
+    QApplication app( argc, argv );
 	//
 	DialogImpl win;
 	win.show();

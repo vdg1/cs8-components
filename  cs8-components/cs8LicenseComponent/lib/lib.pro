@@ -1,9 +1,0 @@
-TEMPLATE = lib
-QT += core xml
-HEADERS += src/cs8license.h
-SOURCES += src/cs8license.cpp
-TARGET = cs8LicenseComponent
-DESTDIR = ../../lib
-MOC_DIR = build
-OBJECTS_DIR = build
-CONFIG += staticlib

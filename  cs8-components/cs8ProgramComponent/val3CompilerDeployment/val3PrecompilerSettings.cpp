@@ -1,3 +1,4 @@
+#include <QSettings>
 #include <QTimer>
 #include <cs8application.h>
 

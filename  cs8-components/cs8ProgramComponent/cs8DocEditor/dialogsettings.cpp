@@ -18,6 +18,9 @@ DialogSettings::DialogSettings(QWidget *parent) :
     dir=settings.value("hhcBin",
                        programFilesPath+"/HTML Help Workshop/hhc.exe").toString();
     ui->lineEditHHC->setText(QDir::toNativeSeparators(dir));
+    dir=settings.value("graphviz",
+                       programFilesPath+"/Graphviz2.38/bin/dot.exe").toString();
+    ui->lineEditGraphvis->setText(QDir::toNativeSeparators(dir));
 }
 
 DialogSettings::~DialogSettings()
@@ -47,5 +50,17 @@ void DialogSettings::on_toolButtonHHC_clicked()
     {
         settings.setValue("hhcBin",fileName);
         ui->lineEditHHC->setText(QDir::toNativeSeparators(fileName));
+    }
+}
+
+void DialogSettings::on_toolButtonGraphviz_clicked()
+{
+    QSettings settings;
+    QString dir=settings.value("graphviz",ui->lineEditGraphvis->text()).toString();
+    QString fileName=QFileDialog::getOpenFileName(this,tr("Graphviz"),dir,"dot.exe");
+    if (!fileName.isEmpty())
+    {
+        settings.setValue("graphviz",fileName);
+        ui->lineEditGraphvis->setText(QDir::toNativeSeparators(fileName));
     }
 }
