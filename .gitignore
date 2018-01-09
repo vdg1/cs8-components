@@ -1,0 +1,13 @@
+
+*.lib
+*.pro.user
+moc_*.*
+*.moc
+*.obj
+Makefile*
+*.exe
+*.exp
+ui_*.h
+*.pdb
+release/
+debug/

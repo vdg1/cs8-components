@@ -33,34 +33,29 @@ public:
   bool isConst() const;
 
   void setName(QString value);
-  QString name() const { return m_element.attribute("name"); }
+  QString name() const;
   cs8Variable(QDomElement &element, const QString &descripton = QString());
   cs8Variable(cs8Variable *var);
   cs8Variable();
 
   QString toString(bool withTypeDefinition = true);
   QString documentation(bool withPrefix, bool forCOutput);
-  bool isPublic() const {
-    return m_element.attribute("access", "private") == "private" ? false : true;
-  }
+  bool isPublic() const;
 
   QStringList father();
 
   void setPublic(bool m_public);
 
-  QDomNodeList values() { return m_element.childNodes(); }
+  QDomNodeList values();
   QString definition();
 
   void setGlobal(bool global);
-  bool isGlobal() const {
-    // qDebug() << "var: " << m_name << " has " << m_values.count();
-    return m_global; // m_values.count() > 0;
-  }
+  bool isGlobal() const;
 
   QString allSizes();
   void setAllSizes(const QString &sizes);
 
-  QDomElement element() const { return m_element; }
+  QDomElement element() const;
 
   QVariant varValue(QString index = "0");
   void setValue(const QString &index, const QMap<QString, QString> &valueMap);

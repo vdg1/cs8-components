@@ -133,7 +133,7 @@ bool cs8Application::importVPlusFile(const QString &fileName) {
       index = index.isEmpty() ? QString("0") : index;
       varName.remove(rx);
       // sanitize file name
-      varName = sanitizeVarName(isJoint ? varName.remove(0, 1) : varName);
+      varName = sanitizeSymbolName(isJoint ? varName.remove(0, 1) : varName);
       // remove name from list of components
       components.removeAt(0);
 
@@ -546,7 +546,12 @@ void cs8Application::exportToHFile(const QString &path) {
   file.close();
 }
 
-QString cs8Application::sanitizeVarName(const QString &varName) {
+//!
+//! \brief sanitizeSymbolName
+//! \param varName
+//! \return sanitized symbol name
+//!
+QString cs8Application::sanitizeSymbolName(const QString &varName) {
   QStringList c = varName.split(".", QString::SkipEmptyParts);
   for (int i = 0; i < c.count(); i++) {
     c[i][0] = c[i].at(0).toTitleCase();
@@ -1289,10 +1294,15 @@ void cs8Application::moveParamsToGlobals(cs8Program *program) {
       var->setAllSizes("1");
       newName = var->name();
       oldName = var->name();
-      // remove trailing '_'
+      // remove leading '_'
       newName.remove(0, 1);
+      // remove trailing '_'
+      if (newName.endsWith('_'))
+        newName.chop(1);
       var->setName(newName);
-      m_globalVariableModel->addVariable(var);
+      // add variable to global list if it does not exist yet
+      if (!m_globalVariableModel->variableNameList().contains(newName))
+        m_globalVariableModel->addVariable(var);
       QString code = program->val3Code(true);
       code.replace(oldName, newName);
       program->setCode(code);

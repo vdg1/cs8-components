@@ -202,25 +202,29 @@ QString cs8Program::extractCode(const QString &code_) const {
   QString code = code_;
   int headerLines;
   extractDocumentation(code, headerLines);
-  // extract code
-  code.replace("\r\n", "\n");
-  QStringList list = code.split("\n");
-  int start = list.indexOf(QRegExp("\\s*begin\\s*"));
-  int stop = start + 1;
+  // process only if a header was found
+  if (headerLines != 0) {
+    // extract code
+    code.replace("\r\n", "\n");
+    QStringList list = code.split("\n");
+    int start = list.indexOf(QRegExp("\\s*begin\\s*"));
+    int stop = start + 1;
 
-  // * while ( list.at( stop ).contains( QRegExp( "^\\s*'//'.*" ) ) || list.at(
-  // stop ).simplified().isEmpty() )
-  //      stop++;
-  //   for ( int i = stop - 1; i > start; i-- )
-  //       list.removeAt( i );
-  //
-  for (int i = 0; i < headerLines; i++)
-    list.removeFirst();
-  // remove any comment or empty line in the beginning of code
-  while (list.at(0).contains(QRegExp("^(\\s*(/{2,}.*)|\\s+)$")))
-    list.removeFirst();
-  list.insert(0, "begin");
-  return list.join("\n");
+    // * while ( list.at( stop ).contains( QRegExp( "^\\s*'//'.*" ) ) ||
+    // list.at( stop ).simplified().isEmpty() )
+    //      stop++;
+    //   for ( int i = stop - 1; i > start; i-- )
+    //       list.removeAt( i );
+    //
+    for (int i = 0; i < headerLines; i++)
+      list.removeFirst();
+    // remove any comment or empty line in the beginning of code
+    while (list.at(0).contains(QRegExp("^(\\s*(/{2,}.*)|\\s+)$")))
+      list.removeFirst();
+    list.insert(0, "begin");
+    return list.join("\n");
+  } else
+    return code_;
 }
 
 // return a list of variable tokens
@@ -334,16 +338,17 @@ QStringList cs8Program::getCalls() {
   return list;
 }
 
-QString cs8Program::extractDocumentation(const QString &code_,
-                                         int &headerLinesCount) const {
+QStringList cs8Program::extractDocumentation(const QString &code_,
+                                             int &headerLinesCount) const {
   //
   // extract documentation section
   QString documentationSection = code_;
   documentationSection.replace("\r\n", "\n");
   // revert automatic correction done by Val3 Studio
   documentationSection.replace("//\\endIf", "//\\endif");
-  documentationSection.remove(0, documentationSection.indexOf("begin\n") + 8);
+  // documentationSection.remove(0, documentationSection.indexOf("begin\n"));
   QStringList documentationList = documentationSection.split("\n");
+  documentationList.removeFirst();
   QStringList documentation;
   int hasIfBlock = -1;
   int hasCodeInIfBlock = -1;
@@ -354,6 +359,7 @@ QString cs8Program::extractDocumentation(const QString &code_,
   bool isEndIf = false;
   bool isNextLineEndIf = false;
   int i;
+  headerLinesCount = 0;
   for (i = 0; i < documentationList.count(); i++) {
     QString line = documentationList[i].trimmed();
     QString nextLine = i < documentationList.count() - 1
@@ -365,6 +371,9 @@ QString cs8Program::extractDocumentation(const QString &code_,
     isEndMarker = line.startsWith("//_");
     inIfBlock = hasIfBlock != -1 && i > hasIfBlock;
     isEndIf = line.startsWith("endIf");
+
+    if (isComment || line.startsWith("if false") || line.startsWith("endIf"))
+      headerLinesCount++;
 
     if (hasIfBlock == -1 && line.simplified().startsWith("if false"))
       hasIfBlock = i;
@@ -431,8 +440,8 @@ QString cs8Program::extractDocumentation(const QString &code_,
   //while ( documentationList.count() > i )
   //    documentationList.removeLast();
 */
-  headerLinesCount = i + 1;
-  return documentation.join("\n");
+
+  return documentation;
 }
 bool cs8Program::globalDocContainer() const { return m_globalDocContainer; }
 
@@ -534,14 +543,14 @@ void cs8Program::setGlobalDocContainer(bool globalDocContainer) {
 void cs8Program::parseDocumentation(const QString &code_) {
 
   int headerLines;
-  QString documentation = extractDocumentation(code_, headerLines);
+  QStringList documentation = extractDocumentation(code_, headerLines);
   QString tagType;
   QString tagName;
   QString tagText;
   m_tags.clear();
 
   // qDebug() << "parseDocumentation: " << name();
-  foreach (QString line, documentation.split("\n")) {
+  foreach (QString line, documentation) {
     line = line.simplified();
     // process a complete tag before starting the next tag
     if ((line.startsWith("//!") || line.startsWith("//\\")) &&
@@ -907,12 +916,15 @@ void cs8Program::setName(const QString &name) {
 }
 
 QString cs8Program::toDocumentedCode() {
-  QString documentation;
+  // QString documentation;
   QString detailedDocumentation;
+  QStringList list;
+  int startIfRow = -1;
+  int endIfRow = -1;
 
   if (!description().isEmpty()) {
-    documentation = "\\brief\n";
-    documentation += description() + "\n";
+    list << "\\brief";
+    list << description().split("\n");
   }
 
   if (!m_detailedDocumentation.isEmpty()) {
@@ -935,7 +947,7 @@ QString cs8Program::toDocumentedCode() {
   }
 
   if (!m_tags.isEmpty()) {
-    documentation += "\n";
+    detailedDocumentation += "\n";
     foreach (QString key, m_tags.uniqueKeys()) {
       foreach (QString value, m_tags.values(key)) {
         detailedDocumentation += QString("\\%1 %2\n").arg(key).arg(value);
@@ -950,22 +962,30 @@ QString cs8Program::toDocumentedCode() {
 
   if (!detailedDocumentation.isEmpty()) {
     if (m_withIfBlock) {
-      documentation += "  if false\n";
+      startIfRow = list.count();
+      list << "  if false";
     }
-    documentation += detailedDocumentation;
-    if (m_withIfBlock)
-      documentation += "  endIf";
-    else
-      documentation += "_";
+    list << detailedDocumentation.split("\n");
+    if (m_withIfBlock) {
+      endIfRow = list.count();
+      list << "  endIf";
+    } else
+      list << "_";
   } else
-    documentation += "_";
-  if (!documentation.endsWith("\n"))
-    documentation += "\n";
+    list << "_";
+  // if (!documentation.endsWith("\n"))
+  //  documentation += "\n";
 
-  QStringList list = documentation.split("\n");
+  // QStringList list = documentation.split("\n");
   while (list.last().isEmpty())
     list.removeLast();
-  list.replaceInStrings(QRegExp("^(?!(\\s*(if false|endIf)))"), "  //");
+  // prepend '//' markers
+  // list.replaceInStrings(QRegExp("^(?!(\\s*(if false|endIf)))"), "  //");
+  for (int i = 0; i < list.count(); i++) {
+    if (i != startIfRow && i != endIfRow)
+      list[i] = QString("  //%1").arg(list[i]);
+  }
+
   // indent lines in if block
   bool inIfBlock = false;
   for (int i = 0; i < list.count(); i++) {
@@ -976,7 +996,7 @@ QString cs8Program::toDocumentedCode() {
     else if (inIfBlock)
       list[i] = "  " + list[i];
   }
-  documentation = list.join("\n") + "\n";
+  QString documentation = list.join("\n") + "\n";
 
   QString code = val3Code(false);
 

@@ -84,6 +84,10 @@ QString cs8Variable::documentation(bool withPrefix, bool forCOutput) {
     return prefix + out;
 }
 
+bool cs8Variable::isPublic() const {
+  return m_element.attribute("access", "private") == "private" ? false : true;
+}
+
 QStringList cs8Variable::father() {
   QStringList list;
   QDomNode element = m_element.firstChildElement("Value");
@@ -103,6 +107,8 @@ void cs8Variable::setPublic(bool m_public) {
   emit modified();
   m_element.setAttribute("access", m_public ? "public" : "private");
 }
+
+QDomNodeList cs8Variable::values() { return m_element.childNodes(); }
 
 QString cs8Variable::definition() {
 
@@ -135,6 +141,11 @@ void cs8Variable::setGlobal(bool global) {
   }
 }
 
+bool cs8Variable::isGlobal() const {
+  // qDebug() << "var: " << m_name << " has " << m_values.count();
+  return m_global; // m_values.count() > 0;
+}
+
 QString cs8Variable::allSizes() {
   return m_element.attribute("size").replace(" ", ", ");
 }
@@ -143,6 +154,8 @@ void cs8Variable::setAllSizes(const QString &sizes) {
   emit modified();
   m_element.setAttribute("size", sizes);
 }
+
+QDomElement cs8Variable::element() const { return m_element; }
 
 QVariant cs8Variable::varValue(QString index) {
   QDomElement e;
@@ -287,5 +300,7 @@ void cs8Variable::setName(QString value) {
   emit modified();
   m_element.setAttribute("name", value);
 }
+
+QString cs8Variable::name() const { return m_element.attribute("name"); }
 
 //

@@ -51,7 +51,7 @@ private:
     QMultiMap<QString,QString> m_tags;
     void printChildNodes(const QDomElement & element);
     void createXMLSkeleton();
-    QString extractDocumentation(const QString & code_, int &headerLinesCount) const;
+    QStringList extractDocumentation(const QString & code_, int &headerLinesCount) const;
     QString m_briefDescription;
     bool m_globalDocContainer;
     QStringList variableTokens(bool onlyModifiedVars);
