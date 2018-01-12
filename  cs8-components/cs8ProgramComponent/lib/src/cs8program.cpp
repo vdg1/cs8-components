@@ -207,8 +207,8 @@ QString cs8Program::extractCode(const QString &code_) const {
     // extract code
     code.replace("\r\n", "\n");
     QStringList list = code.split("\n");
-    int start = list.indexOf(QRegExp("\\s*begin\\s*"));
-    int stop = start + 1;
+    // int start = list.indexOf(QRegExp("\\s*begin\\s*"));
+    // int stop = start + 1;
 
     // * while ( list.at( stop ).contains( QRegExp( "^\\s*'//'.*" ) ) ||
     // list.at( stop ).simplified().isEmpty() )
@@ -348,10 +348,10 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
   documentationSection.replace("//\\endIf", "//\\endif");
   // documentationSection.remove(0, documentationSection.indexOf("begin\n"));
   QStringList documentationList = documentationSection.split("\n");
+  // remove 'begin' token
   documentationList.removeFirst();
   QStringList documentation;
   int hasIfBlock = -1;
-  int hasCodeInIfBlock = -1;
   bool isComment = false;
   bool isNextLineComment = false;
   bool isEndMarker = false;
@@ -375,13 +375,13 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
     if (isComment || line.startsWith("if false") || line.startsWith("endIf"))
       headerLinesCount++;
 
-    if (hasIfBlock == -1 && line.simplified().startsWith("if false"))
+    if (hasIfBlock == -1 && line.startsWith("if false")) {
       hasIfBlock = i;
-    else if (hasIfBlock != -1 && !isComment && !line.startsWith("endIf")) {
+    } else if (hasIfBlock != -1 && !isComment && !line.startsWith("endIf")) {
       // there is unexpected code in 'if false' block
       // reset header line to last occurence of comment
       i = hasIfBlock - 1;
-      hasCodeInIfBlock = i;
+      headerLinesCount = i;
       // exit header parser here
       break;
     }
@@ -413,7 +413,7 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
      */
     if (nextLine.startsWith("//_") && hasIfBlock != -1 && isEndIf) {
       // jump ahead by 1 line to include endmarker in header
-      i++;
+      headerLinesCount++;
       break;
     }
 
@@ -423,7 +423,7 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
      *
      */
     if (!isNextLineComment && hasIfBlock != -1 && isEndIf) {
-      i++;
+      headerLinesCount++;
       break;
     }
   }

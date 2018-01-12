@@ -72,6 +72,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                   qDebug() << r.pattern();
                   expressionString.replace(pos, matchedLength,
                                            var->type().left(r.cap(2).toInt()));
+                  rx.setPattern(expressionString);
                 }
               }
             }

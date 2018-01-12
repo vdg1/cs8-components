@@ -16,10 +16,12 @@ MainWindow::MainWindow(QWidget *parent)
   QCoreApplication::setOrganizationDomain("hsh.as");
   QCoreApplication::setApplicationName("Val3 Documentation Editor");
 
+  /*
   QDirIterator it(":", QDirIterator::Subdirectories);
   while (it.hasNext()) {
     qDebug() << it.next();
   }
+*/
 
   ui->setupUi(this);
   m_application = new cs8Application(this);
@@ -79,12 +81,15 @@ void MainWindow::readSettings() {
   restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
   // create docks, toolbars, etc…
   restoreState(settings.value("mainWindowState").toByteArray());
+  ui->splitter->restoreState(
+      settings.value("mainWindowSplitter").toByteArray());
 }
 
 void MainWindow::writeSettings() {
   QSettings settings;
   settings.setValue("mainWindowGeometry", saveGeometry());
   settings.setValue("mainWindowState", saveState());
+  settings.setValue("mainWindowSplitter", ui->splitter->saveState());
 }
 
 void MainWindow::createRecentFilesItems() {

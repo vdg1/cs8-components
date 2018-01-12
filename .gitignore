@@ -11,3 +11,5 @@ ui_*.h
 *.pdb
 release/
 debug/
+*.ilk
+*.ilk

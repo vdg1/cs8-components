@@ -61,7 +61,7 @@
     </reference>
   </localData>
   <program>
-    <reference checkProperty="notReferenced" scope="private" expression="(?! (start|stop))">
+    <reference checkProperty="notReferenced" scope="private" expression="(?!(start|stop))">
       <message><![CDATA[<level>Warning<CLASS>PRG<P1>%progName%<P2>CODE<line>1<msg>Program %progName% is not called<file>%fileName%]]></message>
     </reference>
   </program>
