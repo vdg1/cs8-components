@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="_StartMachine" access="public">
+    <Description><![CDATA[Start machine cycle]]></Description>
+    <Locals>
+      <Local name="bAreaTest" type="bool" xsi:type="array" size="1" />
+      <Local name="nOldSpeedScale" type="num" xsi:type="array" size="1" />
+      <Local name="bTestRun" type="bool" xsi:type="array" size="1" />
+      <Local name="txt" type="string" xsi:type="array" size="1" />
+      <Local name="time" type="num" xsi:type="array" size="1" />
+      <Local name="sValue" type="string" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  //
+  // add list of pending status messages
+  //!i18n 16 -> "Wait for Mould Free Condition"
+  
+  call status:setEnabled(WAIT_MOULD_FREE,true)
+  //!change 23.05.06, vdg: reduce speed in test mode when approaching the mould area boundary
+  // from inside towards outside
+  //!change 08.09.06, vdg: store data:setTestRun in a local variable
+  bTestRun=data:setTestRun
+  // prime the motion stack monitor which checks if the arm is actually 
+  // programmed to leave the mould when StartMachine() is called
+  call primeMotStack()
+  if bTestRun
+    //wait(secu:nSafeZoneDist[0]<300)
+    nOldSpeedScale=getMonitorSpeed()
+    //!fix 09.06.06, vdg: set speed to the lower speed setting (current speedScale() or dry run speed)
+    ///TODO
+    //$setSpeed(min(speedScale(),10))
+    //call setSpeed(min(getMonitorSpeed(),10))
+    //wait(secu:nSafeZoneDist[0]<50)
+    //$setSpeed(1)
+    ///TODO
+    //call setSpeed(1)
+  endIf
+  // WAIT GRIPPER OUT OF MOULD AREA ==================================================================================
+  // record the safety distance of the robot
+
+  time=clock()
+  //requiredTime=0.2
+  //currentTime=0
+  // if (speedScale()>99) and (workingMode()==4) and (SYS:diMachineInAuto[moduleIndex]==true) and !bTestRun
+  if (getMonitorSpeed()>99) and (workingMode()==4) and !bTestRun
+    do
+      // Check if there are still motions in the stack.
+      // If it is empty, it means the robot never leaves the mould area before
+      // StartMachine() is called.
+      call checkMotStack()
+    until (SYS:doMouldFree[moduleIndex]==true)
+  else
+    do
+      // Check if there are still motions in the stack.
+      // If it is empty, it means the robot never leaves the mould area before
+      // StartMachine() is called.
+      call checkMotStack()
+    until (SYS:doMouldFree[moduleIndex]==true)
+  endIf
+  //
+  call status:setEnabled(WAIT_MOULD_FREE,false)
+  //
+  //!change 18.05.06, vdg: check if doMouldFree has toggled
+  call stopAreaTest(bAreaTest)
+  // START MACHINE CYCLE =============================================================================================
+  //!change 16.02.06, vdg: Allow to start IMM in endIf cycle mode SYS:bStartInEndCycl is set
+  if (!SYS:CE_Requested or SYS:bStartInEndCycl) and !SYS:bPartMade[moduleIndex] and bAreaTest
+    //!change 18.05.06, vdg: Stop robot at point where machine is being started
+    //  and ask the user if it is safe to start the IMM
+    if bTestRun
+      bSuspendForTest=true
+      // reset original speedScale only if speed was not modified by user meanwhile
+      // wait for settled arm
+      watch(isSettled(),3)
+      // reset old speed setting if it wasn't changed by the user
+      if getMonitorSpeed()==1
+        ///TODO
+        //$setSpeed(nOldSpeedScale)
+        //call setSpeed(nOldSpeedScale)
+      endIf
+      //sValue=toString("4.0",secu:nSafeZoneDist[0])
+      call str:printf((("Robot stopped approx. at point where IMM cycle is being started (Overshoot: %1mm). Press START to continue!")),sValue,txt)
+      ///TODO
+      //call ui:popUpCond(txt,"SYS:bBtStart==true",false)
+      bSuspendForTest=true
+      wait(bSuspendForTest==false)
+    endIf
+    //!change 08.06.06, vdg: Start IMM only if dry run mode is not active
+    if !bTestRun
+      SYS:doStartMachine[moduleIndex]=true
+    endIf
+    //call stat:stopTakeTime()
+    //call stat:stopCycleTime()
+    //call stat:startCycleTime()
+    //call stat:startRobotTime()
+  endIf
+  //
+end
+
+      ]]></Code>
+  </Program>
+</Programs>

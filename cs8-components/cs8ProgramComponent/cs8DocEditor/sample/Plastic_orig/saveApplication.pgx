@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+  <program name="saveApplication" public="false">
+    <description />
+    <paramSection />
+    <localSection>
+      <local name="nResult" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  // save the application
+  nResult=app:libSave()
+  // check if saving was successfull
+  if nResult!=0
+    popUpMsg("Saving Application failed: "+toString("",nResult))
+  else
+    SYS:bModified=false
+  endIf
+  data:libSave()
+end
+</code>
+    </source>
+  </program>
+</programList>

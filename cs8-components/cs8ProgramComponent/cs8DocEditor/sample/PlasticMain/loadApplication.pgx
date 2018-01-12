@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+ <Program name="loadApplication">
+  <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+   <Parameter type="string" name="name_" xsi:type="element"/>
+  </Parameters>
+  <Locals>
+   <Local size="1" type="num" name="nResult" xsi:type="array"/>
+   <Local size="4" type="string" name="txt" xsi:type="array"/>
+  </Locals>
+  <Code><![CDATA[begin
+    //\brief
+  //
+  //\fix 
+  //03.05.06, vdg: Halt all tasks while loading the new application
+  // This should avoid "pure virtual function calls" and "page faults"
+  //\fix 
+  //11.03.08, vdg: Load correct template library for user application
+  //\var nResult 
+  //\var txt 
+  //\param name_ 
+  //
+//!fix 03.05.06, vdg: Halt all tasks while loading the new application
+  //                    This should avoid "pure virtual function calls" and "page faults"
+  //!fix 11.03.08, vdg: Load correct template library for user application
+  call rob:haltTasks()
+  //!change 23.05.06, vdg: unload the application from application manager only if reloading the
+  // same application again
+  if name_==data:sApplication
+    //!fixme 09.10.06, vdg: make sure that reloading the same application works
+    logMsg("Closing library in app manager: "+name_)
+    app:$libClose()
+    logMsg("Library closed")
+    delay(2)
+    logMsg("Loading library alias")
+    nResult=appTmp:libLoad("Plastic/templates/tempApplication")
+    logMsg("return code for temp load: "+toString("",nResult))
+    delay(2)
+    nResult=app:libLoad("Plastic/templates/tempApplication")
+    logMsg("return code: "+toString("",nResult))
+    delay(2)
+    logMsg("Loading alias done")
+  endIf
+  // try to load the application
+  nResult=app:libLoad(name_)
+  // check if loading was successfull
+  if nResult!=0
+    // inform operator what public symbos are missing in case of loading error 11 ==> interface mismatch
+    if nResult==11
+      if !app:libExist("HR_HomeReturn()")
+        call str:printf1arg((("The routine /tiHR_HomeReturn/tn is not defined or not set public in application /ti%1/tn.")),name_,txt)
+        call ui:popUp(txt,0,true)
+      endIf
+      if !app:libExist("MP_MainProgram()")
+        call str:printf1arg((("The routine /tiMP_MainProgram/tn is not defined or not set public in application /ti%1/tn.")),name_,txt)
+        call ui:popUp(txt,0,true)
+      endIf
+      if !app:libExist("PLC_MainPLC()")
+        call str:printf1arg((("The routine /tiPLC_MainPLC/tn is not defined or not set public in application /ti%1/tn.")),name_,txt)
+        call ui:popUp(txt,0,true)
+      endIf
+      if !app:libExist("tGripCenter")
+        call str:printf1arg((("The global data /titGripCenter/tn of type tool is not defined or not set public in application /ti%1/tn.")),name_,txt)
+        call ui:popUp(txt,0,true)
+      endIf
+      if !app:libExist("jHome")
+        call str:printf1arg((("The global data /tijHome/tn of type joint is not defined or not set public in application /ti%1/tn.")),name_,txt)
+        call ui:popUp(txt,0,true)
+      endIf
+    endIf
+    // revert changes and reload the old application
+    //!change 05.04.06, vdg: add information to log
+    call str:printf3arg((("Loading application %1 failed: %2 %3")),name_,toString("0.0",nResult),ui:sLibraryMessage[min(nResult,size(ui:sLibraryMessage)-1)],txt)
+    call ui:popUp(txt,0,true)
+    logMsg(txt)
+    //!change 06.06.06, vdg: if reloading the old application also fails, reload
+    //  the standard library z01_Application
+    nResult=app:libLoad(data:sApplication)
+    if nResult!=0
+      app:libLoad("Plastic/templates/tempApplication")
+      data:sApplication=""
+    endIf
+  else
+    //!Issue 22: call user event program
+    call prg:onAppLoad(name_)
+    //!change 05.04.06, vdg: add information to log
+    logMsg("Application "+name_+" loaded")
+    //!change 23.05.06, vdg: load application in application manager
+    //!fixme 07.08.06, vdg: sometimes loading a library with $libOpen crashes the application manager
+    // thus $libOpen() removed again.
+    app:$libOpen()
+    //delay(5)
+    data:sApplication=name_
+    //!todo 03.05.06, vdg: For some reason saving data causes a page fault here
+    //data:libSave()
+    //!issue 42: reset auxilary buttons
+    SYS:sAux1=""
+    SYS:sAux2=""
+    SYS:nLiAux1=0
+    SYS:nLiAux2=0
+  endIf
+  SYS:bFirstRunAfterL=true
+  SYS:bModified=false
+  data:jHome=app:jHome
+  //!fix 10.05.06, vdg: do not copy the entire structure as this will create undefined references
+  //                    when app is being replaced by a libLoad() instruction
+  data:tTCP.trsf=app:tGripCenter.trsf
+  //!fix 05.04.06, vdg: relink IO to make them effective in application... is this a bug?
+  call usr:clearUserIO()
+  call usr:clearUserMon()
+  //!fix 22.05.06, vdg: reset gripper links if user gripper signals are used
+  //if !data:setSystemGrip
+  //call ui:clearGripperIO()
+  //endIf
+  call SYS:InitSysIO()
+  call USER:InitUserIO()
+  //!fix 03.05.06, vdg: restart all tasks
+  call rob:restart()
+  data:libSave()
+end
+
+      
+      ]]></Code>
+ </Program>
+</Programs>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+ <Program name="run">
+  <Locals>
+   <Local size="1" type="num" name="idx" xsi:type="array"/>
+  </Locals>
+  <Code><![CDATA[begin
+    //\brief
+  //
+  //\change 
+  //27.04.6, vdg: Added information if home return is active (SYS:bHomeRetActive)
+  //\change 
+  //23.04.06, vdg: - clear all pending status messages that are not persistent
+  // - reset pallet counters after a total home return
+  //\change 
+  //07.06.06, vdg: - code clean up: move code to sub routines
+  //
+  //\var idx 
+  //
+//!change 27.04.6, vdg: Added information if home return is active (SYS:bHomeRetActive)
+  //!change 23.04.06, vdg: - clear all pending status messages that are not persistent
+  //                       - reset pallet counters after a total home return
+  //!change 07.06.06, vdg: - code clean up: move code to sub routines
+  //
+  for idx=0 to size(stat:nTaskState)-1
+    stat:nTaskState[idx]=-1
+  endFor
+  //
+  //!Issue 22: call user event program
+  call prg:onSystemStart()
+  call prg:startPLC()
+  while (rob:bRobActive)
+    delay(0)
+    call processEvents()
+    call checkRobotPos()
+    call checkTaskStates(stat:nTaskState)
+    call controlTasks()
+    // run rob module synchronously
+    if !data:setAsyncRun
+      call rob:run()
+    endIf
+  endWhile
+  call prg:stopPLC()
+end
+
+      
+      ]]></Code>
+ </Program>
+</Programs>

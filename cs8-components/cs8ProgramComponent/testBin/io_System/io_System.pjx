@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://www.staubli.com/robotics/VAL3/Project/3">
+  <Parameters version="s7.0" stackSize="5000" millimeterUnit="true" />
+  <Programs>
+    <Program file="_globals.pgx" />
+    <Program file="InitSysIO.pgx" />
+    <Program file="SysIN.pgx" />
+    <Program file="SysOUT.pgx" />
+  </Programs>
+  <Database>
+    <Data file="io_System.dtx" />
+  </Database>
+  <Libraries>
+    <Library alias="io" path="Disk://io/io.pjx" />
+  </Libraries>
+</Project>

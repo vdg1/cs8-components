@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="runHigh" access="public">
+    <Code><![CDATA[begin
+  call taskPartMade()
+  call IMMTiming()
+   call BtRobotOff()
+ 
+  call secuTask1()
+  call secuTask2()
+end
+    
+      ]]></Code>
+  </Program>
+</Programs>

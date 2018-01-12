@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+  <program name="start" public="false">
+    <description />
+    <paramSection />
+    <localSection>
+      <local name="bResult" type="bool" size="1" />
+    </localSection>
+    <source>
+      <code>
+begin
+  //===========================================================================
+  //   START UP ROBOT
+  //===========================================================================
+  cls()
+  delay(0)
+  userPage()
+  title("Swiss System AB Plastics (c) 2007 V"+sVersion)
+  logMsg("Swiss System AB Plastics (c) 2007 V"+sVersion)
+    // Initialize System IO
+    call SYS:InitSysIO()
+  //!issue 23
+  // check if a new version was installed and check dependcies of sys data library
+  bResult=true
+  call loadSysData(bResult)
+  // if dependencies are ok we can proceed to start up
+  if upd:sResult==""
+    call FUN:loadSysData(bResult)
+    call fun:loadSysData(bResult)
+    call rob:loadSysData(bResult)
+    call secu:loadSysData(bResult)
+    call scr:loadSysData(bResult)
+    call ui:loadSysData(bResult)
+    delay(2)
+    //
+    // START UP USER DISPLAY =========================
+    call ui:start()
+    if ui:bStartUp
+      //
+      // Initialize User IO
+      call USER:InitUserIO()
+      // Start up robot
+      call rob:StartUpRobot()
+      //
+      // pass on version information to UI
+      ui:sVersion=sVersion
+      // initiate full home return on start up
+      SYS:bTotalHome=true
+      //!change 16.10.06, vdg: Force a home return even if robot is already at home
+      SYS:bForceHomeReq=data:setForceHome
+      // start main loop
+      taskCreate "Run",10,run()
+      
+      //call ui:popUp("Application started",data:nMsgTimeOut,false)
+    endIf
+  endIf
+end
+</code>
+    </source>
+  </program>
+</programList>

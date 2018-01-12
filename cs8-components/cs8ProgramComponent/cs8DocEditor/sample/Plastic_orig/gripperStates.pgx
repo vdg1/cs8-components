@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<programList xmlns="ProgramNameSpace">
+  <program name="gripperStates" public="false">
+    <description />
+    <paramSection />
+    <localSection>
+      <local name="idx" type="num" size="1" />
+      <local name="nValue" type="num" size="1" />
+    </localSection>
+    <source>
+      <code>begin
+  // check the state of gripper input signals
+  for idx=1 to data:nGripCount
+    //!fix 12.07.06, vdg: check input signal type of every gripper
+    if ui:nGripperIOType[idx]==0
+      // check digital inputs
+      SYS:bGrip[idx]=SYS:diGrip[idx]==true
+    else
+      // check analog inputs
+      //!change 04.10.06, vdg: Use function to read in analog input
+      call ui:getSensorValue(idx,nValue)
+      SYS:bGrip[idx]=nValue&gt;data:nGripThreshold[idx]
+      //      SYS:bGrip[idx]=((aioGet(SYS:aiGrip[idx])/32768*100)-data:nGripOffset[idx])&gt;data:nGripThreshold[idx]
+    endIf
+  endFor  
+end
+</code>
+    </source>
+  </program>
+</programList>

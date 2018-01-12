@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+  <Program name="secuTask2" access="public">
+    <Description><![CDATA[Control of Safety realay]]></Description>
+    <Locals>
+      <Local name="pLocFlange" type="point" xsi:type="array" size="1" />
+      <Local name="pLocTCP" type="point" xsi:type="array" size="1" />
+    </Locals>
+    <Code><![CDATA[begin
+  // wait until system is initialized
+  if SYS:nStateRobot<=STATE:INITIALIZING
+    return
+  endIf
+  if SYS:doSecu[0]==false or SYS:doSecu[1]==false
+    return
+  endIf
+  // Get home position relative to the frame of IMM mould area.....
+  if jt:isTXRobot
+    pLocFlange=jointToPoint(flange,data:fAreaIMM,data:jHomeTX)
+    pLocTCP=jointToPoint(data:tTCP,data:fAreaIMM,data:jHomeTX)
+  else
+    pLocFlange=jointToPoint(flange,data:fAreaIMM,data:jHomeTS)
+    pLocTCP=jointToPoint(data:tTCP,data:fAreaIMM,data:jHomeTS)
+  endIf
+//
+  if pLocTCP.trsf.z>nMouldAreaZone
+    call status:raise(HOME_IN_MOULD,"")
+  endIf
+  // Get current robot position relative to the frame of IMM Backside.....
+  pLocFlange=here(flange,data:fAreaIMM)
+  pLocTCP=here(data:tTCP,data:fAreaIMM)
+  nMouldAreaDist=max(pLocTCP.trsf.z,pLocFlange.trsf.z)-nMouldAreaZone
+  //
+  // Robotarm in mould when sig:MouldOpen missing or sig:StartIMM is active..........................................................
+  if SYS:doMouldFree==false and (SYS:diMouldMidOpen==false and SYS:diMouldOpen==false)
+    call status:raise(ARM_IN_MOULD_NO,"")
+  endIf
+  if (SYS:doMouldFree==false and SYS:doStartMachine==true)
+    call status:raise(ARM_IN_MOULD_ST,"")
+  endIf
+end
+]]></Code>
+  </Program>
+</Programs>

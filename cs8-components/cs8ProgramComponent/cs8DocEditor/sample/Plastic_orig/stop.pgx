@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<programList xmlns="ProgramNameSpace" >
+    <program name="stop" public="false" >
+        <description></description>
+        <paramSection>
+        </paramSection>
+        <localSection>
+        </localSection>
+        <source>
+            <code>
+begin
+  call rob:ShutDownRobot()
+  call ui:stop()
+  resetMotion()
+end
+            </code>
+        </source>
+    </program>
+</programList>

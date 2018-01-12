@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+ <Program name="parseStackInfo">
+  <Parameters xmlns="http://www.staubli.com/robotics/VAL3/Param/1">
+   <Parameter type="string" name="stackInfo_" xsi:type="element"/>
+   <Parameter use="reference" type="string" name="library_" xsi:type="array"/>
+   <Parameter use="reference" type="string" name="program_" xsi:type="array"/>
+   <Parameter use="reference" type="num" name="line_" xsi:type="array"/>
+   <Parameter use="reference" type="string" name="code_" xsi:type="array"/>
+  </Parameters>
+  <Locals>
+   <Local size="1" type="bool" name="error" xsi:type="array"/>
+   <Local size="1" type="string" name="dummy" xsi:type="array"/>
+  </Locals>
+  <Code><![CDATA[begin
+    //
+  //\var error 
+  //\var dummy 
+  //\param stackInfo_ 
+  //\param library_ 
+  //\param program_ 
+  //\param line_ 
+  //\param code_ 
+  //
+if len(stackInfo_)>0
+    library_=left(stackInfo_,find(stackInfo_,":"))
+    stackInfo_=right(stackInfo_,len(stackInfo_)-find(stackInfo_,":")-1)
+    program_=left(stackInfo_,find(stackInfo_,")")+1)
+    stackInfo_=right(stackInfo_,len(stackInfo_)-find(stackInfo_,")")-1)
+    stackInfo_=right(stackInfo_,len(stackInfo_)-find(stackInfo_,"ne")-3)
+    dummy=stackInfo_
+    dummy=toNum(dummy,line_,error)
+    stackInfo_=right(stackInfo_,len(stackInfo_)-find(stackInfo_,":")-1)
+    code_=stackInfo_
+  endIf
+end
+
+      
+      ]]></Code>
+ </Program>
+</Programs>

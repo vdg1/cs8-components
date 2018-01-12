@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Programs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.staubli.com/robotics/VAL3/Program/2">
+ <Program access="public" name="start">
+  <Locals>
+   <Local size="1" type="bool" name="bResult" xsi:type="array"/>
+   <Local size="1" type="bool" name="bLicense" xsi:type="array"/>
+  </Locals>
+  <Code><![CDATA[begin
+    //
+  //\var bResult 
+  //\var bLicense 
+  //
+//===========================================================================
+  //   START UP ROBOT
+  //===========================================================================
+  cls()
+  delay(0)
+  userPage()
+  call logo()
+  call debug:setVerbosity(libPath(),debug:LEV_INFO)
+  title(sCopyRight+sVersion)
+  // Initialize System IO
+  call SYS:InitSysIO()
+  taskCreate "starting",10,startUpTask()
+  // load version information
+  call loadVersionInfo()
+  logMsg(sCopyRight+sVersion)
+  // detect hardware
+  call hw:start()
+  //!issue 23
+  // check if a new version was installed and check dependcies of sys data library
+  bResult=true
+  homeFlag=false
+  bFirstLoad=true
+  nPLCRestartCnt=0
+  // check if running on emulator
+  SYS:bIsEmulator=getVersion("Starc")==""
+  
+  call loadSysData(bResult, bLicense)
+  if bResult
+    if bLicense
+      call createLicense()
+    endIf
+    call loadLibraries(bResult)
+    
+    
+    // if dependencies are ok we can proceed to start up
+    //if upd:sResult==""
+    if bResult
+      call util:start()
+      call FUN:start()
+      call FUN:loadSysData("zData",bResult)
+      call fun:start()
+      call fun:loadSysData("zData",bResult)
+      call rob:loadSysData("zData",bResult)
+      call secu:loadSysData("zData",bResult)
+      //    call scr_:loadSysData("zData",bResult)
+      call ui:loadSysData("zData",bResult)
+      delay(2)
+      //!issue 22: load user program events
+      call loadUserProgram(bResult)
+      //
+      bStartUp=false
+      wait(taskStatus("starting")==-1)
+      if bResult
+        // initialize language
+        call lang:start()
+        if data:sLanguage==""
+          data:sLanguage="english"
+          call lang:setLanguage(data:sLanguage)
+        else
+          call lang:setLanguage(data:sLanguage)
+        endIf
+        
+        // START UP USER DISPLAY =========================
+        call ui:start()
+        if ui:bStartUp
+          // initialize database
+          call db:start()
+          //
+          // Start up master/slave com
+          call msl:start()    
+          // Start up robot
+          call rob:start()
+          
+          // start IO monitor if io:monitor is defined
+          call monitor:start()
+          // pass on version information to UI
+          ui:sVersion=sVersion
+          // initiate full home return on start up
+          SYS:bTotalHome=true
+          //!change 16.10.06, vdg: Force a home return even if robot is already at home
+          SYS:bForceHomeReq=data:setForceHome
+          //
+          //
+          // Initialize User IO
+          call USER:InitUserIO()
+          // initialize custom modules
+          call customModule:start()
+          call run()
+          // start main loop
+          //taskCreate "Run",10,run()
+          //call ui:popUp("Application started",data:nMsgTimeOut,false)
+          //taskCreateSync "status",16,overrun,status()
+        endIf
+      endIf
+    endIf
+  endIf
+  //wait(taskStatus("Run")==-1)
+end
+
+      
+      ]]></Code>
+ </Program>
+</Programs>

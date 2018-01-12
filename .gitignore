@@ -12,4 +12,3 @@ ui_*.h
 release/
 debug/
 *.ilk
-*.ilk
