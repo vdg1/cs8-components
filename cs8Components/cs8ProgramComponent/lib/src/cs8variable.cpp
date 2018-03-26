@@ -1,11 +1,10 @@
 #include "cs8variable.h"
 #include <QStringList>
 //
-cs8Variable::cs8Variable(QDomElement &element, const QString &description)
-    : QObject() {
+cs8Variable::cs8Variable(QDomElement &element, const QString &description) : QObject() {
   m_element = element;
   m_description = description;
-  setBuildInTypes();
+  m_buildInTypes = setBuildInVariableTypes();
   setGlobal(false);
 }
 
@@ -13,41 +12,32 @@ cs8Variable::cs8Variable(cs8Variable *var) {
   m_docFragment = m_doc.createDocumentFragment();
   m_element = var->element().cloneNode(true).toElement();
   m_docFragment.appendChild(m_element);
-  setBuildInTypes();
+  m_buildInTypes = setBuildInVariableTypes();
 }
 
-void cs8Variable::setBuildInTypes() {
-  m_buildInTypes << "pointRx"
-                 << "pointRs"
-                 << "mdesc"
-                 << "bool"
-                 << "string"
-                 << "tool"
-                 << "jointRx"
-                 << "jointRs"
-                 << "frame"
-                 << "dio"
-                 << "sio"
-                 << "aio"
-                 << "num"
-                 << "config"
-                 << "trsf";
+QStringList cs8Variable::setBuildInVariableTypes(bool val3S6Format) {
+  return QStringList() << "aio"
+                       << "bool" << ("configRs") << (val3S6Format ? "config" : "configRx") << "dio"
+                       << "frame"
+                       << "jointRs" << (val3S6Format ? "joint" : "jointRx") << "mdesc"
+                       << "num"
+                       << "pointRs" << (val3S6Format ? "point" : "pointRx") << "sio"
+                       << "string"
+                       << "tool"
+                       << "trsf";
 }
 
-cs8Variable::cs8Variable() : QObject() {
+cs8Variable::cs8Variable() : QObject(), m_global(false) {
   m_docFragment = m_doc.createDocumentFragment();
   m_element = m_doc.createElement("Data");
   m_docFragment.appendChild(m_element);
-  setBuildInTypes();
+  m_buildInTypes = setBuildInVariableTypes();
   setGlobal(false);
 }
 
 QString cs8Variable::toString(bool withTypeDefinition) {
   if (withTypeDefinition)
-    return QString("%1 %2%3")
-        .arg(type())
-        .arg(use() == "reference" ? "& " : "")
-        .arg(name());
+    return QString("%1 %2%3").arg(type()).arg(use() == "reference" ? "& " : "").arg(name());
   else
     return QString("%1").arg(name());
 }
@@ -72,21 +62,17 @@ QString cs8Variable::documentation(bool withPrefix, bool forCOutput) {
       inCodeSection = false;
       out += prefix + "<br>\n";
     }
-    out +=
-        (firstLine ? "" : prefix) + str + (inCodeSection ? "<br>" : "") + "\n";
+    out += (firstLine ? "" : prefix) + str + (inCodeSection ? "<br>" : "") + "\n";
     firstLine = false;
   }
   // qDebug() << "processed: " << out;
   if (!isGlobal())
-    return prefix + (forCOutput ? "@param " : "\\param ") + name() + " " + out +
-           "\n";
+    return prefix + (forCOutput ? "@param " : "\\param ") + name() + " " + out + "\n";
   else
     return prefix + out;
 }
 
-bool cs8Variable::isPublic() const {
-  return m_element.attribute("access", "private") == "private" ? false : true;
-}
+bool cs8Variable::isPublic() const { return m_element.attribute("access", "private") == "private" ? false : true; }
 
 QStringList cs8Variable::father() {
   QStringList list;
@@ -112,8 +98,7 @@ QDomNodeList cs8Variable::values() { return m_element.childNodes(); }
 
 QString cs8Variable::definition() {
 
-  return (QString("%1 %2").arg(type()).arg(name())) +
-         (allSizes() != QString() ? QString("[%1]").arg(allSizes()) : "");
+  return (QString("%1 %2").arg(type()).arg(name())) + (allSizes() != QString() ? QString("[%1]").arg(allSizes()) : "");
 }
 
 void cs8Variable::setGlobal(bool global) {
@@ -131,8 +116,7 @@ void cs8Variable::setGlobal(bool global) {
       m_element.setAttribute("size", "1");
     }
     m_element.removeAttribute("use");
-    if (m_element.attribute("xsi:type") == "collection" &&
-        m_element.hasAttribute("size")) {
+    if (m_element.attribute("xsi:type") == "collection" && m_element.hasAttribute("size")) {
       m_element.removeAttribute("size");
     }
     if (!m_element.hasAttribute("access")) {
@@ -146,16 +130,181 @@ bool cs8Variable::isGlobal() const {
   return m_global; // m_values.count() > 0;
 }
 
-QString cs8Variable::allSizes() {
-  return m_element.attribute("size").replace(" ", ", ");
-}
+QString cs8Variable::allSizes() { return m_element.attribute("size").replace(" ", ", "); }
 
 void cs8Variable::setAllSizes(const QString &sizes) {
   emit modified();
   m_element.setAttribute("size", sizes);
 }
 
-QDomElement cs8Variable::element() const { return m_element; }
+QDomElement cs8Variable::element(QDomDocument *doc, bool val3S6Format) const {
+  if (!val3S6Format)
+    return m_element;
+  else {
+    QDomElement element = doc->createElement("___");
+    if (m_element.tagName() == "Local") {
+      element.setTagName("local");
+      element.setAttribute("name", m_element.attribute("name"));
+      element.setAttribute("type", m_element.attribute("type"));
+      element.setAttribute("size", m_element.attribute("size"));
+    } else if (m_element.tagName() == "Parameter") {
+      element.setTagName("param");
+      element.setAttribute("name", m_element.attribute("name"));
+      element.setAttribute("type", m_element.attribute("type"));
+      element.setAttribute("byVal", m_element.attribute("use") == "reference" ? "false" : "true");
+    } else {
+      QString typeName = m_element.attribute("type");
+      // replace jointRX and pointRX with point and joint
+      typeName.replace("Rx", "");
+      element.setTagName(typeName);
+      element.setAttribute("name", m_element.attribute("name"));
+      element.setAttribute("public", m_element.attribute("access") == "public" ? "true" : "false");
+      // for io type do not write value elements
+      if (typeName == "dio" || typeName == "aio" || typeName == "sio") {
+        element.setAttribute("size", m_element.attribute("size"));
+      } else {
+        // identify array size
+        QStringList arrayDefinition = m_element.attribute("size", "1").split(",");
+        while (arrayDefinition.count() < 3)
+          arrayDefinition.insert(0, "1");
+        int totalValues = arrayDefinition.at(0).toInt() * arrayDefinition.at(1).toInt() * arrayDefinition.at(2).toInt();
+        // element.setAttribute("size", m_element.attribute("size"));
+        // write values
+        for (int i = 0; i < totalValues; i++) {
+
+          // QDomElement sourceValue = m_element.childNodes().at(i).toElement();
+          bool found = false;
+
+          QDomElement sourceValue;
+          for (int id = 0; id < m_element.childNodes().count(); id++) {
+            if (m_element.childNodes().at(id).toElement().attribute("key", "0").toInt() == i) {
+              sourceValue = m_element.childNodes().at(id).toElement();
+              found = true;
+              break;
+            }
+          }
+
+          QString str = element.tagName();
+          str = str.left(1).toUpper() + str.mid(1);
+          QDomElement valueElement = doc->createElement("value" + str);
+          valueElement.setAttribute("index", sourceValue.attribute("key", QString("%1").arg(i)));
+
+          if (typeName == "bool") {
+            valueElement.setAttribute("value", sourceValue.attribute("value", "false"));
+          } else if (typeName == "joint") {
+            QDomElement val = doc->createElement("jointValue");
+            val.setAttribute("j1", sourceValue.attribute("j1", "0"));
+            val.setAttribute("j2", sourceValue.attribute("j2", "0"));
+            val.setAttribute("j3", sourceValue.attribute("j3", "0"));
+            val.setAttribute("j4", sourceValue.attribute("j4", "0"));
+            val.setAttribute("j5", sourceValue.attribute("j5", "0"));
+            val.setAttribute("j6", sourceValue.attribute("j6", "0"));
+            valueElement.appendChild(val);
+          } else if (typeName == "mdesc") {
+            QDomElement val = doc->createElement("mdescValue");
+            val.setAttribute("accel", sourceValue.attribute("accel", "100"));
+            val.setAttribute("decel", sourceValue.attribute("decel", "100"));
+            val.setAttribute("vel", sourceValue.attribute("vel", "100"));
+            val.setAttribute("tmax", sourceValue.attribute("tmax", "999999"));
+            val.setAttribute("rmax", sourceValue.attribute("rmax", "999999"));
+            val.setAttribute("blend", sourceValue.attribute("blend", "off"));
+            val.setAttribute("leave", sourceValue.attribute("leave", "0"));
+            val.setAttribute("reach", sourceValue.attribute("reach", "0"));
+            valueElement.appendChild(val);
+          } else if (typeName == "trsf") {
+            QDomElement val = doc->createElement("trsfValue");
+            val.setAttribute("x", sourceValue.attribute("x", "0"));
+            val.setAttribute("y", sourceValue.attribute("y", "0"));
+            val.setAttribute("z", sourceValue.attribute("z", "0"));
+            val.setAttribute("rx", sourceValue.attribute("rx", "0"));
+            val.setAttribute("ry", sourceValue.attribute("ry", "0"));
+            val.setAttribute("rz", sourceValue.attribute("rz", "0"));
+            valueElement.appendChild(val);
+          } else if (typeName == "config") {
+            QDomElement val = doc->createElement("configValue");
+            val.setAttribute("shoulder", sourceValue.attribute("shoulder", "ssame"));
+            val.setAttribute("elbow", sourceValue.attribute("elbow", "esame"));
+            val.setAttribute("wrist", sourceValue.attribute("wrist", "wsame"));
+            valueElement.appendChild(val);
+          } else if (typeName == "configRs") {
+            QDomElement val = doc->createElement("configRsValue");
+            val.setAttribute("shoulder", sourceValue.attribute("shoulder", "ssame"));
+            valueElement.appendChild(val);
+          } else if (typeName == "num") {
+            valueElement.setAttribute("value", sourceValue.attribute("value", "0"));
+          } else if (typeName == "string") {
+            valueElement.setAttribute("value", sourceValue.attribute("value", ""));
+          } else if (typeName == "tool") {
+            QDomElement fatherElement = doc->createElement("tFather");
+            QString sourceFather = sourceValue.attribute("fatherId");
+            QString arrayName, arrayIndex;
+            extractArrayIndex(sourceFather, arrayName, arrayIndex);
+            fatherElement.setAttribute("name", arrayName);
+            fatherElement.setAttribute("fatherIndex", arrayIndex);
+            //
+            element.appendChild(fatherElement);
+            QDomElement val = doc->createElement("ttValue");
+            val.setAttribute("x", sourceValue.attribute("x", "0"));
+            val.setAttribute("y", sourceValue.attribute("y", "0"));
+            val.setAttribute("z", sourceValue.attribute("z", "0"));
+            val.setAttribute("rx", sourceValue.attribute("rx", "0"));
+            val.setAttribute("ry", sourceValue.attribute("ry", "0"));
+            val.setAttribute("rz", sourceValue.attribute("rz", "0"));
+            valueElement.appendChild(val);
+            val = doc->createElement("io");
+            val.setAttribute("alias", "io");
+            val.setAttribute("ioIndex", "0");
+            val.setAttribute("name", sourceValue.attribute("ioLink", "valve1"));
+            val.setAttribute("open", sourceValue.attribute("open", "0"));
+            val.setAttribute("close", sourceValue.attribute("close", "0"));
+            valueElement.appendChild(val);
+          } else if (typeName == "point") {
+            QDomElement fatherElement = doc->createElement("pFather");
+            QString sourceFather = sourceValue.attribute("fatherId");
+            QString arrayName, arrayIndex;
+            extractArrayIndex(sourceFather, arrayName, arrayIndex);
+            fatherElement.setAttribute("name", arrayName);
+            fatherElement.setAttribute("fatherIndex", arrayIndex);
+            //
+            element.appendChild(fatherElement);
+            QDomElement val = doc->createElement("tpValue");
+            val.setAttribute("x", sourceValue.attribute("x", "0"));
+            val.setAttribute("y", sourceValue.attribute("y", "0"));
+            val.setAttribute("z", sourceValue.attribute("z", "0"));
+            val.setAttribute("rx", sourceValue.attribute("rx", "0"));
+            val.setAttribute("ry", sourceValue.attribute("ry", "0"));
+            val.setAttribute("rz", sourceValue.attribute("rz", "0"));
+            valueElement.appendChild(val);
+            val = doc->createElement("cpValue");
+            val.setAttribute("shoulder", sourceValue.attribute("shoulder", "ssame"));
+            val.setAttribute("elbow", sourceValue.attribute("elbow", "esame"));
+            val.setAttribute("wrist", sourceValue.attribute("wrist", "wsame"));
+            valueElement.appendChild(val);
+          } else if (typeName == "frame") {
+            QDomElement fatherElement = doc->createElement("fFather");
+            QString sourceFather = sourceValue.attribute("fatherId");
+            QString arrayName, arrayIndex;
+            extractArrayIndex(sourceFather, arrayName, arrayIndex);
+            fatherElement.setAttribute("name", arrayName);
+            fatherElement.setAttribute("fatherIndex", arrayIndex);
+            //
+            element.appendChild(fatherElement);
+            QDomElement val = doc->createElement("tfValue");
+            val.setAttribute("x", sourceValue.attribute("x", "0"));
+            val.setAttribute("y", sourceValue.attribute("y", "0"));
+            val.setAttribute("z", sourceValue.attribute("z", "0"));
+            val.setAttribute("rx", sourceValue.attribute("rx", "0"));
+            val.setAttribute("ry", sourceValue.attribute("ry", "0"));
+            val.setAttribute("rz", sourceValue.attribute("rz", "0"));
+            valueElement.appendChild(val);
+          }
+          element.appendChild(valueElement);
+        }
+      }
+    }
+    return element;
+  }
+}
 
 QVariant cs8Variable::varValue(QString index) {
   QDomElement e;
@@ -174,8 +323,7 @@ QVariant cs8Variable::varValue(QString index) {
     return QVariant();
 }
 
-void cs8Variable::setValue(const QString &index,
-                           const QMap<QString, QString> &valueMap) {
+void cs8Variable::setValue(const QString &index, const QMap<QString, QString> &valueMap) {
   QDomElement valueElement;
   // check if key already exist
   for (int i = 0; i < m_element.childNodes().count(); i++) {
@@ -212,7 +360,7 @@ bool cs8Variable::isBuildInType() const {
   return types.contains(type_);
 }
 
-QStringList cs8Variable::buildInTypes() { return m_buildInTypes; }
+QStringList cs8Variable::buildInTypes(bool val3S6Format) { return setBuildInVariableTypes(val3S6Format); }
 
 bool cs8Variable::hasConstPrefix(QString *prefix) const {
   QRegExp rx;
@@ -224,14 +372,22 @@ bool cs8Variable::hasConstPrefix(QString *prefix) const {
   return result;
 }
 
+void cs8Variable::extractArrayIndex(const QString &value, QString &name, QString &index) {
+  if (value.indexOf("[") > -1) {
+    name = value.mid(0, value.indexOf("["));
+    index = value.mid(value.indexOf("[") + 1, value.length() - value.indexOf("]"));
+  } else {
+    name = value;
+    index = "0";
+  }
+}
+
 void cs8Variable::setUse(QString value) {
   emit modified();
   m_element.setAttribute("use", value);
 }
 
-QString cs8Variable::use() const {
-  return m_element.attribute("use", "reference");
-}
+QString cs8Variable::use() const { return m_element.attribute("use", "reference"); }
 
 void cs8Variable::setDescription(QString value) {
   emit modified();
@@ -248,13 +404,9 @@ uint cs8Variable::size(int dimension) {
     return 0;
 }
 
-QString cs8Variable::dimension() const {
-  return m_element.attribute("size", "");
-}
+QString cs8Variable::dimension() const { return m_element.attribute("size", ""); }
 
-uint cs8Variable::dimensionCount() const {
-  return m_element.attribute("size", "").count(",") + 1;
-}
+uint cs8Variable::dimensionCount() const { return m_element.attribute("size", "").count(",") + 1; }
 
 void cs8Variable::setDimension(const QString &dim) {
   if (m_element.hasAttribute("size"))

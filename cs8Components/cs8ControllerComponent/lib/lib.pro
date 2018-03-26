@@ -29,12 +29,13 @@ printsupport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += staticlib
+CONFIG += debug_and_release
 
 DESTDIR = ../../lib/
 
 
 
-DEFINES += DLLEXPORT
+#DEFINES += DLLEXPORT
 win32 {
  build_pass:CONFIG(debug, debug|release) {
     TARGET = cs8ControllerComponentd

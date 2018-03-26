@@ -12,3 +12,4 @@ ui_*.h
 release/
 debug/
 *.ilk
+*.pro.user.*

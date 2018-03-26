@@ -73,7 +73,7 @@ win32 {
  build_pass:CONFIG(debug, debug|release) {
     TARGET = cs8ProjectComponentd
     OBJECTS_DIR = buildd
-    UI_DIR = build
+    UI_DIR = buildd
     MOC_DIR = buildd
 
  } else {

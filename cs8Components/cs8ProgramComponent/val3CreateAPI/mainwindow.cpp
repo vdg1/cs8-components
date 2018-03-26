@@ -90,7 +90,7 @@ void MainWindow::on_commandLinkButton_clicked() {
 void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                             bool copyInProjectFolder) {
   // QMap<QString, cs8Application *> cs8DestApps;
-  cs8Application *cs8DestApp = 0;
+  cs8Application *cs8DestApp = nullptr;
   QString moduleBaseName;
   QString name;
 
@@ -98,7 +98,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
     // check if module has any public programs
     if (cs8SourceApp->programModel()->publicPrograms().count() > 0) {
       moduleBaseName = cs8SourceApp->name().remove(0, 3);
-      cs8DestApp = 0;
+      cs8DestApp = nullptr;
       // create API calls to public programs
       foreach (cs8Program *program,
                cs8SourceApp->programModel()->programList()) {

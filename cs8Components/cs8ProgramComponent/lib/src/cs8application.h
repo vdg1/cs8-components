@@ -19,9 +19,9 @@ class cs8Application : public QObject {
 
 public:
   QString projectPath(bool cs8Format = false);
-  bool save();
+  bool save(const QString &path = QString(), const QString &name = QString(), bool saveInS6Format = false);
   bool loadDataFile(const QString &fileName);
-  bool saveDataFile(const QString &fileName);
+  bool saveDataFile(const QString &fileName, bool val3S6Format = false);
   bool open(const QString &pfxFilePath);
   bool openFromPathName(const QString &filePath);
   cs8Application(QObject *parent = 0);
@@ -45,7 +45,7 @@ public:
   QString cellPath() const;
   QString cellProjectFilePath(bool cs8Format = false) const;
   QString cellDataFilePath(bool cs8Format = false) const;
-  bool writeProjectFile();
+  bool writeProjectFile(bool val3S6Format = false);
   QHash<QString, QString> exportDirectives() const;
   bool isModified() const;
   void moveParamsToGlobals(cs8Program *program);
@@ -116,16 +116,14 @@ protected:
   QDomElement m_typesSection;
   QDomElement m_projectSection;
 
-  void createXMLSkeleton();
+  void createXMLSkeleton(bool S6Format);
 
 protected slots:
-  void slotGlobalVariableDocumentationFound(const QString &name,
-                                            const QString &document);
+  void slotGlobalVariableDocumentationFound(const QString &name, const QString &document);
   void slotModuleDocumentationFound(const QString &document);
   void slotMainPageDocumentationFound(const QString &document);
   void slotExportDirectiveFound(const QString &module, const QString &function);
-  void slotUnknownTagFound(const QString &tagType, const QString &tagName,
-                           const QString &tagText);
+  void slotUnknownTagFound(const QString &tagType, const QString &tagName, const QString &tagText);
   void setModified(bool modified);
 
 signals:

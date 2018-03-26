@@ -9,7 +9,8 @@ SUBDIRS = lib \
     val3CreateAPI \
     val3CompilerDeployment \
     chmlib \
-    importVPlus
+   # importVPlus \
+    saveAsS6
 
 
     # val3PreCompilerSettings
@@ -20,3 +21,4 @@ cs8DocEditor.depends=lib
 val3PreCompiler.depends=lib
 val3CreateAPI.depends=lib
 val3CompilerDeployment.depends=lib
+saveAsS6.depends=lib
