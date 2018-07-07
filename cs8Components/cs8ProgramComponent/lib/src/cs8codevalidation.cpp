@@ -16,32 +16,25 @@ bool cs8CodeValidation::loadRuleFile(const QString &fileName) {
   int errorColumn, errorLine;
   if (!rules.setContent(&file, &errorMessage, &errorLine, &errorColumn)) {
     file.close();
-    QString message =
-        QString("The rule file %1 could not be loaded: %2, line %3, column %4")
-            .arg(fileName)
-            .arg(errorMessage)
-            .arg(errorLine)
-            .arg(errorColumn);
+    // QString message =
+    //    QString("The rule file %1 could not be loaded: %2, line %3, column %4")
+    //        .arg(fileName)
+    //        .arg(errorMessage)
+    //        .arg(errorLine)
+    //        .arg(errorColumn);
     return false;
   }
   file.close();
 
-  globalDataRules = rules.documentElement()
-                        .elementsByTagName("globalData")
-                        .at(0)
-                        .childNodes();
-  parameterRules =
-      rules.documentElement().elementsByTagName("parameter").at(0).childNodes();
-  localDataRules =
-      rules.documentElement().elementsByTagName("localData").at(0).childNodes();
-  programRules =
-      rules.documentElement().elementsByTagName("program").at(0).childNodes();
+  globalDataRules = rules.documentElement().elementsByTagName("globalData").at(0).childNodes();
+  parameterRules = rules.documentElement().elementsByTagName("parameter").at(0).childNodes();
+  localDataRules = rules.documentElement().elementsByTagName("localData").at(0).childNodes();
+  programRules = rules.documentElement().elementsByTagName("program").at(0).childNodes();
   return true;
 }
 
-QStringList cs8CodeValidation::runDataValidationRule(
-    cs8Application *app, cs8Program *program,
-    QList<cs8Variable *> *variableList, QDomNodeList ruleList) {
+QStringList cs8CodeValidation::runDataValidationRule(cs8Application *app, cs8Program *program,
+                                                     QList<cs8Variable *> *variableList, QDomNodeList ruleList) {
   QStringList validationMessages;
   for (int i = 0; i < ruleList.count(); i++) {
     QDomElement ruleNode = ruleList.at(i).toElement();
@@ -49,42 +42,39 @@ QStringList cs8CodeValidation::runDataValidationRule(
 
     QRegExp rx(expressionString);
     QString checkProperty = ruleNode.attribute("checkProperty");
-    QString message =
-        ruleNode.elementsByTagName("message").at(0).toElement().text();
+    QString message = ruleNode.elementsByTagName("message").at(0).toElement().text();
 
     if (ruleNode.nodeName() == "variable") {
       QString varType = ruleNode.attribute("type");
       qDebug() << "Check rule " << varType;
 
       //
-      if (variableList != 0)
+      if (variableList != nullptr)
         foreach (cs8Variable *var, *variableList) {
           qDebug() << "apply rule to var:" << var->name() << ":" << var->type();
 
           if (varType == "%USER%")
             if (!var->isBuildInType()) {
               varType = var->type();
-              QRegExp r("%(\\w*)\\((\\d*)\\)%");
+              QRegExp r(R"(%(\w*)\((\d*)\)%)");
               int pos = r.indexIn(expressionString);
               int matchedLength = r.matchedLength();
               if (pos != -1 && r.captureCount() == 2) {
                 if (r.cap(1) == "PREFIX") {
                   qDebug() << r.pattern();
-                  expressionString.replace(pos, matchedLength,
-                                           var->type().left(r.cap(2).toInt()));
+                  expressionString.replace(pos, matchedLength, var->type().left(r.cap(2).toInt()));
                   rx.setPattern(expressionString);
                 }
               }
             }
-          if (checkProperty == "name" &&
-              (varType == var->type() || varType.isEmpty())) {
+          if (checkProperty == "name" && (varType == var->type() || varType.isEmpty())) {
             // apply name rule on variable name
             if (rx.indexIn(var->name()) == -1 || rx.pattern().isEmpty()) {
               QString msg = message;
               msg.replace("%varType%", var->type());
               msg.replace("%varName%", var->name());
 
-              if (program == 0) {
+              if (program == nullptr) {
                 msg.replace("%fileName%", app->cellDataFilePath(true));
               } else {
                 msg.replace("%progName%", program->name());
@@ -103,24 +93,21 @@ QStringList cs8CodeValidation::runDataValidationRule(
         variableScope = 2;
 
       // check if variable list is passed
-      if (variableList != 0) {
+      if (variableList != nullptr) {
         foreach (cs8Variable *var, *variableList) {
           // apply name rule on variable name
           if (rx.indexIn(var->name()) != -1 || rx.pattern().isEmpty()) {
             if (checkProperty == "notReferenced") {
-              bool referenced =
-                  program == 0
-                      ? app->getReferencedMap()[var->name()] == true
-                      : program->referencedVariables().contains(var->name());
-              if ((var->isPublic() && (variableScope < 2) ||
-                   !var->isPublic() && variableScope == 1) &&
+              bool referenced = program == nullptr ? app->getReferencedMap()[var->name()] == true
+                                                   : program->referencedVariables().contains(var->name());
+              if (((var->isPublic() && (variableScope < 2)) || (!var->isPublic() && variableScope == 1)) &&
                   !referenced) {
                 // apply name rule on variable name
                 if (rx.indexIn(var->name()) == -1 || rx.pattern().isEmpty()) {
                   QString msg = message;
                   msg.replace("%varType%", var->type());
                   msg.replace("%varName%", var->name());
-                  if (program == 0) {
+                  if (program == nullptr) {
                     msg.replace("%fileName%", app->cellDataFilePath(true));
                   } else {
                     msg.replace("%progName%", program->name());
@@ -132,8 +119,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
             } else if (checkProperty == "hidden") {
 
               foreach (cs8Program *prog, app->programModel()->programList()) {
-                if (prog->localVariableModel()->variableNameList().contains(
-                        var->name())) {
+                if (prog->localVariableModel()->variableNameList().contains(var->name())) {
 
                   QString msg = message;
                   msg.replace("%progName%", prog->name());
@@ -154,11 +140,9 @@ QStringList cs8CodeValidation::runDataValidationRule(
         if (rx.indexIn(program->name()) != -1 || rx.pattern().isEmpty()) {
           if (checkProperty == "notReferenced") {
             bool referenced = app->getCallList(program).count() != 0;
-            qDebug() << "check program  " << program->name()
-                     << "referenced: " << referenced
+            qDebug() << "check program  " << program->name() << "referenced: " << referenced
                      << "public: " << program->isPublic();
-            if (((program->isPublic() && (variableScope < 2)) ||
-                 (!program->isPublic() && variableScope == 2)) &&
+            if (((program->isPublic() && (variableScope < 2)) || (!program->isPublic() && variableScope == 2)) &&
                 !referenced) {
               // apply name rule on variable name
               // if (rx.indexIn(program->name())==-1 || rx.pattern().isEmpty())
@@ -182,15 +166,12 @@ QStringList cs8CodeValidation::runValidation(cs8Application *app) {
   QStringList validationMessages;
   // run global data rules
 
-  validationMessages << runDataValidationRule(
-      app, 0, &app->globalVariableModel()->variableList(), globalDataRules);
+  validationMessages << runDataValidationRule(app, 0, &app->globalVariableModel()->variableList(), globalDataRules);
   foreach (cs8Program *program, app->programModel()->programList()) {
-    validationMessages << runDataValidationRule(
-        app, program, &program->parameterModel()->variableList(),
-        parameterRules);
-    validationMessages << runDataValidationRule(
-        app, program, &program->localVariableModel()->variableList(),
-        localDataRules);
+    validationMessages << runDataValidationRule(app, program, &program->parameterModel()->variableList(),
+                                                parameterRules);
+    validationMessages << runDataValidationRule(app, program, &program->localVariableModel()->variableList(),
+                                                localDataRules);
     validationMessages << runDataValidationRule(app, program, 0, programRules);
 
     // check TODOs in code

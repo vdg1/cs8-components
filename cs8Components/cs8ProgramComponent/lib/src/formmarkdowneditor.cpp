@@ -5,10 +5,9 @@
 #include <QSettings>
 #include <QWebChannel>
 
-FormMarkDownEditor::FormMarkDownEditor(QWidget *parent)
-    : QWidget(parent), ui(new Ui::FormMarkDownEditor) {
+FormMarkDownEditor::FormMarkDownEditor(QWidget *parent) : QWidget(parent), ui(new Ui::FormMarkDownEditor) {
   ui->setupUi(this);
-  PreviewPage *page = new PreviewPage(this);
+  auto *page = new PreviewPage(this);
   ui->preview->setPage(page);
 
   connect(ui->editor, &QPlainTextEdit::textChanged, [=]() {
@@ -17,7 +16,7 @@ FormMarkDownEditor::FormMarkDownEditor(QWidget *parent)
     m_content.setText(previewText());
   });
 
-  QWebChannel *channel = new QWebChannel(this);
+  auto *channel = new QWebChannel(this);
   channel->registerObject(QStringLiteral("content"), &m_content);
   page->setWebChannel(channel);
 
@@ -30,8 +29,7 @@ FormMarkDownEditor::FormMarkDownEditor(QWidget *parent)
   m_font.setPointSize(11);
   ui->editor->setFont(m_font);
   QSettings setting;
-  ui->splitter->restoreState(
-      setting.value("FormMarkDownEditorSplitter").toByteArray());
+  ui->splitter->restoreState(setting.value("FormMarkDownEditorSplitter").toByteArray());
 }
 
 FormMarkDownEditor::~FormMarkDownEditor() {
@@ -57,9 +55,7 @@ QString FormMarkDownEditor::text() const { return ui->editor->toPlainText(); }
 QString FormMarkDownEditor::prefixText() const { return m_prefixText; }
 
 QString FormMarkDownEditor::previewText() const {
-  return (m_prefixText.isEmpty() ? QString("")
-                                 : m_prefixText + "<br><hr><br>") +
-         ui->editor->toPlainText() +
+  return (m_prefixText.isEmpty() ? QString("") : m_prefixText + "<br><hr><br>") + ui->editor->toPlainText() +
          (m_postfixText.isEmpty() ? QString("") : "<br><br>" + m_postfixText);
 }
 
@@ -70,6 +66,4 @@ void FormMarkDownEditor::setPrefixText(const QString &prefixText) {
 
 QString FormMarkDownEditor::postfixText() const { return m_postfixText; }
 
-void FormMarkDownEditor::setPostfixText(const QString &postfixText) {
-  m_postfixText = postfixText;
-}
+void FormMarkDownEditor::setPostfixText(const QString &postfixText) { m_postfixText = postfixText; }

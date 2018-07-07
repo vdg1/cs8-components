@@ -2,6 +2,7 @@
 #include <QStringList>
 //
 cs8Variable::cs8Variable(QDomElement &element, const QString &description) : QObject() {
+  m_global = false;
   m_element = element;
   m_description = description;
   m_buildInTypes = setBuildInVariableTypes();
@@ -9,6 +10,7 @@ cs8Variable::cs8Variable(QDomElement &element, const QString &description) : QOb
 }
 
 cs8Variable::cs8Variable(cs8Variable *var) {
+  m_global = false;
   m_docFragment = m_doc.createDocumentFragment();
   m_element = var->element().cloneNode(true).toElement();
   m_docFragment.appendChild(m_element);
@@ -17,7 +19,8 @@ cs8Variable::cs8Variable(cs8Variable *var) {
 
 QStringList cs8Variable::setBuildInVariableTypes(bool val3S6Format) {
   return QStringList() << "aio"
-                       << "bool" << ("configRs") << (val3S6Format ? "config" : "configRx") << "dio"
+                       << "bool"
+                       << "configRs" << (val3S6Format ? "config" : "configRx") << "dio"
                        << "frame"
                        << "jointRs" << (val3S6Format ? "joint" : "jointRx") << "mdesc"
                        << "num"
@@ -37,7 +40,7 @@ cs8Variable::cs8Variable() : QObject(), m_global(false) {
 
 QString cs8Variable::toString(bool withTypeDefinition) {
   if (withTypeDefinition)
-    return QString("%1 %2%3").arg(type()).arg(use() == "reference" ? "& " : "").arg(name());
+    return QString("%1 %2%3").arg(type(), (use() == "reference" ? "& " : ""), name());
   else
     return QString("%1").arg(name());
 }
@@ -80,7 +83,7 @@ QStringList cs8Variable::father() {
   while (!element.isNull()) {
     QString father = element.toElement().attribute("fatherId");
     if (!father.isEmpty()) {
-      father.remove(QRegExp("\\[(\\d*)\\]"));
+      father.remove(QRegExp(R"(\[(\d*)\])"));
       list << father;
     }
     element = element.nextSiblingElement("Value");
@@ -98,7 +101,7 @@ QDomNodeList cs8Variable::values() { return m_element.childNodes(); }
 
 QString cs8Variable::definition() {
 
-  return (QString("%1 %2").arg(type()).arg(name())) + (allSizes() != QString() ? QString("[%1]").arg(allSizes()) : "");
+  return (QString("%1 %2").arg(type(), name())) + (allSizes() != QString() ? QString("[%1]").arg(allSizes()) : "");
 }
 
 void cs8Variable::setGlobal(bool global) {
@@ -173,19 +176,17 @@ QDomElement cs8Variable::element(QDomDocument *doc, bool val3S6Format) const {
         for (int i = 0; i < totalValues; i++) {
 
           // QDomElement sourceValue = m_element.childNodes().at(i).toElement();
-          bool found = false;
 
           QDomElement sourceValue;
           for (int id = 0; id < m_element.childNodes().count(); id++) {
             if (m_element.childNodes().at(id).toElement().attribute("key", "0").toInt() == i) {
               sourceValue = m_element.childNodes().at(id).toElement();
-              found = true;
               break;
             }
           }
 
           QString str = element.tagName();
-          str = str.left(1).toUpper() + str.mid(1);
+          str = str.at(0).toUpper() + str.mid(1);
           QDomElement valueElement = doc->createElement("value" + str);
           valueElement.setAttribute("index", sourceValue.attribute("key", QString("%1").arg(i)));
 
@@ -367,7 +368,7 @@ bool cs8Variable::hasConstPrefix(QString *prefix) const {
   rx.setPattern("([A-Z]+)(_[A-Z0-9]*)");
   bool result = rx.indexIn(name()) == 0;
   qDebug() << rx.cap(1);
-  if (prefix != 0)
+  if (prefix != nullptr)
     *prefix = rx.cap(1);
   return result;
 }
@@ -406,7 +407,7 @@ uint cs8Variable::size(int dimension) {
 
 QString cs8Variable::dimension() const { return m_element.attribute("size", ""); }
 
-uint cs8Variable::dimensionCount() const { return m_element.attribute("size", "").count(",") + 1; }
+int cs8Variable::dimensionCount() const { return m_element.attribute("size", "").count(",") + 1; }
 
 void cs8Variable::setDimension(const QString &dim) {
   if (m_element.hasAttribute("size"))
@@ -439,7 +440,7 @@ QChar cs8Variable::prefix() const {
   else if (typeName.startsWith("string"))
     return 's';
   else
-    return QChar();
+    return {};
 }
 
 bool cs8Variable::isConst() const {

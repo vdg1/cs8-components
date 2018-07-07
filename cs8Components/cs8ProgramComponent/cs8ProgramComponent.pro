@@ -9,7 +9,7 @@ SUBDIRS = lib \
     val3CreateAPI \
     val3CompilerDeployment \
     chmlib \
-   # importVPlus \
+    importVPlus \
     saveAsS6
 
 

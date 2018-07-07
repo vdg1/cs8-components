@@ -25,7 +25,7 @@ public:
   uint size(int dimension = 0);
 
   QString dimension() const;
-  uint dimensionCount() const;
+  int dimensionCount() const;
   void setDimension(const QString &dim);
   void setType(QString value);
   QString type() const;
@@ -61,7 +61,7 @@ public:
   void setValue(const QString &index, const QMap<QString, QString> &valueMap);
   bool isBuildInType() const;
   static QStringList buildInTypes(bool val3S6Format = false);
-  bool hasConstPrefix(QString *prefix = 0) const;
+  bool hasConstPrefix(QString *prefix = nullptr) const;
   static void extractArrayIndex(const QString &value, QString &name, QString &index);
 
 protected:

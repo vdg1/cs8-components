@@ -10,7 +10,7 @@
 
 #define MAX_LENGTH 40
 //
-cs8Program::cs8Program(QObject *parent) : QObject(parent), m_withIfBlock(true), m_public(false) {
+cs8Program::cs8Program(QObject *parent) : QObject(parent), m_public(false), m_withIfBlock(true) {
   m_localVariableModel = new cs8LocalVariableModel(this);
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
   m_parameterModel = new cs8ParameterModel(this);
@@ -57,7 +57,7 @@ void cs8Program::printChildNodes(const QDomElement &element) {
 void cs8Program::createXMLSkeleton(bool val3S6Format) {
   m_XMLDocument = QDomDocument();
   QDomProcessingInstruction process =
-      m_XMLDocument.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+      m_XMLDocument.createProcessingInstruction("xml", R"(version="1.0" encoding="utf-8")");
   m_XMLDocument.appendChild(process);
 
   if (!val3S6Format) {
@@ -159,13 +159,13 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
 
   //
   QStringList referencedVariables = variableTokens(true);
-  cs8Application *app = qobject_cast<cs8Application *>(parent());
+  auto *app = qobject_cast<cs8Application *>(parent());
   if (app) {
     foreach (QString var, referencedVariables) {
       if (app->globalVariableModel()->variableNameList().contains(var) &&
           !m_localVariableModel->variableNameList().contains(var) &&
           !m_referencedGlobalVarModel->variableNameList().contains(var)) {
-        cs8Variable *refVar = new cs8Variable();
+        auto *refVar = new cs8Variable();
         cs8Variable *globalVar = app->globalVariableModel()->getVarByName(var);
 
         refVar->setGlobal(true);
@@ -254,7 +254,7 @@ QStringList cs8Program::variableTokens(bool onlyModifiedVars) {
     if (!l.startsWith("//")) {
       // remove string from code line
       QRegExp rx;
-      rx.setPattern("\\\".*\\\"");
+      rx.setPattern(R"(\".*\")");
       rx.setMinimal(true);
       int pos = 0;
       while (rx.indexIn(l, pos) != -1)
@@ -323,7 +323,7 @@ QMap<int, QString> cs8Program::todos() {
   QMap<int, QString> todos;
   qDebug() << "Check todos in " << name();
   QRegExp rx;
-  rx.setPattern("^\\s*//[/\\\\]{1}\\s*TODO.*");
+  rx.setPattern(R"(^\s*//[/\\]{1}\s*TODO.*)");
   int codeLine = 0;
   foreach (QString line, code.split("\n")) {
     if (rx.indexIn(line) != -1)
@@ -351,97 +351,6 @@ QStringList cs8Program::getCalls() {
   }
   return list;
 }
-/*
- *
-QStringList cs8Program::extractDocumentation(const QString &code_, int &headerLinesCount) const {
-  //
-  // extract documentation section
-  QString documentationSection = code_;
-  documentationSection.replace("\r\n", "\n");
-  // revert automatic correction done by Val3 Studio
-  documentationSection.replace("//\\endIf", "//\\endif");
-  // documentationSection.remove(0, documentationSection.indexOf("begin\n"));
-  QStringList documentationList = documentationSection.split("\n");
-  // remove 'begin' token
-  documentationList.removeFirst();
-  QStringList documentation;
-  int hasIfBlock = -1;
-  bool isComment = false;
-  bool isNextLineComment = false;
-  bool isEndMarker = false;
-  bool inIfBlock = false;
-  bool isEndIf = false;
-  bool isNextLineEndIf = false;
-  int i;
-  headerLinesCount = 0;
-  for (i = 0; i < documentationList.count(); i++) {
-    QString line = documentationList[i].trimmed();
-    QString nextLine = i < documentationList.count() - 1 ? documentationList[i + 1].trimmed() : QString();
-    isNextLineComment = nextLine.startsWith("//");
-    isNextLineEndIf = nextLine.startsWith("endIf");
-    isComment = line.startsWith("//");
-    isEndMarker = line.startsWith("//_");
-    inIfBlock = hasIfBlock != -1 && i > hasIfBlock;
-    isEndIf = line.startsWith("endIf");
-
-    if (isComment || line.startsWith("if false") || line.startsWith("endIf"))
-      headerLinesCount++;
-
-    if (hasIfBlock == -1 && line.startsWith("if false")) {
-      hasIfBlock = i;
-    } else if (hasIfBlock != -1 && !isComment && !line.startsWith("endIf")) {
-      // there is unexpected code in 'if false' block
-      // reset header line to last occurence of comment
-      i = hasIfBlock - 1;
-      headerLinesCount = i;
-      // exit header parser here
-      break;
-    }
-
-    if (isComment && !isEndMarker)
-      documentation << line;
-    /*
-     * //
-     * Val3 line
-     *
-     * /
-    if (isComment && hasIfBlock == -1 && !isNextLineComment && !nextLine.startsWith("if false"))
-      break;
-
-    /*
-     * //_
-     * Val3 line
-     *
-     * /
-    if (isEndMarker && hasIfBlock == -1)
-      break;
-
-    /*
-     * endIf
-     * //_
-     * Val3 line
-     *
-     * /
-    if (nextLine.startsWith("//_") && hasIfBlock != -1 && isEndIf) {
-      // jump ahead by 1 line to include endmarker in header
-      headerLinesCount++;
-      break;
-    }
-
-    /*
-     * endIf
-     * Val3 line
-     *
-     * /
-    if (!isNextLineComment && hasIfBlock != -1 && isEndIf) {
-      headerLinesCount++;
-      break;
-    }
-  }
-
-  return documentation;
-}
-*/
 
 QStringList cs8Program::extractDocumentation(const QString &code_, int &headerLinesCount) const {
   //
@@ -467,7 +376,7 @@ QStringList cs8Program::extractDocumentation(const QString &code_, int &headerLi
   isComment = (line.startsWith("//") || ((line.startsWith("//!") || line.startsWith("//\\")) && row == 0) ||
                line.startsWith("if false") || line.startsWith("endIf") || line.startsWith("//_"));
   while (isComment && !isEndMarker) {
-    QString line = documentationList[row].trimmed();
+    line = documentationList[row].trimmed();
     isEndMarker = line.startsWith("//_");
     if (line.startsWith("//") || line.startsWith("if false") || line.startsWith("endIf") || line.startsWith("//_")) {
       isComment = true;
@@ -480,10 +389,10 @@ QStringList cs8Program::extractDocumentation(const QString &code_, int &headerLi
   //
   // check if a non-comment line is in if block
   for (row = 0; row < endOfCommentBlock; row++) {
-    QString line = documentationList[row].trimmed();
+    line = documentationList[row].trimmed();
     if (line.startsWith("if false"))
       hasIfBlock = row;
-    if (hasIfBlock != -1 && !line.startsWith("//") && !line.startsWith("endIf")) {
+    else if (hasIfBlock != -1 && !line.startsWith("//") && !line.startsWith("endIf")) {
       // ok, we have hit a non-comment line in if block
       // ==> comment block actually stops just before if false line
       endOfCommentBlock = hasIfBlock;
@@ -613,7 +522,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
     // process a complete tag before starting the next tag
     if ((line.startsWith("//!") || line.startsWith("//\\")) && !tagType.isEmpty()) {
       // remove trailing array indexes from tag name
-      tagName = tagName.remove(QRegExp("\\[\\d*\\]"));
+      tagName = tagName.remove(QRegExp(R"(\[\d*\])"));
       // qDebug() << "process tag:" << tagType << ":" << tagName << ":" <<
       // tagText;
       if (tagType == "param") {
@@ -671,7 +580,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
       rx.setPattern("^\\s*" + tagType);
       tagText = line.remove(rx).simplified();
       // match the tag name (optionally with [..] array indicator)
-      rx.setPattern("^\\w*(|(\\[\\d*\\]))(\\s|$)");
+      rx.setPattern(R"(^\w*(|(\[\d*\]))(\s|$))");
       int pos = rx.indexIn(tagText);
       if (pos != -1)
         tagName = rx.cap().simplified();
@@ -1012,8 +921,10 @@ QString cs8Program::toDocumentedCode() {
 
   if (!m_tags.isEmpty()) {
     detailedDocumentation += "\n";
-    foreach (QString key, m_tags.uniqueKeys()) {
-      foreach (QString value, m_tags.values(key)) { detailedDocumentation += QString("\\%1 %2\n").arg(key).arg(value); }
+    for (auto &key : m_tags.uniqueKeys()) {
+      for (auto &value : m_tags.values(key)) {
+        detailedDocumentation += QString("\\%1 %2\n").arg(key, value);
+      }
     }
   }
 
@@ -1063,7 +974,7 @@ QString cs8Program::toDocumentedCode() {
   QString code = val3Code(false);
 
   QRegExp rx;
-  rx.setPattern("\\s*begin\\s*\\n");
+  rx.setPattern(R"(\s*begin\s*\n)");
   rx.setMinimal(true);
   int start = rx.indexIn(code, 0);
   start += rx.matchedLength();

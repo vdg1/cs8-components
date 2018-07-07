@@ -24,7 +24,7 @@ public:
   bool saveDataFile(const QString &fileName, bool val3S6Format = false);
   bool open(const QString &pfxFilePath);
   bool openFromPathName(const QString &filePath);
-  cs8Application(QObject *parent = 0);
+  cs8Application(QObject *parent = nullptr);
   bool parseProject(const QDomDocument &doc);
 
   cs8ProgramModel *programModel() const;
@@ -38,8 +38,8 @@ public:
   void setName(const QString &name);
 
   bool loadDocumentationFile(const QString &);
-  QString moduleDocumentationFormatted(QString withSlashes = QString("///"));
-  QString mainPageDocumentationFromatted(QString withSlashes = QString("///"));
+  QString moduleDocumentationFormatted(const QString &withSlashes = QString("///"));
+  QString mainPageDocumentationFromatted(const QString &withSlashes = QString("///"));
   QString performPrecompilerChecks();
   void setCellPath(const QString &path);
   QString cellPath() const;

@@ -10,7 +10,7 @@
 #include <QDebug>
 #include <QStringList>
 //
-cs8LibraryAliasModel::cs8LibraryAliasModel(QObject *parent) : QAbstractTableModel(parent) {
+cs8LibraryAliasModel::cs8LibraryAliasModel(QObject *parent) : QAbstractTableModel(parent), m_projectVersion(0) {
   // m_variableList = new QList<cs8Variable*>;
 }
 //
@@ -30,7 +30,7 @@ bool cs8LibraryAliasModel::add(const QDomElement &element, const QString & /*des
 }
 
 bool cs8LibraryAliasModel::add(const QString &aliasName, const QString &path, const bool autoLoad) {
-  cs8LibraryAlias *alias = new cs8LibraryAlias(aliasName, path, autoLoad);
+  auto *alias = new cs8LibraryAlias(aliasName, path, autoLoad);
   connect(alias, SIGNAL(modified()), this, SLOT(slotModified()));
   m_aliasList.append(alias);
 #if QT_VERSION >= 0x050000
@@ -74,15 +74,12 @@ QVariant cs8LibraryAliasModel::data(const QModelIndex &index, int role) const {
     switch (column) {
     case 0:
       return variable->name();
-      break;
 
     case 1:
       return variable->path();
-      break;
 
     case 2:
       return variable->autoLoad();
-      break;
     }
   }
 
@@ -113,7 +110,7 @@ QVariant cs8LibraryAliasModel::headerData(int section, Qt::Orientation orientati
  */
 Qt::ItemFlags cs8LibraryAliasModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
-    return 0;
+    return nullptr;
 
   if (index.column() == 3)
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
@@ -144,7 +141,7 @@ cs8LibraryAlias *cs8LibraryAliasModel::getAliasByName(const QString &name) {
     if (m_aliasList.at(i)->name().compare(name) == 0)
       return m_aliasList.at(i);
   }
-  return 0;
+  return nullptr;
 }
 
 QString cs8LibraryAliasModel::toDocumentedCode() {
@@ -152,7 +149,7 @@ QString cs8LibraryAliasModel::toDocumentedCode() {
   foreach (cs8LibraryAlias *var, m_aliasList) {
     QString descr = var->documentation();
     descr.replace("\n", "\n  //");
-    header += QString("\n  // %3 : %2").arg(descr).arg(var->name());
+    header += QString("\n  // %3 : %2").arg(descr, var->name());
   }
   return header;
 }

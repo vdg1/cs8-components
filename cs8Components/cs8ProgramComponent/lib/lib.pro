@@ -92,3 +92,5 @@ RESOURCES += \
 headers.path    = ../../include
 headers.files   += $$HEADERS
 INSTALLS       += headers
+
+DISTFILES +=

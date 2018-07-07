@@ -3,7 +3,8 @@
 #include <QDebug>
 #include <QStringList>
 //
-cs8VariableModel::cs8VariableModel(QObject *parent, modelType mode) : QAbstractTableModel(parent), m_mode(mode) {
+cs8VariableModel::cs8VariableModel(QObject *parent, modelType mode)
+    : QAbstractTableModel(parent), m_mode(mode), m_withUndocumentedSymbols(false) {
   // m_variableList = new QList<cs8Variable*>;
 }
 //
@@ -43,7 +44,7 @@ void cs8VariableModel::addVariable(cs8Variable *variable) {
 }
 
 bool cs8VariableModel::addGlobalVariable(QDomElement &element, const QString &description) {
-  cs8Variable *variable = new cs8Variable(element, description);
+  auto *variable = new cs8Variable(element, description);
   connect(variable, SIGNAL(modified()), this, SLOT(slotModified()));
   variable->setGlobal(true);
   m_variableList.append(variable);
@@ -76,7 +77,7 @@ QList<cs8Variable *> cs8VariableModel::privateVariables() {
 
 cs8Variable *cs8VariableModel::variable(QModelIndex index) {
   if (!index.isValid())
-    return 0;
+    return nullptr;
   return m_variableList.at(index.row());
 }
 
@@ -100,7 +101,7 @@ QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) {
 }
 
 cs8Variable *cs8VariableModel::createVariable(const QString &name) {
-  cs8Variable *variable = new cs8Variable();
+  auto *variable = new cs8Variable();
   variable->setName(name);
   variable->setParent(this);
   m_variableList.append(variable);
@@ -118,7 +119,7 @@ bool cs8VariableModel::hasDocumentation() {
 QString cs8VariableModel::toDtxDocument() {
   QDomDocument doc;
 
-  QDomProcessingInstruction process = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+  QDomProcessingInstruction process = doc.createProcessingInstruction("xml", R"(version="1.0" encoding="utf-8")");
   doc.appendChild(process);
   QDomElement database = doc.createElement("Database");
   doc.appendChild(database);
@@ -224,7 +225,7 @@ QVariant cs8VariableModel::headerData(int section, Qt::Orientation orientation, 
  */
 Qt::ItemFlags cs8VariableModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
-    return 0;
+    return nullptr;
 
   if (index.column() == 3)
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
@@ -259,7 +260,7 @@ cs8Variable *cs8VariableModel::getVarByName(const QString &name) {
     if (var->name().compare(n) == 0)
       return var;
   }
-  return 0;
+  return nullptr;
 }
 
 QDomNode cs8VariableModel::document(QDomDocument &doc) {
@@ -305,7 +306,7 @@ QString cs8VariableModel::toDocumentedCode() {
   foreach (cs8Variable *var, m_variableList) {
     QString descr = var->description();
     if (!descr.isEmpty() || m_withUndocumentedSymbols)
-      header += QString("\n\\%1 %3 %2\n").arg(prefix).arg(descr).arg(var->name());
+      header += QString("\n\\%1 %3 %2\n").arg(prefix).arg(descr, var->name());
   }
   qDebug() << "header: " << header;
   return header;

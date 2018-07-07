@@ -21,9 +21,8 @@ Q_OBJECT
 
 public:
 QString projectPath(bool cs8Format=false);
-bool save();
 bool loadDataFile(const QString & fileName);
-bool saveDataFile(const QString & fileName);
+bool saveDataFile(const QString & fileName, bool);
 bool open(const QString & pfxFilePath);
 bool openFromPathName(const QString & filePath);
 cs8Application(QObject* parent = 0);
@@ -36,10 +35,7 @@ QString exportToCImplementation();
 QString exportToCDefinition();
 bool exportInterfacePrototype(const QString & path);
 bool integrateInterface(cs8Application *sourceApplication);
-QString name() const
-{
-    return m_projectName;
-}
+QString name() const;
 void setName(const QString & name);
 
 bool loadDocumentationFile(const QString &);

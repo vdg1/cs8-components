@@ -36,7 +36,8 @@ void cs8Application::setIncludeLibraryDocuments(bool includeLibraryDocuments) {
   m_includeLibraryDocuments = includeLibraryDocuments;
 }
 
-cs8Application::cs8Application(QObject *parent) : QObject(parent) {
+cs8Application::cs8Application(QObject *parent)
+    : QObject(parent), m_modified(false), m_withUndocumentedSymbols(false), m_includeLibraryDocuments(false) {
   m_programModel = new cs8ProgramModel(this);
   m_globalVariableModel = new cs8GlobalVariableModel(this);
   m_libraryAliasModel = new cs8LibraryAliasModel(this);
@@ -107,7 +108,7 @@ bool cs8Application::importVPlusFile(const QString &fileName) {
 
     //
     switch (currSection) {
-    case Locations:
+    case Locations: {
       components = line.split(" ", QString::SkipEmptyParts);
       varName = components.at(0).trimmed();
       bool isJoint = varName.startsWith("#");
@@ -123,15 +124,15 @@ bool cs8Application::importVPlusFile(const QString &fileName) {
       if (isJoint) {
         // location is a joint variable
         varName.prepend("j");
-        if ((var = globalVariableModel()->getVarByName(varName)) == 0)
+        if ((var = globalVariableModel()->getVarByName(varName)) == nullptr)
           var = new cs8Variable();
         var->setGlobal(true);
         var->setType("jointRx");
         var->setName(varName);
         QMap<QString, QString> map;
         map.insert("j1", components.at(0));
-        map.insert("j2", QString("%1").arg(components.at(1).toFloat() + 90.0));
-        map.insert("j3", QString("%1").arg(components.at(2).toFloat() - 90.0));
+        map.insert("j2", QString("%1").arg(components.at(1).toDouble() + 90.0));
+        map.insert("j3", QString("%1").arg(components.at(2).toDouble() - 90.0));
         map.insert("j4", components.at(3));
         map.insert("j5", components.at(4));
         map.insert("j6", components.at(5));
@@ -141,7 +142,7 @@ bool cs8Application::importVPlusFile(const QString &fileName) {
       } else {
         // location is a point variable
         varName.prepend("p");
-        if ((var = globalVariableModel()->getVarByName(varName)) == 0) {
+        if ((var = globalVariableModel()->getVarByName(varName)) == nullptr) {
           var = new cs8Variable();
           var->setGlobal(true);
         }
@@ -157,20 +158,20 @@ bool cs8Application::importVPlusFile(const QString &fileName) {
 
         matrixTrans = matrixRot.mid(matrixRot.size() - 3, 3);
 
-        QMatrix4x4 matrix(matrixRot[0], matrixRot[3], matrixRot[6], matrixTrans[0], matrixRot[1], matrixRot[4],
-                          matrixRot[7], matrixTrans[1], matrixRot[2], matrixRot[5], matrixRot[8], matrixTrans[2], 0, 0,
-                          0, 1);
+        QMatrix4x4 matrix(matrixRot[0], matrixRot[3], matrixRot[6], matrixRot[9], matrixRot[1], matrixRot[4],
+                          matrixRot[7], matrixRot[10], matrixRot[2], matrixRot[5], matrixRot[8], matrixRot[11], 0, 0, 0,
+                          1);
         Qt3DCore::QTransform trans;
         trans.setMatrix(matrix);
         QMap<QString, QString> map;
 
         float rx, ry, rz;
-        // rx=trans.rotationX();
-        // ry=trans.rotationY();
-        // rz=trans.rotationZ();
-        rx = atan2(matrixRot[5], matrixRot[8]);
-        ry = atan2(-matrixRot[2], sqrtf(matrixRot[5] * matrixRot[5] + matrixRot[8] * matrixRot[8]));
-        rz = atan2(matrixRot[1], matrixRot[0]);
+        rx = trans.rotationX();
+        ry = trans.rotationY();
+        rz = trans.rotationZ();
+        // rx = atan2(matrixRot[5], matrixRot[8]);
+        // ry = atan2(-matrixRot[2], sqrtf(matrixRot[5] * matrixRot[5] + matrixRot[8] * matrixRot[8]));
+        // rz = atan2(matrixRot[1], matrixRot[0]);
 
         // if name contains "grip" assume it is a TCP
         if (varName.contains("grip", Qt::CaseInsensitive)) {
@@ -193,6 +194,9 @@ bool cs8Application::importVPlusFile(const QString &fileName) {
         var->setValue(index, map);
         globalVariableModel()->addVariable(var);
       }
+    } break;
+
+    default:
       break;
     }
   }
@@ -268,7 +272,7 @@ bool cs8Application::exportInterfacePrototype(const QString &path) {
 
   // save pjx file
   QDomDocument doc;
-  QDomProcessingInstruction process = doc.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+  QDomProcessingInstruction process = doc.createProcessingInstruction("xml", R"(version="1.0" encoding="utf-8")");
   doc.appendChild(process);
   QDomElement projectElement = doc.createElement("Project");
   projectElement.setAttribute("xmlns", "http://www.staubli.com/robotics/VAL3/Project/3");
@@ -338,7 +342,7 @@ bool cs8Application::integrateInterface(cs8Application *sourceApplication) {
       if (!var->isPublic())
         var->setPublic(true);
     } else {
-      cs8Variable *var = new cs8Variable(globalSourceVariable);
+      auto *var = new cs8Variable(globalSourceVariable);
       globalVariableModel()->addVariable(var);
     }
   }
@@ -396,7 +400,7 @@ QString cs8Application::exportToCImplementation() {
     out << QString("   void %3::%1{\n%2\n}").arg(program->definition()).arg(program->toCSyntax()).arg(m_projectName);
   }
 
-  return out.join(("\n"));
+  return out.join("\n");
 }
 
 QString cs8Application::exportToCDefinition() {
@@ -406,13 +410,13 @@ QString cs8Application::exportToCDefinition() {
 
   if (!mainPageDocumentationFromatted().isEmpty()) {
     out << "/*! \\mainpage\n";
-    out << mainPageDocumentationFromatted(false);
+    out << mainPageDocumentationFromatted();
     out << "\n*/";
   }
 
   if (!moduleDocumentationFormatted().isEmpty()) {
     out << "/*! \\details\n";
-    out << moduleDocumentationFormatted(false);
+    out << moduleDocumentationFormatted();
     out << "\n*/";
   }
 
@@ -439,7 +443,7 @@ QString cs8Application::exportToCDefinition() {
 
       QString doc;
       cs8Variable *var = m_globalVariableModel->getVarByName(i.value());
-      if (var != 0) {
+      if (var != nullptr) {
         doc = var->description();
         doc = doc.replace("\n", "\\n");
       } else
@@ -480,7 +484,7 @@ QString cs8Application::exportToCDefinition() {
 
   out << "}";
 
-  return out.join(("\n"));
+  return out.join("\n");
 }
 
 /*!
@@ -580,7 +584,7 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
     // check if global variable sVersion exists
     m_version = "";
     cs8Variable *var = globalVariableModel()->getVarByName("sVersion");
-    if (var != 0) {
+    if (var != nullptr) {
       m_version = var->varValue("0").toString();
     } else {
       // check if version.dat exists
@@ -612,7 +616,7 @@ void cs8Application::slotGlobalVariableDocumentationFound(const QString &name, c
 
   qDebug() << "find: " << name;
   cs8Variable *variable = m_globalVariableModel->getVarByName(name);
-  if (variable != 0) {
+  if (variable != nullptr) {
     qDebug() << "setting doc for " << name << " to " << document;
     variable->setDescription(document);
   }
@@ -681,7 +685,7 @@ bool cs8Application::saveDataFile(const QString &fileName, bool val3S6Format) {
 
   QDomDocument xmlDataDocument = QDomDocument();
   QDomProcessingInstruction process =
-      xmlDataDocument.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+      xmlDataDocument.createProcessingInstruction("xml", R"(version="1.0" encoding="utf-8")");
   xmlDataDocument.appendChild(process);
 
   if (!val3S6Format) {
@@ -714,13 +718,13 @@ bool cs8Application::saveDataFile(const QString &fileName, bool val3S6Format) {
         s7DataType += "Rx";
       // create world and flange node
       if (dataType == "frame") {
-        cs8Variable *var = new cs8Variable();
+        auto *var = new cs8Variable();
         var->setName("world");
         var->setType("frame");
         m_globalVariableModel->addVariable(var);
       }
       if (dataType == "tool") {
-        cs8Variable *var = new cs8Variable();
+        auto *var = new cs8Variable();
         var->setName("flange");
         var->setType("tool");
         m_globalVariableModel->addVariable(var);
@@ -808,7 +812,7 @@ QString cs8Application::projectPath(bool cs8Format) {
   }
 }
 
-QString cs8Application::moduleDocumentationFormatted(QString withSlashes) {
+QString cs8Application::moduleDocumentationFormatted(const QString &withSlashes) {
 
   QString out;
   QStringList list;
@@ -852,7 +856,7 @@ QString cs8Application::moduleDocumentationFormatted(QString withSlashes) {
   return out;
 }
 
-QString cs8Application::mainPageDocumentationFromatted(QString withSlashes) {
+QString cs8Application::mainPageDocumentationFromatted(const QString &withSlashes) {
 
   QString out;
   QStringList list;
@@ -872,7 +876,7 @@ QString cs8Application::mainPageDocumentationFromatted(QString withSlashes) {
     }
     if (inCodeSection) {
       qDebug() << str << "indent: " << indentation;
-      if (str.simplified().indexOf(QRegExp("^\\s*(begin|if\\s|for\\s|while\\s|do\\s|switch\\s|case\\s)")) == 0) {
+      if (str.simplified().indexOf(QRegExp(R"(^\s*(begin|if\s|for\s|while\s|do\s|switch\s|case\s))")) == 0) {
         str = indentText + str.trimmed();
         indentation++;
         indentText = "";
@@ -979,7 +983,9 @@ void cs8Application::checkEnumerations(QStringList &output) {
       i.next();
       if (constSet->values(i.key()).count() > 1) {
         QString msg;
-        foreach (QString key, constSet->values(i.key())) { msg += key + ", "; }
+        for (auto &key : constSet->values(i.key())) {
+          msg += key + ", ";
+        }
         msg.chop(2);
         output.append(QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
                           .arg("")
@@ -1051,7 +1057,7 @@ QStringList cs8Application::getCallList(cs8Program *program) {
   QMapIterator<QString, QList<cs8Program *>> i(m_callList);
   while (i.hasNext()) {
     i.next();
-    foreach (cs8Program *prog, i.value()) {
+    for (auto prog : i.value()) {
       if (prog == program)
         list << i.key();
     }
@@ -1083,9 +1089,9 @@ void cs8Application::checkGlobalData(QStringList &output) {
                                 "msg>%2<file>%3")
                             .arg(program->name())
                             .arg("Warning: Global variable '" + globalVariable->name() +
-                                 "' is hidden in program by a local variable "
-                                 "of the same name")
-                            .arg(program->cellFilePath()));
+                                     "' is hidden in program by a local variable "
+                                     "of the same name",
+                                 program->cellFilePath()));
         }
       } else
           // if global variable is not hidden, check if it is used
@@ -1098,16 +1104,14 @@ void cs8Application::checkGlobalData(QStringList &output) {
         output.append(QString("<level>Warning<CLASS>DATA<P1>%1<P2>%4<line>1<msg>%2<file>%3")
                           .arg(globalVariable->type())
                           .arg("Warning: Global variable '" + globalVariable->name() + "' is not used")
-                          .arg(cellDataFilePath(true))
-                          .arg(globalVariable->name() + "[0]"));
+                          .arg(cellDataFilePath(true), globalVariable->name() + "[0]"));
       } else {
         if (reportUnusedPublicGlobalVariables)
           output.append(
               QString("<level>Warning<CLASS>DATA<P1>%1<P2>%4<line>1<msg>%2<file>%3")
-                  .arg(globalVariable->type())
-                  .arg("Warning: Global variable '" + globalVariable->name() + "' is not used, but is set as PUBLIC")
-                  .arg(cellDataFilePath(true))
-                  .arg(globalVariable->name() + "[0]"));
+                  .arg(globalVariable->type(),
+                       "Warning: Global variable '" + globalVariable->name() + "' is not used, but is set as PUBLIC",
+                       cellDataFilePath(true), globalVariable->name() + "[0]"));
       }
     }
   }
@@ -1128,10 +1132,7 @@ void cs8Application::checkObsoleteProgramFiles(QStringList &output) {
     }
     if (!found) {
       output.append(QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
-                        .arg(pgxFileName)
-                        .arg("Warning: Program file is obsolete")
-                        .arg("")
-                        .arg(""));
+                        .arg(pgxFileName, "Warning: Program file is obsolete", "", ""));
     }
   }
 }
@@ -1302,7 +1303,7 @@ void cs8Application::createXMLSkeleton(bool S6Format) {
     // Val3 s7 format
     m_XMLDocument = QDomDocument();
     QDomProcessingInstruction process =
-        m_XMLDocument.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+        m_XMLDocument.createProcessingInstruction("xml", R"(version="1.0" encoding="utf-8")");
     m_XMLDocument.appendChild(process);
 
     m_projectSection = m_XMLDocument.createElement("Project");
@@ -1331,7 +1332,7 @@ void cs8Application::createXMLSkeleton(bool S6Format) {
     // Val3 s6 format
     m_XMLDocument = QDomDocument();
     QDomProcessingInstruction process =
-        m_XMLDocument.createProcessingInstruction("xml", "version=\"1.0\" encoding=\"utf-8\"");
+        m_XMLDocument.createProcessingInstruction("xml", R"(version="1.0" encoding="utf-8")");
     m_XMLDocument.appendChild(process);
 
     m_projectSection = m_XMLDocument.createElement("project");
