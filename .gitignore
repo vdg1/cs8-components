@@ -13,3 +13,6 @@ release/
 debug/
 *.ilk
 *.pro.user.*
+*.dtx
+*.LC
+*.PG
