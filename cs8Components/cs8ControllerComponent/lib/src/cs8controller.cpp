@@ -1,4 +1,5 @@
 #include "cs8controller.h"
+#include "qftp.h"
 #include <QDebug>
 #include <QDir>
 #include <QDirIterator>
@@ -7,15 +8,12 @@
 #include <QNetworkReply>
 #include <QTcpSocket>
 #include <QUrl>
-#include "qftp.h"
 
 //
-cs8Controller::cs8Controller()
-    : QObject(), m_isOnline(false), m_checkOnline(false), m_ftp(0) {
+cs8Controller::cs8Controller() : QObject(), m_isOnline(false), m_checkOnline(false), m_ftp(0) {
   m_onlineTimer = new QTimer(this);
   m_onlineTimer->setSingleShot(true);
-  connect(m_onlineTimer, &QTimer::timeout, this,
-          &cs8Controller::slotOnlineTimerTimeout);
+  connect(m_onlineTimer, &QTimer::timeout, this, &cs8Controller::slotOnlineTimerTimeout);
 
   // create time out timer
   m_transferTimeOut = new QTimer(this);
@@ -32,44 +30,41 @@ cs8Controller::cs8Controller()
 //
 
 void cs8Controller::slotOnlineTimerTimeout() {
-  qDebug() << __FUNCTION__ << " state: " << m_ftp->state()
-           << " host: " << m_url.host();
+  qDebug() << __FUNCTION__ << " state: " << m_ftp->state() << " host: " << m_url.host();
   switch (m_ftp->state()) {
-    case QFtp::Unconnected:
-      qDebug() << "       connecting to " << m_url.host() << m_url.userName()
-               << m_url.password();
-      m_ftp->connectToHost(m_url.host());
-      m_ftp->login(m_url.userName(), m_url.password());
-      break;
+  case QFtp::Unconnected:
+    qDebug() << "       connecting to " << m_url.host() << m_url.userName() << m_url.password();
+    m_ftp->connectToHost(m_url.host());
+    m_ftp->login(m_url.userName(), m_url.password());
+    break;
 
-    case QFtp::LoggedIn:
-      m_ftp->rawCommand("NOOP");
-      break;
+  case QFtp::LoggedIn:
+    m_ftp->rawCommand("NOOP");
+    break;
 
-    case QFtp::Closing:
-      m_ftp->abort();
-      break;
+  case QFtp::Closing:
+    m_ftp->abort();
+    break;
 
-    default:
-      m_ftp->abort();
-      m_ftp->close();
-      break;
+  default:
+    m_ftp->abort();
+    m_ftp->close();
+    break;
   }
 
-  if (m_checkOnline) slotStartCheck();
+  if (m_checkOnline)
+    slotStartCheck();
 }
 
 void cs8Controller::initializeFTPSession() {
-  if (m_ftp != nullptr) m_ftp->deleteLater();
+  if (m_ftp != nullptr)
+    m_ftp->deleteLater();
   m_ftp = new QFtp(this);
-  connect(m_ftp, &QFtp::commandFinished, this,
-          &cs8Controller::slotCommandFinished);
-  connect(m_ftp, &QFtp::dataTransferProgress, this,
-          &cs8Controller::slotDataTransferProgress);
+  connect(m_ftp, &QFtp::commandFinished, this, &cs8Controller::slotCommandFinished);
+  connect(m_ftp, &QFtp::dataTransferProgress, this, &cs8Controller::slotDataTransferProgress);
 }
 
-void cs8Controller::setLoginData(const QString &userName,
-                                 const QString &password) {
+void cs8Controller::setLoginData(const QString &userName, const QString &password) {
   initializeFTPSession();
   m_url.setUserName(userName);
   m_url.setPassword(password);
@@ -80,7 +75,8 @@ void cs8Controller::setAddress(const QString &value) {
   m_isOnline = false;
   emit onlineChanged(m_isOnline, 0, QString());
 
-  if (m_checkOnline) slotStartCheck();
+  if (m_checkOnline)
+    slotStartCheck();
 }
 
 void cs8Controller::enableOnlineCheck(bool enable_) {
@@ -109,11 +105,10 @@ void cs8Controller::preFTPTransfer(QEventLoop *eventLoop, bool *timeout) {
     eventLoop->quit();
   });
   // connect dataprogress signal
-  m_connDataProgress =
-      QObject::connect(m_ftp, &QFtp::dataTransferProgress, [=]() {
-        m_transferTimeOut->stop();
-        m_transferTimeOut->start();
-      });
+  m_connDataProgress = QObject::connect(m_ftp, &QFtp::dataTransferProgress, [=]() {
+    m_transferTimeOut->stop();
+    m_transferTimeOut->start();
+  });
   // connect listinfo signal
   m_connListInfo = QObject::connect(m_ftp, &QFtp::listInfo, [=]() {
     m_transferTimeOut->stop();
@@ -132,16 +127,16 @@ void cs8Controller::postFTPTransfer() {
   m_transferTimeOut->stop();
 
   m_lastError = m_ftp->errorString();
-  connect(m_ftp, &QFtp::commandFinished, this,
-          &cs8Controller::slotCommandFinished);
-  if (m_checkOnline) slotStartCheck();
+  connect(m_ftp, &QFtp::commandFinished, this, &cs8Controller::slotCommandFinished);
+  if (m_checkOnline)
+    slotStartCheck();
   emit transferProgress(0, 0, 0);
 }
 
-bool cs8Controller::getFileContent(const QString &fileName, QByteArray &data,
-                                   qint64 &sizeOnServer) {
+bool cs8Controller::getFileContent(const QString &fileName, QByteArray &data, qint64 &sizeOnServer) {
   qDebug() << __FUNCTION__ << fileName;
-  if (!checkFtpSession()) return false;
+  if (!checkFtpSession())
+    return false;
   // initialize operation
   // prepare local event loop
   QEventLoop *eventLoop = new QEventLoop(this);
@@ -153,14 +148,13 @@ bool cs8Controller::getFileContent(const QString &fileName, QByteArray &data,
   m_url.setPath(fileName);
 
   // connect done signal
-  QMetaObject::Connection connDone =
-      QObject::connect(m_ftp, &QFtp::done, [=](bool error) {
-        qDebug() << "command finished with error " << error;
-        eventLoop->quit();
-      });
+  QMetaObject::Connection connDone = QObject::connect(m_ftp, &QFtp::done, [=](bool error) {
+    qDebug() << "command finished with error " << error;
+    eventLoop->quit();
+  });
 
-  QMetaObject::Connection connTransferProgress = QObject::connect(
-      m_ftp, &QFtp::dataTransferProgress, [&](qint64 done, qint64 total) {
+  QMetaObject::Connection connTransferProgress =
+      QObject::connect(m_ftp, &QFtp::dataTransferProgress, [&](qint64 done, qint64 total) {
         Q_UNUSED(done);
         fileSize = total;
       });
@@ -169,8 +163,7 @@ bool cs8Controller::getFileContent(const QString &fileName, QByteArray &data,
   QBuffer buffer(&data);
   if (buffer.open(QIODevice::ReadWrite)) {
     int id = m_ftp->get(fileName, &buffer, QFtp::Binary);
-    qDebug() << __FUNCTION__ << ": retrieve " << m_url.toString()
-             << " id: " << id;
+    qDebug() << __FUNCTION__ << ": retrieve " << m_url.toString() << " id: " << id;
     eventLoop->exec();
     qDebug() << __FUNCTION__ << ": finished";
   }
@@ -185,10 +178,10 @@ bool cs8Controller::getFileContent(const QString &fileName, QByteArray &data,
   return (m_ftp->error() == QFtp::NoError && !timeout);
 }
 
-bool cs8Controller::getFolderContents(const QString &path,
-                                      QList<QUrlInfo> &list) {
+bool cs8Controller::getFolderContents(const QString &path, QList<QUrlInfo> &list) {
   qDebug() << __FUNCTION__ << path;
-  if (!checkFtpSession()) return false;
+  if (!checkFtpSession())
+    return false;
   // initialize operation
   // prepare local event loop
   QEventLoop *eventLoop = new QEventLoop(this);
@@ -199,20 +192,17 @@ bool cs8Controller::getFolderContents(const QString &path,
   QList<QUrlInfo> *resultList = new QList<QUrlInfo>;
 
   // connect done signal
-  QMetaObject::Connection connDone =
-      QObject::connect(m_ftp, &QFtp::done, [=](bool error) {
-        qDebug() << "command finished with error " << error;
-        eventLoop->quit();
-      });
+  QMetaObject::Connection connDone = QObject::connect(m_ftp, &QFtp::done, [=](bool error) {
+    qDebug() << "command finished with error " << error;
+    eventLoop->quit();
+  });
   // connect listInfo signal
-  QMetaObject::Connection connListInfo =
-      connect(m_ftp, &QFtp::listInfo, [=](const QUrlInfo &i) {
-        resultList->append(i);
-        qDebug() << "listinfo: " << i.name();
-      });
+  QMetaObject::Connection connListInfo = connect(m_ftp, &QFtp::listInfo, [=](const QUrlInfo &i) {
+    resultList->append(i);
+    qDebug() << "listinfo: " << i.name();
+  });
   int id = m_ftp->list(m_url.path());
-  qDebug() << __FUNCTION__ << ": retrieve " << m_url.toString()
-           << " id: " << id;
+  qDebug() << __FUNCTION__ << ": retrieve " << m_url.toString() << " id: " << id;
   eventLoop->exec();
   qDebug() << __FUNCTION__ << ": finished";
   // read results
@@ -231,12 +221,12 @@ bool cs8Controller::getFolderContents(const QString &path,
   return m_ftp->error() == QFtp::NoError && !timeout;
 }
 
-bool cs8Controller::downloadFile(const QString &remoteFileName,
-                                 const QString &localFileName,
-                                 qint64 &sizeOnServer) {
-  if (!checkFtpSession()) return false;
+bool cs8Controller::downloadFile(const QString &remoteFileName, const QString &localFileName, qint64 &sizeOnServer) {
+  if (!checkFtpSession())
+    return false;
   QByteArray data;
-  if (!getFileContent(remoteFileName, data, sizeOnServer)) return false;
+  if (!getFileContent(remoteFileName, data, sizeOnServer))
+    return false;
   QFile file(localFileName);
   if (!file.open(QFile::ReadWrite)) {
     m_lastError = file.errorString();
@@ -260,9 +250,8 @@ void cs8Controller::slotStopCheck() {
 }
 
 void cs8Controller::slotCommandFinished(int id, bool error) {
-  qDebug() << __FUNCTION__ << " : cmd finished: " << id
-           << " error: " << m_ftp->errorString() << " state: " << m_ftp->state()
-           << " pending commands: " << m_ftp->hasPendingCommands();
+  qDebug() << __FUNCTION__ << " : cmd finished: " << id << " error: " << m_ftp->errorString()
+           << " state: " << m_ftp->state() << " pending commands: " << m_ftp->hasPendingCommands();
 
   slotStopCheck();
   if (error) {
@@ -295,7 +284,8 @@ void cs8Controller::slotDataTransferProgress(qint64 done, qint64 total) {
   qint64 elapsed = m_rateTime->elapsed();
   float rate = 0.0;
 
-  if (elapsed > 0) rate = qMax((float)(done / (elapsed)), (float)0.0) * 1000;
+  if (elapsed > 0)
+    rate = qMax((float)(done / (elapsed)), (float)0.0) * 1000;
 
   emit transferProgress(done, total, round(rate));
 }
@@ -337,7 +327,8 @@ bool cs8Controller::armType(QString &armType) {
         // extract arm type from tuning identifier
         QRegExp rx;
         rx.setPattern("(.*)(-\\*)");
-        if (rx.indexIn(armType) > -1) armType = rx.cap(1);
+        if (rx.indexIn(armType) > -1)
+          armType = rx.cap(1);
         return true;
       }
     }
@@ -351,8 +342,7 @@ bool cs8Controller::armType(QString &armType) {
   /sys/config/options.cfx is checked, then /usr/configs/arm.cfx. If strategy is
   1 only /sys/config/options.cfx is checked.
   */
-bool cs8Controller::serialNumber(QString &number,
-                                 const cs8::serialNumberType source) {
+bool cs8Controller::serialNumber(QString &number, const cs8::serialNumberType source) {
   QDomDocument doc;
   QString docErrString;
   // QFile file;
@@ -364,11 +354,13 @@ bool cs8Controller::serialNumber(QString &number,
   QByteArray data;
   if (source == cs8::Any || source == cs8::MachineSerialNumber) {
     if (!getFileContent("/sys/configs/options.cfx", data, size)) {
-      if (source == cs8::MachineSerialNumber) ok = false;
+      if (source == cs8::MachineSerialNumber)
+        ok = false;
     }
 
     if (!doc.setContent(data, &docErrString, &docErrLine, &docErrCol)) {
-      if (source == cs8::MachineSerialNumber) ok = false;
+      if (source == cs8::MachineSerialNumber)
+        ok = false;
     }
     if (ok) {
       // reading /sys/config/options.cfx succeeded
@@ -378,11 +370,13 @@ bool cs8Controller::serialNumber(QString &number,
       // read controller serial number from /usr/configs/controller.cfx
       // as of version s7
       if (!getFileContent("/usr/configs/controller.cfx", data, size)) {
-        if (source == cs8::MachineSerialNumber) return false;
+        if (source == cs8::MachineSerialNumber)
+          return false;
       }
 
       if (!doc.setContent(data, &docErrString, &docErrLine, &docErrCol)) {
-        if (source == cs8::MachineSerialNumber) return false;
+        if (source == cs8::MachineSerialNumber)
+          return false;
       } else {
         // reading /sys/config/options.cfx succeeded
         number = orderNumber(doc);
@@ -410,8 +404,7 @@ QString cs8Controller::orderNumber(const QDomDocument &doc) {
   QDomElement element = doc.documentElement();
   for (int i = 0; i < element.elementsByTagName("String").count(); i++) {
     QDomNode node = element.elementsByTagName("String").at(i);
-    if (node.toElement().attribute("name") == "orderNumber" ||
-        node.toElement().attribute("name") == "serialNumber") {
+    if (node.toElement().attribute("name") == "orderNumber" || node.toElement().attribute("name") == "serialNumber") {
       // check if orderNumber value is not an empty string
       QString orderNumber = node.toElement().attribute("value");
       if (!orderNumber.isEmpty()) {
@@ -439,17 +432,17 @@ bool cs8Controller::checkFtpSession() {
     timeout->setSingleShot(true);
     timeout->start(5000);
 
-    QMetaObject::Connection connTimeOut =
-        QObject::connect(timeout, &QTimer::timeout, [=]() {
-          qDebug() << "Aborting due to time out";
-          m_ftp->abort();
-          eventLoop->quit();
-        });
+    QMetaObject::Connection connTimeOut = QObject::connect(timeout, &QTimer::timeout, [=]() {
+      qDebug() << "Aborting due to time out";
+      m_ftp->abort();
+      eventLoop->quit();
+    });
 
-    QMetaObject::Connection connCommandFinished = QObject::connect(
-        m_ftp, &QFtp::commandFinished, [=](int id, bool error) {
+    QMetaObject::Connection connCommandFinished =
+        QObject::connect(m_ftp, &QFtp::commandFinished, [=](int id, bool error) {
           qDebug() << "command " << id << " finished with error " << error;
-          if (id == idLogin || error) eventLoop->quit();
+          if (id == idLogin || error)
+            eventLoop->quit();
         });
 
     // connect(m_ftp,&QFtp::done,eventLoop,&QEventLoop::quit);
@@ -489,9 +482,7 @@ QString cs8Controller::armSerialNumber() {
     \fn cs8Controller::configFileItem(const QDomDocument & configFile, const
    QString & type, const QString & name, const QString & default=QString())
  */
-QString cs8Controller::configFileItem(const QDomDocument &configFile_,
-                                      const QString &type_,
-                                      const QString &name_,
+QString cs8Controller::configFileItem(const QDomDocument &configFile_, const QString &type_, const QString &name_,
                                       const QString &default_) {
   QDomElement element = configFile_.documentElement();
   for (int i = 0; i < element.elementsByTagName(type_).count(); i++) {
@@ -546,7 +537,8 @@ QString cs8Controller::armType() {
     return QString();
   }
   QDomDocument doc;
-  if (!doc.setContent(data)) return QString();
+  if (!doc.setContent(data))
+    return QString();
 
   return configFileItem(doc, "String", "arm");
 }

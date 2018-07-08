@@ -26,20 +26,17 @@ class cs8Controller : public QObject {
 
   void postFTPTransfer();
 
- public:
+public:
   bool logFile(QString &text);
   bool serialNumber(QString &number, const cs8::serialNumberType = cs8::Any);
   bool armType(QString &armType);
   void abort();
-  void setLoginData(const QString &userName,
-                    const QString &password = QString(""));
+  void setLoginData(const QString &userName, const QString &password = QString(""));
   void setAddress(const QString &value);
   QString address() { return m_url.host(); }
   cs8Controller();
   QString armSerialNumber();
   QString controllerSerialNumber();
-
-  // QString serialNumber ( cs8::serialNumberType type );
   QString armType();
   QString lastError() const;
   QUrl url() const { return m_url; }
@@ -49,19 +46,17 @@ class cs8Controller : public QObject {
   void enableOnlineCheck(bool enable_);
 
   bool getFileContent(const QString &fileName, QByteArray &data);
-  bool getFileContent(const QString &fileName, QByteArray &data,
-                      qint64 &sizeOnServer);
+  bool getFileContent(const QString &fileName, QByteArray &data, qint64 &sizeOnServer);
   bool getFolderContents(const QString &path, QList<QUrlInfo> &list);
-  bool downloadFile(const QString &remoteFileName, const QString &localFileName,
-                    qint64 &sizeOnServer);
+  bool downloadFile(const QString &remoteFileName, const QString &localFileName, qint64 &sizeOnServer);
 
- signals:
+signals:
   void onlineChanged(bool online, int error, const QString &errorString);
   void transferProgress(qint64 done, qint64 total, double bytesPerSec);
 
- public slots:
+public slots:
 
- protected:
+protected:
   bool m_isOnline;
   bool m_checkOnline;
   QString m_lastError;
@@ -74,14 +69,13 @@ class cs8Controller : public QObject {
   QTimer *m_transferTimeOut;
   QElapsedTimer *m_rateTime;
 
-  QString configFileItem(const QDomDocument &configFile_, const QString &type_,
-                         const QString &name_,
+  QString configFileItem(const QDomDocument &configFile_, const QString &type_, const QString &name_,
                          const QString &default_ = QString());
   QString orderNumber(const QDomDocument &doc);
   bool checkFtpSession();
   void initializeFTPSession();
 
- protected slots:
+protected slots:
   void slotOnlineTimerTimeout();
   void slotCommandFinished(int id, bool error);
   void slotDataTransferProgress(qint64 done, qint64 total);
