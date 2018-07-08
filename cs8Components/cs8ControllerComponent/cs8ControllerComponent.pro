@@ -1,2 +1,2 @@
-SUBDIRS = lib errorLogBin
+SUBDIRS = lib errorLogBin MCPWidgetExample
 TEMPLATE = subdirs

@@ -8,7 +8,8 @@ HEADERS +=  src/cs8controller.h \
     src/qttelnet.h \
     src/cs8telnet.h \
     src/cs8ControllerComponent.h \
-    src/cs8loginterface.h
+    src/cs8loginterface.h \
+    src/cs8mcpdisplay.h
 
 SOURCES += src/cs8controller.cpp \
    #  src/cs8fileinfo.cpp \
@@ -18,7 +19,8 @@ SOURCES += src/cs8controller.cpp \
     src/qurlinfo.cpp \
     src/qttelnet.cpp \
     src/cs8telnet.cpp \
-    src/cs8loginterface.cpp
+    src/cs8loginterface.cpp \
+    src/cs8mcpdisplay.cpp
 
 QT += core \
     network \
@@ -58,3 +60,6 @@ LIBS += -lWs2_32
 headers.path    = ../../include
 headers.files   += $$HEADERS
 INSTALLS       += headers
+
+FORMS += \
+    ui/cs8mcpdisplay.ui
