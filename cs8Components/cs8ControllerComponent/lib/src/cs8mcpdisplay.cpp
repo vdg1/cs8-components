@@ -66,6 +66,14 @@ void cs8MCPDisplay::setFontSize(int size) {
 
 void cs8MCPDisplay::slotToggle(bool value) {}
 
+QColor cs8MCPDisplay::foreground() const { return m_foreground; }
+
+void cs8MCPDisplay::setForeground(const QColor &foreground) { m_foreground = foreground; }
+
+QColor cs8MCPDisplay::background() const { return m_background; }
+
+void cs8MCPDisplay::setBackground(const QColor &background) { m_background = background; }
+
 cs8MCPDisplayRow::cs8MCPDisplayRow(QWidget *parent)
     : QObject(parent), m_label(new QLabel(parent)), m_text(QString().fill(' ', 40)),
       m_mode(QByteArray().fill(cs8MCPDisplay::Normal, 40)), m_toggle(false) {}
