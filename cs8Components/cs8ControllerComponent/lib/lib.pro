@@ -8,7 +8,12 @@ HEADERS +=  src/cs8controller.h \
     src/qttelnet.h \
     src/cs8telnet.h \
     src/cs8ControllerComponent.h \
-    src/cs8loginterface.h
+    src/cs8loginterface.h \
+    src/cs8abstractbrowser.h \
+    src/cs8remotebrowser.h \
+    src/cs8filebrowsermodel.h \
+    src/cs8fileitem.h \
+    src/cs8localbrowser.h
 
 SOURCES += src/cs8controller.cpp \
    #  src/cs8fileinfo.cpp \
@@ -18,7 +23,12 @@ SOURCES += src/cs8controller.cpp \
     src/qurlinfo.cpp \
     src/qttelnet.cpp \
     src/cs8telnet.cpp \
-    src/cs8loginterface.cpp
+    src/cs8loginterface.cpp \
+    src/cs8abstractbrowser.cpp \
+    src/cs8remotebrowser.cpp \
+    src/cs8filebrowsermodel.cpp \
+    src/cs8fileitem.cpp \
+    src/cs8localbrowser.cpp
 
 QT += core \
     network \

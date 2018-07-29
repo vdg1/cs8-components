@@ -10,7 +10,7 @@
 #include <QUrl>
 
 //
-cs8Controller::cs8Controller() : QObject(), m_isOnline(false), m_checkOnline(false), m_ftp(0) {
+cs8Controller::cs8Controller(QObject *parent) : QObject(parent), m_isOnline(false), m_checkOnline(false), m_ftp(0) {
   m_onlineTimer = new QTimer(this);
   m_onlineTimer->setSingleShot(true);
   connect(m_onlineTimer, &QTimer::timeout, this, &cs8Controller::slotOnlineTimerTimeout);
@@ -234,6 +234,18 @@ bool cs8Controller::downloadFile(const QString &remoteFileName, const QString &l
   }
   file.write(data);
   return true;
+}
+
+QUrl cs8Controller::getUrl() const { return m_url; }
+
+void cs8Controller::setUrl(const QUrl &url) {
+  m_url = url;
+  initializeFTPSession();
+  m_isOnline = false;
+  emit onlineChanged(m_isOnline, 0, QString());
+
+  if (m_checkOnline)
+    slotStartCheck();
 }
 
 void cs8Controller::slotStartCheck() {
