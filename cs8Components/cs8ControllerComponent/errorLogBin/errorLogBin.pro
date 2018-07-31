@@ -10,6 +10,7 @@ DESTDIR = ../bin
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
+TARGET = errorlog2
 
 FORMS = ui/dialog.ui
 HEADERS = src/dialogimpl.h
@@ -21,3 +22,5 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/ -lcs8Con
 INCLUDEPATH += $$PWD/../../include
 DEPENDPATH += $$PWD/../../include
 LIBS += -lWs2_32
+win32:CONFIG(release, debug|release):PRE_TARGETDEPS +=$$OUT_PWD/../../lib/cs8ControllerComponent.lib
+else:win32:CONFIG(debug, debug|release):PRE_TARGETDEPS +=$$OUT_PWD/../../lib/cs8ControllerComponentd.lib

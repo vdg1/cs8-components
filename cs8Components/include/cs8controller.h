@@ -34,7 +34,7 @@ public:
   void setLoginData(const QString &userName, const QString &password = QString(""));
   void setAddress(const QString &value);
   QString address() { return m_url.host(); }
-  cs8Controller();
+  cs8Controller(QObject *parent = nullptr);
   QString armSerialNumber();
   QString controllerSerialNumber();
   QString armType();
@@ -49,6 +49,9 @@ public:
   bool getFileContent(const QString &fileName, QByteArray &data, qint64 &sizeOnServer);
   bool getFolderContents(const QString &path, QList<QUrlInfo> &list);
   bool downloadFile(const QString &remoteFileName, const QString &localFileName, qint64 &sizeOnServer);
+
+  QUrl getUrl() const;
+  void setUrl(const QUrl &url);
 
 signals:
   void onlineChanged(bool online, int error, const QString &errorString);

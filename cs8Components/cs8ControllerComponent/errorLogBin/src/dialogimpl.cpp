@@ -1,6 +1,8 @@
 #include "dialogimpl.h"
 #include "cs8ControllerComponent.h"
 
+#include "cs8filebrowsermodel.h"
+#include "cs8localbrowser.h"
 #include "cs8remotebrowser.h"
 #include <QDebug>
 #include <QDirIterator>
@@ -13,7 +15,7 @@
 DialogImpl::DialogImpl(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f) {
   setupUi(this);
   connect(btLoad, SIGNAL(clicked()), this, SLOT(slotLoad()));
-  m_ctrl = new cs8Controller();
+  m_ctrl = new cs8Controller(this);
   // m_ctrl->enableOnlineCheck(true);
   m_ctrl->setAddress(leHost->text());
   scanner = new cs8NetworkScanner(this);
@@ -27,7 +29,11 @@ DialogImpl::DialogImpl(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f) 
   m_telnet = new cs8Telnet(this);
   QObject::connect(m_telnet, &cs8Telnet::telnetLine, [=](const QString &newValue) { textEdit->append(newValue); });
 
-  cs8RemoteBrowser browser();
+  m_browser = new cs8FileBrowserModel(
+      QUrl(QDir::fromNativeSeparators(
+          "D:\\data\\Staubli\\SRS\\_Development\\Dev_SaxeAutomation_SRS2014\\Dev_SaxeAutomation")),
+      this);
+  treeView->setModel(m_browser);
 }
 //
 

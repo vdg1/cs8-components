@@ -5,19 +5,40 @@ cs8RemoteBrowser::cs8RemoteBrowser(const QUrl &url, QObject *parent) : cs8Abstra
   m_controller->setUrl(m_url);
 }
 
-bool cs8RemoteBrowser::getProfiles(QFileInfoList &profiles) {
+QFileInfoList cs8RemoteBrowser::getProfiles(bool *ok) {
+  qDebug() << __FUNCTION__ << m_url.toString() + "/usr/configs/profiles";
   QList<QUrlInfo> list;
-  if (m_controller->getFolderContents("/usr/config/profiles", list)) {
+  if (m_controller->getFolderContents("/usr/configs/profiles", list)) {
     QFileInfoList outList;
     foreach (auto info, list) {
       QFileInfo item;
       item.setFile(info.name());
       outList << item;
     }
-    profiles = outList;
-    return true;
+    *ok = true;
+    return outList;
+
   } else {
-    profiles = QFileInfoList();
-    return false;
+    *ok = false;
+    return QFileInfoList();
+  }
+}
+
+QFileInfoList cs8RemoteBrowser::getLogFiles(bool *ok) {
+  qDebug() << __FUNCTION__ << m_url.toString() + "/log";
+  QList<QUrlInfo> list;
+  if (m_controller->getFolderContents("/log", list)) {
+    QFileInfoList outList;
+    foreach (auto info, list) {
+      QFileInfo item;
+      item.setFile(info.name());
+      outList << item;
+    }
+    *ok = true;
+    return outList;
+
+  } else {
+    *ok = false;
+    return QFileInfoList();
   }
 }

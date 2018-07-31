@@ -6,6 +6,7 @@
 #include <QAbstractItemModel>
 
 class cs8FileBrowserModel : public QAbstractItemModel {
+  Q_OBJECT
 public:
   cs8FileBrowserModel(const QUrl &url, QObject *parent = 0);
 
@@ -29,11 +30,16 @@ public:
 
   cs8AbstractBrowser *getBackend() const;
 
+public slots:
+  void fillModel();
+
 private:
   void setupModelData(const QStringList &lines, cs8FileItem *parent);
   cs8FileItem *getItem(const QModelIndex &index) const;
 
   cs8FileItem *rootItem;
+  cs8FileItem *profilesNode;
+  cs8FileItem *logNode;
   cs8AbstractBrowser *m_backend;
 };
 

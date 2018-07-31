@@ -9,7 +9,9 @@ class cs8AbstractBrowser : public QObject {
   Q_OBJECT
 public:
   explicit cs8AbstractBrowser(const QUrl &url, QObject *parent = nullptr);
-  virtual bool getProfiles(QFileInfoList &profiles) = 0;
+  virtual QFileInfoList getProfiles(bool *ok = 0) = 0;
+  virtual QFileInfoList getLogFiles(bool *ok = 0) = 0;
+  QString controllerName() const;
 signals:
   void urlChanged();
 

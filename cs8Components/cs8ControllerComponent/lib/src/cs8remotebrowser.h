@@ -7,7 +7,9 @@
 class cs8RemoteBrowser : public cs8AbstractBrowser {
 public:
   explicit cs8RemoteBrowser(const QUrl &url, QObject *parent = nullptr);
-  bool getProfiles(QFileInfoList &profiles) override;
+
+  QFileInfoList getProfiles(bool *ok = Q_NULLPTR) override;
+  QFileInfoList getLogFiles(bool *ok = 0) override;
 
 protected:
   cs8Controller *m_controller;

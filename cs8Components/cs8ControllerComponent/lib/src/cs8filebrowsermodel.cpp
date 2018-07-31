@@ -4,12 +4,28 @@
 
 #include <QUrl>
 
-cs8FileBrowserModel::cs8FileBrowserModel(const QUrl &url, QObject *parent) : QAbstractItemModel(parent), m_backend(0) {
+void cs8FileBrowserModel::fillModel() {
+  if (rootItem != nullptr)
+    delete rootItem;
+  rootItem = new cs8FileItem(m_backend->controllerName());
+
+  profilesNode = new cs8FileItem(tr("Profiles"), rootItem);
+  profilesNode->appendFileInfos(m_backend->getProfiles());
+  rootItem->appendChild(profilesNode);
+
+  logNode = new cs8FileItem(tr("Logs"), rootItem);
+  logNode->appendFileInfos(m_backend->getLogFiles());
+  rootItem->appendChild(logNode);
+}
+
+cs8FileBrowserModel::cs8FileBrowserModel(const QUrl &url, QObject *parent)
+    : QAbstractItemModel(parent), m_backend(0), rootItem(0) {
   if (url.scheme() == "ftp")
     m_backend = new cs8RemoteBrowser(url, this);
   else
     m_backend = new cs8LocalBrowser(url, this);
-  // rootItem = new cs8FileItem();
+  rootItem = new cs8FileItem(m_backend->controllerName());
+  QTimer::singleShot(0, this, &cs8FileBrowserModel::fillModel);
 }
 
 cs8FileBrowserModel::~cs8FileBrowserModel() { delete rootItem; }
@@ -20,19 +36,23 @@ QVariant cs8FileBrowserModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole)
+  if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::CheckStateRole)
     return QVariant();
 
   cs8FileItem *item = getItem(index);
-
+  if (index.column() == 0 && role == Qt::CheckStateRole) {
+    return item->checked();
+  }
   return item->data(index.column());
 }
 
 Qt::ItemFlags cs8FileBrowserModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return 0;
-
-  return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+  Qt::ItemFlags flags = Qt::ItemIsEnabled;
+  flags |= Qt::ItemIsAutoTristate | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;
+  // qDebug() << "flags for: " << index << ":" << flags;
+  return flags;
 }
 
 cs8FileItem *cs8FileBrowserModel::getItem(const QModelIndex &index) const {
@@ -58,7 +78,6 @@ QModelIndex cs8FileBrowserModel::index(int row, int column, const QModelIndex &p
     return QModelIndex();
 
   cs8FileItem *parentItem = getItem(parent);
-
   cs8FileItem *childItem = parentItem->child(row);
   if (childItem)
     return createIndex(row, column, childItem);
@@ -131,14 +150,31 @@ int cs8FileBrowserModel::rowCount(const QModelIndex &parent) const {
 }
 
 bool cs8FileBrowserModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-  if (role != Qt::EditRole)
+  if (!index.isValid())
     return false;
-
+  qDebug() << __FUNCTION__ << index << ":" << value << ":" << role;
   cs8FileItem *item = getItem(index);
-  bool result = item->setData(index.column(), value);
+  bool result = true;
 
-  if (result)
-    emit dataChanged(index, index);
+  if (role == Qt::CheckStateRole) {
+    item->setChecked(value.value<Qt::CheckState>());
+    if (item->hasChildren() && (value.value<Qt::CheckState>() != Qt::PartiallyChecked)) {
+      foreach (auto item, item->childItems()) { item->setChecked(value.value<Qt::CheckState>()); }
+      emit dataChanged(this->index(0, 0, index), this->index(item->childCount() - 1, 0, index));
+    }
+    // update parent item to tristate state if required
+    if (item->hasSiblings()) {
+      if (item->parentItem()->allChildsCheckedState(Qt::Checked))
+        setData(index.parent(), Qt::Checked, Qt::CheckStateRole);
+      else if (item->parentItem()->allChildsCheckedState(Qt::Unchecked))
+        setData(index.parent(), Qt::Unchecked, Qt::CheckStateRole);
+      else
+        setData(index.parent(), Qt::PartiallyChecked, Qt::CheckStateRole);
+    }
+  } else
+    result = item->setData(index.column(), value);
+
+  emit dataChanged(index, index);
 
   return result;
 }
