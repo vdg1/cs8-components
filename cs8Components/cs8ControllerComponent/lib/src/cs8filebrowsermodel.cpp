@@ -5,17 +5,37 @@
 #include <QUrl>
 
 void cs8FileBrowserModel::fillModel() {
+  beginResetModel();
   if (rootItem != nullptr)
     delete rootItem;
-  rootItem = new cs8FileItem(m_backend->controllerName());
+  rootItem = new cs8FileItem(this /*m_backend->controllerName()*/);
 
   profilesNode = new cs8FileItem(tr("Profiles"), rootItem);
-  profilesNode->appendFileInfos(m_backend->getProfiles());
+  // profilesNode->appendFileInfos(m_backend->getProfiles());
   rootItem->appendChild(profilesNode);
 
   logNode = new cs8FileItem(tr("Logs"), rootItem);
-  logNode->appendFileInfos(m_backend->getLogFiles());
+  // logNode->appendFileInfos(m_backend->getLogFiles());
   rootItem->appendChild(logNode);
+
+  appNode = new cs8FileItem(tr("Applications"), rootItem);
+  appNode->appendFileInfos(m_backend->getApplications());
+  rootItem->appendChild(appNode);
+  endResetModel();
+}
+
+void cs8FileBrowserModel::enumerateChildren(const QModelIndex &parentItem) {
+  cs8FileItem *item = getItem(parentItem);
+  if (item) {
+    qDebug() << __FUNCTION__ << ":" << item->fileName();
+    cs8FileItemList list = m_backend->getApplications(item);
+    if (list.count() > 0) {
+      beginInsertRows(parentItem, 0, list.count() - 1);
+      item->appendFileInfos(list);
+      endInsertRows();
+    }
+    item->setChildsEnumerated(true);
+  }
 }
 
 cs8FileBrowserModel::cs8FileBrowserModel(const QUrl &url, QObject *parent)
@@ -24,7 +44,8 @@ cs8FileBrowserModel::cs8FileBrowserModel(const QUrl &url, QObject *parent)
     m_backend = new cs8RemoteBrowser(url, this);
   else
     m_backend = new cs8LocalBrowser(url, this);
-  rootItem = new cs8FileItem(m_backend->controllerName());
+
+  rootItem = new cs8FileItem(this);
   QTimer::singleShot(0, this, &cs8FileBrowserModel::fillModel);
 }
 
@@ -32,27 +53,61 @@ cs8FileBrowserModel::~cs8FileBrowserModel() { delete rootItem; }
 
 int cs8FileBrowserModel::columnCount(const QModelIndex & /* parent */) const { return rootItem->columnCount(); }
 
+bool cs8FileBrowserModel::canFetchMore(const QModelIndex &parent) const {
+  cs8FileItem *item = getItem(parent);
+  return m_backend->canFetchMore(*item);
+}
+
 QVariant cs8FileBrowserModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::CheckStateRole)
-    return QVariant();
-
   cs8FileItem *item = getItem(index);
-  if (index.column() == 0 && role == Qt::CheckStateRole) {
-    return item->checked();
+
+  switch (role) {
+  case Qt::CheckStateRole:
+    switch (index.column()) {
+    case 0:
+      return item->checkState();
+      break;
+    default:
+      return QVariant();
+      break;
+    }
+    break;
+
+  case Qt::DisplayRole:
+    switch (index.column()) {
+    case 0:
+      return item->fileName();
+      break;
+    case 1:
+      return item->fileSize();
+      break;
+    case 2:
+      return item->isDir();
+      break;
+    default:
+      return QVariant();
+      break;
+    }
+    break;
   }
-  return item->data(index.column());
+
+  return QVariant();
 }
 
 Qt::ItemFlags cs8FileBrowserModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return 0;
-  Qt::ItemFlags flags = Qt::ItemIsEnabled;
-  flags |= Qt::ItemIsAutoTristate | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;
-  // qDebug() << "flags for: " << index << ":" << flags;
-  return flags;
+
+  switch (index.column()) {
+  case 0:
+    return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;
+    break;
+  }
+
+  return Qt::ItemIsEnabled;
 }
 
 cs8FileItem *cs8FileBrowserModel::getItem(const QModelIndex &index) const {
@@ -60,11 +115,21 @@ cs8FileItem *cs8FileBrowserModel::getItem(const QModelIndex &index) const {
     cs8FileItem *item = static_cast<cs8FileItem *>(index.internalPointer());
     if (item)
       return item;
+    else
+      return rootItem;
   }
   return rootItem;
 }
 
-cs8AbstractBrowser *cs8FileBrowserModel::getBackend() const { return m_backend; }
+/*
+QString cs8FileBrowserModel::fileName(cs8FileItem *item) const {
+  return item->filePath().remove(m_backend->getUrl().toString());
+}
+*/
+
+cs8AbstractBrowser *cs8FileBrowserModel::backend() const { return m_backend; }
+
+QUrl cs8FileBrowserModel::url() const { return m_backend->url(); }
 
 QVariant cs8FileBrowserModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
@@ -145,30 +210,41 @@ bool cs8FileBrowserModel::removeRows(int position, int rows, const QModelIndex &
 
 int cs8FileBrowserModel::rowCount(const QModelIndex &parent) const {
   cs8FileItem *parentItem = getItem(parent);
-
+  // qDebug() << __FUNCTION__ << "Child count of " << parentItem->data(0) << ":" << parentItem->childCount();
   return parentItem->childCount();
 }
 
 bool cs8FileBrowserModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   if (!index.isValid())
     return false;
-  qDebug() << __FUNCTION__ << index << ":" << value << ":" << role;
+  // qDebug() << __FUNCTION__ << index << ":" << value << ":" << role;
   cs8FileItem *item = getItem(index);
+
+  if (item->isDir() && !item->childsEnumerated())
+    enumerateChildren(index);
+
   bool result = true;
 
   if (role == Qt::CheckStateRole) {
+    // qDebug() << __FUNCTION__ << index << ":" << value.value<Qt::CheckState>();
     item->setChecked(value.value<Qt::CheckState>());
+    //
+    // check/uncheck child items if this item is being checked/unchecked
     if (item->hasChildren() && (value.value<Qt::CheckState>() != Qt::PartiallyChecked)) {
       foreach (auto item, item->childItems()) { item->setChecked(value.value<Qt::CheckState>()); }
       emit dataChanged(this->index(0, 0, index), this->index(item->childCount() - 1, 0, index));
     }
+    //
     // update parent item to tristate state if required
     if (item->hasSiblings()) {
+      // all childs of parent are checked ==> check parent, too
       if (item->parentItem()->allChildsCheckedState(Qt::Checked))
         setData(index.parent(), Qt::Checked, Qt::CheckStateRole);
+      // all childs of parent are unchecked ==> uncheck parent, too
       else if (item->parentItem()->allChildsCheckedState(Qt::Unchecked))
         setData(index.parent(), Qt::Unchecked, Qt::CheckStateRole);
       else
+        // childs of parent are checked and unchecked ==> set partially checked for parent
         setData(index.parent(), Qt::PartiallyChecked, Qt::CheckStateRole);
     }
   } else
@@ -189,6 +265,16 @@ bool cs8FileBrowserModel::setHeaderData(int section, Qt::Orientation orientation
     emit headerDataChanged(orientation, section, section);
 
   return result;
+}
+
+bool cs8FileBrowserModel::hasChildren(const QModelIndex &parent) const {
+  cs8FileItem *item = getItem(parent);
+  if (item != nullptr) {
+    if (item->isDir() && !item->childsEnumerated()) {
+      return true;
+    }
+  }
+  return rowCount(parent) > 0;
 }
 
 void cs8FileBrowserModel::setupModelData(const QStringList &lines, cs8FileItem *parent) {

@@ -6,6 +6,7 @@
 #include <QEventLoop>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QRegularExpression>
 #include <QTcpSocket>
 #include <QUrl>
 
@@ -178,7 +179,82 @@ bool cs8Controller::getFileContent(const QString &fileName, QByteArray &data, qi
   return (m_ftp->error() == QFtp::NoError && !timeout);
 }
 
-bool cs8Controller::getFolderContents(const QString &path, QList<QUrlInfo> &list) {
+bool cs8Controller::matchesFilters(const QString &fileName, const QFileInfo &fi, const QStringList nameFilters,
+                                   const QDir::Filters filters) const {
+  Q_ASSERT(!fileName.isEmpty());
+
+  // filter . and ..?
+  const int fileNameSize = fileName.size();
+  const bool dotOrDotDot = fileName[0] == QLatin1Char('.') &&
+                           ((fileNameSize == 1) || (fileNameSize == 2 && fileName[1] == QLatin1Char('.')));
+  if ((filters & QDir::NoDot) && dotOrDotDot && fileNameSize == 1)
+    return false;
+  if ((filters & QDir::NoDotDot) && dotOrDotDot && fileNameSize == 2)
+    return false;
+
+  // name filter
+  // Pass all entries through name filters, except dirs if the AllDirs
+  QVector<QRegExp> nameRegExps;
+
+  if (!nameFilters.isEmpty() && !((filters & QDir::AllDirs) && fi.isDir())) {
+    bool matched = false;
+    for (QVector<QRegExp>::const_iterator iter = nameRegExps.constBegin(), end = nameRegExps.constEnd(); iter != end;
+         ++iter) {
+
+      QRegExp copy = *iter;
+      if (copy.exactMatch(fileName)) {
+        matched = true;
+        break;
+      }
+    }
+    if (!matched)
+      return false;
+  }
+  // skip symlinks
+  const bool skipSymlinks = (filters & QDir::NoSymLinks);
+  const bool includeSystem = (filters & QDir::System);
+  if (skipSymlinks && fi.isSymLink()) {
+    // The only reason to save this file is if it is a broken link and we are requesting system files.
+    if (!includeSystem || fi.exists())
+      return false;
+  }
+
+  // filter hidden
+  const bool includeHidden = (filters & QDir::Hidden);
+  if (!includeHidden && !dotOrDotDot && fi.isHidden())
+    return false;
+
+  // filter system files
+  if (!includeSystem && (!(fi.isFile() || fi.isDir() || fi.isSymLink()) || (!fi.exists() && fi.isSymLink())))
+    return false;
+
+  // skip directories
+  const bool skipDirs = !(filters & (QDir::Dirs | QDir::AllDirs));
+  if (skipDirs && fi.isDir())
+    return false;
+
+  // skip files
+  const bool skipFiles = !(filters & QDir::Files);
+  if (skipFiles && fi.isFile())
+    // Basically we need a reason not to exclude this file otherwise we just eliminate it.
+    return false;
+
+  // filter permissions
+  const bool filterPermissions =
+      ((filters & QDir::PermissionMask) && (filters & QDir::PermissionMask) != QDir::PermissionMask);
+  const bool doWritable = !filterPermissions || (filters & QDir::Writable);
+  const bool doExecutable = !filterPermissions || (filters & QDir::Executable);
+  const bool doReadable = !filterPermissions || (filters & QDir::Readable);
+  if (filterPermissions &&
+      ((doReadable && !fi.isReadable()) || (doWritable && !fi.isWritable()) || (doExecutable && !fi.isExecutable()))) {
+    return false;
+  }
+
+  return true;
+}
+
+bool cs8Controller::getFolderContents(const QString &path, const QString &nameFilter,
+                                      const QFlags<QDir::Filter> &filter, QList<QUrlInfo> &list) {
   qDebug() << __FUNCTION__ << path;
   if (!checkFtpSession())
     return false;
@@ -198,7 +274,11 @@ bool cs8Controller::getFolderContents(const QString &path, QList<QUrlInfo> &list
   });
   // connect listInfo signal
   QMetaObject::Connection connListInfo = connect(m_ftp, &QFtp::listInfo, [=](const QUrlInfo &i) {
-    resultList->append(i);
+    QString name = i.name().split("/").last();
+    QRegularExpression rx(nameFilter);
+
+    if (name.contains(rx) || nameFilter.isEmpty())
+      resultList->append(i);
     qDebug() << "listinfo: " << i.name();
   });
   int id = m_ftp->list(m_url.path());

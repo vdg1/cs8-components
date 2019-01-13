@@ -389,7 +389,7 @@ void cs8Application::setName(const QString &name) {
   m_projectName = name;
 }
 
-QString cs8Application::exportToCImplementation() {
+QString cs8Application::exportToCImplementation() const {
   QStringList out;
 
   out << QString("#include <%1.h>\n").arg(m_projectName);
@@ -403,7 +403,7 @@ QString cs8Application::exportToCImplementation() {
   return out.join("\n");
 }
 
-QString cs8Application::exportToCDefinition() {
+QString cs8Application::exportToCDefinition() const {
   QStringList out;
 
   out << "\n";
@@ -454,7 +454,7 @@ QString cs8Application::exportToCDefinition() {
                  .arg(i.hasNext() ? "," : " ")     // 3: , for next element
                  .arg(var->varValue().toString()); // 4: value
     }
-    out << QString("   }\n\n");
+    out << QString("   };\n\n");
   }
 
   foreach (cs8Variable *variable, m_globalVariableModel->publicVariables()) {
@@ -487,10 +487,23 @@ QString cs8Application::exportToCDefinition() {
   return out.join("\n");
 }
 
+QString cs8Application::exportToIOList() const {
+  QString data;
+
+  foreach (cs8Variable *variable, m_globalVariableModel->variableList(QRegularExpression("[asd]io"))) {
+    data += QString("%1;%2;%3;%4\n")
+                .arg(variable->name())
+                .arg(variable->type())
+                .arg(variable->size())
+                .arg(variable->documentation(false, false).remove("\n"));
+  }
+  return data;
+}
+
 /*!
  *
  */
-void cs8Application::exportToCppFile(const QString &path) {
+void cs8Application::exportToCppFile(const QString &path) const {
   QString fileName;
 
   qDebug() << "export Cpp interface to : " << path + " : " + m_projectName;
@@ -507,7 +520,7 @@ void cs8Application::exportToCppFile(const QString &path) {
   file.close();
 }
 
-void cs8Application::exportToHFile(const QString &path) {
+void cs8Application::exportToHFile(const QString &path) const {
   QString fileName;
 
   qDebug() << "export  interface to : " << path + " : " + m_projectName;
@@ -812,7 +825,7 @@ QString cs8Application::projectPath(bool cs8Format) {
   }
 }
 
-QString cs8Application::moduleDocumentationFormatted(const QString &withSlashes) {
+QString cs8Application::moduleDocumentationFormatted(const QString &withSlashes) const {
 
   QString out;
   QStringList list;
@@ -856,7 +869,7 @@ QString cs8Application::moduleDocumentationFormatted(const QString &withSlashes)
   return out;
 }
 
-QString cs8Application::mainPageDocumentationFromatted(const QString &withSlashes) {
+QString cs8Application::mainPageDocumentationFromatted(const QString &withSlashes) const {
 
   QString out;
   QStringList list;
@@ -900,7 +913,7 @@ QString cs8Application::mainPageDocumentationFromatted(const QString &withSlashe
   return out;
 }
 
-QMap<QString, QMap<QString, QString> *> cs8Application::getEnumerations() {
+QMap<QString, QMap<QString, QString> *> cs8Application::getEnumerations() const {
 
   QString prefix;
   QMap<QString, QString> *constSet;
@@ -1397,9 +1410,23 @@ bool cs8Application::saveProjectData() {
   return true;
 }
 
-void cs8Application::exportToCClass(const QString path) {
+void cs8Application::exportToCClass(const QString &path) const {
   exportToHFile(path);
   exportToCppFile(path);
+}
+
+void cs8Application::exportIOList(const QString &fileName) const {
+
+  qDebug() << "export  IOs to : " << fileName;
+  QFile file;
+  file.setFileName(fileName);
+  if (!file.open(QFile::WriteOnly)) {
+    qDebug() << "Couldn't write IO list to file " << fileName << file.errorString();
+    return;
+  }
+  QTextStream stream(&file);
+  stream << exportToIOList();
+  file.close();
 }
 QString cs8Application::copyRightMessage() const { return m_copyRightMessage; }
 bool cs8Application::withUndocumentedSymbols() const { return m_withUndocumentedSymbols; }

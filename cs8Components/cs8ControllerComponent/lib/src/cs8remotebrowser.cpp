@@ -5,40 +5,46 @@ cs8RemoteBrowser::cs8RemoteBrowser(const QUrl &url, QObject *parent) : cs8Abstra
   m_controller->setUrl(m_url);
 }
 
-QFileInfoList cs8RemoteBrowser::getProfiles(bool *ok) {
+cs8FileItemList cs8RemoteBrowser::getProfiles(bool *ok) {
   qDebug() << __FUNCTION__ << m_url.toString() + "/usr/configs/profiles";
   QList<QUrlInfo> list;
-  if (m_controller->getFolderContents("/usr/configs/profiles", list)) {
-    QFileInfoList outList;
+  if (m_controller->getFolderContents("/usr/configs/profiles", "*", QDir::Files, list)) {
+    cs8FileItemList outList;
     foreach (auto info, list) {
-      QFileInfo item;
-      item.setFile(info.name());
-      outList << item;
+      if (info.name().contains(".cfx"))
+        outList << cs8FileItem(info);
     }
-    *ok = true;
+    if (ok)
+      *ok = true;
     return outList;
 
   } else {
-    *ok = false;
-    return QFileInfoList();
+    if (ok)
+      *ok = false;
+    return cs8FileItemList();
   }
 }
 
-QFileInfoList cs8RemoteBrowser::getLogFiles(bool *ok) {
+cs8FileItemList cs8RemoteBrowser::getLogFiles(bool *ok) {
   qDebug() << __FUNCTION__ << m_url.toString() + "/log";
   QList<QUrlInfo> list;
-  if (m_controller->getFolderContents("/log", list)) {
-    QFileInfoList outList;
+  if (m_controller->getFolderContents("/log", "*", QDir::Files, list)) {
+    cs8FileItemList outList;
     foreach (auto info, list) {
-      QFileInfo item;
-      item.setFile(info.name());
-      outList << item;
+      if (info.name().contains("errors."))
+        outList << cs8FileItem(info);
     }
-    *ok = true;
+    if (ok)
+      *ok = true;
     return outList;
 
   } else {
-    *ok = false;
-    return QFileInfoList();
+    if (ok)
+      *ok = false;
+    return cs8FileItemList();
   }
 }
+
+cs8FileItemList cs8RemoteBrowser::getApplications(cs8FileItem *parent, bool *ok) { return cs8FileItemList(); }
+
+bool cs8RemoteBrowser::canFetchMore(const cs8FileItem &parent) const { return false; }

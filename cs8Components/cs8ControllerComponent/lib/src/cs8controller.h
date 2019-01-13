@@ -2,6 +2,7 @@
 #define CS8CONTROLLER_H
 //
 #include <QBuffer>
+#include <QDir>
 #include <QDomDocument>
 #include <QElapsedTimer>
 #include <QEventLoop>
@@ -47,7 +48,8 @@ public:
 
   bool getFileContent(const QString &fileName, QByteArray &data);
   bool getFileContent(const QString &fileName, QByteArray &data, qint64 &sizeOnServer);
-  bool getFolderContents(const QString &path, QList<QUrlInfo> &list);
+  bool getFolderContents(const QString &path, const QString &nameFilter, const QFlags<QDir::Filter> &filter,
+                         QList<QUrlInfo> &list);
   bool downloadFile(const QString &remoteFileName, const QString &localFileName, qint64 &sizeOnServer);
 
   QUrl getUrl() const;
@@ -77,6 +79,9 @@ protected:
   QString orderNumber(const QDomDocument &doc);
   bool checkFtpSession();
   void initializeFTPSession();
+
+  bool matchesFilters(const QString &fileName, const QFileInfo &fi, const QStringList nameFilters = QStringList(),
+                      const QDir::Filters filters = QDir::NoFilter) const;
 
 protected slots:
   void slotOnlineTimerTimeout();

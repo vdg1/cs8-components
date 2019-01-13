@@ -30,16 +30,17 @@ public:
   cs8ProgramModel *programModel() const;
   cs8LibraryAliasModel *libraryModel() const;
 
-  QString exportToCImplementation();
-  QString exportToCDefinition();
+  QString exportToCImplementation() const;
+  QString exportToCDefinition() const;
+  QString exportToIOList() const;
   bool exportInterfacePrototype(const QString &path);
   bool integrateInterface(cs8Application *sourceApplication);
   QString name() const;
   void setName(const QString &name);
 
   bool loadDocumentationFile(const QString &);
-  QString moduleDocumentationFormatted(const QString &withSlashes = QString("///"));
-  QString mainPageDocumentationFromatted(const QString &withSlashes = QString("///"));
+  QString moduleDocumentationFormatted(const QString &withSlashes = QString("///")) const;
+  QString mainPageDocumentationFromatted(const QString &withSlashes = QString("///")) const;
   QString performPrecompilerChecks();
   void setCellPath(const QString &path);
   QString cellPath() const;
@@ -54,14 +55,15 @@ public:
   cs8TypeModel *typeModel() const;
   bool loadProjectData();
   bool saveProjectData();
-  void exportToCClass(const QString path);
+  void exportToCClass(const QString &path) const;
+  void exportIOList(const QString &fileName) const;
 
   QString copyRightMessage() const;
 
   bool withUndocumentedSymbols() const;
   void setWithUndocumentedSymbols(bool withUndocumentedSymbols);
 
-  QMap<QString, QMap<QString, QString> *> getEnumerations();
+  QMap<QString, QMap<QString, QString> *> getEnumerations() const;
   void checkPrograms(QStringList &output);
   void checkEnumerations(QStringList &output);
   void checkGlobalData(QStringList &output);
@@ -134,8 +136,8 @@ private:
   bool reportHiddenGlobalVariables;
   bool reportParametersPostfix;
   bool reportToDos;
-  void exportToCppFile(const QString &path);
-  void exportToHFile(const QString &path);
+  void exportToCppFile(const QString &path) const;
+  void exportToHFile(const QString &path) const;
 
   QString sanitizeSymbolName(const QString &varName);
 };

@@ -37,6 +37,7 @@ public:
   cs8Variable *variable(QModelIndex index);
   QStringList variableNameList();
   QList<cs8Variable *> variableList(const QString &type = QString());
+  QList<cs8Variable *> variableList(const QRegularExpression &rx);
 
   cs8Variable *createVariable(const QString &name);
   bool hasDocumentation();

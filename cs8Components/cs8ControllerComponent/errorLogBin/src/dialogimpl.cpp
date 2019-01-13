@@ -33,6 +33,7 @@ DialogImpl::DialogImpl(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f) 
       QUrl(QDir::fromNativeSeparators(
           "D:\\data\\Staubli\\SRS\\_Development\\Dev_SaxeAutomation_SRS2014\\Dev_SaxeAutomation")),
       this);
+  // QUrl("ftp://maintenance:spec_cal@localhost"), this);
   treeView->setModel(m_browser);
 }
 //

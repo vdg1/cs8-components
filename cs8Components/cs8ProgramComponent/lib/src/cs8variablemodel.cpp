@@ -1,6 +1,7 @@
 #include "cs8variablemodel.h"
 #include "cs8variable.h"
 #include <QDebug>
+#include <QRegularExpression>
 #include <QStringList>
 //
 cs8VariableModel::cs8VariableModel(QObject *parent, modelType mode)
@@ -98,6 +99,16 @@ QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) {
     }
     return list;
   }
+}
+
+QList<cs8Variable *> cs8VariableModel::variableList(const QRegularExpression &rx) {
+  QList<cs8Variable *> list;
+  foreach (cs8Variable *var, m_variableList) {
+    QRegularExpressionMatch match = rx.match(var->type());
+    if (match.hasMatch())
+      list.append(var);
+  }
+  return list;
 }
 
 cs8Variable *cs8VariableModel::createVariable(const QString &name) {

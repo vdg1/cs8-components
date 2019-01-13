@@ -13,7 +13,8 @@ HEADERS +=  src/cs8controller.h \
     src/cs8remotebrowser.h \
     src/cs8filebrowsermodel.h \
     src/cs8fileitem.h \
-    src/cs8localbrowser.h
+    src/cs8localbrowser.h \
+    src/qurlinfo.h
 
 SOURCES += src/cs8controller.cpp \
    #  src/cs8fileinfo.cpp \
@@ -28,7 +29,8 @@ SOURCES += src/cs8controller.cpp \
     src/cs8remotebrowser.cpp \
     src/cs8filebrowsermodel.cpp \
     src/cs8fileitem.cpp \
-    src/cs8localbrowser.cpp
+    src/cs8localbrowser.cpp \
+    src/qurlinfo.cpp
 
 QT += core \
     network \
