@@ -77,6 +77,7 @@ int main( int argc, char **argv )
     QDir dir( sourceDir );
     cs8Application application;
     QStringList sourceFiles = dir.entryList( QDir::Dirs | QDir::NoDotAndDotDot );
+    sourceFiles += "";
     //sourceFiles.append( "" );
     // QStringList addFiles = dir.entryList( QStringList() << "*.pjx", QDir::Files );
     //if ( addFiles.count() > 0 )

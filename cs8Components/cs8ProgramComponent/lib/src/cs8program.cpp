@@ -667,7 +667,9 @@ QString cs8Program::documentation(bool withPrefix) const {
   list.prepend( "//\\brief" );
   */
   QStringList list;
-  list << "\\brief" << description().split("\n") << "\n" << m_detailedDocumentation.split("\n");
+  list << "\n"
+       << "\\brief" << description().split("\n") << "\n"
+       << m_detailedDocumentation.split("\n");
   // list.removeLast();
   bool inCodeSection = false;
   int indentation = 0;
@@ -696,8 +698,11 @@ QString cs8Program::documentation(bool withPrefix) const {
   }
   // out += "\n";
   // out =list.join("\n");
-  foreach (cs8Variable *parameter, m_parameterModel->variableList()) { out += parameter->documentation(true, false); }
-  return out;
+  foreach (cs8Variable *parameter, m_parameterModel->variableList()) {
+      out += parameter->documentation(true, false);
+  }
+
+  return out.trimmed();
 }
 
 void cs8Program::setDescriptionSection(bool val3S6Format) {
