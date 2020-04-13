@@ -86,8 +86,8 @@ cs8Application::cs8Application(QObject *parent)
 void cs8Application::setProjectPath(const QString &pth) {
   QFileInfo fileInfo(pth);
   QDir dirInfo(pth);
-  qDebug() << fileInfo.absolutePath() << fileInfo.isFile() << fileInfo.isDir();
-  qDebug() << dirInfo.absolutePath();
+  // qDebug() << fileInfo.absolutePath() << fileInfo.isFile() <<
+  // fileInfo.isDir(); qDebug() << dirInfo.absolutePath();
 
   m_projectPath =
       (fileInfo.isFile() ? fileInfo.absolutePath() : dirInfo.absolutePath()) +
@@ -237,6 +237,7 @@ void cs8Application::setBriefModuleDocumentation(
 }
 
 bool cs8Application::open(const QString &pfxFilePath) {
+  qDebug() << Q_FUNC_INFO << "path:" << pfxFilePath;
   QString pth = QDir::fromNativeSeparators(pfxFilePath);
   if (pth.startsWith("Disk://")) {
     pth.replace(QString("Disk://"), m_cellPath + "/usr/usrapp/");
@@ -558,8 +559,8 @@ QString cs8Application::exportToIOList() const {
 void cs8Application::exportToCppFile(const QString &path) const {
   QString fileName;
 
-  qDebug() << "export Cpp interface to : " << path + " : " + m_projectName;
-  qDebug() << "saving Cpp file";
+  // qDebug() << "export Cpp interface to : " << path + " : " + m_projectName;
+  // qDebug() << "saving Cpp file";
   fileName = path + "/" + m_projectName + ".cpp";
   QFile file;
   file.setFileName(fileName);
@@ -576,8 +577,8 @@ void cs8Application::exportToCppFile(const QString &path) const {
 void cs8Application::exportToHFile(const QString &path) const {
   QString fileName;
 
-  qDebug() << "export  interface to : " << path + " : " + m_projectName;
-  qDebug() << "saving h file";
+  // qDebug() << "export  interface to : " << path + " : " + m_projectName;
+  // qDebug() << "saving h file";
   fileName = path + "/" + m_projectName + ".h";
   QFile file;
   file.setFileName(fileName);
@@ -676,7 +677,7 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
     m_callList = buildCallList();
     return true;
   } else {
-    qDebug() << "failed";
+    qDebug() << "failed to parse project file of application" << name();
     return false;
   }
 }
@@ -684,10 +685,10 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
 void cs8Application::slotGlobalVariableDocumentationFound(
     const QString &name, const QString &document) {
 
-  qDebug() << "find: " << name;
+  // qDebug() << "find: " << name;
   cs8Variable *variable = m_globalVariableModel->getVarByName(name);
   if (variable != nullptr) {
-    qDebug() << "setting doc for " << name << " to " << document;
+    // qDebug() << "setting doc for " << name << " to " << document;
     variable->setDescription(document);
   }
 }
@@ -736,7 +737,7 @@ cs8LibraryAliasModel *cs8Application::libraryModel() const {
 }
 
 bool cs8Application::loadDataFile(const QString &fileName) {
-  qDebug() << "Loading data file: " << fileName;
+  // qDebug() << "Loading data file: " << fileName;
 
   QDomDocument doc("data");
   QFile file(fileName);
@@ -753,7 +754,7 @@ bool cs8Application::loadDataFile(const QString &fileName) {
   QDomNodeList sectionList = rootElement.childNodes();
   for (int i = 0; i < sectionList.count(); i++) {
     QDomElement sectionElement = sectionList.at(i).toElement();
-    qDebug() << "Reading section: " << sectionElement.tagName();
+    // qDebug() << "Reading section: " << sectionElement.tagName();
     QDomNodeList variableList = sectionElement.childNodes();
     for (int j = 0; j < variableList.count(); j++) {
       QDomElement variableElement = variableList.at(j).toElement();
@@ -945,21 +946,22 @@ QString cs8Application::formattedDocument(const QString &doc,
       out += withSlashes + " <br>\n";
     }
     if (inCodeSection) {
-      qDebug() << str << "indent: " << indentation;
+      // qDebug() << str << "indent: " << indentation;
       if (str.simplified().indexOf(QRegExp(
-              R"(^\s*(begin|if\s|for\s|while\s|do\s|switch\s|case\s))")) == 0) {
+              R"(^\s*(begin|if\s|for\s|while\s|(do\s*$)|switch\s|case\s|default))")) ==
+          0) {
         str = indentText + str.trimmed();
         indentation++;
         indentText = "";
         for (int i = 0; i < indentation; i++)
           indentText += "&nbsp;";
-        qDebug() << "increase indent";
+        // qDebug() << "increase indent";
 
       } else if (str.simplified().indexOf(QRegExp(
                      "^\\s*(end(If|While|For|Switch)|until|break|else)")) ==
                  0) {
         indentation = qMax(0, --indentation);
-        qDebug() << "decrease indent to " << indentation;
+        // qDebug() << "decrease indent to " << indentation;
         indentText = "";
         for (int i = 0; i < indentation; i++)
           indentText += "&nbsp;";
@@ -985,7 +987,7 @@ cs8Application::getEnumerations() const {
   foreach (cs8Variable *var, m_globalVariableModel->variableList()) {
     if (var->hasConstPrefix(&prefix)) {
 
-      qDebug() << "Found prefix " << prefix << ": " << var->name();
+      // qDebug() << "Found prefix " << prefix << ": " << var->name();
       if (!constSets.contains(prefix)) {
         constSet = new QMap<QString, QString>();
         constSets.insert(prefix, constSet);
@@ -1090,7 +1092,7 @@ QMap<QString, bool> cs8Application::buildGlobalDataReferenceMap() {
 
   // build map
   foreach (cs8Variable *globalVariable, m_globalVariableModel->variableList()) {
-    qDebug() << "Checking global variable: " << globalVariable->name();
+    // qDebug() << "Checking global variable: " << globalVariable->name();
 
     referencedMap.insert(globalVariable->name(), false);
     // ignore variable if it is listed in a pragma statement

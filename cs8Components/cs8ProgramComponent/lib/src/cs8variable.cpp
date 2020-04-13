@@ -1,7 +1,8 @@
 #include "cs8variable.h"
 #include <QStringList>
 //
-cs8Variable::cs8Variable(QDomElement &element, const QString &description) : QObject() {
+cs8Variable::cs8Variable(QDomElement &element, const QString &description)
+    : QObject() {
   m_global = false;
   m_element = element;
   m_description = description;
@@ -20,11 +21,14 @@ cs8Variable::cs8Variable(cs8Variable *var) {
 QStringList cs8Variable::setBuildInVariableTypes(bool val3S6Format) {
   return QStringList() << "aio"
                        << "bool"
-                       << "configRs" << (val3S6Format ? "config" : "configRx") << "dio"
+                       << "configRs" << (val3S6Format ? "config" : "configRx")
+                       << "dio"
                        << "frame"
-                       << "jointRs" << (val3S6Format ? "joint" : "jointRx") << "mdesc"
+                       << "jointRs" << (val3S6Format ? "joint" : "jointRx")
+                       << "mdesc"
                        << "num"
-                       << "pointRs" << (val3S6Format ? "point" : "pointRx") << "sio"
+                       << "pointRs" << (val3S6Format ? "point" : "pointRx")
+                       << "sio"
                        << "string"
                        << "tool"
                        << "trsf";
@@ -40,7 +44,8 @@ cs8Variable::cs8Variable() : QObject(), m_global(false) {
 
 QString cs8Variable::toString(bool withTypeDefinition) {
   if (withTypeDefinition)
-    return QString("%1 %2%3").arg(type(), (use() == "reference" ? "& " : ""), name());
+    return QString("%1 %2%3").arg(type(), (use() == "reference" ? "& " : ""),
+                                  name());
   else
     return QString("%1").arg(name());
 }
@@ -65,17 +70,21 @@ QString cs8Variable::documentation(bool withPrefix, bool forCOutput) {
       inCodeSection = false;
       out += prefix + "<br>\n";
     }
-    out += (firstLine ? "" : prefix) + str + (inCodeSection ? "<br>" : "") + "\n";
+    out +=
+        (firstLine ? "" : prefix) + str + (inCodeSection ? "<br>" : "") + "\n";
     firstLine = false;
   }
   // qDebug() << "processed: " << out;
   if (!isGlobal())
-    return prefix + (forCOutput ? "@param " : "\\param ") + name() + " " + out + "\n";
+    return prefix + (forCOutput ? "@param " : "\\param ") + name() + " " + out +
+           "\n";
   else
     return prefix + out;
 }
 
-bool cs8Variable::isPublic() const { return m_element.attribute("access", "private") == "private" ? false : true; }
+bool cs8Variable::isPublic() const {
+  return m_element.attribute("access", "private") == "private" ? false : true;
+}
 
 QStringList cs8Variable::father() {
   QStringList list;
@@ -101,7 +110,8 @@ QDomNodeList cs8Variable::values() { return m_element.childNodes(); }
 
 QString cs8Variable::definition() {
 
-  return (QString("%1 %2").arg(type(), name())) + (allSizes() != QString() ? QString("[%1]").arg(allSizes()) : "");
+  return (QString("%1 %2").arg(type(), name())) +
+         (allSizes() != QString() ? QString("[%1]").arg(allSizes()) : "");
 }
 
 void cs8Variable::setGlobal(bool global) {
@@ -119,7 +129,8 @@ void cs8Variable::setGlobal(bool global) {
       m_element.setAttribute("size", "1");
     }
     m_element.removeAttribute("use");
-    if (m_element.attribute("xsi:type") == "collection" && m_element.hasAttribute("size")) {
+    if (m_element.attribute("xsi:type") == "collection" &&
+        m_element.hasAttribute("size")) {
       m_element.removeAttribute("size");
     }
     if (!m_element.hasAttribute("access")) {
@@ -133,7 +144,9 @@ bool cs8Variable::isGlobal() const {
   return m_global; // m_values.count() > 0;
 }
 
-QString cs8Variable::allSizes() { return m_element.attribute("size").replace(" ", ", "); }
+QString cs8Variable::allSizes() {
+  return m_element.attribute("size").replace(" ", ", ");
+}
 
 void cs8Variable::setAllSizes(const QString &sizes) {
   emit modified();
@@ -154,23 +167,30 @@ QDomElement cs8Variable::element(QDomDocument *doc, bool val3S6Format) const {
       element.setTagName("param");
       element.setAttribute("name", m_element.attribute("name"));
       element.setAttribute("type", m_element.attribute("type"));
-      element.setAttribute("byVal", m_element.attribute("use") == "reference" ? "false" : "true");
+      element.setAttribute("byVal", m_element.attribute("use") == "reference"
+                                        ? "false"
+                                        : "true");
     } else {
       QString typeName = m_element.attribute("type");
       // replace jointRX and pointRX with point and joint
       typeName.replace("Rx", "");
       element.setTagName(typeName);
       element.setAttribute("name", m_element.attribute("name"));
-      element.setAttribute("public", m_element.attribute("access") == "public" ? "true" : "false");
+      element.setAttribute("public", m_element.attribute("access") == "public"
+                                         ? "true"
+                                         : "false");
       // for io type do not write value elements
       if (typeName == "dio" || typeName == "aio" || typeName == "sio") {
         element.setAttribute("size", m_element.attribute("size"));
       } else {
         // identify array size
-        QStringList arrayDefinition = m_element.attribute("size", "1").split(",");
+        QStringList arrayDefinition =
+            m_element.attribute("size", "1").split(",");
         while (arrayDefinition.count() < 3)
           arrayDefinition.insert(0, "1");
-        int totalValues = arrayDefinition.at(0).toInt() * arrayDefinition.at(1).toInt() * arrayDefinition.at(2).toInt();
+        int totalValues = arrayDefinition.at(0).toInt() *
+                          arrayDefinition.at(1).toInt() *
+                          arrayDefinition.at(2).toInt();
         // element.setAttribute("size", m_element.attribute("size"));
         // write values
         for (int i = 0; i < totalValues; i++) {
@@ -179,7 +199,11 @@ QDomElement cs8Variable::element(QDomDocument *doc, bool val3S6Format) const {
 
           QDomElement sourceValue;
           for (int id = 0; id < m_element.childNodes().count(); id++) {
-            if (m_element.childNodes().at(id).toElement().attribute("key", "0").toInt() == i) {
+            if (m_element.childNodes()
+                    .at(id)
+                    .toElement()
+                    .attribute("key", "0")
+                    .toInt() == i) {
               sourceValue = m_element.childNodes().at(id).toElement();
               break;
             }
@@ -188,10 +212,12 @@ QDomElement cs8Variable::element(QDomDocument *doc, bool val3S6Format) const {
           QString str = element.tagName();
           str = str.at(0).toUpper() + str.mid(1);
           QDomElement valueElement = doc->createElement("value" + str);
-          valueElement.setAttribute("index", sourceValue.attribute("key", QString("%1").arg(i)));
+          valueElement.setAttribute(
+              "index", sourceValue.attribute("key", QString("%1").arg(i)));
 
           if (typeName == "bool") {
-            valueElement.setAttribute("value", sourceValue.attribute("value", "false"));
+            valueElement.setAttribute("value",
+                                      sourceValue.attribute("value", "false"));
           } else if (typeName == "joint") {
             QDomElement val = doc->createElement("jointValue");
             val.setAttribute("j1", sourceValue.attribute("j1", "0"));
@@ -223,18 +249,22 @@ QDomElement cs8Variable::element(QDomDocument *doc, bool val3S6Format) const {
             valueElement.appendChild(val);
           } else if (typeName == "config") {
             QDomElement val = doc->createElement("configValue");
-            val.setAttribute("shoulder", sourceValue.attribute("shoulder", "ssame"));
+            val.setAttribute("shoulder",
+                             sourceValue.attribute("shoulder", "ssame"));
             val.setAttribute("elbow", sourceValue.attribute("elbow", "esame"));
             val.setAttribute("wrist", sourceValue.attribute("wrist", "wsame"));
             valueElement.appendChild(val);
           } else if (typeName == "configRs") {
             QDomElement val = doc->createElement("configRsValue");
-            val.setAttribute("shoulder", sourceValue.attribute("shoulder", "ssame"));
+            val.setAttribute("shoulder",
+                             sourceValue.attribute("shoulder", "ssame"));
             valueElement.appendChild(val);
           } else if (typeName == "num") {
-            valueElement.setAttribute("value", sourceValue.attribute("value", "0"));
+            valueElement.setAttribute("value",
+                                      sourceValue.attribute("value", "0"));
           } else if (typeName == "string") {
-            valueElement.setAttribute("value", sourceValue.attribute("value", ""));
+            valueElement.setAttribute("value",
+                                      sourceValue.attribute("value", ""));
           } else if (typeName == "tool") {
             QDomElement fatherElement = doc->createElement("tFather");
             QString sourceFather = sourceValue.attribute("fatherId");
@@ -277,7 +307,8 @@ QDomElement cs8Variable::element(QDomDocument *doc, bool val3S6Format) const {
             val.setAttribute("rz", sourceValue.attribute("rz", "0"));
             valueElement.appendChild(val);
             val = doc->createElement("cpValue");
-            val.setAttribute("shoulder", sourceValue.attribute("shoulder", "ssame"));
+            val.setAttribute("shoulder",
+                             sourceValue.attribute("shoulder", "ssame"));
             val.setAttribute("elbow", sourceValue.attribute("elbow", "esame"));
             val.setAttribute("wrist", sourceValue.attribute("wrist", "wsame"));
             valueElement.appendChild(val);
@@ -324,7 +355,8 @@ QVariant cs8Variable::varValue(QString index) {
     return QVariant();
 }
 
-void cs8Variable::setValue(const QString &index, const QMap<QString, QString> &valueMap) {
+void cs8Variable::setValue(const QString &index,
+                           const QMap<QString, QString> &valueMap) {
   QDomElement valueElement;
   // check if key already exist
   for (int i = 0; i < m_element.childNodes().count(); i++) {
@@ -361,22 +393,26 @@ bool cs8Variable::isBuildInType() const {
   return types.contains(type_);
 }
 
-QStringList cs8Variable::buildInTypes(bool val3S6Format) { return setBuildInVariableTypes(val3S6Format); }
+QStringList cs8Variable::buildInTypes(bool val3S6Format) {
+  return setBuildInVariableTypes(val3S6Format);
+}
 
 bool cs8Variable::hasConstPrefix(QString *prefix) const {
   QRegExp rx;
   rx.setPattern("([A-Z]+)(_[A-Z0-9]*)");
   bool result = rx.indexIn(name()) == 0;
-  qDebug() << rx.cap(1);
+  // qDebug() << rx.cap(1);
   if (prefix != nullptr)
     *prefix = rx.cap(1);
   return result;
 }
 
-void cs8Variable::extractArrayIndex(const QString &value, QString &name, QString &index) {
+void cs8Variable::extractArrayIndex(const QString &value, QString &name,
+                                    QString &index) {
   if (value.indexOf("[") > -1) {
     name = value.mid(0, value.indexOf("["));
-    index = value.mid(value.indexOf("[") + 1, value.length() - value.indexOf("]"));
+    index =
+        value.mid(value.indexOf("[") + 1, value.length() - value.indexOf("]"));
   } else {
     name = value;
     index = "0";
@@ -388,7 +424,9 @@ void cs8Variable::setUse(QString value) {
   m_element.setAttribute("use", value);
 }
 
-QString cs8Variable::use() const { return m_element.attribute("use", "reference"); }
+QString cs8Variable::use() const {
+  return m_element.attribute("use", "reference");
+}
 
 void cs8Variable::setDescription(QString value) {
   emit modified();
@@ -405,9 +443,13 @@ uint cs8Variable::size(int dimension) {
     return 0;
 }
 
-QString cs8Variable::dimension() const { return m_element.attribute("size", ""); }
+QString cs8Variable::dimension() const {
+  return m_element.attribute("size", "");
+}
 
-int cs8Variable::dimensionCount() const { return m_element.attribute("size", "").count(",") + 1; }
+int cs8Variable::dimensionCount() const {
+  return m_element.attribute("size", "").count(",") + 1;
+}
 
 void cs8Variable::setDimension(const QString &dim) {
   if (m_element.hasAttribute("size"))

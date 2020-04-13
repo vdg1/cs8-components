@@ -76,6 +76,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAdd_Folder"/>
+   <addaction name="actionAdd_Project_File"/>
    <addaction name="actionRemove_Folder"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -92,6 +93,11 @@
   <action name="actionRemove_Folder">
    <property name="text">
     <string>Remove Folder</string>
+   </property>
+  </action>
+  <action name="actionAdd_Project_File">
+   <property name="text">
+    <string>Add Project File</string>
    </property>
   </action>
  </widget>

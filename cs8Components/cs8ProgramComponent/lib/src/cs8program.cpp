@@ -360,7 +360,7 @@ QMap<int, QString> cs8Program::todos() {
 
 QStringList cs8Program::getCalls() {
   QString code = val3Code(true);
-  qDebug() << "Get calls in " << name();
+  // qDebug() << "Get calls in " << name();
   QRegExp rxCall, rxTaskCreate;
   rxCall.setPattern("^\\s*call (\\w*)\\(");
   rxTaskCreate.setPattern(
@@ -578,13 +578,13 @@ void cs8Program::parseDocumentation(const QString &code_) {
       } else if (tagType == "doc") {
         setDetailedDocumentation(tagText);
       } else if (tagType == "module") {
-        qDebug() << "module doc: " << tagName << ":" << tagText;
+        // qDebug() << "module doc: " << tagName << ":" << tagText;
         emit moduleDocumentationFound(tagText);
-      } else if (tagType == "modulebrief") {
-        qDebug() << " brief module doc: " << tagName << ":" << tagText;
+      } else if (tagType == "briefmodule") {
+        // qDebug() << " brief module doc: " << tagName << ":" << tagText;
         emit moduleBriefDocumentationFound(tagText);
       } else if (tagType == "mainpage") {
-        qDebug() << "main page doc: " << tagName << ":" << tagText;
+        // qDebug() << "main page doc: " << tagName << ":" << tagText;
         emit mainPageDocumentationFound(tagText);
       } else if (tagType == "export") {
         tagText = tagText.simplified();
@@ -629,7 +629,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
       tagText.remove(rx);
       rx.setPattern("^:\\s*");
       tagText.remove(rx);
-      qDebug() << "new tag:" << tagType << ":" << tagName << ":" << tagText;
+      // qDebug() << "new tag:" << tagType << ":" << tagName << ":" << tagText;
     } else {
       // Read tag text from code lines and prepend a \n at end of each read
       // line. However, do not prepend a \n if it is the first line.
@@ -642,8 +642,8 @@ void cs8Program::parseDocumentation(const QString &code_) {
   }
   // process a complete tag if there is one available at the end
   if (!tagType.isEmpty()) {
-    qDebug() << "process remaining tag:" << tagType << ":" << tagName << ":"
-             << tagText;
+    // qDebug() << "process remaining tag:" << tagType << ":" << tagName << ":"
+    //         << tagText;
     if (tagType == "param") {
       if (m_parameterModel->getVarByName(tagName) != nullptr)
         m_parameterModel->getVarByName(tagName)->setDescription(tagText);
@@ -651,7 +651,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
       if (m_localVariableModel->getVarByName(tagName) != nullptr)
         m_localVariableModel->getVarByName(tagName)->setDescription(tagText);
     } else if (tagType == "global") {
-      qDebug() << "global var: " << tagName << ":" << tagText;
+      // qDebug() << "global var: " << tagName << ":" << tagText;
       emit globalVariableDocumentationFound(tagName, tagText);
     } else if (tagType == "refGlobal") {
       if (m_referencedGlobalVarModel->getVarByName(tagName) != nullptr)
@@ -661,11 +661,11 @@ void cs8Program::parseDocumentation(const QString &code_) {
       setDescription(tagText);
     } else if (tagType == "doc") {
       setDetailedDocumentation(tagText);
-    } else if (tagType == "modulebrief") {
-      qDebug() << " brief module doc: " << tagName << ":" << tagText;
+    } else if (tagType == "briefmodule") {
+      // qDebug() << " brief module doc: " << tagName << ":" << tagText;
       emit moduleBriefDocumentationFound(tagText);
     } else if (tagType == "module") {
-      qDebug() << "module doc: " << tagName << ":" << tagText;
+      // qDebug() << "module doc: " << tagName << ":" << tagText;
       emit moduleDocumentationFound(tagText);
     } else if (tagType == "mainpage") {
       // qDebug() << "mainpage doc: " << tagName << ":" << tagText;
@@ -702,7 +702,7 @@ QString cs8Program::cellFilePath() const {
 }
 
 QString cs8Program::documentation(bool withPrefix) const {
-  qDebug() << "documentation: " << name();
+  // qDebug() << "documentation: " << name();
   QString out;
   QString prefix = withPrefix ? "/// " : "";
   /*

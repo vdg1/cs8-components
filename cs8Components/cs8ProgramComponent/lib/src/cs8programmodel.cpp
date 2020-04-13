@@ -59,7 +59,7 @@ void cs8ProgramModel::append(cs8Program *program) {
 QList<cs8Program *> cs8ProgramModel::publicPrograms() {
   QList<cs8Program *> out;
   foreach (cs8Program *program, m_programList) {
-    qDebug() << program->name();
+    // qDebug() << program->name();
     if (program->isPublic())
       out << program;
   }

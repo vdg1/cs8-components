@@ -58,13 +58,11 @@ int main(int argc, char **argv) {
   QString nameFilter = "*.pjx";
   QDirIterator dirIterator(sourceDir, QStringList() << nameFilter, QDir::Files,
                            QDirIterator::Subdirectories);
-  QString str("folder");
+
   QStringList sourceFiles;
 
   while (dirIterator.hasNext()) {
-    if (dirIterator.fileName().startsWith("z") ||
-        dirIterator.fileName().startsWith("io")) {
-
+    if (dirIterator.fileName().startsWith("z")) {
       sourceFiles.append(dirIterator.filePath());
     }
     dirIterator.next();
@@ -77,7 +75,7 @@ int main(int argc, char **argv) {
   foreach (QString sourceApp, sourceFiles) {
     qDebug() << sourceDir + "/" + sourceApp;
     if (application.open(sourceApp)) {
-      qDebug() << (sourceApp + " open ok");
+      // qDebug() << (sourceApp + " open ok");
       application.exportToCClass(destDir);
     }
     qDebug() << "Done";
