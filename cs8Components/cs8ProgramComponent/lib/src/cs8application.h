@@ -19,7 +19,8 @@ class cs8Application : public QObject {
 
 public:
   QString projectPath(bool cs8Format = false);
-  bool save(const QString &path = QString(), const QString &name = QString(), bool saveInS6Format = false);
+  bool save(const QString &path = QString(), const QString &name = QString(),
+            bool saveInS6Format = false);
   bool loadDataFile(const QString &fileName);
   bool saveDataFile(const QString &fileName, bool val3S6Format = false);
   bool open(const QString &pfxFilePath);
@@ -39,8 +40,15 @@ public:
   void setName(const QString &name);
 
   bool loadDocumentationFile(const QString &);
-  QString moduleDocumentationFormatted(const QString &withSlashes = QString("///")) const;
-  QString mainPageDocumentationFromatted(const QString &withSlashes = QString("///")) const;
+  QString moduleDocumentationFormatted(
+      const QString &withSlashes = QString("/// ")) const;
+  QString mainPageDocumentationFormatted(
+      const QString &withSlashes = QString("/// ")) const;
+  QString briefModuleDocumentationFormatted(
+      const QString &withSlashes = QString("/// ")) const;
+
+  QString formattedDocument(const QString &doc,
+                            const QString &withSlashes = QString("/// ")) const;
   QString performPrecompilerChecks();
   void setCellPath(const QString &path);
   QString cellPath() const;
@@ -68,8 +76,8 @@ public:
   void checkEnumerations(QStringList &output);
   void checkGlobalData(QStringList &output);
   void checkObsoleteProgramFiles(QStringList &output);
-  QString applicationDocumentation() const;
-  void setApplicationDocumentation(const QString &applicationDocumentation);
+  QString moduleDocumentation() const;
+  void setModuleDocumentation(const QString &moduleDocumentation);
 
   void initPrecompilerSettings();
   QString mainPageDocumentation() const;
@@ -90,6 +98,9 @@ public:
   void setProjectPath(const QString &pth);
   bool importVPlusFile(const QString &fileName);
 
+  QString briefModuleDocumentation() const;
+  void setBriefModuleDocumentation(const QString &briefModuleDocumentation);
+
 protected:
   QHash<QString, QString> m_exportDirectives;
   QHash<QString, QString> m_pragmaList;
@@ -102,7 +113,8 @@ protected:
   cs8LibraryAliasModel *m_libraryAliasModel;
   cs8TypeModel *m_typeModel;
   // QDomDocument m_dataDoc;
-  QString m_moduleDocumentation, m_mainPageDocumentation;
+  QString m_moduleDocumentation, m_mainPageDocumentation,
+      m_briefModuleDocumentation;
   QString m_cellPath;
   QString m_copyRightMessage;
   QString m_version;
@@ -121,11 +133,14 @@ protected:
   void createXMLSkeleton(bool S6Format);
 
 protected slots:
-  void slotGlobalVariableDocumentationFound(const QString &name, const QString &document);
+  void slotGlobalVariableDocumentationFound(const QString &name,
+                                            const QString &document);
   void slotModuleDocumentationFound(const QString &document);
+  void slotBriefModuleDocumentationFound(const QString &document);
   void slotMainPageDocumentationFound(const QString &document);
   void slotExportDirectiveFound(const QString &module, const QString &function);
-  void slotUnknownTagFound(const QString &tagType, const QString &tagName, const QString &tagText);
+  void slotUnknownTagFound(const QString &tagType, const QString &tagName,
+                           const QString &tagText);
   void setModified(bool modified);
 
 signals:

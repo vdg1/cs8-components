@@ -4,7 +4,7 @@ SUBDIRS = lib \
     #testBin \
     extractPrototype \
     extractDoc \
-    #extractIODefinitions \
+   # extractIODefinitions \
     cs8DocEditor \
     val3PreCompiler \
     val3CreateAPI \
