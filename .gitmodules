@@ -1,3 +1,3 @@
 [submodule "cs8Components/cs8ProgramComponent/saxeautomation"]
-	path = cs8Components/cs8ProgramComponent/saxeautomation
+	path = cs8Components/cs8ProgramComponent/usr/usrapp/saxeautomation
 	url = https://vdg_saxe-group@bitbucket.org/saxegroup/saxeautomation.git
