@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QStringList>
 
 #define MAX_LENGTH 40
@@ -690,7 +691,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
   // qDebug() << documentationList;
 }
 
-QString cs8Program::description() const { return m_briefDescription; }
+QString cs8Program::briefDescription() const { return m_briefDescription; }
 
 void cs8Program::setCellPath(const QString &path) { m_cellPath = path; }
 
@@ -713,7 +714,7 @@ QString cs8Program::documentation(bool withPrefix) const {
   */
   QStringList list;
   list << "\n"
-       << "\\brief" << description().split("\n") << "\n"
+       << "\\brief" << m_briefDescription.split("\n") << "\n"
        << m_detailedDocumentation.split("\n");
   // list.removeLast();
   bool inCodeSection = false;
@@ -764,8 +765,14 @@ void cs8Program::setDescriptionSection(bool val3S6Format) {
             .at(i)
             ->documentation(false, false)
             .length() > 2)
-      txt += m_parameterModel->variableList().at(i)->name() + ": " +
-             m_parameterModel->variableList().at(i)->description();
+      txt += m_parameterModel->variableList().at(i)->name().leftJustified(18,
+                                                                          ' ') +
+             ": " + m_parameterModel->variableList().at(i)->description();
+  }
+
+  QRegularExpression rx("(\\s|^)((\\w*)\\\\_)");
+  while (rx.match(txt).hasMatch()) {
+    txt.replace(rx.match(txt).captured(2), rx.match(txt).captured(3) + "_");
   }
 
   QDomNode node;
@@ -965,9 +972,9 @@ QString cs8Program::toDocumentedCode() {
   int startIfRow = -1;
   int endIfRow = -1;
 
-  if (!description().isEmpty()) {
+  if (!briefDescription().isEmpty()) {
     list << "\\brief";
-    list << description().split("\n");
+    list << briefDescription().split("\n");
   }
 
   if (!m_detailedDocumentation.isEmpty()) {

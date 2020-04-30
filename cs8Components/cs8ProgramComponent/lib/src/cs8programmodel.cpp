@@ -117,7 +117,7 @@ QVariant cs8ProgramModel::data(const QModelIndex &index, int role) const {
     return m_programList.at(index.row())->detailedDocumentation();
 
   if (role == Qt::UserRole + 11)
-    return m_programList.at(index.row())->description();
+    return m_programList.at(index.row())->briefDescription();
 
   return QVariant();
 }

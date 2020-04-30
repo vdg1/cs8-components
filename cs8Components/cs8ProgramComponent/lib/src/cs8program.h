@@ -75,7 +75,7 @@ public:
   void setCopyrightMessage(const QString &text);
   QString copyrightMessage() const;
 
-  QString description() const;
+  QString briefDescription() const;
   void setCellPath(const QString &path);
   QString cellFilePath() const;
 
