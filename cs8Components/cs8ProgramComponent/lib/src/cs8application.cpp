@@ -46,7 +46,8 @@ void cs8Application::setIncludeLibraryDocuments(bool includeLibraryDocuments) {
 
 cs8Application::cs8Application(QObject *parent)
     : QObject(parent), m_modified(false), m_withUndocumentedSymbols(false),
-      m_includeLibraryDocuments(false) {
+      m_includeLibraryDocuments(false), m_projectVersion("7.0"),
+      m_projectStackSize("5000"), m_projectMillimeterUnit("true") {
   m_programModel = new cs8ProgramModel(this);
   m_globalVariableModel = new cs8GlobalVariableModel(this);
   m_libraryAliasModel = new cs8LibraryAliasModel(this);
@@ -618,6 +619,9 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
   QDomElement rootElement = doc.documentElement();
 
   m_parameters = rootElement.elementsByTagName("Parameters").at(0).toElement();
+  m_projectVersion = m_parameters.attribute("version", "7.0");
+  m_projectStackSize = m_parameters.attribute("stackSize", "5000");
+  m_projectMillimeterUnit = m_parameters.attribute("millimeterUnit", "true");
   m_programSection =
       rootElement.elementsByTagName("Programs").at(0).toElement();
   m_dataSection = rootElement.elementsByTagName("Database").at(0).toElement();
@@ -855,7 +859,8 @@ bool cs8Application::save(const QString &path, const QString &name,
   // we append it here
   if (m_globalVariableModel->hasDocumentation() ||
       !m_moduleDocumentation.isEmpty() ||
-      !m_briefModuleDocumentation.isEmpty()) {
+      !m_briefModuleDocumentation.isEmpty() ||
+      !m_mainPageDocumentation.isEmpty()) {
     if (!m_programModel->getProgramByName("zzDocumentation"))
       m_programModel->createProgram("zzDocumentation");
 
@@ -863,12 +868,12 @@ bool cs8Application::save(const QString &path, const QString &name,
     prog->setGlobalDocContainer(true);
     prog->clearDocumentationTags();
 
-    if (!m_moduleDocumentation.isEmpty() || true) {
-      prog->setApplicationDocumentation(m_moduleDocumentation);
-    }
-
     if (!m_briefModuleDocumentation.isEmpty() || true) {
       prog->setBriefModuleDocumentation(m_briefModuleDocumentation);
+    }
+
+    if (!m_moduleDocumentation.isEmpty() || true) {
+      prog->setApplicationDocumentation(m_moduleDocumentation);
     }
 
     if (!m_mainPageDocumentation.isEmpty() || true) {
@@ -1319,9 +1324,11 @@ bool cs8Application::writeProjectFile(bool val3S6Format) {
   element.setAttribute("file", m_projectName + ".dtx");
   m_dataSection.appendChild(element);
 
-  if (m_libraryAliasModel->getAliasByName("io") == nullptr) {
-    m_libraryAliasModel->add("io", "Disk://io", true);
-  }
+  if (val3S6Format)
+    if (m_libraryAliasModel->getAliasByName("io") == nullptr) {
+      m_libraryAliasModel->add("io", "Disk://io", true);
+    }
+
   foreach (cs8LibraryAlias *alias, m_libraryAliasModel->list()) {
     QDomElement element =
         m_XMLDocument.createElement(val3S6Format ? "alias" : "Library");
@@ -1347,7 +1354,7 @@ bool cs8Application::writeProjectFile(bool val3S6Format) {
     return false;
 
   QTextStream stream(&file);
-  stream << m_XMLDocument.toString();
+  stream << m_XMLDocument.toString(2);
   file.close();
 
   return true;
@@ -1380,8 +1387,8 @@ void cs8Application::moveParamsToGlobals(cs8Program *program) {
       int arraySize = 1;
       QRegExp rx("(_(A(\\d{1}))_(\\d{1,2}))");
       rx.indexIn(newName);
-      qDebug() << "parameter name to global:" << newName << ":"
-               << rx.matchedLength();
+      // qDebug() << "parameter name to global:" << newName << ":"
+      //         << rx.matchedLength();
       if (rx.matchedLength() > 0) {
         parameterIndex = rx.cap(3).toInt();
         arraySize = rx.cap(4).toInt();
@@ -1399,8 +1406,21 @@ void cs8Application::moveParamsToGlobals(cs8Program *program) {
       var->setName(newName);
       parameters << newName;
       // add variable to global list if it does not exist yet
-      if (!m_globalVariableModel->variableNameList().contains(newName))
+      if (!m_globalVariableModel->variableNameList().contains(newName)) {
         m_globalVariableModel->addVariable(var);
+      } else {
+        // check if we need to update the documentation of the extracted
+        // global variable if the global variable does not have a description
+        // yet
+        if (!var->description().isEmpty()) {
+          cs8Variable *globalVar =
+              m_globalVariableModel->getVarByName(var->name());
+          if (globalVar) {
+            if (globalVar->description().isEmpty())
+              globalVar->setDescription(var->description());
+          }
+        }
+      }
       QString code = program->val3Code(true);
       // append array index
       if (parameterIndex > 0) {
@@ -1433,9 +1453,9 @@ void cs8Application::createXMLSkeleton(bool S6Format) {
     m_XMLDocument.appendChild(m_projectSection);
 
     m_parameters = m_XMLDocument.createElement("Parameters");
-    m_parameters.setAttribute("version", "s7.2");
-    m_parameters.setAttribute("stackSize", "5000");
-    m_parameters.setAttribute("millimeterUnit", "true");
+    m_parameters.setAttribute("version", m_projectVersion);
+    m_parameters.setAttribute("stackSize", m_projectStackSize);
+    m_parameters.setAttribute("millimeterUnit", m_projectMillimeterUnit);
     m_projectSection.appendChild(m_parameters);
 
     m_programSection = m_XMLDocument.createElement("Programs");
@@ -1464,8 +1484,8 @@ void cs8Application::createXMLSkeleton(bool S6Format) {
 
     m_parameters = m_XMLDocument.createElement("parameters");
     m_parameters.setAttribute("version", "s6");
-    m_parameters.setAttribute("stackSize", "5000");
-    m_parameters.setAttribute("millimeterUnit", "true");
+    m_parameters.setAttribute("stackSize", m_projectStackSize);
+    m_parameters.setAttribute("millimeterUnit", m_projectMillimeterUnit);
     m_projectSection.appendChild(m_parameters);
 
     m_programSection = m_XMLDocument.createElement("programSection");

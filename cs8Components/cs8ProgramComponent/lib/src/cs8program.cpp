@@ -882,18 +882,23 @@ bool cs8Program::save(const QString &projectPath, bool withCode,
   }
 
   if (!val3S6Format) {
+    // remove any code sections
+    while (m_programSection.elementsByTagName("Code").size() != 0)
+      m_programSection.removeChild(
+          m_programSection.elementsByTagName("Code").at(0));
+
     QDomCDATASection data = m_XMLDocument.createCDATASection(codeText);
     QDomElement codeSection = m_XMLDocument.createElement("Code");
     codeSection.appendChild(data);
+
     m_programSection.appendChild(codeSection);
-    // if (m_codeSection.replaceChild(data,
-    // m_codeSection.firstChild()).isNull())
-    //  qDebug() << "Setting code node failed!";
   } else {
+    // remove any code sections
+    while (m_programSection.elementsByTagName("code").size() != 0)
+      m_programSection.removeChild(
+          m_programSection.elementsByTagName("code").at(0));
 
     m_programSection.setAttribute("public", isPublic() ? "true" : "false");
-    // qDebug() << "Code Section: " << m_codeSection.nodeName() <<
-    // m_codeSection.nodeValue();
     QDomText codeTextSection = m_XMLDocument.createTextNode(codeText);
     QDomElement codeSection = m_XMLDocument.createElement("code");
     codeSection.appendChild(codeTextSection);
@@ -915,7 +920,7 @@ bool cs8Program::save(const QString &projectPath, bool withCode,
   QTextStream stream(&file);
   stream.setCodec("UTF-8");
   stream.setGenerateByteOrderMark(true);
-  m_XMLDocument.save(stream, 4, QDomNode::EncodingFromDocument);
+  m_XMLDocument.save(stream, 2, QDomNode::EncodingFromDocument);
   // stream << m_XMLDocument.toString();
   file.close();
 
@@ -974,14 +979,14 @@ QString cs8Program::toDocumentedCode() {
   detailedDocumentation += m_localVariableModel->toDocumentedCode();
   detailedDocumentation += m_referencedGlobalVarModel->toDocumentedCode();
 
-  if (!m_applicationDocumentation.isEmpty()) {
-    detailedDocumentation += "\\module\n";
-    detailedDocumentation += m_applicationDocumentation + "\n";
-  }
-
   if (!m_briefModuleDocumentation.isEmpty()) {
     detailedDocumentation += "\\briefmodule\n";
     detailedDocumentation += m_briefModuleDocumentation + "\n";
+  }
+
+  if (!m_applicationDocumentation.isEmpty()) {
+    detailedDocumentation += "\\module\n";
+    detailedDocumentation += m_applicationDocumentation + "\n";
   }
 
   if (!m_mainPageDocumentation.isEmpty()) {

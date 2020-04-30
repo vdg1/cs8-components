@@ -66,7 +66,7 @@ QT += xml \
 
 CONFIG += c++11
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets webchannel webengine webenginewidgets 3dcore
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets webchannel webengine webenginewidgets
 
 
 win32 {

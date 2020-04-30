@@ -129,6 +129,9 @@ protected:
   QDomElement m_aliasSection;
   QDomElement m_typesSection;
   QDomElement m_projectSection;
+  QString m_projectVersion;
+  QString m_projectStackSize;
+  QString m_projectMillimeterUnit;
 
   void createXMLSkeleton(bool S6Format);
 

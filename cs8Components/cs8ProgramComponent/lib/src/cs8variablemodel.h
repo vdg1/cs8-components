@@ -17,20 +17,26 @@ public:
 
   QString toDocumentedCode();
   QDomNode document(QDomDocument &doc);
-  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const;
   int rowCount(const QModelIndex &index) const;
   QVariant data(const QModelIndex &index, int role) const;
   int columnCount(const QModelIndex &index) const;
-  bool addVariable(QDomElement &element, const QString &description = QString());
+  bool addVariable(QDomElement &element,
+                   const QString &description = QString());
   void addVariable(cs8Variable *variable);
-  bool addGlobalVariable(QDomElement &element, const QString &description = QString());
+  bool addGlobalVariable(QDomElement &element,
+                         const QString &description = QString());
   cs8VariableModel(QObject *parent = 0, modelType mode = Local);
-  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+  bool setData(const QModelIndex &index, const QVariant &value,
+               int role = Qt::EditRole);
   Qt::ItemFlags flags(const QModelIndex &index) const;
   cs8Variable *getVarByName(const QString &name);
 
   QString toDtxDocument();
-  QList<cs8Variable *> findVariablesByType(const QString &type_, bool public_ = true);
+  QList<cs8Variable *> findVariablesByType(const QString &type_,
+                                           bool public_ = true);
+  cs8Variable *findVariableByName(const QString &name_);
   void clear();
   QList<cs8Variable *> publicVariables();
   QList<cs8Variable *> privateVariables();
