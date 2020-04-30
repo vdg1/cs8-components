@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "2.2.1"
+#define MyAppVersion "2.3.0"
 #define MyAppPublisher "SAXE Process AB"
 #define MyAppURL "http://www.saxe-group.com"
-#define QT "D:\Qt\5.7\msvc2015"
+#define QT "D:\Qt\5.14.1\msvc2017_64"
 ;#define MINGW "C:\MinGW"
 
 
@@ -54,8 +54,10 @@ Source: "{#QT}\bin\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5WebEngineWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5WebEngineCore.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Quick.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\Qt5QuickWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5WebChannel.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Qml.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\Qt5QmlModels.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\QtWebEngineProcess.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\resources\*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\translations\qtwebengine_locales\*"; DestDir: "{app}"; Flags: ignoreversion
@@ -73,7 +75,7 @@ Name: "{group}\Val3 Create API"; Filename: "{app}\val3CreateAPI.exe"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 
 [Run]
-Filename: "{app}\val3CompilerDeployment.EXE"; Parameters: "--install"; Description: "Install Precompiler for SRC7.x versions"; Flags: postinstall nowait shellexec
+;Filename: "{app}\val3CompilerDeployment.EXE"; Parameters: "--install"; Description: "Install Precompiler for SRC7.x versions"; Flags: postinstall nowait shellexec
 
 
 [UninstallRun]
