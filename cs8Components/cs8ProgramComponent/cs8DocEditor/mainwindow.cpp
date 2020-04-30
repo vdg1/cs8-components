@@ -116,7 +116,7 @@ void MainWindow::on_action_Open_triggered() {
 void MainWindow::on_action_Save_triggered() { m_application->save(); }
 
 void MainWindow::slotSelectionChanged(const QItemSelection &selected,
-                                      const QItemSelection &deselected) {
+                                      const QItemSelection & /*deselected*/) {
   int index = selected.indexes().at(0).row();
   cs8Program *program = m_application->programModel()->programList().at(index);
   ui->plainTextEditCode->setPlainText(program->toDocumentedCode());
@@ -269,9 +269,12 @@ void MainWindow::on_actionApply_project_data_to_all_sub_projects_triggered() {
 void MainWindow::on_actionEdit_Project_Documentation_triggered() {
   DialogProjectDocumentationEditor dlg;
   dlg.setTitle(tr("Project/Module Documentation"));
-  dlg.setText(m_application->applicationDocumentation());
+  dlg.setText(m_application->moduleDocumentation());
+  dlg.setBriefText(m_application->briefModuleDocumentation());
+  dlg.setBriefVisible(true);
   if (dlg.exec() == QDialog::Accepted) {
-    m_application->setApplicationDocumentation(dlg.text());
+    m_application->setModuleDocumentation(dlg.text());
+    m_application->setBriefModuleDocumentation(dlg.briefText());
   }
 }
 
