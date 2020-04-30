@@ -160,9 +160,9 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                     .arg(program->parameterModel()->toString(false)));
 
             cs8DestApp->moveParamsToGlobals(newProgram);
-            newProgram->setDescription(program->description());
+            newProgram->setDescription(program->briefDescription());
             newProgram->setName(name);
-            newProgram->setDescription(program->description());
+            newProgram->setDescription(program->briefDescription());
             newProgram->setDetailedDocumentation(
                 program->detailedDocumentation());
           } else {
@@ -332,24 +332,41 @@ void MainWindow::createAPI() {
   QDir dir;
 
   for (int i = 0; i < ui->listWidget->count(); i++) {
-    dir.setCurrent(ui->listWidget->item(i)->text());
-    foreach (QString pth, dir.entryList(QDir::NoDotAndDotDot | QDir::Dirs))
-      dirs << dir.currentPath() + "/" + pth;
+    QString item = ui->listWidget->item(i)->text();
+    QFileInfo info(item);
+    if (info.isFile())
+      dirs << info.absoluteFilePath();
+    else {
+      dir.setCurrent(item);
+      foreach (QString pth, dir.entryList(QDir::NoDotAndDotDot | QDir::Dirs))
+        dirs << dir.currentPath() + "/" + pth;
+    }
   }
 
   QList<cs8Application *> cs8SourceApps;
   foreach (QString pth, dirs) {
     cs8Application *cs8SourceApp = new cs8Application(this);
-    if (cs8SourceApp->openFromPathName(pth)) {
-      emit addLog(tr("Opened source app %1").arg(pth));
-      cs8SourceApps.append(cs8SourceApp);
+    QFileInfo info(pth);
+    if (info.isFile()) {
+      if (cs8SourceApp->open(pth)) {
+        emit addLog(tr("Opened source app %1").arg(pth));
+        cs8SourceApps.append(cs8SourceApp);
+      } else {
+        emit addLog(tr("Opened source app %1 failed").arg(pth));
+        delete cs8SourceApp;
+      }
     } else {
-      emit addLog(tr("Opened source app %1 failed").arg(pth));
-      delete cs8SourceApp;
+      if (cs8SourceApp->openFromPathName(pth)) {
+        emit addLog(tr("Opened source app %1").arg(pth));
+        cs8SourceApps.append(cs8SourceApp);
+      } else {
+        emit addLog(tr("Opened source app %1 failed").arg(pth));
+        delete cs8SourceApp;
+      }
     }
   }
 
-  createAPIs(cs8SourceApps, false);
+  createAPIs(cs8SourceApps, true);
   ui->commandLinkButton->setEnabled(true);
 }
 
@@ -357,4 +374,20 @@ void MainWindow::on_actionExit_triggered() { close(); }
 
 void MainWindow::slotAddLog(const QString &msg) {
   ui->plainTextEdit->appendPlainText(msg);
+}
+
+void MainWindow::on_actionAdd_Project_File_triggered() {
+  QString filePath = QFileDialog::getOpenFileName(this, "Select Val3 Project",
+                                                  m_recentLocation, "*.pjx");
+  if (!filePath.isEmpty()) {
+    // check if path is already in list
+    if (ui->listWidget->findItems(filePath, Qt::MatchFixedString).count() > 0) {
+      QMessageBox::warning(
+          this, tr("Warning"),
+          tr("The path %1 is already in the list!").arg(filePath));
+      return;
+    }
+    m_recentLocation = filePath;
+    ui->listWidget->addItem(filePath);
+  }
 }

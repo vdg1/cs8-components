@@ -5,12 +5,14 @@
 #include <QStringList>
 //
 cs8VariableModel::cs8VariableModel(QObject *parent, modelType mode)
-    : QAbstractTableModel(parent), m_mode(mode), m_withUndocumentedSymbols(false) {
+    : QAbstractTableModel(parent), m_mode(mode),
+      m_withUndocumentedSymbols(false) {
   // m_variableList = new QList<cs8Variable*>;
 }
 //
 
-bool cs8VariableModel::addVariable(QDomElement &element, const QString &description) {
+bool cs8VariableModel::addVariable(QDomElement &element,
+                                   const QString &description) {
 
   if (element.tagName() == "Local") {
     cs8Variable *variable = new cs8Variable(element);
@@ -44,7 +46,8 @@ void cs8VariableModel::addVariable(cs8Variable *variable) {
   variable->setParent(this);
 }
 
-bool cs8VariableModel::addGlobalVariable(QDomElement &element, const QString &description) {
+bool cs8VariableModel::addGlobalVariable(QDomElement &element,
+                                         const QString &description) {
   auto *variable = new cs8Variable(element, description);
   connect(variable, SIGNAL(modified()), this, SLOT(slotModified()));
   variable->setGlobal(true);
@@ -101,7 +104,8 @@ QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) {
   }
 }
 
-QList<cs8Variable *> cs8VariableModel::variableList(const QRegularExpression &rx) {
+QList<cs8Variable *>
+cs8VariableModel::variableList(const QRegularExpression &rx) {
   QList<cs8Variable *> list;
   foreach (cs8Variable *var, m_variableList) {
     QRegularExpressionMatch match = rx.match(var->type());
@@ -130,12 +134,14 @@ bool cs8VariableModel::hasDocumentation() {
 QString cs8VariableModel::toDtxDocument() {
   QDomDocument doc;
 
-  QDomProcessingInstruction process = doc.createProcessingInstruction("xml", R"(version="1.0" encoding="utf-8")");
+  QDomProcessingInstruction process = doc.createProcessingInstruction(
+      "xml", R"(version="1.0" encoding="utf-8")");
   doc.appendChild(process);
   QDomElement database = doc.createElement("Database");
   doc.appendChild(database);
   database.setAttribute("xmlns", "http://www.staubli.com/robotics/VAL3/Data/2");
-  database.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+  database.setAttribute("xmlns:xsi",
+                        "http://www.w3.org/2001/XMLSchema-instance");
 
   QDomElement dataElement = doc.createElement("Datas");
   database.appendChild(dataElement);
@@ -155,13 +161,22 @@ QString cs8VariableModel::toDtxDocument() {
   return out;
 }
 
-QList<cs8Variable *> cs8VariableModel::findVariablesByType(const QString &type_, bool public_) {
+QList<cs8Variable *> cs8VariableModel::findVariablesByType(const QString &type_,
+                                                           bool public_) {
   QList<cs8Variable *> list;
   foreach (cs8Variable *variable, m_variableList) {
     if (variable->type() == type_ && variable->isPublic() == public_)
       list.append(variable);
   }
   return list;
+}
+
+cs8Variable *cs8VariableModel::findVariableByName(const QString &name_) {
+  for (auto var : m_variableList) {
+    if (var->name() == name_)
+      return var;
+  }
+  return Q_NULLPTR;
 }
 
 int cs8VariableModel::rowCount(const QModelIndex &index) const {
@@ -208,7 +223,8 @@ QVariant cs8VariableModel::data(const QModelIndex &index, int role) const {
   return ret;
 }
 
-QVariant cs8VariableModel::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant cs8VariableModel::headerData(int section, Qt::Orientation orientation,
+                                      int role) const {
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     switch (section) {
     case 0:
@@ -248,7 +264,8 @@ Qt::ItemFlags cs8VariableModel::flags(const QModelIndex &index) const {
    \fn cs8VariableModel::setData ( const QModelIndex & index, const QVariant &
    value, int role = Qt::EditRole )
  */
-bool cs8VariableModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+bool cs8VariableModel::setData(const QModelIndex &index, const QVariant &value,
+                               int role) {
   if (role == Qt::EditRole) {
     if (index.column() == 3) {
       cs8Variable *variable = m_variableList.at(index.row());
@@ -276,7 +293,8 @@ cs8Variable *cs8VariableModel::getVarByName(const QString &name) {
 
 QDomNode cs8VariableModel::document(QDomDocument &doc) {
   QDomDocumentFragment fragment = doc.createDocumentFragment();
-  QDomElement section = doc.createElement(m_mode == Parameter ? "paramSection" : "localSection");
+  QDomElement section =
+      doc.createElement(m_mode == Parameter ? "paramSection" : "localSection");
   fragment.appendChild(section);
   foreach (cs8Variable *var, m_variableList) {
     QDomElement varElement = doc.createElement(m_mode ? "param" : "local");
@@ -324,8 +342,11 @@ QString cs8VariableModel::toDocumentedCode() {
 }
 
 void cs8VariableModel::slotModified() { emit modified(true); }
-bool cs8VariableModel::withUndocumentedSymbols() const { return m_withUndocumentedSymbols; }
+bool cs8VariableModel::withUndocumentedSymbols() const {
+  return m_withUndocumentedSymbols;
+}
 
-void cs8VariableModel::setWithUndocumentedSymbols(bool withUndocumentedSymbols) {
+void cs8VariableModel::setWithUndocumentedSymbols(
+    bool withUndocumentedSymbols) {
   m_withUndocumentedSymbols = withUndocumentedSymbols;
 }

@@ -16,7 +16,8 @@ class cs8Program : public QObject {
 
 public:
   QString toDocumentedCode();
-  bool save(const QString &projectPath, bool withCode = true, bool val3S6Format = false);
+  bool save(const QString &projectPath, bool withCode = true,
+            bool val3S6Format = false);
   cs8ParameterModel *parameterModel() const;
   cs8VariableModel *localVariableModel() const;
   cs8VariableModel *referencedGlobalVariables() const;
@@ -34,9 +35,11 @@ public:
 
   QString extractCode(const QString &code_) const;
 
-  void setCode(const QString &code, bool parseDoc_ = false, bool val3S6Format = false);
+  void setCode(const QString &code, bool parseDoc_ = false,
+               bool val3S6Format = false);
   void copyFromParameterModel(cs8ParameterModel *sourceModel);
-  void addTag(const QString &tagType, const QString &tagName, const QString &tagText);
+  void addTag(const QString &tagType, const QString &tagName,
+              const QString &tagText);
   void clearDocumentationTags();
   void setWithUndocumentedSymbols(bool withUndocumentedSymbols);
   QStringList referencedVariables() const;
@@ -50,7 +53,8 @@ private:
   QMultiMap<QString, QString> m_tags;
   void printChildNodes(const QDomElement &element);
   void createXMLSkeleton(bool val3S6Format = false);
-  QStringList extractDocumentation(const QString &code_, int &headerLinesCount) const;
+  QStringList extractDocumentation(const QString &code_,
+                                   int &headerLinesCount) const;
   QString m_briefDescription;
   bool m_globalDocContainer;
   QStringList variableTokens(bool onlyModifiedVars);
@@ -71,7 +75,7 @@ public:
   void setCopyrightMessage(const QString &text);
   QString copyrightMessage() const;
 
-  QString description() const;
+  QString briefDescription() const;
   void setCellPath(const QString &path);
   QString cellFilePath() const;
 
@@ -80,13 +84,15 @@ public:
   void setGlobalDocContainer(bool globalDocContainer);
 
   void setApplicationDocumentation(const QString &applicationDocumentation);
+  void setBriefModuleDocumentation(const QString &briefDocumentation);
   void setMainPageDocumentation(const QString &applicationDocumentation);
 
   QDomElement programsSection() const;
   void setProgramsSection(const QDomElement &programsSection);
 
 protected:
-  bool parseProgramDoc(const QDomDocument &doc, const QString &code = QString());
+  bool parseProgramDoc(const QDomDocument &doc,
+                       const QString &code = QString());
   void tidyUpCode(QString &code);
   QDomDocument m_XMLDocument;
   QDomElement m_programsSection;
@@ -100,18 +106,22 @@ protected:
   QString m_cellPath;
   QString m_filePath;
   QString m_copyRightMessage;
-  QString m_applicationDocumentation, m_mainPageDocumentation;
+  QString m_applicationDocumentation, m_mainPageDocumentation,
+      m_briefModuleDocumentation;
   QString m_name;
   QString m_programCode;
   bool m_public;
   bool m_withIfBlock;
 
 signals:
-  void globalVariableDocumentationFound(const QString &name, const QString &document);
+  void globalVariableDocumentationFound(const QString &name,
+                                        const QString &document);
   void moduleDocumentationFound(const QString &document);
+  void moduleBriefDocumentationFound(const QString &document);
   void mainPageDocumentationFound(const QString &document);
   void exportDirectiveFound(const QString &module, const QString &routine);
-  void unknownTagFound(const QString &tagType, const QString &tagName, const QString &tagText);
+  void unknownTagFound(const QString &tagType, const QString &tagName,
+                       const QString &tagText);
   void modified();
 };
 #endif

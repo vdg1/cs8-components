@@ -13,3 +13,5 @@ release/
 debug/
 *.ilk
 *.pro.user.*
+*.stash
+Output/
