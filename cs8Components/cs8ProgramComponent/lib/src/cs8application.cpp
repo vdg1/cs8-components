@@ -665,7 +665,7 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
       QFile file(m_projectPath + "version.dat");
       if (file.open(QFile::ReadOnly)) {
         m_version = file.readAll();
-        m_version = m_version.simplified();
+        m_version = m_version.trimmed();
       }
     }
     // if version info found check if build.dat exists
@@ -673,7 +673,7 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
       QFile file(m_projectPath + "build.dat");
       if (file.open(QFile::ReadOnly)) {
         QString build = file.readAll();
-        m_version = m_version + "r" + build.simplified();
+        m_version = m_version + "r" + build.trimmed();
       }
     }
     //
@@ -873,7 +873,7 @@ bool cs8Application::save(const QString &path, const QString &name,
     }
 
     if (!m_moduleDocumentation.isEmpty() || true) {
-      prog->setApplicationDocumentation(m_moduleDocumentation);
+      prog->setApplicationDocumentation(moduleDocumentationFormatted(""));
     }
 
     if (!m_mainPageDocumentation.isEmpty() || true) {
@@ -942,13 +942,13 @@ QString cs8Application::formattedDocument(const QString &doc,
   int indentation = 0;
   QString indentText;
   foreach (QString str, list) {
-    if (str.contains("<code>")) {
+    if (str.contains("<pre>")) {
       inCodeSection = true;
-      out += withSlashes + " <br>\n";
+      out += withSlashes + " \n";
     }
-    if (str.contains("</code>")) {
+    if (str.contains("</pre>")) {
       inCodeSection = false;
-      out += withSlashes + " <br>\n";
+      out += withSlashes + " \n";
     }
     if (inCodeSection) {
       // qDebug() << str << "indent: " << indentation;
@@ -959,7 +959,7 @@ QString cs8Application::formattedDocument(const QString &doc,
         indentation++;
         indentText = "";
         for (int i = 0; i < indentation; i++)
-          indentText += "&nbsp;";
+          indentText += " ";
         // qDebug() << "increase indent";
 
       } else if (str.simplified().indexOf(QRegExp(
@@ -969,15 +969,22 @@ QString cs8Application::formattedDocument(const QString &doc,
         // qDebug() << "decrease indent to " << indentation;
         indentText = "";
         for (int i = 0; i < indentation; i++)
-          indentText += "&nbsp;";
+          indentText += " ";
         str = indentText + str.trimmed();
+        // we need to increase indentation after "else" again
+        if (str.simplified().indexOf(QRegExp("^\\s*(else)")) == 0) {
+          indentation++;
+          indentText = "";
+          for (int i = 0; i < indentation; i++)
+            indentText += " ";
+        }
       } else
         str = indentText + str.trimmed();
     }
 
     out += str.isEmpty()
-               ? ""
-               : (withSlashes + str + (inCodeSection ? "<br>" : "") + "\n");
+               ? "\n"
+               : (withSlashes + str + (inCodeSection ? "" : "") + "\n");
   }
   out += out.isEmpty() ? "" : "\n";
   return out;

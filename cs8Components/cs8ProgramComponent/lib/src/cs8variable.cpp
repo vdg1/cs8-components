@@ -62,11 +62,11 @@ QString cs8Variable::documentation(bool withPrefix, bool forCOutput) {
   bool inCodeSection = false;
   bool firstLine = true;
   foreach (QString str, list) {
-    if (str.contains("<code>")) {
+    if (str.contains("<pre>")) {
       inCodeSection = true;
       out += prefix + "<br>\n";
     }
-    if (str.contains("</code>")) {
+    if (str.contains("</pre>")) {
       inCodeSection = false;
       out += prefix + "<br>\n";
     }

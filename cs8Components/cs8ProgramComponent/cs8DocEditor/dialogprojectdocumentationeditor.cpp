@@ -1,14 +1,21 @@
 #include "dialogprojectdocumentationeditor.h"
 #include "ui_dialogprojectdocumentationeditor.h"
 
+#include <QSettings>
+
 DialogProjectDocumentationEditor::DialogProjectDocumentationEditor(
     QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogProjectDocumentationEditor) {
   ui->setupUi(this);
   ui->frBrief->setVisible(false);
+
+  QSettings settings;
+  restoreGeometry(settings.value("dialogs/projectdocumentation").toByteArray());
 }
 
 DialogProjectDocumentationEditor::~DialogProjectDocumentationEditor() {
+  QSettings settings;
+  settings.setValue("dialogs/projectdocumentation", saveGeometry());
   delete ui;
 }
 

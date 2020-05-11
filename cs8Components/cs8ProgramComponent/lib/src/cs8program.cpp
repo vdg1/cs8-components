@@ -553,7 +553,8 @@ void cs8Program::parseDocumentation(const QString &code_) {
 
   // qDebug() << "parseDocumentation: " << name();
   foreach (QString line, documentation) {
-    line = line.simplified();
+    if (line.length() > 2)
+      line = line.trimmed();
     // process a complete tag before starting the next tag
     if ((line.startsWith("//!") || line.startsWith("//\\")) &&
         !tagType.isEmpty()) {
@@ -618,7 +619,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
       // set tag name
       QRegExp rx;
       rx.setPattern("^\\s*" + tagType);
-      tagText = line.remove(rx).simplified();
+      tagText = line.remove(rx).trimmed();
       // match the tag name (optionally with [..] array indicator)
       rx.setPattern(R"(^\w*(|(\[\d*\]))(\s|$))");
       int pos = rx.indexIn(tagText);
@@ -720,11 +721,11 @@ QString cs8Program::documentation(bool withPrefix) const {
   bool inCodeSection = false;
   int indentation = 0;
   foreach (QString str, list) {
-    if (str.contains("<code>")) {
+    if (str.contains("<pre>")) {
       inCodeSection = true;
       out += prefix + "<br>\n";
     }
-    if (str.contains("</code>")) {
+    if (str.contains("</pre>")) {
       inCodeSection = false;
       out += prefix + "<br>\n";
     }
@@ -732,13 +733,13 @@ QString cs8Program::documentation(bool withPrefix) const {
       qDebug() << str << "indent: " << indentation;
       if (str.simplified().indexOf(
               QRegExp("begin|if |for | while |do |switch| case")) == 0) {
-        str = QString().fill(QChar(' '), indentation * 4) + str.simplified();
+        str = QString().fill(QChar(' '), indentation * 4) + str.trimmed();
         indentation++;
       }
       if (str.simplified().indexOf(QRegExp("end|until |break")) == 0) {
         indentation--;
         indentation = qMax(0, indentation);
-        str = QString().fill(QChar(' '), indentation * 4) + str.simplified();
+        str = QString().fill(QChar(' '), indentation * 4) + str.trimmed();
       }
     }
     out += prefix + str + (inCodeSection ? "<br>" : "") + "\n";

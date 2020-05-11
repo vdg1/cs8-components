@@ -43,6 +43,7 @@ Source: "..\cs8ProgramComponent\bin\preCompilerPackage\*.exe"; DestDir: "{app}\p
 Source: "{#QT}\bin\Qt5Core.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Xml.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Gui.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
+Source: "{#QT}\bin\Qt5Positioning.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\helpFilePackage\*.chm"; DestDir: "{app}\helpFilePackage"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\doxygenTemplateData\*.*"; DestDir: "{app}\doxygenTemplateData"; Flags: ignoreversion recursesubdirs
 
