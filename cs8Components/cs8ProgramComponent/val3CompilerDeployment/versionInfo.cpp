@@ -12,7 +12,7 @@
 
 #include <QTextStream>
 
-bool getProductNamme(const QString & fileName, QString & productName, QString & fileVersion)
+bool getProductName(const QString & fileName, QString & productName, QString & fileVersion)
 {
     DWORD DWD;
     // Read size of info block.

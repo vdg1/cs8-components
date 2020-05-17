@@ -301,8 +301,9 @@ QStringList cs8Program::variableTokens(bool onlyModifiedVars) {
 
 void cs8Program::setCode(const QString &code, bool parseDoc_,
                          bool val3S6Format) {
-  if (m_programCode.isEmpty())
-    m_programCode = code;
+  //  if (m_programCode.isEmpty())
+  // set code unconditionally
+  m_programCode = code;
   if (!val3S6Format) {
     // m_codeSection.toCDATASection().setData(m_programCode);
     if (parseDoc_)

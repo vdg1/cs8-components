@@ -60,7 +60,7 @@ void MainWindow::setup()
             QString val3Version=systemPath.split("\\").last();
             QString fileVersion;
             QString productName;
-            if (getProductNamme(systemPath+"\\VAL3Check.exe", productName, fileVersion))
+            if (getProductName(systemPath+"\\VAL3Check.exe", productName, fileVersion))
             {
                 if (productName.isEmpty())
                     productName=QString("Staubli");
