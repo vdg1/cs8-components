@@ -982,9 +982,10 @@ QString cs8Application::formattedDocument(const QString &doc,
         str = indentText + str.trimmed();
     }
 
-    out += str.isEmpty()
-               ? "\n"
-               : (withSlashes + str + (inCodeSection ? "" : "") + "\n");
+    // out += str.isEmpty()
+    //           ? "\n"
+    //           : (withSlashes + str + (inCodeSection ? "" : "") + "\n");
+    out += withSlashes + str + "\n";
   }
   out += out.isEmpty() ? "" : "\n";
   return out;
