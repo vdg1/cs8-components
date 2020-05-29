@@ -944,11 +944,11 @@ QString cs8Application::formattedDocument(const QString &doc,
   foreach (QString str, list) {
     if (str.contains("<pre>")) {
       inCodeSection = true;
-      out += withSlashes + " \n";
+      // out += withSlashes + " \n";
     }
     if (str.contains("</pre>")) {
       inCodeSection = false;
-      out += withSlashes + " \n";
+      // out += withSlashes + " \n";
     }
     if (inCodeSection) {
       // qDebug() << str << "indent: " << indentation;

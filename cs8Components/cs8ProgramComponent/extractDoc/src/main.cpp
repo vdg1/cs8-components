@@ -51,11 +51,14 @@ int main(int argc, char **argv) {
         QDirIterator dirIterator(source, QStringList() << nameFilter,
                                  QDir::Files, QDirIterator::Subdirectories);
         while (dirIterator.hasNext()) {
-          if (dirIterator.fileName().startsWith("z") ||
-              dirIterator.fileName().startsWith("io")) {
-            sourceFiles.append(dirIterator.filePath());
+          QString filePath = dirIterator.next();
+          QFileInfo info = dirIterator.fileInfo();
+          qDebug() << "check: " << info;
+          if (info.fileName().startsWith("z") ||
+              info.fileName().startsWith("io")) {
+            sourceFiles.append(info.absoluteFilePath());
           }
-          dirIterator.next();
+          // qDebug() << "next: " << dirIterator.next();
         }
       } else if (info.isFile() && info.fileName().endsWith(".pjx")) {
         sourceFiles.append(info.absoluteFilePath());
