@@ -91,6 +91,10 @@ QStringList cs8VariableModel::variableNameList() {
   return list;
 }
 
+QList<cs8Variable *> &cs8VariableModel::rvariableList() {
+  return m_variableList;
+}
+
 QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) {
   if (type.isEmpty()) {
     return m_variableList;
@@ -104,7 +108,7 @@ QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) {
   }
 }
 
-QList<cs8Variable *>
+QList<cs8Variable *> &
 cs8VariableModel::variableList(const QRegularExpression &rx) {
   QList<cs8Variable *> list;
   foreach (cs8Variable *var, m_variableList) {

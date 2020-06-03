@@ -1380,12 +1380,12 @@ bool cs8Application::isModified() const { return m_modified; }
 void cs8Application::moveParamsToGlobals(cs8Program *program) {
   QString newName, oldName;
   QStringList parameters;
-  for (int i = 0; i < program->parameterModel()->variableList().count(); i++) {
+  for (int i = 0; i < program->parameterModel()->rvariableList().count(); i++) {
     // if name of parameter starts with '_' remove it from parameter list and
     // add it as a global variable
-    if (program->parameterModel()->variableList().at(i)->name().startsWith(
+    if (program->parameterModel()->rvariableList().at(i)->name().startsWith(
             "_")) {
-      cs8Variable *var = program->parameterModel()->variableList().takeAt(i);
+      cs8Variable *var = program->parameterModel()->rvariableList().takeAt(i);
 
       // program->parameterModel ()->variableList ().removeAt(i);
       newName = var->name();
