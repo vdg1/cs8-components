@@ -119,10 +119,10 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             cs8DestApp->setCellPath(cs8SourceApps.at(0)->cellPath());
             // create version variable
             cs8Variable *var =
-                cs8DestApp->globalVariableModel()->createVariable("sVersion");
+                cs8DestApp->globalVariableModel()->createVariable("sVersion",
+                                                                  "string");
             var->setPublic(true);
             var->setGlobal(true);
-            var->setType("string");
             var->setDimension("1");
             cs8DestApp->globalVariableModel()->addVariable(var);
           }
@@ -192,7 +192,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             cs8DestApp->programModel()->createProgram("init");
         initProgram->setName("init");
         initProgram->setPublic(true);
-        initProgram->localVariableModel()->createVariable("i");
+        // initProgram->localVariableModel()->createVariable("i", "num");
         QString initProgramCode;
         // create public CONSTS
         QRegExp rx;
@@ -202,10 +202,10 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
           // public global variable is a CONST and a num type
           if (rx.indexIn(var->name()) == 0 && var->type() == "num") {
             cs8Variable *globalVar =
-                cs8DestApp->globalVariableModel()->createVariable(var->name());
+                cs8DestApp->globalVariableModel()->createVariable(var->name(),
+                                                                  var->type());
 
             globalVar->setPublic(true);
-            globalVar->setType(var->type());
             globalVar->setGlobal(true);
             globalVar->setDimension(var->dimension());
             cs8DestApp->globalVariableModel()->addVariable(globalVar);
@@ -255,10 +255,9 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
               // create dio Variable
               cs8Variable *dioVar =
                   cs8DestApp->globalVariableModel()->createVariable(
-                      variable->name().remove(0, 1));
+                      variable->name().remove(0, 1), "dio");
 
               dioVar->setPublic(true);
-              dioVar->setType("dio");
               dioVar->setGlobal(true);
               dioVar->setDimension(variable->dimension());
               dioVar->setDescription(variable->description());
@@ -278,10 +277,9 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
               // create dio Variable
               cs8Variable *dioVar =
                   cs8DestApp->globalVariableModel()->createVariable(
-                      variable->name().remove(0, 1));
+                      variable->name().remove(0, 1), "aio");
 
               dioVar->setPublic(true);
-              dioVar->setType("aio");
               dioVar->setGlobal(true);
               dioVar->setDimension(variable->dimension());
 

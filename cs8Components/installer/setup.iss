@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "2.3.1"
+#define MyAppVersion "2.3.3"
 #define MyAppPublisher "SAXE Process AB"
 #define MyAppURL "http://www.saxe-group.com"
 #define QT "D:\Qt\5.14.1\msvc2017_64"
