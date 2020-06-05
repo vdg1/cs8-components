@@ -122,7 +122,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                 cs8DestApp->globalVariableModel()->createVariable("sVersion",
                                                                   "string");
             var->setPublic(true);
-            var->setGlobal(true);
+            var->setScope(cs8Variable::Global);
             var->setDimension("1");
             cs8DestApp->globalVariableModel()->addVariable(var);
           }
@@ -206,7 +206,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                                                                   var->type());
 
             globalVar->setPublic(true);
-            globalVar->setGlobal(true);
+            globalVar->setScope(cs8Variable::Global);
             globalVar->setDimension(var->dimension());
             cs8DestApp->globalVariableModel()->addVariable(globalVar);
             for (uint i = 0; i < var->size(); i++) {
@@ -258,7 +258,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                       variable->name().remove(0, 1), "dio");
 
               dioVar->setPublic(true);
-              dioVar->setGlobal(true);
+              dioVar->setScope(cs8Variable::Global);
               dioVar->setDimension(variable->dimension());
               dioVar->setDescription(variable->description());
 
@@ -280,7 +280,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                       variable->name().remove(0, 1), "aio");
 
               dioVar->setPublic(true);
-              dioVar->setGlobal(true);
+              dioVar->setScope(cs8Variable::Global);
               dioVar->setDimension(variable->dimension());
 
               cs8DestApp->globalVariableModel()->addVariable(dioVar);

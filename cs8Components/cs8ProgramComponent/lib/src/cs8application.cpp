@@ -146,8 +146,8 @@ bool cs8Application::importVPlusFile(const QString &fileName) {
         // location is a joint variable
         varName.prepend("j");
         if ((var = globalVariableModel()->getVarByName(varName)) == nullptr)
-          var = new cs8Variable();
-        var->setGlobal(true);
+          var = new cs8Variable(this);
+        var->setScope(cs8Variable::Global);
         var->setType("jointRx");
         var->setName(varName);
         QMap<QString, QString> map;
@@ -164,8 +164,8 @@ bool cs8Application::importVPlusFile(const QString &fileName) {
         // location is a point variable
         varName.prepend("p");
         if ((var = globalVariableModel()->getVarByName(varName)) == nullptr) {
-          var = new cs8Variable();
-          var->setGlobal(true);
+          var = new cs8Variable(this);
+          var->setScope(cs8Variable::Global);
         }
 
         // read next line in location file containing matrix components
@@ -813,13 +813,13 @@ bool cs8Application::saveDataFile(const QString &fileName, bool val3S6Format) {
         s7DataType += "Rx";
       // create world and flange node
       if (dataType == "frame") {
-        auto *var = new cs8Variable();
+        auto *var = new cs8Variable(this);
         var->setName("world");
         var->setType("frame");
         m_globalVariableModel->addVariable(var);
       }
       if (dataType == "tool") {
-        auto *var = new cs8Variable();
+        auto *var = new cs8Variable(this);
         var->setName("flange");
         var->setType("tool");
         m_globalVariableModel->addVariable(var);
@@ -1402,7 +1402,7 @@ void cs8Application::moveParamsToGlobals(cs8Program *program) {
         arraySize = rx.cap(4).toInt();
         newName.remove(rx);
       }
-      var->setGlobal(true);
+      var->setScope(cs8Variable::Global);
       var->setPublic(true);
       var->setAllSizes(QString("%1").arg(arraySize));
       //

@@ -44,9 +44,9 @@ public:
   QStringList variableNameList();
   QList<cs8Variable *> &rvariableList();
   QList<cs8Variable *> variableList(const QString &type = QString());
-  QList<cs8Variable *> &variableList(const QRegularExpression &rx);
+  QList<cs8Variable *> variableList(const QRegularExpression &rx);
 
-  cs8Variable *createVariable(const QString &name);
+  cs8Variable *createVariable(const QString &name, const QString &type);
   bool hasDocumentation();
 
   bool withUndocumentedSymbols() const;

@@ -1,17 +1,24 @@
 #include "cs8variable.h"
 #include <QStringList>
 //
-cs8Variable::cs8Variable(QDomElement &element, const QString &description)
-    : QObject() {
-  m_global = false;
+cs8Variable::cs8Variable(QDomElement &element, const QString &description,
+                         QObject *parent)
+    : QObject(parent) {
   m_element = element;
   m_description = description;
   m_buildInTypes = setBuildInVariableTypes();
-  setGlobal(false);
 }
 
-cs8Variable::cs8Variable(cs8Variable *var) {
-  m_global = false;
+cs8Variable::cs8Variable(QObject *parent) : QObject(parent) {
+  m_docFragment = m_doc.createDocumentFragment();
+  m_element = m_doc.createElement("Data");
+  m_docFragment.appendChild(m_element);
+  m_buildInTypes = setBuildInVariableTypes();
+  setScope(Local);
+}
+
+cs8Variable::cs8Variable(cs8Variable *var, QObject *parent) : QObject(parent) {
+
   m_docFragment = m_doc.createDocumentFragment();
   m_element = var->element().cloneNode(true).toElement();
   m_docFragment.appendChild(m_element);
@@ -32,14 +39,6 @@ QStringList cs8Variable::setBuildInVariableTypes(bool val3S6Format) {
                        << "string"
                        << "tool"
                        << "trsf";
-}
-
-cs8Variable::cs8Variable() : QObject(), m_global(false) {
-  m_docFragment = m_doc.createDocumentFragment();
-  m_element = m_doc.createElement("Data");
-  m_docFragment.appendChild(m_element);
-  m_buildInTypes = setBuildInVariableTypes();
-  setGlobal(false);
 }
 
 QString cs8Variable::toString(bool withTypeDefinition) {
@@ -75,7 +74,7 @@ QString cs8Variable::documentation(bool withPrefix, bool forCOutput) {
     firstLine = false;
   }
   // qDebug() << "processed: " << out;
-  if (!isGlobal())
+  if (!scope())
     return prefix + (forCOutput ? "@param " : "\\param ") + name() + " " + out +
            "\n";
   else
@@ -114,34 +113,54 @@ QString cs8Variable::definition() {
          (allSizes() != QString() ? QString("[%1]").arg(allSizes()) : "");
 }
 
-void cs8Variable::setGlobal(bool global) {
+void cs8Variable::setScope(DeclarationScope scope) {
   emit modified();
-  m_global = global;
-  if (global) {
-    m_element.setTagName("Data");
-    if (!m_element.hasAttribute("xsi:type")) {
-      m_element.setAttribute("xsi:type", "array");
-    } else {
-      if (m_element.attribute("xsi:type") == "element")
-        m_element.setAttribute("xsi:type", "array");
-    }
-    if (!m_element.hasAttribute("size")) {
-      m_element.setAttribute("size", "1");
-    }
+  switch (scope) {
+  case Local:
+    m_element.setTagName("Local");
     m_element.removeAttribute("use");
-    if (m_element.attribute("xsi:type") == "collection" &&
-        m_element.hasAttribute("size")) {
-      m_element.removeAttribute("size");
-    }
-    if (!m_element.hasAttribute("access")) {
+    if (!m_element.hasAttribute("xsi:type"))
+      m_element.setAttribute("xsi:type", "array");
+    if (!m_element.hasAttribute("type"))
+      m_element.setAttribute("type", "num");
+    if (!m_element.hasAttribute("size"))
+      m_element.setAttribute("size", "1");
+    break;
+
+  case Global:
+    m_element.setTagName("Data");
+    m_element.removeAttribute("use");
+    if (!m_element.hasAttribute("xsi:type"))
+      m_element.setAttribute("xsi:type", "array");
+    if (!m_element.hasAttribute("type"))
+      m_element.setAttribute("type", "num");
+    if (!m_element.hasAttribute("size"))
+      m_element.setAttribute("size", "1");
+    if (!m_element.hasAttribute("access"))
       m_element.setAttribute("access", "private");
-    }
+    break;
+
+  case Parameter:
+    m_element.setTagName("Parameter");
+    if (!m_element.hasAttribute("xsi:type"))
+      m_element.setAttribute("xsi:type", "element");
+    if (!m_element.hasAttribute("type"))
+      m_element.setAttribute("type", "num");
+    if (!m_element.hasAttribute("use"))
+      m_element.setAttribute("use", "reference");
+    break;
   }
 }
 
-bool cs8Variable::isGlobal() const {
-  // qDebug() << "var: " << m_name << " has " << m_values.count();
-  return m_global; // m_values.count() > 0;
+cs8Variable::DeclarationScope cs8Variable::scope() const {
+  QString tagName = m_element.tagName();
+  if (tagName == "Local")
+    return Local;
+  else if (tagName == "Parameter")
+    return Parameter;
+  else if (tagName == "Global")
+    return Global;
+  return Local;
 }
 
 QString cs8Variable::allSizes() {

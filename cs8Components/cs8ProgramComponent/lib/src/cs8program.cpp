@@ -180,10 +180,10 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
       if (app->globalVariableModel()->variableNameList().contains(var) &&
           !m_localVariableModel->variableNameList().contains(var) &&
           !m_referencedGlobalVarModel->variableNameList().contains(var)) {
-        auto *refVar = new cs8Variable();
+        auto *refVar = new cs8Variable(this);
         cs8Variable *globalVar = app->globalVariableModel()->getVarByName(var);
 
-        refVar->setGlobal(true);
+        refVar->setScope(cs8Variable::Global);
         refVar->setName(globalVar->name());
         refVar->setType(globalVar->type());
         refVar->setAllSizes(globalVar->allSizes());

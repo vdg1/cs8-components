@@ -13,8 +13,15 @@
 class cs8Variable : public QObject {
 
   Q_OBJECT
+  Q_ENUMS(DeclarationScope)
 
 public:
+  enum DeclarationScope { Local, Parameter, Global };
+  cs8Variable(QDomElement &element, const QString &descripton = QString(),
+              QObject *parent = 0);
+  cs8Variable(cs8Variable *var, QObject *parent);
+  cs8Variable(QObject *parent);
+
   void setUse(QString value);
 
   QString use() const;
@@ -34,9 +41,6 @@ public:
 
   void setName(QString value);
   QString name() const;
-  cs8Variable(QDomElement &element, const QString &descripton = QString());
-  cs8Variable(cs8Variable *var);
-  cs8Variable();
 
   QString toString(bool withTypeDefinition = true);
   QString documentation(bool withPrefix, bool forCOutput);
@@ -49,20 +53,22 @@ public:
   QDomNodeList values();
   QString definition();
 
-  void setGlobal(bool global);
-  bool isGlobal() const;
+  void setScope(DeclarationScope scope);
+  DeclarationScope scope() const;
 
   QString allSizes();
   void setAllSizes(const QString &sizes);
 
-  QDomElement element(QDomDocument *doc = nullptr, bool val3S6Format = false) const;
+  QDomElement element(QDomDocument *doc = nullptr,
+                      bool val3S6Format = false) const;
 
   QVariant varValue(QString index = "0");
   void setValue(const QString &index, const QMap<QString, QString> &valueMap);
   bool isBuildInType() const;
   static QStringList buildInTypes(bool val3S6Format = false);
   bool hasConstPrefix(QString *prefix = nullptr) const;
-  static void extractArrayIndex(const QString &value, QString &name, QString &index);
+  static void extractArrayIndex(const QString &value, QString &name,
+                                QString &index);
 
 protected:
   QStringList m_buildInTypes;
@@ -70,7 +76,6 @@ protected:
   QString m_description;
   QDomDocumentFragment m_docFragment;
   QDomDocument m_doc;
-  bool m_global;
   static QStringList setBuildInVariableTypes(bool val3S6Format = false);
 
 signals:

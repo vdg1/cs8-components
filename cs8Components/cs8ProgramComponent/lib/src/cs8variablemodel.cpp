@@ -50,7 +50,7 @@ bool cs8VariableModel::addGlobalVariable(QDomElement &element,
                                          const QString &description) {
   auto *variable = new cs8Variable(element, description);
   connect(variable, SIGNAL(modified()), this, SLOT(slotModified()));
-  variable->setGlobal(true);
+  variable->setScope(cs8Variable::Global);
   m_variableList.append(variable);
 #if QT_VERSION >= 0x050000
   beginResetModel();
@@ -108,7 +108,7 @@ QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) {
   }
 }
 
-QList<cs8Variable *> &
+QList<cs8Variable *>
 cs8VariableModel::variableList(const QRegularExpression &rx) {
   QList<cs8Variable *> list;
   foreach (cs8Variable *var, m_variableList) {
@@ -119,10 +119,12 @@ cs8VariableModel::variableList(const QRegularExpression &rx) {
   return list;
 }
 
-cs8Variable *cs8VariableModel::createVariable(const QString &name) {
-  auto *variable = new cs8Variable();
+cs8Variable *cs8VariableModel::createVariable(const QString &name,
+                                              const QString &type) {
+  auto *variable = new cs8Variable(this);
   variable->setName(name);
-  variable->setParent(this);
+  variable->setType(type);
+  // variable->setParent(this);
   m_variableList.append(variable);
   return variable;
 }
