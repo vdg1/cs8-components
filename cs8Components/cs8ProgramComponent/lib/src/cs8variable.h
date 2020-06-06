@@ -38,6 +38,8 @@ public:
   QString type() const;
   QChar prefix() const;
   bool isConst() const;
+  void setXsiType(const QString &type);
+  QString xsiType() const;
 
   void setName(QString value);
   QString name() const;

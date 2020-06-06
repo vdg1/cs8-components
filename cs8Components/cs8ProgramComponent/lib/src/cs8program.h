@@ -16,6 +16,8 @@ class cs8Program : public QObject {
 
 public:
   QString toDocumentedCode();
+  bool saveOld(const QString &projectPath, bool withCode = true,
+               bool val3S6Format = false);
   bool save(const QString &projectPath, bool withCode = true,
             bool val3S6Format = false);
   cs8ParameterModel *parameterModel() const;
@@ -89,6 +91,8 @@ public:
 
   QDomElement programsSection() const;
   void setProgramsSection(const QDomElement &programsSection);
+
+  QString formattedDescriptionHeader() const;
 
 protected:
   bool parseProgramDoc(const QDomDocument &doc,

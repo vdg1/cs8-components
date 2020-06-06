@@ -443,9 +443,7 @@ void cs8Variable::setUse(QString value) {
   m_element.setAttribute("use", value);
 }
 
-QString cs8Variable::use() const {
-  return m_element.attribute("use", "reference");
-}
+QString cs8Variable::use() const { return m_element.attribute("use", "value"); }
 
 void cs8Variable::setDescription(QString value) {
   emit modified();
@@ -508,6 +506,14 @@ bool cs8Variable::isConst() const {
   QRegExp rx;
   rx.setPattern("([A-Z]+)(_[A-Z0-9]*)");
   return rx.indexIn(name()) == 0;
+}
+
+void cs8Variable::setXsiType(const QString &type) {
+  m_element.setAttribute("xsi:type", type);
+}
+
+QString cs8Variable::xsiType() const {
+  return m_element.attribute("xsi:type", "array");
 }
 
 void cs8Variable::setName(QString value) {

@@ -2,12 +2,14 @@
 #include "cs8application.h"
 #include "cs8variable.h"
 
+#include <QBuffer>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QStringList>
+#include <QXmlStreamWriter>
 
 #define MAX_LENGTH 40
 //
@@ -754,9 +756,8 @@ QString cs8Program::documentation(bool withPrefix) const {
   return out.trimmed();
 }
 
-void cs8Program::setDescriptionSection(bool val3S6Format) {
-  QString txt;
-  txt = m_briefDescription;
+QString cs8Program::formattedDescriptionHeader() const {
+  QString txt = m_briefDescription;
   while (txt.endsWith("\n"))
     txt.chop(1);
   // retrieve documentation of parameters
@@ -771,22 +772,26 @@ void cs8Program::setDescriptionSection(bool val3S6Format) {
                                                                           ' ') +
              ": " + m_parameterModel->variableList().at(i)->description();
   }
-
   QRegularExpression rx("(\\s|^)((\\w*)\\\\_)");
   while (rx.match(txt).hasMatch()) {
     txt.replace(rx.match(txt).captured(2), rx.match(txt).captured(3) + "_");
   }
+  return txt;
+}
 
+void cs8Program::setDescriptionSection(bool val3S6Format) {
   QDomNode node;
   while (m_descriptionSection.childNodes().count() > 0) {
     node = m_descriptionSection.childNodes().at(0);
     m_descriptionSection.removeChild(node);
   }
+
   if (!val3S6Format) {
-    QDomCDATASection data = m_XMLDocument.createCDATASection(txt);
+    QDomCDATASection data =
+        m_XMLDocument.createCDATASection(formattedDescriptionHeader());
     m_descriptionSection.appendChild(data);
   } else {
-    QDomText data = m_XMLDocument.createTextNode(txt);
+    QDomText data = m_XMLDocument.createTextNode(formattedDescriptionHeader());
     m_descriptionSection.appendChild(data);
   }
 }
@@ -866,8 +871,8 @@ bool cs8Program::save(const QString & projectPath, bool withCode) {
 }
 */
 
-bool cs8Program::save(const QString &projectPath, bool withCode,
-                      bool val3S6Format) {
+bool cs8Program::saveOld(const QString &projectPath, bool withCode,
+                         bool val3S6Format) {
   if (val3S6Format) {
     createXMLSkeleton(val3S6Format);
     setName(m_name);
@@ -932,6 +937,80 @@ bool cs8Program::save(const QString &projectPath, bool withCode,
   m_XMLDocument.save(stream, 2, QDomNode::EncodingFromDocument);
   // stream << m_XMLDocument.toString();
   file.close();
+
+  return true;
+}
+
+bool cs8Program::save(const QString &projectPath, bool withCode,
+                      bool val3S6Format) {
+  QBuffer buffer;
+  buffer.open(QBuffer::ReadWrite);
+  QXmlStreamWriter stream(&buffer);
+  stream.setAutoFormatting(true);
+  stream.setAutoFormattingIndent(2);
+  stream.setCodec("utf-8");
+  stream.writeStartDocument();
+
+  //
+  stream.writeStartElement("Programs");
+  stream.writeAttribute("xmlns:xsi",
+                        "http://www.w3.org/2001/XMLSchema-instance");
+  stream.writeAttribute("xmlns",
+                        "http://www.staubli.com/robotics/VAL3/Program/2");
+  stream.writeStartElement("Program");
+  stream.writeAttribute("name", name());
+  if (isPublic())
+    stream.writeAttribute("access", "public");
+  //
+  stream.writeStartElement("Description");
+  stream.writeCDATA(formattedDescriptionHeader());
+  stream.writeEndElement();
+  //
+  stream.writeStartElement("Parameters");
+  stream.writeAttribute("xmlns",
+                        "http://www.staubli.com/robotics/VAL3/Param/1");
+  for (auto item : parameterModel()->variableList()) {
+    stream.writeEmptyElement("Parameter");
+    stream.writeAttribute("name", item->name());
+    stream.writeAttribute("type", item->type());
+    stream.writeAttribute("xsi:type", item->xsiType());
+    if (item->use() == "reference")
+      stream.writeAttribute("use", item->use());
+  }
+  stream.writeEndElement();
+  //
+  stream.writeStartElement("Locals");
+  for (auto item : localVariableModel()->variableList()) {
+    stream.writeEmptyElement("Local");
+    stream.writeAttribute("name", item->name());
+    stream.writeAttribute("type", item->type());
+    stream.writeAttribute("xsi:type", item->xsiType());
+    stream.writeAttribute("size", item->dimension());
+  }
+  stream.writeEndElement();
+  //
+  stream.writeStartElement("Code");
+  QString codeText;
+  if (withCode) {
+    codeText = toDocumentedCode();
+  } else {
+    if (name() != "stop") {
+      codeText = "begin\n"
+                 "logMsg(libPath())\n"
+                 "put(sqrt(-1))\n"
+                 "end";
+    } else {
+      codeText = "begin\n"
+                 "end";
+    }
+  }
+  stream.writeCDATA(codeText);
+  stream.writeEndDocument();
+
+  QString fileName_ = projectPath + fileName();
+  QFile file(fileName_);
+  if (!file.open(QIODevice::WriteOnly))
+    return false;
 
   return true;
 }
