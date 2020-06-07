@@ -136,6 +136,7 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
 
   m_descriptionSection =
       m_programsSection.elementsByTagName("Description").at(0).toElement();
+  m_briefDescription = m_descriptionSection.text();
   if (m_descriptionSection.isNull()) {
     m_descriptionSection = m_XMLDocument.createElement("Description");
     m_programSection.insertBefore(m_descriptionSection,
@@ -776,7 +777,8 @@ QString cs8Program::formattedDescriptionHeader() const {
   while (rx.match(txt).hasMatch()) {
     txt.replace(rx.match(txt).captured(2), rx.match(txt).captured(3) + "_");
   }
-  return txt;
+
+  return txt.trimmed();
 }
 
 void cs8Program::setDescriptionSection(bool val3S6Format) {
@@ -976,6 +978,9 @@ bool cs8Program::save(const QString &projectPath, bool withCode,
     stream.writeAttribute("xsi:type", item->xsiType());
     if (item->use() == "reference")
       stream.writeAttribute("use", item->use());
+    if (item->dimensionCount() > 1)
+      stream.writeAttribute("dimensions",
+                            QString("%1").arg(item->dimensionCount()));
   }
   stream.writeEndElement();
   //
@@ -985,7 +990,8 @@ bool cs8Program::save(const QString &projectPath, bool withCode,
     stream.writeAttribute("name", item->name());
     stream.writeAttribute("type", item->type());
     stream.writeAttribute("xsi:type", item->xsiType());
-    stream.writeAttribute("size", item->dimension());
+    if (item->xsiType() != "collection")
+      stream.writeAttribute("size", item->dimension());
   }
   stream.writeEndElement();
   //
@@ -1007,11 +1013,16 @@ bool cs8Program::save(const QString &projectPath, bool withCode,
   stream.writeCDATA(codeText);
   stream.writeEndDocument();
 
+  // match our XML output to XML output of SRS
+  buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
+  if (buffer.buffer().right(1) == "\n")
+    buffer.buffer().chop(1);
+  //
   QString fileName_ = projectPath + fileName();
   QFile file(fileName_);
   if (!file.open(QIODevice::WriteOnly))
     return false;
-
+  file.write(buffer.buffer());
   return true;
 }
 
@@ -1107,8 +1118,9 @@ QString cs8Program::toDocumentedCode() {
       list << "  endIf";
     } else
       list << "_";
-  } else
+  } else {
     list << "_";
+  }
   // if (!documentation.endsWith("\n"))
   //  documentation += "\n";
 

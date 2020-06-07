@@ -465,7 +465,17 @@ QString cs8Variable::dimension() const {
 }
 
 int cs8Variable::dimensionCount() const {
-  return m_element.attribute("size", "").count(",") + 1;
+  switch (scope()) {
+  case Local:
+  case Global:
+    return m_element.attribute("size", "").count(",") + 1;
+    break;
+  case Parameter:
+    return m_element.attribute("dimensions", "1").toInt();
+    break;
+  }
+
+  return 1;
 }
 
 void cs8Variable::setDimension(const QString &dim) {
