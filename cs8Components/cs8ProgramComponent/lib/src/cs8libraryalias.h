@@ -18,7 +18,8 @@ class cs8LibraryAlias : public QObject {
   Q_OBJECT
 
 public:
-  cs8LibraryAlias(const QString &name, const QString &path, bool autoLoad = true);
+  cs8LibraryAlias(const QString &name, const QString &path,
+                  bool autoLoad = true);
   virtual ~cs8LibraryAlias();
   QString name() const;
 
@@ -28,9 +29,10 @@ public:
 
   void setPath(const QString &path);
 
-  QString autoLoad() const;
+  QString autoLoadString() const;
 
   void setAutoLoad(bool m_autoLoad);
+  bool autoLoad() const;
 
   QString documentation() const;
   QString definition() const;

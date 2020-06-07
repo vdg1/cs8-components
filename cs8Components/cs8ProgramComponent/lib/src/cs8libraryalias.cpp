@@ -42,7 +42,7 @@ void cs8LibraryAlias::setPath(const QString &path) {
   emit modified();
 }
 
-QString cs8LibraryAlias::autoLoad() const {
+QString cs8LibraryAlias::autoLoadString() const {
   return m_autoLoad ? "true" : "false";
 }
 
@@ -50,6 +50,8 @@ void cs8LibraryAlias::setAutoLoad(bool m_autoLoad) {
   this->m_autoLoad = m_autoLoad;
   emit modified();
 }
+
+bool cs8LibraryAlias::autoLoad() const { return m_autoLoad; }
 
 QString cs8LibraryAlias::documentation() const { return m_documentation; }
 
