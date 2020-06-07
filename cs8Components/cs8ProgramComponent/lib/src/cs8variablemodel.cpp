@@ -15,7 +15,7 @@ bool cs8VariableModel::addVariable(QDomElement &element,
                                    const QString &description) {
 
   if (element.tagName() == "Local") {
-    cs8Variable *variable = new cs8Variable(element);
+    cs8Variable *variable = new cs8Variable(element, "", this);
 
     variable->setDescription(description);
     m_variableList.append(variable);
@@ -26,7 +26,7 @@ bool cs8VariableModel::addVariable(QDomElement &element,
     reset();
 #endif
   } else if (element.tagName() == "Parameter") {
-    cs8Variable *variable = new cs8Variable(element);
+    cs8Variable *variable = new cs8Variable(element, "", this);
 
     variable->setDescription(description);
     m_variableList.append(variable);
