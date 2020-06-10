@@ -54,6 +54,7 @@ public:
   QString cellPath() const;
   QString cellProjectFilePath(bool cs8Format = false) const;
   QString cellDataFilePath(bool cs8Format = false) const;
+  bool writeProjectFile_old(bool val3S6Format = false);
   bool writeProjectFile(bool val3S6Format = false);
   QHash<QString, QString> exportDirectives() const;
   bool isModified() const;
@@ -100,6 +101,15 @@ public:
 
   QString briefModuleDocumentation() const;
   void setBriefModuleDocumentation(const QString &briefModuleDocumentation);
+
+  QString getProjectVersion() const;
+  void setProjectVersion(const QString &projectVersion);
+
+  QString getProjectStackSize() const;
+  void setProjectStackSize(const QString &projectStackSize);
+
+  QString getProjectMillimeterUnit() const;
+  void setProjectMillimeterUnit(const QString &projectMillimeterUnit);
 
 protected:
   QHash<QString, QString> m_exportDirectives;

@@ -130,7 +130,8 @@ void cs8Variable::setScope(DeclarationScope scope) {
   case Global:
     m_element.setTagName("Data");
     m_element.removeAttribute("use");
-    if (!m_element.hasAttribute("xsi:type"))
+    if (!m_element.hasAttribute("xsi:type") ||
+        (m_element.attribute("xsi:type") == "element"))
       m_element.setAttribute("xsi:type", "array");
     if (!m_element.hasAttribute("type"))
       m_element.setAttribute("type", "num");

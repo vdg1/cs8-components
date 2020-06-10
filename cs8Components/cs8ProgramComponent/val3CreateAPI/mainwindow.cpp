@@ -117,6 +117,8 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             cs8DestApp = new cs8Application(this);
             cs8DestApp->setName(destAppName);
             cs8DestApp->setCellPath(cs8SourceApps.at(0)->cellPath());
+            cs8DestApp->setProjectVersion(
+                cs8SourceApps.at(0)->getProjectVersion());
             // create version variable
             cs8Variable *var =
                 cs8DestApp->globalVariableModel()->createVariable("sVersion",

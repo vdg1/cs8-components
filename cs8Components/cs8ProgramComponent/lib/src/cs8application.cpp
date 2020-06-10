@@ -11,7 +11,9 @@
 #include "cs8programmodel.h"
 #include "cs8variable.h"
 #include "cs8variablemodel.h"
+#include <QBuffer>
 #include <QRegularExpression>
+#include <QXmlStreamWriter>
 #include <Qt3DCore/QTransform>
 //
 void cs8Application::initPrecompilerSettings() {
@@ -235,6 +237,29 @@ QString cs8Application::briefModuleDocumentation() const {
 void cs8Application::setBriefModuleDocumentation(
     const QString &briefModuleDocumentation) {
   m_briefModuleDocumentation = briefModuleDocumentation;
+}
+
+QString cs8Application::getProjectVersion() const { return m_projectVersion; }
+
+void cs8Application::setProjectVersion(const QString &projectVersion) {
+  m_projectVersion = projectVersion;
+}
+
+QString cs8Application::getProjectStackSize() const {
+  return m_projectStackSize;
+}
+
+void cs8Application::setProjectStackSize(const QString &projectStackSize) {
+  m_projectStackSize = projectStackSize;
+}
+
+QString cs8Application::getProjectMillimeterUnit() const {
+  return m_projectMillimeterUnit;
+}
+
+void cs8Application::setProjectMillimeterUnit(
+    const QString &projectMillimeterUnit) {
+  m_projectMillimeterUnit = projectMillimeterUnit;
 }
 
 bool cs8Application::open(const QString &pfxFilePath) {
@@ -1318,7 +1343,7 @@ QString cs8Application::cellDataFilePath(bool cs8Format) const {
   return pth;
 }
 
-bool cs8Application::writeProjectFile(bool val3S6Format) {
+bool cs8Application::writeProjectFile_old(bool val3S6Format) {
   createXMLSkeleton(val3S6Format);
   foreach (cs8Program *program, m_programModel->programList()) {
     QDomElement element =
@@ -1365,6 +1390,74 @@ bool cs8Application::writeProjectFile(bool val3S6Format) {
   stream << m_XMLDocument.toString(2);
   file.close();
 
+  return true;
+}
+
+bool cs8Application::writeProjectFile(bool val3S6Format) {
+  QBuffer buffer;
+  buffer.open(QBuffer::ReadWrite);
+  QXmlStreamWriter stream(&buffer);
+  stream.setAutoFormatting(true);
+  stream.setAutoFormattingIndent(2);
+  stream.setCodec("utf-8");
+  stream.writeStartDocument();
+
+  stream.writeStartElement("Project");
+  stream.writeAttribute("xmlns",
+                        "http://www.staubli.com/robotics/VAL3/Project/3");
+
+  stream.writeStartElement("Parameters");
+  stream.writeAttribute("version", m_projectVersion);
+  stream.writeAttribute("stackSize", m_projectStackSize);
+  stream.writeAttribute("millimeterUnit", m_projectMillimeterUnit);
+  stream.writeEndElement();
+
+  stream.writeStartElement("Programs");
+  for (auto item : m_programModel->programList()) {
+    stream.writeStartElement("Program");
+    stream.writeAttribute("file", item->fileName());
+    stream.writeEndElement();
+  }
+  stream.writeEndElement();
+
+  stream.writeStartElement("Database");
+  stream.writeStartElement("Data");
+  stream.writeAttribute("file", m_projectName + ".dtx");
+  stream.writeEndElement();
+  stream.writeEndElement();
+
+  stream.writeStartElement("Libraries");
+  for (auto item : m_libraryAliasModel->list()) {
+    stream.writeStartElement("Library");
+    stream.writeAttribute("alias", item->name());
+    stream.writeAttribute("path", item->path());
+    if (!item->autoLoad())
+      stream.writeAttribute("autoload", item->autoLoadString());
+    stream.writeEndElement();
+  }
+  stream.writeEndElement();
+
+  stream.writeStartElement("Types");
+  for (auto item : m_typeModel->list()) {
+    stream.writeStartElement("Type");
+    stream.writeAttribute("name", item->name());
+    stream.writeAttribute("path", item->path());
+    stream.writeEndElement();
+  }
+  stream.writeEndElement();
+
+  stream.writeEndDocument();
+
+  // match our XML output to XML output of SRS
+  buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
+  if (buffer.buffer().right(1) == "\n")
+    buffer.buffer().chop(1);
+  //
+  QString fileName_ = m_projectPath + m_projectName + ".pjx";
+  QFile file(fileName_);
+  if (!file.open(QIODevice::WriteOnly))
+    return false;
+  file.write(buffer.buffer());
   return true;
 }
 
