@@ -3,6 +3,7 @@
 //
 #include <QAbstractTableModel>
 #include <QDomElement>
+#include <QXmlStreamWriter>
 
 class cs8Variable;
 //
@@ -51,6 +52,8 @@ public:
 
   bool withUndocumentedSymbols() const;
   void setWithUndocumentedSymbols(bool withUndocumentedSymbols);
+
+  void writeXMLStream(QXmlStreamWriter &stream);
 
 signals:
   void modified(bool);

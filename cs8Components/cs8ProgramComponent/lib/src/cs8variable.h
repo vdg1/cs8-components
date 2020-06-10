@@ -8,6 +8,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <QXmlStreamWriter>
 //
 
 class cs8Variable : public QObject {
@@ -71,6 +72,8 @@ public:
   bool hasConstPrefix(QString *prefix = nullptr) const;
   static void extractArrayIndex(const QString &value, QString &name,
                                 QString &index);
+
+  void writeXMLStream(QXmlStreamWriter &stream);
 
 protected:
   QStringList m_buildInTypes;

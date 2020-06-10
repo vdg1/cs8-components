@@ -1,6 +1,6 @@
 #include "cs8globalvariablemodel.h"
 
-cs8GlobalVariableModel::cs8GlobalVariableModel(QObject *parent) :
-    cs8VariableModel(parent, cs8VariableModel::Global)
-{
-}
+cs8GlobalVariableModel::cs8GlobalVariableModel(QObject *parent)
+    : cs8VariableModel(parent, cs8VariableModel::Global) {}
+
+void cs8GlobalVariableModel::writeXMLStream(QXmlStreamWriter &stream) {}

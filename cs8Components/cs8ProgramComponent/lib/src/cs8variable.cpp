@@ -438,6 +438,29 @@ void cs8Variable::extractArrayIndex(const QString &value, QString &name,
   }
 }
 
+void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
+  switch (scope()) {
+  case Parameter:
+    stream.writeEmptyElement("Parameter");
+    stream.writeAttribute("name", name());
+    stream.writeAttribute("type", type());
+    stream.writeAttribute("xsi:type", xsiType());
+    if (use() == "reference")
+      stream.writeAttribute("use", use());
+    if (dimensionCount() > 1)
+      stream.writeAttribute("dimensions", QString("%1").arg(dimensionCount()));
+    break;
+  case Local:
+    stream.writeEmptyElement("Local");
+    stream.writeAttribute("name", name());
+    stream.writeAttribute("type", type());
+    stream.writeAttribute("xsi:type", xsiType());
+    if (xsiType() != "collection")
+      stream.writeAttribute("size", dimension());
+    break;
+  }
+}
+
 void cs8Variable::setUse(QString value) {
   emit modified();
   m_element.setAttribute("use", value);

@@ -356,3 +356,11 @@ void cs8VariableModel::setWithUndocumentedSymbols(
     bool withUndocumentedSymbols) {
   m_withUndocumentedSymbols = withUndocumentedSymbols;
 }
+
+void cs8VariableModel::writeXMLStream(QXmlStreamWriter &stream) {
+  stream.writeStartElement("Locals");
+  for (auto item : variableList()) {
+    item->writeXMLStream(stream);
+  }
+  stream.writeEndElement();
+}

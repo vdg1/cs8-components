@@ -968,32 +968,9 @@ bool cs8Program::save(const QString &projectPath, bool withCode,
   stream.writeCDATA(formattedDescriptionHeader());
   stream.writeEndElement();
   //
-  stream.writeStartElement("Parameters");
-  stream.writeAttribute("xmlns",
-                        "http://www.staubli.com/robotics/VAL3/Param/1");
-  for (auto item : parameterModel()->variableList()) {
-    stream.writeEmptyElement("Parameter");
-    stream.writeAttribute("name", item->name());
-    stream.writeAttribute("type", item->type());
-    stream.writeAttribute("xsi:type", item->xsiType());
-    if (item->use() == "reference")
-      stream.writeAttribute("use", item->use());
-    if (item->dimensionCount() > 1)
-      stream.writeAttribute("dimensions",
-                            QString("%1").arg(item->dimensionCount()));
-  }
-  stream.writeEndElement();
+  parameterModel()->writeXMLStream(stream);
   //
-  stream.writeStartElement("Locals");
-  for (auto item : localVariableModel()->variableList()) {
-    stream.writeEmptyElement("Local");
-    stream.writeAttribute("name", item->name());
-    stream.writeAttribute("type", item->type());
-    stream.writeAttribute("xsi:type", item->xsiType());
-    if (item->xsiType() != "collection")
-      stream.writeAttribute("size", item->dimension());
-  }
-  stream.writeEndElement();
+  localVariableModel()->writeXMLStream(stream);
   //
   stream.writeStartElement("Code");
   QString codeText;
