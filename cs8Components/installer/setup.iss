@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "2.3.3"
+#define MyAppVersion "2.3.4"
 #define MyAppPublisher "SAXE Process AB"
 #define MyAppURL "http://www.saxe-group.com"
 #define QT "D:\Qt\5.14.1\msvc2017_64"
@@ -51,18 +51,25 @@ Source: "{#QT}\bin\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Xml.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Network.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\Qt5Svg.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5WebEngineWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5WebEngineCore.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#QT}\bin\Qt5Quick.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#QT}\bin\Qt5QuickWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5WebChannel.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\Qt5Quick.dll"; DestDir: "{app}"; Flags: ignoreversion
+
+Source: "{#QT}\bin\opengl32sw.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\libGLESV2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\libEGL.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\D3Dcompiler_47.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\Qt5QuickWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Qml.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5QmlModels.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\QtWebEngineProcess.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#QT}\resources\*"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\resources\*"; DestDir: "{app}\resources\"; Flags: ignoreversion
 Source: "{#QT}\translations\qtwebengine_locales\*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\plugins\platforms\qwindows.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\plugins\styles\qwindowsvistastyle.dll"; DestDir: "{app}\styles\"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [InstallDelete]

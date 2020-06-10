@@ -102,6 +102,15 @@ public:
   QString briefModuleDocumentation() const;
   void setBriefModuleDocumentation(const QString &briefModuleDocumentation);
 
+  QString getProjectVersion() const;
+  void setProjectVersion(const QString &projectVersion);
+
+  QString getProjectStackSize() const;
+  void setProjectStackSize(const QString &projectStackSize);
+
+  QString getProjectMillimeterUnit() const;
+  void setProjectMillimeterUnit(const QString &projectMillimeterUnit);
+
 protected:
   QHash<QString, QString> m_exportDirectives;
   QHash<QString, QString> m_pragmaList;

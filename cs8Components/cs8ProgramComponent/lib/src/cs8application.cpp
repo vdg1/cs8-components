@@ -239,6 +239,29 @@ void cs8Application::setBriefModuleDocumentation(
   m_briefModuleDocumentation = briefModuleDocumentation;
 }
 
+QString cs8Application::getProjectVersion() const { return m_projectVersion; }
+
+void cs8Application::setProjectVersion(const QString &projectVersion) {
+  m_projectVersion = projectVersion;
+}
+
+QString cs8Application::getProjectStackSize() const {
+  return m_projectStackSize;
+}
+
+void cs8Application::setProjectStackSize(const QString &projectStackSize) {
+  m_projectStackSize = projectStackSize;
+}
+
+QString cs8Application::getProjectMillimeterUnit() const {
+  return m_projectMillimeterUnit;
+}
+
+void cs8Application::setProjectMillimeterUnit(
+    const QString &projectMillimeterUnit) {
+  m_projectMillimeterUnit = projectMillimeterUnit;
+}
+
 bool cs8Application::open(const QString &pfxFilePath) {
   qDebug() << Q_FUNC_INFO << "path:" << pfxFilePath;
   QString pth = QDir::fromNativeSeparators(pfxFilePath);
