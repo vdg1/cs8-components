@@ -61,60 +61,36 @@ void cs8Program::printChildNodes(const QDomElement &element) {
     qDebug() << i << element.childNodes().at(i).nodeName();
 }
 
-void cs8Program::createXMLSkeleton(bool val3S6Format) {
+void cs8Program::createXMLSkeleton() {
   m_XMLDocument = QDomDocument();
   QDomProcessingInstruction process = m_XMLDocument.createProcessingInstruction(
       "xml", R"(version="1.0" encoding="utf-8")");
   m_XMLDocument.appendChild(process);
 
-  if (!val3S6Format) {
-    m_programsSection = m_XMLDocument.createElement("Programs");
-    m_programsSection.setAttribute("xmlns:xsi",
-                                   "http://www.w3.org/2001/XMLSchema-instance");
-    m_programsSection.setAttribute(
-        "xmlns", "http://www.staubli.com/robotics/VAL3/Program/2");
-    m_XMLDocument.appendChild(m_programsSection);
+  m_programsSection = m_XMLDocument.createElement("Programs");
+  m_programsSection.setAttribute("xmlns:xsi",
+                                 "http://www.w3.org/2001/XMLSchema-instance");
+  m_programsSection.setAttribute(
+      "xmlns", "http://www.staubli.com/robotics/VAL3/Program/2");
+  m_XMLDocument.appendChild(m_programsSection);
 
-    m_programSection = m_XMLDocument.createElement("Program");
-    m_programsSection.appendChild(m_programSection);
+  m_programSection = m_XMLDocument.createElement("Program");
+  m_programsSection.appendChild(m_programSection);
 
-    m_descriptionSection = m_XMLDocument.createElement("Description");
-    m_programSection.appendChild(m_descriptionSection);
+  m_descriptionSection = m_XMLDocument.createElement("Description");
+  m_programSection.appendChild(m_descriptionSection);
 
-    m_paramSection = m_XMLDocument.createElement("Parameters");
-    m_paramSection.setAttribute("xmlns",
-                                "http://www.staubli.com/robotics/VAL3/Param/1");
-    m_programSection.appendChild(m_paramSection);
+  m_paramSection = m_XMLDocument.createElement("Parameters");
+  m_paramSection.setAttribute("xmlns",
+                              "http://www.staubli.com/robotics/VAL3/Param/1");
+  m_programSection.appendChild(m_paramSection);
 
-    m_localSection = m_XMLDocument.createElement("Locals");
-    m_programSection.appendChild(m_localSection);
+  m_localSection = m_XMLDocument.createElement("Locals");
+  m_programSection.appendChild(m_localSection);
 
-    // m_codeSection = m_XMLDocument.createElement("Code");
-    // m_programSection.appendChild(m_codeSection);
-  } else {
-    m_programsSection = m_XMLDocument.createElement("programList");
-    m_programsSection.setAttribute("xmlns", "ProgramNameSpace");
-    m_XMLDocument.appendChild(m_programsSection);
-
-    m_programSection = m_XMLDocument.createElement("program");
-    m_programsSection.appendChild(m_programSection);
-
-    m_descriptionSection = m_XMLDocument.createElement("description");
-    m_programSection.appendChild(m_descriptionSection);
-
-    m_paramSection = m_XMLDocument.createElement("paramSection");
-    m_programSection.appendChild(m_paramSection);
-
-    m_localSection = m_XMLDocument.createElement("localSection");
-    m_programSection.appendChild(m_localSection);
-
-    m_sourceSection = m_XMLDocument.createElement("source");
-    m_programSection.appendChild(m_sourceSection);
-
-    // m_codeSection = m_XMLDocument.createElement("code");
-    // m_sourceSection.appendChild(m_codeSection);
-  }
-  setCode("begin\nend", false, val3S6Format);
+  // m_codeSection = m_XMLDocument.createElement("Code");
+  // m_programSection.appendChild(m_codeSection);
+  setCode("begin\nend", false);
 }
 
 /*!
@@ -781,21 +757,16 @@ QString cs8Program::formattedDescriptionHeader() const {
   return txt.trimmed();
 }
 
-void cs8Program::setDescriptionSection(bool val3S6Format) {
+void cs8Program::setDescriptionSection() {
   QDomNode node;
   while (m_descriptionSection.childNodes().count() > 0) {
     node = m_descriptionSection.childNodes().at(0);
     m_descriptionSection.removeChild(node);
   }
 
-  if (!val3S6Format) {
-    QDomCDATASection data =
-        m_XMLDocument.createCDATASection(formattedDescriptionHeader());
-    m_descriptionSection.appendChild(data);
-  } else {
-    QDomText data = m_XMLDocument.createTextNode(formattedDescriptionHeader());
-    m_descriptionSection.appendChild(data);
-  }
+  QDomCDATASection data =
+      m_XMLDocument.createCDATASection(formattedDescriptionHeader());
+  m_descriptionSection.appendChild(data);
 }
 
 void cs8Program::setDescription(const QString &theValue) {
@@ -812,139 +783,7 @@ QString cs8Program::detailedDocumentation() const {
   return m_detailedDocumentation;
 }
 
-/*
-bool cs8Program::save(const QString & projectPath, bool withCode) {
-    qDebug() << "Saving progam " << m_name;
-    QDomDocument doc;
-    QDomElement programList = doc.createElement("programList");
-    programList.setAttribute("xmlns", "ProgramNameSpace");
-    doc.appendChild(programList);
-
-    QDomElement program = doc.createElement("program");
-    program.setAttribute("name", name());
-    program.setAttribute("public", isPublic() ? "true" : "false");
-    programList.appendChild(program);
-
-
-    QDomElement descriptionElement=doc.createElement("description");
-    //descriptionElement.setAttribute("xmlns","ProgramNameSpace");
-    program.appendChild(descriptionElement);
-    program.appendChild(m_parameterModel->document(doc));
-    program.appendChild(m_localVariableModel->document(doc));
-
-    QDomElement source = doc.createElement("source");
-    program.appendChild(source);
-
-    QDomElement code = doc.createElement("code");
-    source.appendChild(code);
-
-    QDomText codeText;
-    if (withCode)
-    {
-        codeText = doc.createTextNode(toDocumentedCode());
-    }
-    else
-    {
-        if (name()!="stop")
-        {
-            codeText = doc.createTextNode("begin\n"
-                                          "logMsg(libPath())\n"
-                                          "put(sqrt(-1))\n"
-                                          "end");
-        }
-        else
-        {
-            codeText = doc.createTextNode("begin\n"
-                                          "end");
-        }
-    }
-    code.appendChild(codeText);
-
-    QFile file(projectPath + "/" + fileName());
-    if (!file.open(QIODevice::WriteOnly))
-        return false;
-
-    QTextStream stream(&file);
-    stream << "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n";
-    stream << doc.toString();
-    file.close();
-
-    return true;
-}
-*/
-
-bool cs8Program::saveOld(const QString &projectPath, bool withCode,
-                         bool val3S6Format) {
-  if (val3S6Format) {
-    createXMLSkeleton(val3S6Format);
-    setName(m_name);
-  }
-  Q_ASSERT(!name().isEmpty());
-  qDebug() << "Saving progam " << name();
-  setDescriptionSection(val3S6Format);
-  QString codeText;
-  if (withCode) {
-    codeText = toDocumentedCode();
-  } else {
-    if (name() != "stop") {
-      codeText = "begin\n"
-                 "logMsg(libPath())\n"
-                 "put(sqrt(-1))\n"
-                 "end";
-    } else {
-      codeText = "begin\n"
-                 "end";
-    }
-  }
-
-  if (!val3S6Format) {
-    // remove any code sections
-    while (m_programSection.elementsByTagName("Code").size() != 0)
-      m_programSection.removeChild(
-          m_programSection.elementsByTagName("Code").at(0));
-
-    QDomCDATASection data = m_XMLDocument.createCDATASection(codeText);
-    QDomElement codeSection = m_XMLDocument.createElement("Code");
-    codeSection.appendChild(data);
-
-    m_programSection.appendChild(codeSection);
-  } else {
-    // remove any code sections
-    while (m_programSection.elementsByTagName("code").size() != 0)
-      m_programSection.removeChild(
-          m_programSection.elementsByTagName("code").at(0));
-
-    m_programSection.setAttribute("public", isPublic() ? "true" : "false");
-    QDomText codeTextSection = m_XMLDocument.createTextNode(codeText);
-    QDomElement codeSection = m_XMLDocument.createElement("code");
-    codeSection.appendChild(codeTextSection);
-    m_sourceSection.appendChild(codeSection);
-  }
-
-  foreach (cs8Variable *param, m_parameterModel->variableList()) {
-    m_paramSection.appendChild(param->element(&m_XMLDocument, val3S6Format));
-  }
-  foreach (cs8Variable *var, m_localVariableModel->variableList()) {
-    m_localSection.appendChild(var->element(&m_XMLDocument, val3S6Format));
-  }
-
-  QString fileName_ = projectPath + fileName();
-  QFile file(fileName_);
-  if (!file.open(QIODevice::WriteOnly))
-    return false;
-
-  QTextStream stream(&file);
-  stream.setCodec("UTF-8");
-  stream.setGenerateByteOrderMark(true);
-  m_XMLDocument.save(stream, 2, QDomNode::EncodingFromDocument);
-  // stream << m_XMLDocument.toString();
-  file.close();
-
-  return true;
-}
-
-bool cs8Program::save(const QString &projectPath, bool withCode,
-                      bool val3S6Format) {
+bool cs8Program::save(const QString &projectPath, bool withCode) {
   QBuffer buffer;
   buffer.open(QBuffer::ReadWrite);
   QXmlStreamWriter stream(&buffer);
@@ -964,9 +803,11 @@ bool cs8Program::save(const QString &projectPath, bool withCode,
   if (isPublic())
     stream.writeAttribute("access", "public");
   //
-  stream.writeStartElement("Description");
-  stream.writeCDATA(formattedDescriptionHeader());
-  stream.writeEndElement();
+  if (!m_briefDescription.isEmpty()) {
+    stream.writeStartElement("Description");
+    stream.writeCDATA(formattedDescriptionHeader());
+    stream.writeEndElement();
+  }
   //
   parameterModel()->writeXMLStream(stream);
   //

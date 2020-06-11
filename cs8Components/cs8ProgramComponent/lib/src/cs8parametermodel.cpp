@@ -49,6 +49,8 @@ QString cs8ParameterModel::toString(bool withTypeDefinition) {
 }
 
 void cs8ParameterModel::writeXMLStream(QXmlStreamWriter &stream) {
+  if (variableList().count() == 0)
+    return;
   stream.writeStartElement("Parameters");
   stream.writeAttribute("xmlns",
                         "http://www.staubli.com/robotics/VAL3/Param/1");

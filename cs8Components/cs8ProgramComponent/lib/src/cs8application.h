@@ -19,11 +19,9 @@ class cs8Application : public QObject {
 
 public:
   QString projectPath(bool cs8Format = false);
-  bool save(const QString &path = QString(), const QString &name = QString(),
-            bool saveInS6Format = false);
+  bool save(const QString &path = QString(), const QString &name = QString());
   bool loadDataFile(const QString &fileName);
-  bool saveDataFileOld(const QString &fileName, bool val3S6Format = false);
-  bool saveDataFile(const QString &fileName, bool val3S6Format = false);
+  bool saveDataFile(const QString &fileName);
   bool open(const QString &pfxFilePath);
   bool openFromPathName(const QString &filePath);
   cs8Application(QObject *parent = nullptr);

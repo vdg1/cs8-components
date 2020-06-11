@@ -22,7 +22,7 @@ Q_OBJECT
 public:
 QString projectPath(bool cs8Format=false);
 bool loadDataFile(const QString & fileName);
-bool saveDataFile(const QString & fileName, bool);
+bool saveDataFile(const QString &fileName);
 bool open(const QString & pfxFilePath);
 bool openFromPathName(const QString & filePath);
 cs8Application(QObject* parent = 0);
@@ -47,14 +47,8 @@ QString cellPath() const;
 QString cellProjectFilePath(bool cs8Format=false) const;
 QString cellDataFilePath(bool cs8Format=false) const;
 bool writeProjectFile();
-QHash<QString, QString> exportDirectives() const
-{
-    return m_exportDirectives;
-}
-bool isModified() const
-{
-    return m_modified;
-}
+QHash<QString, QString> exportDirectives() const;
+bool isModified() const;
 void moveParamsToGlobals(cs8Program *program);
 void setCopyrightMessage(const QString &text);
 cs8VariableModel *globalVariableModel() const;

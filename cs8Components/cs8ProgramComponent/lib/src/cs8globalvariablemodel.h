@@ -9,8 +9,9 @@ class cs8GlobalVariableModel : public cs8VariableModel {
 public:
   explicit cs8GlobalVariableModel(QObject *parent = 0);
   void writeXMLStream(QXmlStreamWriter &stream);
-  bool addGlobalVariable(QDomElement &element,
-                         const QString &description = QString());
+  using cs8VariableModel::addVariable;
+  bool addVariable(QDomElement &element,
+                   const QString &description = QString());
 
 signals:
 

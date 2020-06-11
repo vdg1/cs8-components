@@ -12,8 +12,8 @@ void cs8GlobalVariableModel::writeXMLStream(QXmlStreamWriter &stream) {
   stream.writeEndElement();
 }
 
-bool cs8GlobalVariableModel::addGlobalVariable(QDomElement &element,
-                                               const QString &description) {
+bool cs8GlobalVariableModel::addVariable(QDomElement &element,
+                                         const QString &description) {
   auto *variable = new cs8Variable(element, description);
   // variable->setScope(cs8Variable::Global);
   connect(variable, SIGNAL(modified()), this, SLOT(slotModified()));

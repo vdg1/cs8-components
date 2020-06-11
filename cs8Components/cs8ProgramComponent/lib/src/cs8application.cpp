@@ -787,92 +787,14 @@ bool cs8Application::loadDataFile(const QString &fileName) {
     QDomNodeList variableList = sectionElement.childNodes();
     for (int j = 0; j < variableList.count(); j++) {
       QDomElement variableElement = variableList.at(j).toElement();
-      m_globalVariableModel->addGlobalVariable(variableElement);
+      m_globalVariableModel->addVariable(variableElement);
     }
   }
   file.close();
   return true;
 }
 
-bool cs8Application::saveDataFileOld(const QString &fileName,
-                                     bool val3S6Format) {
-  qDebug() << "Saving data file: " << fileName;
-
-  QDomDocument xmlDataDocument = QDomDocument();
-  QDomProcessingInstruction process =
-      xmlDataDocument.createProcessingInstruction(
-          "xml", R"(version="1.0" encoding="utf-8")");
-  xmlDataDocument.appendChild(process);
-
-  if (!val3S6Format) {
-    QDomElement databaseSection = xmlDataDocument.createElement("Database");
-
-    databaseSection.setAttribute("xmlns",
-                                 "http://www.staubli.com/robotics/VAL3/Data/2");
-    databaseSection.setAttribute("xmlns:xsi",
-                                 "http://www.w3.org/2001/XMLSchema-instance");
-    xmlDataDocument.appendChild(databaseSection);
-
-    QDomElement datasSection = xmlDataDocument.createElement("Datas");
-    databaseSection.appendChild(datasSection);
-
-    foreach (cs8Variable *var, m_globalVariableModel->variableList()) {
-      datasSection.appendChild(var->element());
-    }
-  } else {
-    QDomElement databaseSection = xmlDataDocument.createElement("dataList");
-
-    databaseSection.setAttribute("xmlns", "DataNameSpace");
-    xmlDataDocument.appendChild(databaseSection);
-
-    foreach (QString dataType, cs8Variable::buildInTypes(true)) {
-      QDomElement datasSection =
-          xmlDataDocument.createElement(dataType + "Section");
-      databaseSection.appendChild(datasSection);
-      // replace s6 name with s7 name
-      QString s7DataType = dataType;
-      if (s7DataType == "point")
-        s7DataType += "Rx";
-      if (s7DataType == "joint")
-        s7DataType += "Rx";
-      if (s7DataType == "config")
-        s7DataType += "Rx";
-      // create world and flange node
-      if (dataType == "frame") {
-        auto *var = new cs8Variable(this);
-        var->setName("world");
-        var->setType("frame");
-        m_globalVariableModel->addVariable(var);
-      }
-      if (dataType == "tool") {
-        auto *var = new cs8Variable(this);
-        var->setName("flange");
-        var->setType("tool");
-        m_globalVariableModel->addVariable(var);
-      }
-      foreach (cs8Variable *var,
-               m_globalVariableModel->variableList(s7DataType)) {
-        datasSection.appendChild(var->element(&m_XMLDocument, true));
-      }
-    }
-  }
-  QFile file(fileName);
-  if (!file.open(QIODevice::WriteOnly))
-    return false;
-
-  QTextStream stream(&file);
-
-  stream.setCodec("UTF-8");
-  stream.setGenerateByteOrderMark(true);
-  xmlDataDocument.save(stream, 4, QDomNode::EncodingFromDocument);
-  // stream << xmlDataDocument.toString ();
-  // qDebug() << xmlDataDocument.toString();
-  file.close();
-
-  return true;
-}
-
-bool cs8Application::saveDataFile(const QString &fileName, bool val3S6Format) {
+bool cs8Application::saveDataFile(const QString &fileName) {
   QBuffer buffer;
   buffer.open(QBuffer::ReadWrite);
   QXmlStreamWriter stream(&buffer);
@@ -903,8 +825,7 @@ bool cs8Application::saveDataFile(const QString &fileName, bool val3S6Format) {
   return true;
 }
 
-bool cs8Application::save(const QString &path, const QString &name,
-                          bool saveInS6Format) {
+bool cs8Application::save(const QString &path, const QString &name) {
   if (!path.isEmpty())
     m_projectPath = path;
   if (!name.isEmpty())
@@ -947,13 +868,13 @@ bool cs8Application::save(const QString &path, const QString &name,
   }
   QDir dir;
   dir.mkpath(m_projectPath);
-  if (!writeProjectFile(saveInS6Format))
+  if (!writeProjectFile())
     return false;
-  if (!saveDataFile(m_projectPath + m_projectName + ".dtx", saveInS6Format))
+  if (!saveDataFile(m_projectPath + m_projectName + ".dtx"))
     return false;
   foreach (cs8Program *program, m_programModel->programList()) {
     qDebug() << "Save program " << program->name();
-    if (!program->save(m_projectPath, true, saveInS6Format))
+    if (!program->save(m_projectPath, true))
       return false;
   }
   if (!saveProjectData())
@@ -1375,6 +1296,12 @@ QString cs8Application::cellDataFilePath(bool cs8Format) const {
   return pth;
 }
 
+QHash<QString, QString> cs8Application::exportDirectives() const {
+  return m_exportDirectives;
+}
+
+bool cs8Application::isModified() const { return m_modified; }
+
 bool cs8Application::writeProjectFile_old(bool val3S6Format) {
   createXMLSkeleton(val3S6Format);
   foreach (cs8Program *program, m_programModel->programList()) {
@@ -1492,12 +1419,6 @@ bool cs8Application::writeProjectFile(bool val3S6Format) {
   file.write(buffer.buffer());
   return true;
 }
-
-QHash<QString, QString> cs8Application::exportDirectives() const {
-  return m_exportDirectives;
-}
-
-bool cs8Application::isModified() const { return m_modified; }
 
 /*
  * Move parameters to global variables if name starts with '_'

@@ -11,8 +11,7 @@ SUBDIRS = lib \
     val3CreateAPI \
     val3CompilerDeployment \
     chmlib \
-    importVPlus \
-    saveAsS6
+    importVPlus
 
 
     # val3PreCompilerSettings

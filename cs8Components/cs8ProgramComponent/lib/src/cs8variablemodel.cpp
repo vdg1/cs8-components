@@ -343,6 +343,8 @@ void cs8VariableModel::setWithUndocumentedSymbols(
 }
 
 void cs8VariableModel::writeXMLStream(QXmlStreamWriter &stream) {
+  if (variableList().count() == 0)
+    return;
   stream.writeStartElement("Locals");
   for (auto item : variableList()) {
     item->writeXMLStream(stream);

@@ -12,5 +12,5 @@ int main(int argc, char *argv[]) {
            "CS9\\Controller_s882\\usr\\usrapp\\aMotionID\\aMotionID.pjx");
   app.save("D:\\data\\Staubli\\SRS\\_Development\\Dev_SAXEAutomation_"
            "CS9\\Controller_s882\\usr\\usrapp\\aMotionID_saved\\",
-           "aMotionID_saved", false);
+           "aMotionID_saved");
 }

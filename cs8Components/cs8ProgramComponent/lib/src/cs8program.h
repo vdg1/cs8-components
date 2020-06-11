@@ -16,10 +16,7 @@ class cs8Program : public QObject {
 
 public:
   QString toDocumentedCode();
-  bool saveOld(const QString &projectPath, bool withCode = true,
-               bool val3S6Format = false);
-  bool save(const QString &projectPath, bool withCode = true,
-            bool val3S6Format = false);
+  bool save(const QString &projectPath, bool withCode = true);
   cs8ParameterModel *parameterModel() const;
   cs8VariableModel *localVariableModel() const;
   cs8VariableModel *referencedGlobalVariables() const;
@@ -54,7 +51,7 @@ private:
   cs8VariableModel *m_referencedGlobalVarModel;
   QMultiMap<QString, QString> m_tags;
   void printChildNodes(const QDomElement &element);
-  void createXMLSkeleton(bool val3S6Format = false);
+  void createXMLSkeleton();
   QStringList extractDocumentation(const QString &code_,
                                    int &headerLinesCount) const;
   QString m_briefDescription;
@@ -81,7 +78,7 @@ public:
   void setCellPath(const QString &path);
   QString cellFilePath() const;
 
-  void setDescriptionSection(bool val3S6Format = false);
+  void setDescriptionSection();
   bool globalDocContainer() const;
   void setGlobalDocContainer(bool globalDocContainer);
 
