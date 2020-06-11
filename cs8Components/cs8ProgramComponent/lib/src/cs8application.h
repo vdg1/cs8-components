@@ -22,6 +22,7 @@ public:
   bool save(const QString &path = QString(), const QString &name = QString(),
             bool saveInS6Format = false);
   bool loadDataFile(const QString &fileName);
+  bool saveDataFileOld(const QString &fileName, bool val3S6Format = false);
   bool saveDataFile(const QString &fileName, bool val3S6Format = false);
   bool open(const QString &pfxFilePath);
   bool openFromPathName(const QString &filePath);

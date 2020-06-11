@@ -46,21 +46,6 @@ void cs8VariableModel::addVariable(cs8Variable *variable) {
   variable->setParent(this);
 }
 
-bool cs8VariableModel::addGlobalVariable(QDomElement &element,
-                                         const QString &description) {
-  auto *variable = new cs8Variable(element, description);
-  connect(variable, SIGNAL(modified()), this, SLOT(slotModified()));
-  variable->setScope(cs8Variable::Global);
-  m_variableList.append(variable);
-#if QT_VERSION >= 0x050000
-  beginResetModel();
-  endResetModel();
-#else
-  reset();
-#endif
-  return true;
-}
-
 QList<cs8Variable *> cs8VariableModel::publicVariables() {
   QList<cs8Variable *> out;
   foreach (cs8Variable *variable, m_variableList) {

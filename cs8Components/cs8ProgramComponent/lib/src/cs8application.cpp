@@ -794,7 +794,8 @@ bool cs8Application::loadDataFile(const QString &fileName) {
   return true;
 }
 
-bool cs8Application::saveDataFile(const QString &fileName, bool val3S6Format) {
+bool cs8Application::saveDataFileOld(const QString &fileName,
+                                     bool val3S6Format) {
   qDebug() << "Saving data file: " << fileName;
 
   QDomDocument xmlDataDocument = QDomDocument();
@@ -868,6 +869,37 @@ bool cs8Application::saveDataFile(const QString &fileName, bool val3S6Format) {
   // qDebug() << xmlDataDocument.toString();
   file.close();
 
+  return true;
+}
+
+bool cs8Application::saveDataFile(const QString &fileName, bool val3S6Format) {
+  QBuffer buffer;
+  buffer.open(QBuffer::ReadWrite);
+  QXmlStreamWriter stream(&buffer);
+  stream.setAutoFormatting(true);
+  stream.setAutoFormattingIndent(2);
+  stream.setCodec("utf-8");
+  stream.writeStartDocument();
+
+  stream.writeStartElement("Database");
+  stream.writeAttribute("xmlns:xsi",
+                        "http://www.w3.org/2001/XMLSchema-instance");
+  stream.writeAttribute("xmlns", "http://www.staubli.com/robotics/VAL3/Data/2");
+
+  m_globalVariableModel->writeXMLStream(stream);
+
+  stream.writeEndDocument();
+
+  // match our XML output to XML output of SRS
+  buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
+  if (buffer.buffer().right(1) == "\n")
+    buffer.buffer().chop(1);
+  //
+  QString fileName_ = fileName;
+  QFile file(fileName_);
+  if (!file.open(QIODevice::WriteOnly))
+    return false;
+  file.write(buffer.buffer());
   return true;
 }
 

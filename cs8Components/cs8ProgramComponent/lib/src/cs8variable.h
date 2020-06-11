@@ -48,10 +48,10 @@ public:
   QString toString(bool withTypeDefinition = true);
   QString documentation(bool withPrefix, bool forCOutput);
   bool isPublic() const;
+  void setPublic(bool m_public);
+  QString publicStr() const;
 
   QStringList father();
-
-  void setPublic(bool m_public);
 
   QDomNodeList values();
   QString definition();
@@ -82,6 +82,9 @@ protected:
   QDomDocumentFragment m_docFragment;
   QDomDocument m_doc;
   static QStringList setBuildInVariableTypes(bool val3S6Format = false);
+
+  void writeValueElements(QXmlStreamWriter &stream);
+  void writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes);
 
 signals:
   void modified();

@@ -26,8 +26,6 @@ public:
   bool addVariable(QDomElement &element,
                    const QString &description = QString());
   void addVariable(cs8Variable *variable);
-  bool addGlobalVariable(QDomElement &element,
-                         const QString &description = QString());
   cs8VariableModel(QObject *parent = 0, modelType mode = Local);
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole);

@@ -105,6 +105,10 @@ void cs8Variable::setPublic(bool m_public) {
   m_element.setAttribute("access", m_public ? "public" : "private");
 }
 
+QString cs8Variable::publicStr() const {
+  return m_element.attribute("access", "private");
+}
+
 QDomNodeList cs8Variable::values() { return m_element.childNodes(); }
 
 QString cs8Variable::definition() {
@@ -159,7 +163,7 @@ cs8Variable::DeclarationScope cs8Variable::scope() const {
     return Local;
   else if (tagName == "Parameter")
     return Parameter;
-  else if (tagName == "Global")
+  else if (tagName == "Data")
     return Global;
   return Local;
 }
@@ -439,6 +443,52 @@ void cs8Variable::extractArrayIndex(const QString &value, QString &name,
   }
 }
 
+void cs8Variable::writeValueElements(QXmlStreamWriter &stream) {
+
+  writeNodes(stream, m_element.childNodes());
+}
+
+void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
+  for (int i = 0; i < nodes.count(); i++) {
+    QDomElement valueElement = nodes.at(i).toElement();
+    QDomNamedNodeMap valueAttributes = valueElement.attributes();
+    QStringList attributeOrder = QStringList() << "key"
+                                               << "name"
+                                               << "value"
+                                               << "x"
+                                               << "y"
+                                               << "z"
+                                               << "rx"
+                                               << "ry"
+                                               << "rz"
+                                               << "xsi:type"
+                                               << "type"
+                                               << "size"
+                                               << "fatherId";
+
+    stream.writeStartElement(valueElement.tagName());
+    // write attributes in pre defined order
+    for (auto attr : attributeOrder) {
+      if (valueAttributes.contains(attr)) {
+        QDomNode attribute = valueAttributes.namedItem(attr);
+        stream.writeAttribute(attribute.nodeName(), attribute.nodeValue());
+        valueAttributes.removeNamedItem(attribute.nodeName());
+      }
+    }
+    // write remaining attributes
+    while (valueAttributes.length() > 0) {
+      QDomNode attribute = valueAttributes.item(0);
+      stream.writeAttribute(attribute.nodeName(), attribute.nodeValue());
+      valueAttributes.removeNamedItem(attribute.nodeName());
+    }
+    // write fields
+    if (valueElement.childNodes().count() > 0) {
+      writeNodes(stream, valueElement.childNodes());
+    }
+    stream.writeEndElement();
+  }
+}
+
 void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
   switch (scope()) {
   case Parameter:
@@ -451,6 +501,7 @@ void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
     if (dimensionCount() > 1)
       stream.writeAttribute("dimensions", QString("%1").arg(dimensionCount()));
     break;
+
   case Local:
     stream.writeEmptyElement("Local");
     stream.writeAttribute("name", name());
@@ -458,6 +509,18 @@ void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
     stream.writeAttribute("xsi:type", xsiType());
     if (xsiType() != "collection")
       stream.writeAttribute("size", dimension());
+    break;
+
+  case Global:
+    stream.writeStartElement("Data");
+    stream.writeAttribute("name", name());
+    stream.writeAttribute("access", publicStr());
+    stream.writeAttribute("xsi:type", xsiType());
+    stream.writeAttribute("type", type());
+    if (xsiType() != "collection")
+      stream.writeAttribute("size", dimension());
+    writeValueElements(stream);
+    stream.writeEndElement();
     break;
   }
 }
