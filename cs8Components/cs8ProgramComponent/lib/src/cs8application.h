@@ -53,8 +53,7 @@ public:
   QString cellPath() const;
   QString cellProjectFilePath(bool cs8Format = false) const;
   QString cellDataFilePath(bool cs8Format = false) const;
-  bool writeProjectFile_old(bool val3S6Format = false);
-  bool writeProjectFile(bool val3S6Format = false);
+  bool writeProjectFile();
   QHash<QString, QString> exportDirectives() const;
   bool isModified() const;
   void moveParamsToGlobals(cs8Program *program);

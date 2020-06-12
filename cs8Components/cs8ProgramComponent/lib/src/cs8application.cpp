@@ -1302,57 +1302,7 @@ QHash<QString, QString> cs8Application::exportDirectives() const {
 
 bool cs8Application::isModified() const { return m_modified; }
 
-bool cs8Application::writeProjectFile_old(bool val3S6Format) {
-  createXMLSkeleton(val3S6Format);
-  foreach (cs8Program *program, m_programModel->programList()) {
-    QDomElement element =
-        m_XMLDocument.createElement(val3S6Format ? "program" : "Program");
-    element.setAttribute("file", program->fileName());
-    m_programSection.appendChild(element);
-  }
-
-  QDomElement element =
-      m_XMLDocument.createElement(val3S6Format ? "data" : "Data");
-  element.setAttribute("file", m_projectName + ".dtx");
-  m_dataSection.appendChild(element);
-
-  if (val3S6Format)
-    if (m_libraryAliasModel->getAliasByName("io") == nullptr) {
-      m_libraryAliasModel->add("io", "Disk://io", true);
-    }
-
-  foreach (cs8LibraryAlias *alias, m_libraryAliasModel->list()) {
-    QDomElement element =
-        m_XMLDocument.createElement(val3S6Format ? "alias" : "Library");
-    element.setAttribute(val3S6Format ? "interface" : "path",
-                         alias->path(val3S6Format));
-    element.setAttribute(val3S6Format ? "name" : "alias", alias->name());
-    element.setAttribute("autoload", alias->autoLoad());
-    m_aliasSection.appendChild(element);
-  }
-
-  if (!val3S6Format) {
-    foreach (cs8LibraryAlias *type, m_typeModel->list()) {
-      QDomElement element = m_XMLDocument.createElement("Type");
-      element.setAttribute("path", type->path());
-      element.setAttribute("name", type->name());
-      m_typesSection.appendChild(element);
-    }
-  }
-
-  QString fileName_ = m_projectPath + m_projectName + ".pjx";
-  QFile file(fileName_);
-  if (!file.open(QIODevice::WriteOnly))
-    return false;
-
-  QTextStream stream(&file);
-  stream << m_XMLDocument.toString(2);
-  file.close();
-
-  return true;
-}
-
-bool cs8Application::writeProjectFile(bool val3S6Format) {
+bool cs8Application::writeProjectFile() {
   QBuffer buffer;
   buffer.open(QBuffer::ReadWrite);
   QXmlStreamWriter stream(&buffer);

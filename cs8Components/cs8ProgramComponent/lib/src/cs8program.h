@@ -51,7 +51,7 @@ private:
   cs8VariableModel *m_referencedGlobalVarModel;
   QMultiMap<QString, QString> m_tags;
   void printChildNodes(const QDomElement &element);
-  void createXMLSkeleton();
+
   QStringList extractDocumentation(const QString &code_,
                                    int &headerLinesCount) const;
   QString m_briefDescription;

@@ -25,16 +25,19 @@ cs8Variable::cs8Variable(cs8Variable *var, QObject *parent) : QObject(parent) {
   m_buildInTypes = setBuildInVariableTypes();
 }
 
-QStringList cs8Variable::setBuildInVariableTypes(bool val3S6Format) {
+QStringList cs8Variable::setBuildInVariableTypes() {
   return QStringList() << "aio"
                        << "bool"
-                       << "configRs" << (val3S6Format ? "config" : "configRx")
+                       << "configRs"
+                       << "configRx"
                        << "dio"
                        << "frame"
-                       << "jointRs" << (val3S6Format ? "joint" : "jointRx")
+                       << "jointRs"
+                       << "jointRx"
                        << "mdesc"
                        << "num"
-                       << "pointRs" << (val3S6Format ? "point" : "pointRx")
+                       << "pointRs"
+                       << "pointRx"
                        << "sio"
                        << "string"
                        << "tool"
@@ -177,190 +180,7 @@ void cs8Variable::setAllSizes(const QString &sizes) {
   m_element.setAttribute("size", sizes);
 }
 
-QDomElement cs8Variable::element(QDomDocument *doc, bool val3S6Format) const {
-  if (!val3S6Format)
-    return m_element;
-  else {
-    QDomElement element = doc->createElement("___");
-    if (m_element.tagName() == "Local") {
-      element.setTagName("local");
-      element.setAttribute("name", m_element.attribute("name"));
-      element.setAttribute("type", m_element.attribute("type"));
-      element.setAttribute("size", m_element.attribute("size"));
-    } else if (m_element.tagName() == "Parameter") {
-      element.setTagName("param");
-      element.setAttribute("name", m_element.attribute("name"));
-      element.setAttribute("type", m_element.attribute("type"));
-      element.setAttribute("byVal", m_element.attribute("use") == "reference"
-                                        ? "false"
-                                        : "true");
-    } else {
-      QString typeName = m_element.attribute("type");
-      // replace jointRX and pointRX with point and joint
-      typeName.replace("Rx", "");
-      element.setTagName(typeName);
-      element.setAttribute("name", m_element.attribute("name"));
-      element.setAttribute("public", m_element.attribute("access") == "public"
-                                         ? "true"
-                                         : "false");
-      // for io type do not write value elements
-      if (typeName == "dio" || typeName == "aio" || typeName == "sio") {
-        element.setAttribute("size", m_element.attribute("size"));
-      } else {
-        // identify array size
-        QStringList arrayDefinition =
-            m_element.attribute("size", "1").split(",");
-        while (arrayDefinition.count() < 3)
-          arrayDefinition.insert(0, "1");
-        int totalValues = arrayDefinition.at(0).toInt() *
-                          arrayDefinition.at(1).toInt() *
-                          arrayDefinition.at(2).toInt();
-        // element.setAttribute("size", m_element.attribute("size"));
-        // write values
-        for (int i = 0; i < totalValues; i++) {
-
-          // QDomElement sourceValue = m_element.childNodes().at(i).toElement();
-
-          QDomElement sourceValue;
-          for (int id = 0; id < m_element.childNodes().count(); id++) {
-            if (m_element.childNodes()
-                    .at(id)
-                    .toElement()
-                    .attribute("key", "0")
-                    .toInt() == i) {
-              sourceValue = m_element.childNodes().at(id).toElement();
-              break;
-            }
-          }
-
-          QString str = element.tagName();
-          str = str.at(0).toUpper() + str.mid(1);
-          QDomElement valueElement = doc->createElement("value" + str);
-          valueElement.setAttribute(
-              "index", sourceValue.attribute("key", QString("%1").arg(i)));
-
-          if (typeName == "bool") {
-            valueElement.setAttribute("value",
-                                      sourceValue.attribute("value", "false"));
-          } else if (typeName == "joint") {
-            QDomElement val = doc->createElement("jointValue");
-            val.setAttribute("j1", sourceValue.attribute("j1", "0"));
-            val.setAttribute("j2", sourceValue.attribute("j2", "0"));
-            val.setAttribute("j3", sourceValue.attribute("j3", "0"));
-            val.setAttribute("j4", sourceValue.attribute("j4", "0"));
-            val.setAttribute("j5", sourceValue.attribute("j5", "0"));
-            val.setAttribute("j6", sourceValue.attribute("j6", "0"));
-            valueElement.appendChild(val);
-          } else if (typeName == "mdesc") {
-            QDomElement val = doc->createElement("mdescValue");
-            val.setAttribute("accel", sourceValue.attribute("accel", "100"));
-            val.setAttribute("decel", sourceValue.attribute("decel", "100"));
-            val.setAttribute("vel", sourceValue.attribute("vel", "100"));
-            val.setAttribute("tmax", sourceValue.attribute("tmax", "999999"));
-            val.setAttribute("rmax", sourceValue.attribute("rmax", "999999"));
-            val.setAttribute("blend", sourceValue.attribute("blend", "off"));
-            val.setAttribute("leave", sourceValue.attribute("leave", "0"));
-            val.setAttribute("reach", sourceValue.attribute("reach", "0"));
-            valueElement.appendChild(val);
-          } else if (typeName == "trsf") {
-            QDomElement val = doc->createElement("trsfValue");
-            val.setAttribute("x", sourceValue.attribute("x", "0"));
-            val.setAttribute("y", sourceValue.attribute("y", "0"));
-            val.setAttribute("z", sourceValue.attribute("z", "0"));
-            val.setAttribute("rx", sourceValue.attribute("rx", "0"));
-            val.setAttribute("ry", sourceValue.attribute("ry", "0"));
-            val.setAttribute("rz", sourceValue.attribute("rz", "0"));
-            valueElement.appendChild(val);
-          } else if (typeName == "config") {
-            QDomElement val = doc->createElement("configValue");
-            val.setAttribute("shoulder",
-                             sourceValue.attribute("shoulder", "ssame"));
-            val.setAttribute("elbow", sourceValue.attribute("elbow", "esame"));
-            val.setAttribute("wrist", sourceValue.attribute("wrist", "wsame"));
-            valueElement.appendChild(val);
-          } else if (typeName == "configRs") {
-            QDomElement val = doc->createElement("configRsValue");
-            val.setAttribute("shoulder",
-                             sourceValue.attribute("shoulder", "ssame"));
-            valueElement.appendChild(val);
-          } else if (typeName == "num") {
-            valueElement.setAttribute("value",
-                                      sourceValue.attribute("value", "0"));
-          } else if (typeName == "string") {
-            valueElement.setAttribute("value",
-                                      sourceValue.attribute("value", ""));
-          } else if (typeName == "tool") {
-            QDomElement fatherElement = doc->createElement("tFather");
-            QString sourceFather = sourceValue.attribute("fatherId");
-            QString arrayName, arrayIndex;
-            extractArrayIndex(sourceFather, arrayName, arrayIndex);
-            fatherElement.setAttribute("name", arrayName);
-            fatherElement.setAttribute("fatherIndex", arrayIndex);
-            //
-            element.appendChild(fatherElement);
-            QDomElement val = doc->createElement("ttValue");
-            val.setAttribute("x", sourceValue.attribute("x", "0"));
-            val.setAttribute("y", sourceValue.attribute("y", "0"));
-            val.setAttribute("z", sourceValue.attribute("z", "0"));
-            val.setAttribute("rx", sourceValue.attribute("rx", "0"));
-            val.setAttribute("ry", sourceValue.attribute("ry", "0"));
-            val.setAttribute("rz", sourceValue.attribute("rz", "0"));
-            valueElement.appendChild(val);
-            val = doc->createElement("io");
-            val.setAttribute("alias", "io");
-            val.setAttribute("ioIndex", "0");
-            val.setAttribute("name", sourceValue.attribute("ioLink", "valve1"));
-            val.setAttribute("open", sourceValue.attribute("open", "0"));
-            val.setAttribute("close", sourceValue.attribute("close", "0"));
-            valueElement.appendChild(val);
-          } else if (typeName == "point") {
-            QDomElement fatherElement = doc->createElement("pFather");
-            QString sourceFather = sourceValue.attribute("fatherId");
-            QString arrayName, arrayIndex;
-            extractArrayIndex(sourceFather, arrayName, arrayIndex);
-            fatherElement.setAttribute("name", arrayName);
-            fatherElement.setAttribute("fatherIndex", arrayIndex);
-            //
-            element.appendChild(fatherElement);
-            QDomElement val = doc->createElement("tpValue");
-            val.setAttribute("x", sourceValue.attribute("x", "0"));
-            val.setAttribute("y", sourceValue.attribute("y", "0"));
-            val.setAttribute("z", sourceValue.attribute("z", "0"));
-            val.setAttribute("rx", sourceValue.attribute("rx", "0"));
-            val.setAttribute("ry", sourceValue.attribute("ry", "0"));
-            val.setAttribute("rz", sourceValue.attribute("rz", "0"));
-            valueElement.appendChild(val);
-            val = doc->createElement("cpValue");
-            val.setAttribute("shoulder",
-                             sourceValue.attribute("shoulder", "ssame"));
-            val.setAttribute("elbow", sourceValue.attribute("elbow", "esame"));
-            val.setAttribute("wrist", sourceValue.attribute("wrist", "wsame"));
-            valueElement.appendChild(val);
-          } else if (typeName == "frame") {
-            QDomElement fatherElement = doc->createElement("fFather");
-            QString sourceFather = sourceValue.attribute("fatherId");
-            QString arrayName, arrayIndex;
-            extractArrayIndex(sourceFather, arrayName, arrayIndex);
-            fatherElement.setAttribute("name", arrayName);
-            fatherElement.setAttribute("fatherIndex", arrayIndex);
-            //
-            element.appendChild(fatherElement);
-            QDomElement val = doc->createElement("tfValue");
-            val.setAttribute("x", sourceValue.attribute("x", "0"));
-            val.setAttribute("y", sourceValue.attribute("y", "0"));
-            val.setAttribute("z", sourceValue.attribute("z", "0"));
-            val.setAttribute("rx", sourceValue.attribute("rx", "0"));
-            val.setAttribute("ry", sourceValue.attribute("ry", "0"));
-            val.setAttribute("rz", sourceValue.attribute("rz", "0"));
-            valueElement.appendChild(val);
-          }
-          element.appendChild(valueElement);
-        }
-      }
-    }
-    return element;
-  }
-}
+QDomElement cs8Variable::element() const { return m_element; }
 
 QVariant cs8Variable::varValue(QString index) {
   QDomElement e;
@@ -417,9 +237,7 @@ bool cs8Variable::isBuildInType() const {
   return types.contains(type_);
 }
 
-QStringList cs8Variable::buildInTypes(bool val3S6Format) {
-  return setBuildInVariableTypes(val3S6Format);
-}
+QStringList cs8Variable::buildInTypes() { return setBuildInVariableTypes(); }
 
 bool cs8Variable::hasConstPrefix(QString *prefix) const {
   QRegExp rx;

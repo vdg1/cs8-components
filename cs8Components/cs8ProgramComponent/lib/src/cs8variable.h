@@ -62,13 +62,12 @@ public:
   QString allSizes();
   void setAllSizes(const QString &sizes);
 
-  QDomElement element(QDomDocument *doc = nullptr,
-                      bool val3S6Format = false) const;
+  QDomElement element() const;
 
   QVariant varValue(QString index = "0");
   void setValue(const QString &index, const QMap<QString, QString> &valueMap);
   bool isBuildInType() const;
-  static QStringList buildInTypes(bool val3S6Format = false);
+  static QStringList buildInTypes();
   bool hasConstPrefix(QString *prefix = nullptr) const;
   static void extractArrayIndex(const QString &value, QString &name,
                                 QString &index);
@@ -81,7 +80,7 @@ protected:
   QString m_description;
   QDomDocumentFragment m_docFragment;
   QDomDocument m_doc;
-  static QStringList setBuildInVariableTypes(bool val3S6Format = false);
+  static QStringList setBuildInVariableTypes();
 
   void writeValueElements(QXmlStreamWriter &stream);
   void writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes);

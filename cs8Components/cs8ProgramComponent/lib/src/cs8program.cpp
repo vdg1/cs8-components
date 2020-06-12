@@ -24,7 +24,6 @@ cs8Program::cs8Program(QObject *parent)
   m_referencedGlobalVarModel =
       new cs8VariableModel(this, cs8VariableModel::ReferencedGlobal);
   m_globalDocContainer = false;
-  createXMLSkeleton();
 }
 //
 /*!
@@ -59,38 +58,6 @@ void cs8Program::printChildNodes(const QDomElement &element) {
   qDebug() << "Child nodes of: " << element.tagName();
   for (int i = 0; i < element.childNodes().count(); i++)
     qDebug() << i << element.childNodes().at(i).nodeName();
-}
-
-void cs8Program::createXMLSkeleton() {
-  m_XMLDocument = QDomDocument();
-  QDomProcessingInstruction process = m_XMLDocument.createProcessingInstruction(
-      "xml", R"(version="1.0" encoding="utf-8")");
-  m_XMLDocument.appendChild(process);
-
-  m_programsSection = m_XMLDocument.createElement("Programs");
-  m_programsSection.setAttribute("xmlns:xsi",
-                                 "http://www.w3.org/2001/XMLSchema-instance");
-  m_programsSection.setAttribute(
-      "xmlns", "http://www.staubli.com/robotics/VAL3/Program/2");
-  m_XMLDocument.appendChild(m_programsSection);
-
-  m_programSection = m_XMLDocument.createElement("Program");
-  m_programsSection.appendChild(m_programSection);
-
-  m_descriptionSection = m_XMLDocument.createElement("Description");
-  m_programSection.appendChild(m_descriptionSection);
-
-  m_paramSection = m_XMLDocument.createElement("Parameters");
-  m_paramSection.setAttribute("xmlns",
-                              "http://www.staubli.com/robotics/VAL3/Param/1");
-  m_programSection.appendChild(m_paramSection);
-
-  m_localSection = m_XMLDocument.createElement("Locals");
-  m_programSection.appendChild(m_localSection);
-
-  // m_codeSection = m_XMLDocument.createElement("Code");
-  // m_programSection.appendChild(m_codeSection);
-  setCode("begin\nend", false);
 }
 
 /*!
