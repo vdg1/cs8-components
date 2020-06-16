@@ -26,17 +26,6 @@ cs8Program::cs8Program(QObject *parent)
   m_globalDocContainer = false;
 }
 //
-/*!
- \fn cs8Program::cs8Program(const QString & filePath)
- */
-/*
- cs8Program::cs8Program(const QString & filePath) :
- QObject() {
- m_localVariableModel = new cs8VariableModel(this);
- m_parameterModel = new cs8ParameterModel(this);
- open(filePath);
- }
- */
 
 bool cs8Program::open(const QString &filePath) {
   // qDebug() << "cs8Program::open () " << filePath;
@@ -44,14 +33,15 @@ bool cs8Program::open(const QString &filePath) {
   QFile file(filePath);
   if (!file.open(QIODevice::ReadOnly))
     return false;
-  if (!m_XMLDocument.setContent(&file)) {
+  QDomDocument doc;
+  if (!doc.setContent(&file)) {
     file.close();
     return false;
   }
   file.close();
 
   m_filePath = filePath;
-  return parseProgramDoc(m_XMLDocument);
+  return parseProgramDoc(doc);
 }
 
 void cs8Program::printChildNodes(const QDomElement &element) {
@@ -63,62 +53,7 @@ void cs8Program::printChildNodes(const QDomElement &element) {
 /*!
  \fn cs8Program::parseProgramDoc(const QDomDocument & doc)
  */
-bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
-  m_programsSection = doc.documentElement();
-
-  // printChildNodes(m_programsSection);
-  m_programSection = m_programsSection.firstChild().toElement();
-  setPublic(m_programSection.attribute("access", "private") == "public"
-                ? true
-                : false);
-  m_name = m_programSection.attribute("name");
-
-  // printChildNodes(m_programSection);
-  if (m_programSection.isNull())
-    qDebug() << "Reading program section failed";
-
-  m_descriptionSection =
-      m_programsSection.elementsByTagName("Description").at(0).toElement();
-  m_briefDescription = m_descriptionSection.text();
-  if (m_descriptionSection.isNull()) {
-    m_descriptionSection = m_XMLDocument.createElement("Description");
-    m_programSection.insertBefore(m_descriptionSection,
-                                  m_programSection.firstChild());
-  }
-  m_paramSection =
-      m_programSection.elementsByTagName("Parameters").at(0).toElement();
-  m_localSection =
-      m_programSection.elementsByTagName("Locals").at(0).toElement();
-
-  // qDebug() << m_programSection.elementsByTagName("Code").at(0).nodeType();
-  if (code.isEmpty()) {
-    QDomElement codeSection =
-        m_programSection.elementsByTagName("Code").at(0).toElement();
-    if (codeSection.isNull())
-      qDebug() << "Reading code section failed";
-    m_programCode = codeSection.text();
-    // remove code section from XML
-    m_programSection.removeChild(codeSection);
-  } else {
-    m_programCode = code;
-  }
-  // qDebug() << "program name: " << name () << m_programSection.attribute
-  // ("name");
-  QDomNodeList childList;
-
-  childList = m_localSection.elementsByTagName("Local");
-  for (int i = 0; i < childList.count(); i++) {
-    QDomElement item = childList.at(i).toElement();
-    m_localVariableModel->addVariable(item);
-  }
-
-  childList = m_paramSection.elementsByTagName("Parameter");
-  for (int i = 0; i < childList.count(); i++) {
-    QDomElement item = childList.at(i).toElement();
-    m_parameterModel->addVariable(item);
-  }
-
-  //
+void cs8Program::readAndUpdateProgramCode() {
   QStringList referencedVariables = variableTokens(true);
   auto *app = qobject_cast<cs8Application *>(parent());
   if (app) {
@@ -140,22 +75,76 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
   parseDocumentation(val3Code());
   // update token list
   m_variableTokens = variableTokens(false);
+}
+
+bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
+  QDomElement programsSection = doc.documentElement();
+  Q_ASSERT(!programsSection.isNull());
+  // printChildNodes(m_programsSection);
+  QDomElement programSection = programsSection.firstChild().toElement();
+  setPublic(programSection.attribute("access", "private") == "public" ? true
+                                                                      : false);
+  m_name = programSection.attribute("name");
+
+  // printChildNodes(m_programSection);
+  if (programSection.isNull())
+    qDebug() << "Reading program section failed";
+
+  QDomElement descriptionSection =
+      programsSection.elementsByTagName("Description").at(0).toElement();
+  m_briefDescription = descriptionSection.text();
+
+  QDomElement paramSection =
+      programSection.elementsByTagName("Parameters").at(0).toElement();
+  QDomElement localSection =
+      programSection.elementsByTagName("Locals").at(0).toElement();
+
+  // qDebug() << m_programSection.elementsByTagName("Code").at(0).nodeType();
+  if (code.isEmpty()) {
+    QDomElement codeSection =
+        programSection.elementsByTagName("Code").at(0).toElement();
+    if (codeSection.isNull())
+      qDebug() << "Reading code section failed";
+    m_programCode = codeSection.text();
+    // remove code section from XML
+    programSection.removeChild(codeSection);
+  } else {
+    m_programCode = code;
+  }
+  // qDebug() << "program name: " << name () << m_programSection.attribute
+  // ("name");
+  QDomNodeList childList;
+
+  childList = localSection.elementsByTagName("Local");
+  for (int i = 0; i < childList.count(); i++) {
+    QDomElement item = childList.at(i).toElement();
+    m_localVariableModel->addVariable(item);
+  }
+
+  childList = paramSection.elementsByTagName("Parameter");
+  for (int i = 0; i < childList.count(); i++) {
+    QDomElement item = childList.at(i).toElement();
+    m_parameterModel->addVariable(item);
+  }
+
+  //
+  readAndUpdateProgramCode();
   return true;
 }
 
 void cs8Program::tidyUpCode(QString &code) {
   // remove empty lines after "end"
   QStringList list = code.split("\n");
-  while (list.last().simplified().isEmpty())
+  while (list.length() > 0 && list.last().simplified().isEmpty())
     list.removeLast();
 
   code = list.join("\n");
 }
-QDomElement cs8Program::programsSection() const { return m_programsSection; }
+// QDomElement cs8Program::programsSection() const { return m_programsSection; }
 
-void cs8Program::setProgramsSection(const QDomElement &programsSection) {
-  m_programsSection = programsSection;
-}
+// void cs8Program::setProgramsSection(const QDomElement &programsSection) {
+//  m_programsSection = programsSection;
+//}
 
 void cs8Program::setApplicationDocumentation(
     const QString &applicationDocumentation) {
@@ -245,34 +234,16 @@ QStringList cs8Program::variableTokens(bool onlyModifiedVars) {
   return list;
 }
 
-void cs8Program::setCode(const QString &code, bool parseDoc_,
-                         bool val3S6Format) {
-  //  if (m_programCode.isEmpty())
-  // set code unconditionally
+void cs8Program::setCode(const QString &code, bool parseDoc_) {
   m_programCode = code;
-  if (!val3S6Format) {
-    // m_codeSection.toCDATASection().setData(m_programCode);
-    if (parseDoc_)
-      parseProgramDoc(m_XMLDocument, code);
-  } else {
-    // m_codeSection.toText().setNodeValue(m_programCode);
-  }
+  if (parseDoc_)
+    readAndUpdateProgramCode();
 }
 
 void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel) {
   m_parameterModel->clear();
   foreach (cs8Variable *param, sourceModel->variableList()) {
     QDomElement element = param->element().cloneNode(true).toElement();
-    // cs8Variable *p = new cs8Variable( element, param->description() );
-    // qDebug() << p->name () << ":" << p->definition ();
-
-    /*
-        p->setDescription (param->description ());
-        p->setName (param->name ());
-        p->setGlobal (param->isGlobal ());
-        p->setType (param->type ());
-        p->setUse (param->use ());
-        */
     m_parameterModel->addVariable(element, param->description());
   }
 }
@@ -345,6 +316,8 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
   headerLinesCount = 0;
   int row = 0;
   //
+  if (documentationList.length() == 0)
+    return QStringList();
   // extract code until non-header line found
   QString line = documentationList[row].trimmed();
   isEndMarker = line.startsWith("//_");
@@ -400,93 +373,6 @@ void cs8Program::setGlobalDocContainer(bool globalDocContainer) {
 
 /*!
  \fn cs8Program::parseDocumentation( QString & code)
- */
-/*
- void cs8Program::parseDocumentation(QString & code) {
-
- QString text = code;
-
- // remove header from code
- QString out;
- if (true) {
- code.replace("\r\n", "\n");
- QStringList list = code.split("\n");
- int start = list.indexOf(QRegExp("\\s*begin\\s*"));
- int stop = start + 1;
- while (list.at(stop).contains(QRegExp("^\\s*�//.*")))
-
- stop++;
- for (int i = stop - 1; i > start; i--)
- list.removeAt(i);
- code = list.join("\n");
- //out=code.replace(start,stop-start,QString());
- }
- text.replace("\r\n", "\n");
- text.remove(0, code.indexOf("begin\n") + 8);
- QStringList list = text.split("\n");
-
- int i = 0;
- for (i = 0; i < list.count(); i++) {
- if (!(list[i] = list[i].simplified()).startsWith("//"))
- break;
- }
- while (list.count() > i)
- list.removeLast();
-
- int state = 0;
- QString itemName = "";
- QString itemDescr = "";
- QStringList itemList;
- QString line;
- i = 0;
- while (i < list.count()) {
- line = list.at(i);
- QString item;
- if (line.startsWith("//!")) {
- item = line;
- i++;
- }
-
- while (i < list.count() && !((line = list.at(i)).startsWith("//!"))) {
- item += line.replace(QRegExp("^//"), "\n");
- i++;
- }
- itemList << item;
- }
-
- foreach ( QString line,itemList ) {
- if (line.startsWith("//!brief")) {
- line.remove("//!brief\n");
- m_description = line;
- }
-
- if (line.startsWith("//!param")) {
- line.remove("//!param");
- itemName = line.left(line.indexOf(":")).simplified();
- itemDescr
- = line.right(line.length() - line.indexOf(":") - 1).simplified();
- if (m_parameterModel->getVarByName(itemName) != 0)
- m_parameterModel->getVarByName(itemName)->setDescription(
- itemDescr);
- }
- if (line.startsWith("//!local")) {
- line.remove("//!local");
- itemName = line.left(line.indexOf(":")).simplified();
- itemDescr = line.simplified();
- if (m_localVariableModel->getVarByName(itemName) != 0)
- m_localVariableModel->getVarByName(itemName)->setDescription(
- itemDescr);
- }
- if (line.startsWith("//!global")) {
- line.remove("//!global");
- line = line.simplified();
- itemName = line.left(line.indexOf(" ")).simplified();
- itemDescr = line.simplified();
- qDebug() << "global var: " << itemName << ":" << itemDescr;
- emit globalVariableDocumentationFound(itemName, itemDescr);
- }
- }
- }
  */
 
 void cs8Program::parseDocumentation(const QString &code_) {
@@ -724,18 +610,6 @@ QString cs8Program::formattedDescriptionHeader() const {
   return txt.trimmed();
 }
 
-void cs8Program::setDescriptionSection() {
-  QDomNode node;
-  while (m_descriptionSection.childNodes().count() > 0) {
-    node = m_descriptionSection.childNodes().at(0);
-    m_descriptionSection.removeChild(node);
-  }
-
-  QDomCDATASection data =
-      m_XMLDocument.createCDATASection(formattedDescriptionHeader());
-  m_descriptionSection.appendChild(data);
-}
-
 void cs8Program::setDescription(const QString &theValue) {
   m_briefDescription = theValue;
   emit modified();
@@ -823,24 +697,18 @@ cs8VariableModel *cs8Program::referencedGlobalVariables() const {
   return m_referencedGlobalVarModel;
 }
 
-void cs8Program::setPublic(bool value) {
-  m_public = value;
-  m_programSection.setAttribute("access", value ? "public" : "private");
-}
+void cs8Program::setPublic(bool value) { m_public = value; }
 
 bool cs8Program::isPublic() const { return m_public; }
 
 QString cs8Program::name() const {
   // qDebug() << m_programSection.attribute("name");
-  return m_name; // m_programSection.attribute("name");
+  return m_name;
 }
 
 QString cs8Program::fileName() const { return name() + ".pgx"; }
 
-void cs8Program::setName(const QString &name) {
-  m_name = name;
-  m_programSection.setAttribute("name", name);
-}
+void cs8Program::setName(const QString &name) { m_name = name; }
 
 QString cs8Program::toDocumentedCode() {
   // QString documentation;

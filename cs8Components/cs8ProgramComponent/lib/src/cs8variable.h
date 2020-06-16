@@ -78,6 +78,7 @@ protected:
   QStringList m_buildInTypes;
   QDomElement m_element;
   QString m_description;
+  QString m_name;
   QDomDocumentFragment m_docFragment;
   QDomDocument m_doc;
   static QStringList setBuildInVariableTypes();

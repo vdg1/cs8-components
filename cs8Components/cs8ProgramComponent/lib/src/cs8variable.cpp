@@ -7,6 +7,7 @@ cs8Variable::cs8Variable(QDomElement &element, const QString &description,
   m_element = element;
   m_description = description;
   m_buildInTypes = setBuildInVariableTypes();
+  m_name = name();
 }
 
 cs8Variable::cs8Variable(QObject *parent) : QObject(parent) {
@@ -23,6 +24,7 @@ cs8Variable::cs8Variable(cs8Variable *var, QObject *parent) : QObject(parent) {
   m_element = var->element().cloneNode(true).toElement();
   m_docFragment.appendChild(m_element);
   m_buildInTypes = setBuildInVariableTypes();
+  m_name = name();
 }
 
 QStringList cs8Variable::setBuildInVariableTypes() {
@@ -433,6 +435,7 @@ QString cs8Variable::xsiType() const {
 
 void cs8Variable::setName(QString value) {
   emit modified();
+  m_name = value;
   m_element.setAttribute("name", value);
 }
 

@@ -34,8 +34,7 @@ public:
 
   QString extractCode(const QString &code_) const;
 
-  void setCode(const QString &code, bool parseDoc_ = false,
-               bool val3S6Format = false);
+  void setCode(const QString &code, bool parseDoc_ = false);
   void copyFromParameterModel(cs8ParameterModel *sourceModel);
   void addTag(const QString &tagType, const QString &tagName,
               const QString &tagText);
@@ -78,7 +77,6 @@ public:
   void setCellPath(const QString &path);
   QString cellFilePath() const;
 
-  void setDescriptionSection();
   bool globalDocContainer() const;
   void setGlobalDocContainer(bool globalDocContainer);
 
@@ -86,23 +84,12 @@ public:
   void setBriefModuleDocumentation(const QString &briefDocumentation);
   void setMainPageDocumentation(const QString &applicationDocumentation);
 
-  QDomElement programsSection() const;
-  void setProgramsSection(const QDomElement &programsSection);
-
   QString formattedDescriptionHeader() const;
 
 protected:
   bool parseProgramDoc(const QDomDocument &doc,
                        const QString &code = QString());
   void tidyUpCode(QString &code);
-  QDomDocument m_XMLDocument;
-  QDomElement m_programsSection;
-  QDomElement m_paramSection;
-  QDomElement m_programSection;
-  QDomElement m_localSection;
-  // QDomElement m_codeSection;
-  QDomElement m_sourceSection;
-  QDomElement m_descriptionSection;
   QString m_detailedDocumentation;
   QString m_cellPath;
   QString m_filePath;
@@ -113,6 +100,8 @@ protected:
   QString m_programCode;
   bool m_public;
   bool m_withIfBlock;
+
+  void readAndUpdateProgramCode();
 
 signals:
   void globalVariableDocumentationFound(const QString &name,

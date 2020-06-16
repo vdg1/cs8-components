@@ -46,7 +46,7 @@ public:
   void setCellPath(const QString &path);
   void append(cs8Program *program);
 
-  void createProgram(cs8Program *program);
+  // void createProgram(cs8Program *program);
   cs8Program *createProgram(const QString &programName);
 
 protected:

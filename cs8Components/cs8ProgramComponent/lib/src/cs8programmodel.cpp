@@ -12,6 +12,7 @@
 #include "cs8programmodel.h"
 #include "cs8program.h"
 #include <QDebug>
+#include <QFileInfoList>
 #include <QFont>
 cs8ProgramModel::cs8ProgramModel(QObject *parent) : QAbstractListModel(parent) {
   m_cellPath = "";
@@ -143,13 +144,14 @@ cs8Program *cs8ProgramModel::createProgram(const QString &programName) {
   program->setCellPath(m_cellPath);
   if (!programName.isEmpty())
     program->setName(programName);
-
+  Q_ASSERT(!programName.isEmpty());
   return program;
 }
 
 void cs8ProgramModel::addProgram(const QString &filePath) {
   // qDebug() << "cs8ProgramModel::addProgram () " << filePath;
-  cs8Program *program = createProgram("");
+  QFileInfo info(filePath);
+  cs8Program *program = createProgram(info.baseName());
   if (!program->open(filePath))
     qDebug() << "Opening program " << filePath << " failed";
 #if QT_VERSION >= 0x050000

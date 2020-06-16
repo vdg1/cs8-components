@@ -126,7 +126,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             var->setPublic(true);
             var->setScope(cs8Variable::Global);
             var->setDimension("1");
-            cs8DestApp->globalVariableModel()->addVariable(var);
+            // cs8DestApp->globalVariableModel()->addVariable(var);
           }
 
           qDebug() << program->name();
@@ -210,7 +210,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             globalVar->setPublic(true);
             globalVar->setScope(cs8Variable::Global);
             globalVar->setDimension(var->dimension());
-            cs8DestApp->globalVariableModel()->addVariable(globalVar);
+            // cs8DestApp->globalVariableModel()->addVariable(globalVar);
             for (uint i = 0; i < var->size(); i++) {
 
               initProgramCode += QString("  %1[%2]=%3:%1[%2]\n")
@@ -264,7 +264,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
               dioVar->setDimension(variable->dimension());
               dioVar->setDescription(variable->description());
 
-              cs8DestApp->globalVariableModel()->addVariable(dioVar);
+              // cs8DestApp->globalVariableModel()->addVariable(dioVar);
               for (uint i = 0; i < variable->size(); i++) {
                 // add dioLink code
                 initProgramCode += QString("  dioLink(%1[%4],%2:%3[%4])\n")
@@ -285,7 +285,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
               dioVar->setScope(cs8Variable::Global);
               dioVar->setDimension(variable->dimension());
 
-              cs8DestApp->globalVariableModel()->addVariable(dioVar);
+              // cs8DestApp->globalVariableModel()->addVariable(dioVar);
 
               for (uint i = 0; i < variable->size(); i++) {
                 // add dioLink code
