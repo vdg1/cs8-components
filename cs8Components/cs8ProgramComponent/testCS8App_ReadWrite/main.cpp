@@ -9,8 +9,16 @@ int main(int argc, char *argv[]) {
 
   cs8Application app;
   app.open("D:\\data\\Staubli\\SRS\\_Development\\Dev_SAXEAutomation_"
-           "CS9\\Controller_s882\\usr\\usrapp\\aMotionID\\aMotionID.pjx");
-  app.save("D:\\data\\Staubli\\SRS\\_Development\\Dev_SAXEAutomation_"
-           "CS9\\Controller_s882\\usr\\usrapp\\aMotionID_saved\\",
-           "aMotionID_saved");
+           "CS9\\Controller_"
+           "s882\\usr\\usrapp\\Libraries\\stringHandling\\stringHandling.pjx");
+  app.save(
+      "D:\\data\\Staubli\\SRS\\_Development\\Dev_SAXEAutomation_"
+      "CS9\\Controller_s882\\usr\\usrapp\\Libraries\\stringHandling_saved\\",
+      "stringHandling_saved");
+
+  // app.open("D:\\data\\Staubli\\SRS\\_Development\\Dev_SAXEAutomation_"
+  //         "CS9\\Controller_s882\\usr\\usrapp\\aMotionID\\aMotionID.pjx");
+  // app.save("D:\\data\\Staubli\\SRS\\_Development\\Dev_SAXEAutomation_"
+  //         "CS9\\Controller_s882\\usr\\usrapp\\aMotionID_saved\\",
+  //         "aMotionID_saved");
 }
