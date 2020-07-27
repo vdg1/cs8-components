@@ -129,7 +129,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             // cs8DestApp->globalVariableModel()->addVariable(var);
           }
 
-          qDebug() << program->name();
+          // qDebug() << program->name();
           emit addLog(
               tr("Exporting function %1 from application %2 to module %3")
                   .arg(program->name())
@@ -230,6 +230,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                                               "/io" + moduleBaseName)) {
           // ioMap library exists
           // add library alias
+          /*
           QDir dir(ioMapApplication.cellDataFilePath(false));
           dir.cdUp();
           dir.cdUp();
@@ -242,7 +243,10 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                                 ioMapApplication.cellPath() + "usr/usrapp/"),
                             "Disk://");
           pth = QDir::fromNativeSeparators(pth);
-          qDebug() << pth;
+            */
+          QString pth = "Disk://ioMaps";
+
+          qDebug() << "ioMap library path: " << pth;
           cs8DestApp->libraryModel()->add(
               ioMapApplication.name(),
               pth + "/" + ioMapApplication.name() + "/" +

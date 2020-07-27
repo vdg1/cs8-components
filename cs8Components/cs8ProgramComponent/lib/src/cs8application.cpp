@@ -873,7 +873,7 @@ bool cs8Application::save(const QString &path, const QString &name) {
   if (!saveDataFile(m_projectPath + m_projectName + ".dtx"))
     return false;
   foreach (cs8Program *program, m_programModel->programList()) {
-    qDebug() << "Save program " << program->name();
+    qDebug() << __FUNCTION__ << " Save program: " << program->name();
     if (!program->save(m_projectPath, true))
       return false;
   }

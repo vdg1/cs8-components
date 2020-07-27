@@ -243,7 +243,7 @@ QStringList cs8Variable::buildInTypes() { return setBuildInVariableTypes(); }
 
 bool cs8Variable::hasConstPrefix(QString *prefix) const {
   QRegExp rx;
-  rx.setPattern("([A-Z]+)(_[A-Z0-9]*)");
+  rx.setPattern("([A-Z]+)(_[A-Z0-9_]*)");
   bool result = rx.indexIn(name()) == 0;
   // qDebug() << rx.cap(1);
   if (prefix != nullptr)

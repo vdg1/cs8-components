@@ -24,6 +24,7 @@ cs8Program::cs8Program(QObject *parent)
   m_referencedGlobalVarModel =
       new cs8VariableModel(this, cs8VariableModel::ReferencedGlobal);
   m_globalDocContainer = false;
+  m_programCode = "begin\nend";
 }
 //
 
@@ -330,7 +331,7 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
     line = documentationList[row].trimmed();
     isEndMarker = line.startsWith("//_");
     if (line.startsWith("//") || line.startsWith("if false") ||
-        line.startsWith("endIf") || line.startsWith("//_")) {
+        line.startsWith("endIf") || line.startsWith("//_") || line.isEmpty()) {
       isComment = true;
     } else {
       isComment = false;

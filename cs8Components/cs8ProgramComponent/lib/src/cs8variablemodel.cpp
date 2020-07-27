@@ -328,7 +328,7 @@ QString cs8VariableModel::toDocumentedCode() {
     if (!descr.isEmpty() || m_withUndocumentedSymbols)
       header += QString("\n\\%1 %3 %2\n").arg(prefix).arg(descr, var->name());
   }
-  qDebug() << "header: " << header;
+  // qDebug() << "header: " << header;
   return header;
 }
 
