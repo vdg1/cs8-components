@@ -8,6 +8,7 @@ cs8Variable::cs8Variable(QDomElement &element, const QString &description,
   m_description = description;
   m_buildInTypes = setBuildInVariableTypes();
   m_name = name();
+  qDebug() << definition() << valuesToString();
 }
 
 cs8Variable::cs8Variable(QObject *parent) : QObject(parent) {
@@ -114,7 +115,16 @@ QString cs8Variable::publicStr() const {
   return m_element.attribute("access", "private");
 }
 
-QDomNodeList cs8Variable::values() { return m_element.childNodes(); }
+QDomNodeList cs8Variable::values() const { return m_element.childNodes(); }
+
+QString cs8Variable::valuesToString() const {
+  QString s;
+  for (int i = 0; i < values().count(); i++) {
+    s += values().item(i).toElement().attribute("key") + ":>" +
+         values().item(i).toElement().attribute("value") + "<\n";
+  }
+  return s;
+}
 
 QString cs8Variable::definition() {
 

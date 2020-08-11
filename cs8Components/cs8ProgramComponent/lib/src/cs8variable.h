@@ -53,7 +53,8 @@ public:
 
   QStringList father();
 
-  QDomNodeList values();
+  QDomNodeList values() const;
+  QString valuesToString() const;
   QString definition();
 
   void setScope(DeclarationScope scope);

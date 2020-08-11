@@ -302,7 +302,7 @@ bool cs8Application::openFromPathName(const QString &filePath) {
       filePath_ + "/" +
       filePath_.right(filePath_.length() - filePath_.lastIndexOf("/", -2)) +
       ".pjx";
-  qDebug() << "openFromPathName: " << name;
+  qDebug() << Q_FUNC_INFO << ":" << name;
   bool result = open(name);
   return result;
 }

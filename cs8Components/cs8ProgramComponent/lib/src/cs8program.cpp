@@ -58,7 +58,7 @@ void cs8Program::readAndUpdateProgramCode() {
   QStringList referencedVariables = variableTokens(true);
   auto *app = qobject_cast<cs8Application *>(parent());
   if (app) {
-    foreach (QString var, referencedVariables) {
+    foreach (const QString &var, referencedVariables) {
       if (app->globalVariableModel()->variableNameList().contains(var) &&
           !m_localVariableModel->variableNameList().contains(var) &&
           !m_referencedGlobalVarModel->variableNameList().contains(var)) {
@@ -208,7 +208,7 @@ QString cs8Program::extractCode(const QString &code_) const {
 QStringList cs8Program::variableTokens(bool onlyModifiedVars) {
   QStringList list;
   QString code = val3Code(true);
-  foreach (QString line, code.split("\n")) {
+  foreach (const QString &line, code.split("\n")) {
     QString l = line.trimmed();
     // ignore comment lines
     if (!l.startsWith("//")) {
@@ -270,7 +270,7 @@ QMap<int, QString> cs8Program::todos() {
   QRegExp rx;
   rx.setPattern(R"(^\s*//[/\\]{1}\s*TODO.*)");
   int codeLine = 0;
-  foreach (QString line, code.split("\n")) {
+  foreach (const QString &line, code.split("\n")) {
     if (rx.indexIn(line) != -1)
       todos.insert(codeLine, line);
     codeLine++;
@@ -286,7 +286,7 @@ QStringList cs8Program::getCalls() {
   rxTaskCreate.setPattern(
       "^(\\s*taskCreate\\s*\\\"*\\w*\\\"*\\s*,\\s*\\w*\\s*,\\s*)(\\w*)\\(");
   QStringList list;
-  foreach (QString line, code.split("\n")) {
+  foreach (const QString &line, code.split("\n")) {
     if (rxCall.indexIn(line) != -1) {
       if (rxCall.captureCount() == 1)
         list << rxCall.cap(1);
