@@ -100,6 +100,7 @@ protected:
   QString m_programCode;
   bool m_public;
   bool m_withIfBlock;
+  bool m_hasByteOrderMark;
 
   void readAndUpdateProgramCode();
 

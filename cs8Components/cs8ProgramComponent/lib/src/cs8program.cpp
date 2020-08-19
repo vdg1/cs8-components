@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QStringList>
+#include <QTextCodec>
 #include <QXmlStreamWriter>
 
 #define MAX_LENGTH 40
@@ -34,6 +35,11 @@ bool cs8Program::open(const QString &filePath) {
   QFile file(filePath);
   if (!file.open(QIODevice::ReadOnly))
     return false;
+  m_hasByteOrderMark =
+      QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
+  if (m_hasByteOrderMark)
+    qDebug() << "File has BOM";
+
   QDomDocument doc;
   if (!doc.setContent(&file)) {
     file.close();
@@ -95,6 +101,18 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
       programsSection.elementsByTagName("Description").at(0).toElement();
   m_briefDescription = descriptionSection.text();
 
+  QTextCodec::ConverterState state;
+  QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+  bool isAscii = codec->canEncode(m_briefDescription);
+  if (!isAscii)
+    qDebug() << "Brief is not ASCII";
+
+  // const QString text = codec->toUnicode(m_briefDescription.constData(),
+  //                                      m_briefDescription.size(), &state);
+  // if (state.invalidChars > 0) {
+  //    qDebug() << "Not a valid UTF-8 sequence.";
+  //  }
+
   QDomElement paramSection =
       programSection.elementsByTagName("Parameters").at(0).toElement();
   QDomElement localSection =
@@ -109,6 +127,11 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
     m_programCode = codeSection.text();
     // remove code section from XML
     programSection.removeChild(codeSection);
+
+    bool isAscii = codec->canEncode(m_programCode);
+    if (!isAscii)
+      qDebug() << "Code is not ASCII";
+
   } else {
     m_programCode = code;
   }
@@ -628,6 +651,7 @@ QString cs8Program::detailedDocumentation() const {
 bool cs8Program::save(const QString &projectPath, bool withCode) {
   QBuffer buffer;
   buffer.open(QBuffer::ReadWrite);
+
   QXmlStreamWriter stream(&buffer);
   stream.setAutoFormatting(true);
   stream.setAutoFormattingIndent(2);
@@ -677,12 +701,22 @@ bool cs8Program::save(const QString &projectPath, bool withCode) {
   buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
   if (buffer.buffer().right(1) == "\n")
     buffer.buffer().chop(1);
+  buffer.buffer().replace("\n", "\r\n");
+  buffer.buffer().replace("\"/>", "\" />");
   //
+
   QString fileName_ = projectPath + fileName();
   QFile file(fileName_);
   if (!file.open(QIODevice::WriteOnly))
     return false;
+
+  if (m_hasByteOrderMark) {
+    buffer.buffer().insert(0, 0xBF);
+    buffer.buffer().insert(0, 0xBB);
+    buffer.buffer().insert(0, 0xEF);
+  }
   file.write(buffer.buffer());
+
   return true;
 }
 
