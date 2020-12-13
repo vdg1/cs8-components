@@ -122,6 +122,7 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
   if (code.isEmpty()) {
     QDomElement codeSection =
         programSection.elementsByTagName("Code").at(0).toElement();
+    m_lineNumberCodeSection = codeSection.lineNumber();
     if (codeSection.isNull())
       qDebug() << "Reading code section failed";
     m_programCode = codeSection.text();
@@ -163,6 +164,27 @@ void cs8Program::tidyUpCode(QString &code) {
     list.removeLast();
 
   code = list.join("\n");
+}
+
+int cs8Program::getLineNumberCodeSection() const
+{
+    return m_lineNumberCodeSection;
+}
+
+void cs8Program::undoTranslationTags()
+{
+    //m_programCode
+    QRegularExpression rx("(i18n:tr\\[\\\")(.*)(\\\"\\])");
+    rx.setPatternOptions(QRegularExpression::InvertedGreedinessOption);
+    QRegularExpressionMatch m;
+
+    m = rx.match(m_programCode);
+    qDebug() << m.hasMatch() << m.lastCapturedIndex() << m.capturedTexts();
+    while (m.hasMatch() && m.lastCapturedIndex() == 3) {
+        m_programCode.replace(m.capturedStart(3), m.capturedLength(3), "\")");
+        m_programCode.replace(m.capturedStart(1), m.capturedLength(1), "(\"");
+        m = rx.match(m_programCode);
+    }
 }
 // QDomElement cs8Program::programsSection() const { return m_programsSection; }
 
@@ -648,76 +670,77 @@ QString cs8Program::detailedDocumentation() const {
   return m_detailedDocumentation;
 }
 
-bool cs8Program::save(const QString &projectPath, bool withCode) {
-  QBuffer buffer;
-  buffer.open(QBuffer::ReadWrite);
+bool cs8Program::save(const QString &filePath, bool withCode)
+{
+    QBuffer buffer;
+    buffer.open(QBuffer::ReadWrite);
 
-  QXmlStreamWriter stream(&buffer);
-  stream.setAutoFormatting(true);
-  stream.setAutoFormattingIndent(2);
-  stream.setCodec("utf-8");
-  stream.writeStartDocument();
+    QXmlStreamWriter stream(&buffer);
+    stream.setAutoFormatting(true);
+    stream.setAutoFormattingIndent(2);
+    stream.setCodec("utf-8");
+    stream.writeStartDocument();
 
-  //
-  stream.writeStartElement("Programs");
-  stream.writeAttribute("xmlns:xsi",
-                        "http://www.w3.org/2001/XMLSchema-instance");
-  stream.writeAttribute("xmlns",
-                        "http://www.staubli.com/robotics/VAL3/Program/2");
-  stream.writeStartElement("Program");
-  stream.writeAttribute("name", name());
-  if (isPublic())
-    stream.writeAttribute("access", "public");
-  //
-  if (!m_briefDescription.isEmpty()) {
-    stream.writeStartElement("Description");
-    stream.writeCDATA(formattedDescriptionHeader());
-    stream.writeEndElement();
-  }
-  //
-  parameterModel()->writeXMLStream(stream);
-  //
-  localVariableModel()->writeXMLStream(stream);
-  //
-  stream.writeStartElement("Code");
-  QString codeText;
-  if (withCode) {
-    codeText = toDocumentedCode();
-  } else {
-    if (name() != "stop") {
-      codeText = "begin\n"
-                 "logMsg(libPath())\n"
-                 "put(sqrt(-1))\n"
-                 "end";
-    } else {
-      codeText = "begin\n"
-                 "end";
+    //
+    stream.writeStartElement("Programs");
+    stream.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    stream.writeAttribute("xmlns", "http://www.staubli.com/robotics/VAL3/Program/2");
+    stream.writeStartElement("Program");
+    stream.writeAttribute("name", name());
+    if (isPublic())
+        stream.writeAttribute("access", "public");
+    //
+    if (!m_briefDescription.isEmpty()) {
+        stream.writeStartElement("Description");
+        stream.writeCDATA(formattedDescriptionHeader());
+        stream.writeEndElement();
     }
-  }
-  stream.writeCDATA(codeText);
-  stream.writeEndDocument();
+    //
+    parameterModel()->writeXMLStream(stream);
+    //
+    localVariableModel()->writeXMLStream(stream);
+    //
+    stream.writeStartElement("Code");
+    QString codeText;
+    if (withCode) {
+        codeText = toDocumentedCode();
+    } else {
+        if (name() != "stop") {
+            codeText = "begin\n"
+                       "logMsg(libPath())\n"
+                       "put(sqrt(-1))\n"
+                       "end";
+        } else {
+            codeText = "begin\n"
+                       "end";
+        }
+    }
+    stream.writeCDATA(codeText);
+    stream.writeEndDocument();
 
-  // match our XML output to XML output of SRS
-  buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
-  if (buffer.buffer().right(1) == "\n")
-    buffer.buffer().chop(1);
-  buffer.buffer().replace("\n", "\r\n");
-  buffer.buffer().replace("\"/>", "\" />");
-  //
+    // match our XML output to XML output of SRS
+    buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
+    if (buffer.buffer().right(1) == "\n")
+        buffer.buffer().chop(1);
+    buffer.buffer().replace("\n", "\r\n");
+    buffer.buffer().replace("\"/>", "\" />");
+    //
 
-  QString fileName_ = projectPath + fileName();
-  QFile file(fileName_);
-  if (!file.open(QIODevice::WriteOnly))
-    return false;
+    QFileInfo i(filePath);
+    QString fileName_ = i.isDir() ? filePath + fileName() : filePath;
+    //QString fileName_ = filePath + fileName();
+    QFile file(fileName_);
+    if (!file.open(QIODevice::WriteOnly))
+        return false;
 
-  if (m_hasByteOrderMark) {
-    buffer.buffer().insert(0, 0xBF);
-    buffer.buffer().insert(0, 0xBB);
-    buffer.buffer().insert(0, 0xEF);
-  }
-  file.write(buffer.buffer());
+    if (m_hasByteOrderMark) {
+        buffer.buffer().insert(0, 0xBF);
+        buffer.buffer().insert(0, 0xBB);
+        buffer.buffer().insert(0, 0xEF);
+    }
+    file.write(buffer.buffer());
 
-  return true;
+    return true;
 }
 
 cs8ParameterModel *cs8Program::parameterModel() const {

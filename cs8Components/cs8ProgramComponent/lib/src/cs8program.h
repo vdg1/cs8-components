@@ -86,9 +86,11 @@ public:
 
   QString formattedDescriptionHeader() const;
 
-protected:
-  bool parseProgramDoc(const QDomDocument &doc,
-                       const QString &code = QString());
+  int getLineNumberCodeSection() const;
+  void undoTranslationTags();
+
+  protected:
+  bool parseProgramDoc(const QDomDocument &doc, const QString &code = QString());
   void tidyUpCode(QString &code);
   QString m_detailedDocumentation;
   QString m_cellPath;
@@ -101,6 +103,7 @@ protected:
   bool m_public;
   bool m_withIfBlock;
   bool m_hasByteOrderMark;
+  int m_lineNumberCodeSection;
 
   void readAndUpdateProgramCode();
 
