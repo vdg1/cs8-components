@@ -27,6 +27,20 @@ cs8Program::cs8Program(QObject *parent)
   m_globalDocContainer = false;
   m_programCode = "begin\nend";
 }
+
+cs8Program::cs8Program()
+    : QObject(), m_public(false), m_withIfBlock(true) {
+  m_localVariableModel = new cs8LocalVariableModel(this);
+  connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
+          &cs8Program::modified);
+  m_parameterModel = new cs8ParameterModel(this);
+  connect(m_parameterModel, &cs8LocalVariableModel::modified, this,
+          &cs8Program::modified);
+  m_referencedGlobalVarModel =
+      new cs8VariableModel(this, cs8VariableModel::ReferencedGlobal);
+  m_globalDocContainer = false;
+  m_programCode = "begin\nend";
+}
 //
 
 bool cs8Program::open(const QString &filePath) {
@@ -571,7 +585,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
   // qDebug() << documentationList;
 }
 
-QString cs8Program::briefDescription() const { return m_briefDescription; }
+QString cs8Program::briefDescription(bool trimmed) const { return trimmed?m_briefDescription.trimmed():m_briefDescription; }
 
 void cs8Program::setCellPath(const QString &path) { m_cellPath = path; }
 
@@ -633,7 +647,7 @@ QString cs8Program::documentation(bool withPrefix) const {
 }
 
 QString cs8Program::formattedDescriptionHeader() const {
-  QString txt = m_briefDescription;
+  QString txt = m_briefDescription.trimmed();
   while (txt.endsWith("\n"))
     txt.chop(1);
   // retrieve documentation of parameters
@@ -775,9 +789,9 @@ QString cs8Program::toDocumentedCode() {
   int startIfRow = -1;
   int endIfRow = -1;
 
-  if (!briefDescription().isEmpty()) {
+  if (!briefDescription(true).isEmpty()) {
     list << "\\brief";
-    list << briefDescription().split("\n");
+    list << briefDescription(true).split("\r\n");
   }
 
   if (!m_detailedDocumentation.isEmpty()) {
@@ -876,7 +890,7 @@ QString cs8Program::definition() const {
 }
 
 void cs8Program::setCopyrightMessage(const QString &text) {
-  m_copyRightMessage = text;
+  m_copyRightMessage = text.trimmed();
   emit modified();
 }
 

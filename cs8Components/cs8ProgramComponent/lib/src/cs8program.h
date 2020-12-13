@@ -60,6 +60,7 @@ private:
 
 public:
   cs8Program(QObject *parent);
+  cs8Program();
   // cs8Program(const QString & filePath);
   bool open(const QString &filePath);
   QString val3Code(bool withDocumentation = true);
@@ -73,7 +74,7 @@ public:
   void setCopyrightMessage(const QString &text);
   QString copyrightMessage() const;
 
-  QString briefDescription() const;
+  QString briefDescription(bool trimmed) const;
   void setCellPath(const QString &path);
   QString cellFilePath() const;
 

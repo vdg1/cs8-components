@@ -162,9 +162,9 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                     .arg(program->parameterModel()->toString(false)));
 
             cs8DestApp->moveParamsToGlobals(newProgram);
-            newProgram->setDescription(program->briefDescription());
+            newProgram->setDescription(program->briefDescription(true));
             newProgram->setName(name);
-            newProgram->setDescription(program->briefDescription());
+            //newProgram->setDescription(program->briefDescription(true));
             newProgram->setDetailedDocumentation(
                 program->detailedDocumentation());
           } else {
