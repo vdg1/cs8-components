@@ -5,7 +5,7 @@
 #define MyAppVersion "2.3.4"
 #define MyAppPublisher "SAXE Process AB"
 #define MyAppURL "http://www.saxe-group.com"
-#define QT "D:\Qt\5.14.1\msvc2017_64"
+#define QT "D:\Qt\5.14.2\msvc2017_64"
 ;#define MINGW "C:\MinGW"
 
 

@@ -22,56 +22,58 @@ class cs8VariableModel;
 /**
  @author Volker Drewer-Gutland <volker.drewer@gmx.de>
  */
-class cs8ProgramModel: public QAbstractListModel {
-    Q_OBJECT
+class cs8ProgramModel : public QAbstractListModel {
+  Q_OBJECT
 public:
-    QList<cs8Program*> programList() {
-        return m_programList;
-    }
-    cs8VariableModel* localVariableModel(const QModelIndex & index);
-    cs8VariableModel* parameterModel(const QModelIndex & index);
-    cs8VariableModel *referencedGlobalVriableModel(const QModelIndex & index);
+  QList<cs8Program *> programList() { return m_programList; }
+  cs8VariableModel *localVariableModel(const QModelIndex &index);
+  cs8VariableModel *parameterModel(const QModelIndex &index);
+  cs8VariableModel *referencedGlobalVriableModel(const QModelIndex &index);
 
-    void clear();
-    void addProgram(const QString & filePath);
-    cs8ProgramModel(QObject *parent = 0);
+  void clear();
+  void addProgram(const QString &filePath);
+  cs8ProgramModel(QObject *parent = 0);
 
-    ~cs8ProgramModel();
-    virtual int rowCount(const QModelIndex &) const;
-    virtual int colCount(const QModelIndex &) const;
-    virtual QVariant data(const QModelIndex & index, int role) const;
-    bool setData(const QModelIndex & index, const QVariant & value, int role =
-                 Qt::EditRole);
-    QList<cs8Program*> publicPrograms();
-    QList<cs8Program*> privatePrograms();
-    cs8Program* getProgramByName(const QString & name);
-    void setCellPath(const QString &path);
-    void append(cs8Program *program);
+  ~cs8ProgramModel();
+  virtual int rowCount(const QModelIndex &) const;
+  virtual int colCount(const QModelIndex &) const;
+  virtual QVariant data(const QModelIndex &index, int role) const;
+  bool setData(const QModelIndex &index, const QVariant &value,
+               int role = Qt::EditRole);
+  QList<cs8Program *> publicPrograms();
+  QList<cs8Program *> privatePrograms();
+  cs8Program *getProgramByName(const QString &name);
+  void setCellPath(const QString &path);
+  void append(cs8Program *program);
 
-    void createProgram(cs8Program* program);
-    cs8Program * createProgram(const QString &programName);
-    protected:
-    QList<cs8Program*> m_programList;
-    QString m_cellPath;
+  // void createProgram(cs8Program *program);
+  cs8Program *createProgram(const QString &programName);
+
+protected:
+  QList<cs8Program *> m_programList;
+  QString m_cellPath;
 
 protected slots:
-    void slotGlobalVariableDocumentationFound(const QString & name,
-                                              const QString & document);
-    void slotModuleDocumentationFound(const QString & document);
-    void slotMainPageDocumentationFound(const QString & document);
-    void slotExportDirectiveFound(const QString & module, const QString & function);
-    void slotUnknownTagFound(const QString & tagType, const QString & tagName, const QString & tagText);
-    void slotModified();
+  void slotGlobalVariableDocumentationFound(const QString &name,
+                                            const QString &document);
+  void slotModuleDocumentationFound(const QString &document);
+  void slotBriefModuleDocumentationFound(const QString &document);
+  void slotMainPageDocumentationFound(const QString &document);
+  void slotExportDirectiveFound(const QString &module, const QString &function);
+  void slotUnknownTagFound(const QString &tagType, const QString &tagName,
+                           const QString &tagText);
+  void slotModified();
 
 signals:
-    void globalVariableDocumentationFound(const QString & name,
-                                          const QString & document);
-    void moduleDocumentationFound(const QString & document);
-    void mainPageDocumentationFound(const QString & document);
-    void exportDirectiveFound(const QString & module, const QString & function);
-    void unknownTagFound(const QString & tagType, const QString & tagName, const QString & tagText);
-    void modified(bool);
+  void globalVariableDocumentationFound(const QString &name,
+                                        const QString &document);
+  void moduleDocumentationFound(const QString &document);
+  void briefModuleDocumentationFound(const QString &document);
+  void mainPageDocumentationFound(const QString &document);
+  void exportDirectiveFound(const QString &module, const QString &function);
+  void unknownTagFound(const QString &tagType, const QString &tagName,
+                       const QString &tagText);
+  void modified(bool);
 };
 
 #endif
-

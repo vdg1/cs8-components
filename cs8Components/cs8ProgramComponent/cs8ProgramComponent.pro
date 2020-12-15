@@ -7,6 +7,7 @@ SUBDIRS = lib \
    # extractIODefinitions \
     cs8DocEditor \
     testCS8App_ReadWrite \
+    testCS8Program \
     val3PreCompiler \
     val3CreateAPI \
     val3CompilerDeployment \

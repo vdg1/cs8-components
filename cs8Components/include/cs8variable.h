@@ -1,105 +1,93 @@
 #ifndef CS8VARIABLE_H
 #define CS8VARIABLE_H
 //
-#include <QObject>
-#include <QString>
-#include <QHash>
-#include <QVariant>
 #include <QDebug>
 #include <QDomElement>
+#include <QHash>
+#include <QObject>
+#include <QString>
 #include <QStringList>
+#include <QVariant>
+#include <QXmlStreamWriter>
 //
 
+class cs8Variable : public QObject {
 
-class cs8Variable : public QObject
-{
-
-    Q_OBJECT
+  Q_OBJECT
+  Q_ENUMS(DeclarationScope)
 
 public:
-    void setUse(QString value);
+  enum DeclarationScope { Local, Parameter, Global };
+  cs8Variable(QDomElement &element, const QString &descripton = QString(),
+              QObject *parent = 0);
+  cs8Variable(cs8Variable *var, QObject *parent);
+  cs8Variable(QObject *parent);
 
-    QString use() const;
+  void setUse(QString value);
 
-    void setDescription(QString value);
-    QString description() const;
+  QString use() const;
 
-    uint size(int dimension=0)
-    {
-        QStringList list=m_element.attribute("size","").split(" ");
-        if (list.count()>=dimension)
-            return list.at(dimension).toUInt();
-        else
-            return 0;
-    }
+  void setDescription(QString value);
+  QString description() const;
 
-    QString dimension() const;
-    uint dimensionCount() const;
-    void setDimension(const QString & dim);
-    void setType(QString value);
-    QString type() const;
-    QString prefix() const;
-    bool isConst() const;
+  uint size(int dimension = 0);
 
-    void setName(QString value);
-    QString name() const
-    {
-        return m_element.attribute("name");
-    }
-    cs8Variable(QDomElement & element, const QString & descripton=QString());
-    cs8Variable(cs8Variable *var);
-    cs8Variable();
+  QString dimension() const;
+  int dimensionCount() const;
+  void setDimension(const QString &dim);
+  void setType(QString value);
+  QString type() const;
+  QChar prefix() const;
+  bool isConst() const;
+  void setXsiType(const QString &type);
+  QString xsiType() const;
 
-    QString toString(bool withTypeDefinition=true);
-    QString documentation(bool withPrefix, bool forCOutput);
-    bool isPublic() const
-    {
-        return m_element.attribute("access","private")=="private"?false:true;
-    }
+  void setName(QString value);
+  QString name() const;
 
-    QStringList father();
+  QString toString(bool withTypeDefinition = true);
+  QString documentation(bool withPrefix, bool forCOutput);
+  bool isPublic() const;
+  void setPublic(bool m_public);
+  QString publicStr() const;
 
-    void setPublic(bool m_public);
+  QStringList father();
 
-    QDomNodeList values()
-    {
-        return m_element.childNodes();
-    }
-    QString definition();
+  QDomNodeList values() const;
+  QString valuesToString() const;
+  QString definition();
 
+  void setScope(DeclarationScope scope);
+  DeclarationScope scope() const;
 
-    void setGlobal(bool global);
-    bool isGlobal() const
-    {
-        //qDebug() << "var: " << m_name << " has " << m_values.count();
-        return m_global;// m_values.count() > 0;
-    }
+  QString allSizes();
+  void setAllSizes(const QString &sizes);
 
-    QString allSizes();
-    void setAllSizes(const QString & sizes);
+  QDomElement element() const;
 
-    QDomElement element() const
-    {
-        return m_element;
-    }
+  QVariant varValue(QString index = "0");
+  void setValue(const QString &index, const QMap<QString, QString> &valueMap);
+  bool isBuildInType() const;
+  static QStringList buildInTypes();
+  bool hasConstPrefix(QString *prefix = nullptr) const;
+  static void extractArrayIndex(const QString &value, QString &name,
+                                QString &index);
 
-    QVariant varValue(QString index="0");
-    bool isBuildInType()const ;
-    QStringList buildInTypes();
-    bool hasConstPrefix(QString *prefix=0) const;
-
+  void writeXMLStream(QXmlStreamWriter &stream);
 
 protected:
-    QStringList m_buildInTypes;
-    QDomElement m_element;
-    QString m_description;
-    QDomDocumentFragment m_docFragment;
-    QDomDocument m_doc;
-    bool m_global;
+  QStringList m_buildInTypes;
+  QDomElement m_element;
+  QString m_description;
+  QString m_name;
+  QDomDocumentFragment m_docFragment;
+  QDomDocument m_doc;
+  static QStringList setBuildInVariableTypes();
 
-    void setBuildInTypes();
+  void writeValueElements(QXmlStreamWriter &stream);
+  void writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes);
+
 signals:
-    void modified();
-
+  void modified();
 };
 #endif

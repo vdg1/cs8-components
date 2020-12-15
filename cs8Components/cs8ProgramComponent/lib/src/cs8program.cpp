@@ -28,8 +28,7 @@ cs8Program::cs8Program(QObject *parent)
   m_programCode = "begin\nend";
 }
 
-cs8Program::cs8Program()
-    : QObject(), m_public(false), m_withIfBlock(true) {
+cs8Program::cs8Program() : QObject(), m_public(false), m_withIfBlock(true) {
   m_localVariableModel = new cs8LocalVariableModel(this);
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
           &cs8Program::modified);
@@ -171,34 +170,43 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
   return true;
 }
 
+QString &rtrim(QString &str) {
+  while (str.size() > 0 && str.at(str.size() - 1).isSpace())
+    str.chop(1);
+  return str;
+}
+
 void cs8Program::tidyUpCode(QString &code) {
+  // remove double \r
+  code = code.remove("\r\r");
   // remove empty lines after "end"
   QStringList list = code.split("\n");
   while (list.length() > 0 && list.last().simplified().isEmpty())
     list.removeLast();
 
+  for (auto &i : list) {
+    i = rtrim(i);
+  }
   code = list.join("\n");
 }
 
-int cs8Program::getLineNumberCodeSection() const
-{
-    return m_lineNumberCodeSection;
+int cs8Program::getLineNumberCodeSection() const {
+  return m_lineNumberCodeSection;
 }
 
-void cs8Program::undoTranslationTags()
-{
-    //m_programCode
-    QRegularExpression rx("(i18n:tr\\[\\\")(.*)(\\\"\\])");
-    rx.setPatternOptions(QRegularExpression::InvertedGreedinessOption);
-    QRegularExpressionMatch m;
+void cs8Program::undoTranslationTags() {
+  // m_programCode
+  QRegularExpression rx("(i18n:tr\\[\\\")(.*)(\\\"\\])");
+  rx.setPatternOptions(QRegularExpression::InvertedGreedinessOption);
+  QRegularExpressionMatch m;
 
+  m = rx.match(m_programCode);
+  qDebug() << m.hasMatch() << m.lastCapturedIndex() << m.capturedTexts();
+  while (m.hasMatch() && m.lastCapturedIndex() == 3) {
+    m_programCode.replace(m.capturedStart(3), m.capturedLength(3), "\")");
+    m_programCode.replace(m.capturedStart(1), m.capturedLength(1), "(\"");
     m = rx.match(m_programCode);
-    qDebug() << m.hasMatch() << m.lastCapturedIndex() << m.capturedTexts();
-    while (m.hasMatch() && m.lastCapturedIndex() == 3) {
-        m_programCode.replace(m.capturedStart(3), m.capturedLength(3), "\")");
-        m_programCode.replace(m.capturedStart(1), m.capturedLength(1), "(\"");
-        m = rx.match(m_programCode);
-    }
+  }
 }
 // QDomElement cs8Program::programsSection() const { return m_programsSection; }
 
@@ -381,6 +389,14 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
   // extract code until non-header line found
   QString line = documentationList[row].trimmed();
   isEndMarker = line.startsWith("//_");
+  // remove next line if it is a //_ line
+  int headerOffset = 0;
+  while (row < documentationList.count() - 1 &&
+         documentationList[row + 1].trimmed().startsWith("//_")) {
+    documentationList.removeAt(row + 1);
+    headerOffset++;
+  }
+
   isComment =
       (line.startsWith("//") ||
        ((line.startsWith("//!") || line.startsWith("//\\")) && row == 0) ||
@@ -397,7 +413,7 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
     }
     row++;
   }
-  int endOfCommentBlock = qMax(0, row - (isEndMarker ? 0 : 1));
+  int endOfCommentBlock = qMax(0, row - (isEndMarker ? 0 : 1) + headerOffset);
   //
   // check if a non-comment line is in if block
   for (row = 0; row < endOfCommentBlock; row++) {
@@ -452,7 +468,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
     if ((line.startsWith("//!") || line.startsWith("//\\")) &&
         !tagType.isEmpty()) {
       // remove trailing array indexes from tag name
-      tagName = tagName.remove(QRegExp(R"(\[\d*\])"));
+      tagName = tagName.remove(QRegExp(R"(\[\d*\])")).remove("\\");
       // qDebug() << "process tag:" << tagType << ":" << tagName << ":" <<
       // tagText;
       if (tagType == "param") {
@@ -514,7 +530,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
       rx.setPattern("^\\s*" + tagType);
       tagText = line.remove(rx).trimmed();
       // match the tag name (optionally with [..] array indicator)
-      rx.setPattern(R"(^\w*(|(\[\d*\]))(\s|$))");
+      rx.setPattern(R"(^[\w\\]*(|(\[\d*\]))(\s|$))");
       int pos = rx.indexIn(tagText);
       if (pos != -1)
         tagName = rx.cap().simplified();
@@ -585,7 +601,9 @@ void cs8Program::parseDocumentation(const QString &code_) {
   // qDebug() << documentationList;
 }
 
-QString cs8Program::briefDescription(bool trimmed) const { return trimmed?m_briefDescription.trimmed():m_briefDescription; }
+QString cs8Program::briefDescription(bool trimmed) const {
+  return trimmed ? m_briefDescription.trimmed() : m_briefDescription;
+}
 
 void cs8Program::setCellPath(const QString &path) { m_cellPath = path; }
 
@@ -684,77 +702,78 @@ QString cs8Program::detailedDocumentation() const {
   return m_detailedDocumentation;
 }
 
-bool cs8Program::save(const QString &filePath, bool withCode)
-{
-    QBuffer buffer;
-    buffer.open(QBuffer::ReadWrite);
+bool cs8Program::save(const QString &filePath, bool withCode) {
+  QBuffer buffer;
+  buffer.open(QBuffer::ReadWrite);
 
-    QXmlStreamWriter stream(&buffer);
-    stream.setAutoFormatting(true);
-    stream.setAutoFormattingIndent(2);
-    stream.setCodec("utf-8");
-    stream.writeStartDocument();
+  QXmlStreamWriter stream(&buffer);
+  stream.setAutoFormatting(true);
+  stream.setAutoFormattingIndent(2);
+  stream.setCodec("utf-8");
+  stream.writeStartDocument();
 
-    //
-    stream.writeStartElement("Programs");
-    stream.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-    stream.writeAttribute("xmlns", "http://www.staubli.com/robotics/VAL3/Program/2");
-    stream.writeStartElement("Program");
-    stream.writeAttribute("name", name());
-    if (isPublic())
-        stream.writeAttribute("access", "public");
-    //
-    if (!m_briefDescription.isEmpty()) {
-        stream.writeStartElement("Description");
-        stream.writeCDATA(formattedDescriptionHeader());
-        stream.writeEndElement();
-    }
-    //
-    parameterModel()->writeXMLStream(stream);
-    //
-    localVariableModel()->writeXMLStream(stream);
-    //
-    stream.writeStartElement("Code");
-    QString codeText;
-    if (withCode) {
-        codeText = toDocumentedCode();
+  //
+  stream.writeStartElement("Programs");
+  stream.writeAttribute("xmlns:xsi",
+                        "http://www.w3.org/2001/XMLSchema-instance");
+  stream.writeAttribute("xmlns",
+                        "http://www.staubli.com/robotics/VAL3/Program/2");
+  stream.writeStartElement("Program");
+  stream.writeAttribute("name", name());
+  if (isPublic())
+    stream.writeAttribute("access", "public");
+  //
+  if (!m_briefDescription.isEmpty()) {
+    stream.writeStartElement("Description");
+    stream.writeCDATA(formattedDescriptionHeader());
+    stream.writeEndElement();
+  }
+  //
+  parameterModel()->writeXMLStream(stream);
+  //
+  localVariableModel()->writeXMLStream(stream);
+  //
+  stream.writeStartElement("Code");
+  QString codeText;
+  if (withCode) {
+    codeText = toDocumentedCode();
+  } else {
+    if (name() != "stop") {
+      codeText = "begin\n"
+                 "logMsg(libPath())\n"
+                 "put(sqrt(-1))\n"
+                 "end";
     } else {
-        if (name() != "stop") {
-            codeText = "begin\n"
-                       "logMsg(libPath())\n"
-                       "put(sqrt(-1))\n"
-                       "end";
-        } else {
-            codeText = "begin\n"
-                       "end";
-        }
+      codeText = "begin\n"
+                 "end";
     }
-    stream.writeCDATA(codeText);
-    stream.writeEndDocument();
+  }
+  stream.writeCDATA(codeText);
+  stream.writeEndDocument();
 
-    // match our XML output to XML output of SRS
-    buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
-    if (buffer.buffer().right(1) == "\n")
-        buffer.buffer().chop(1);
-    buffer.buffer().replace("\n", "\r\n");
-    buffer.buffer().replace("\"/>", "\" />");
-    //
+  // match our XML output to XML output of SRS
+  buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
+  if (buffer.buffer().right(1) == "\n")
+    buffer.buffer().chop(1);
+  buffer.buffer().replace("\n", "\r\n");
+  buffer.buffer().replace("\"/>", "\" />");
+  //
 
-    QFileInfo i(filePath);
-    QString fileName_ = i.isDir() ? filePath + fileName() : filePath;
-    //QString fileName_ = filePath + fileName();
-    QFile file(fileName_);
-    if (!file.open(QIODevice::WriteOnly))
-        return false;
+  QFileInfo i(filePath);
+  QString fileName_ = i.isDir() ? filePath + fileName() : filePath;
+  // QString fileName_ = filePath + fileName();
+  QFile file(fileName_);
+  if (!file.open(QIODevice::WriteOnly))
+    return false;
 
-    if (m_hasByteOrderMark) {
-        buffer.buffer().insert(0, 0xBF);
-        buffer.buffer().insert(0, 0xBB);
-        buffer.buffer().insert(0, 0xEF);
-    }
-    file.write(buffer.buffer());
+  if (m_hasByteOrderMark) {
+    buffer.buffer().insert(0, 0xBF);
+    buffer.buffer().insert(0, 0xBB);
+    buffer.buffer().insert(0, 0xEF);
+  }
+  file.write(buffer.buffer());
 
-    return true;
+  return true;
 }
 
 cs8ParameterModel *cs8Program::parameterModel() const {
@@ -791,7 +810,7 @@ QString cs8Program::toDocumentedCode() {
 
   if (!briefDescription(true).isEmpty()) {
     list << "\\brief";
-    list << briefDescription(true).split("\r\n");
+    list << briefDescription(true).split("\n");
   }
 
   if (!m_detailedDocumentation.isEmpty()) {
@@ -856,7 +875,7 @@ QString cs8Program::toDocumentedCode() {
   // list.replaceInStrings(QRegExp("^(?!(\\s*(if false|endIf)))"), "  //");
   for (int i = 0; i < list.count(); i++) {
     if (i != startIfRow && i != endIfRow)
-      list[i] = QString("  //%1").arg(list[i]);
+      list[i] = QString("  //%1").arg(rtrim(list[i]));
   }
 
   // indent lines in if block

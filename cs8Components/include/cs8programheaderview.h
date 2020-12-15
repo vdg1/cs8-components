@@ -36,6 +36,8 @@ public:
 
 
 
+    FormMarkDownEditor *documentation() const;
+
 protected slots:
     void slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected ) ;
     void slotModified();
