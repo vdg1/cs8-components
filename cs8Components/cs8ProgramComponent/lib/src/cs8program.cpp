@@ -378,7 +378,6 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
   // remove 'begin' token
   documentationList.removeFirst();
   QStringList documentation;
-  int hasIfBlock = -1;
   bool isComment = false;
   bool isEndMarker = false;
   headerLinesCount = 0;
@@ -388,14 +387,9 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
     return QStringList();
   // extract code until non-header line found
   QString line = documentationList[row].trimmed();
-  isEndMarker = line.startsWith("//_");
-  // remove next line if it is a //_ line
-  int headerOffset = 0;
-  while (row < documentationList.count() - 1 &&
-         documentationList[row + 1].trimmed().startsWith("//_")) {
-    documentationList.removeAt(row + 1);
-    headerOffset++;
-  }
+  isEndMarker = line.startsWith("//_") &&
+                (row < documentationList.count() &&
+                 !(documentationList[row + 1].trimmed().startsWith("//_")));
 
   isComment =
       (line.startsWith("//") ||
@@ -404,7 +398,9 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
        line.startsWith("//_"));
   while (isComment && !isEndMarker) {
     line = documentationList[row].trimmed();
-    isEndMarker = line.startsWith("//_");
+    isEndMarker = line.startsWith("//_") &&
+                  (row < documentationList.count() &&
+                   !(documentationList[row + 1].trimmed().startsWith("//_")));
     if (line.startsWith("//") || line.startsWith("if false") ||
         line.startsWith("endIf") || line.startsWith("//_") || line.isEmpty()) {
       isComment = true;
@@ -413,19 +409,29 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
     }
     row++;
   }
-  int endOfCommentBlock = qMax(0, row - (isEndMarker ? 0 : 1) + headerOffset);
+  int endOfCommentBlock = qMax(0, row - (isEndMarker ? 0 : 1));
   //
   // check if a non-comment line is in if block
+
+  int hasIfBlock = -1;
+  int hasEndIf = -1;
   for (row = 0; row < endOfCommentBlock; row++) {
     line = documentationList[row].trimmed();
-    if (line.startsWith("if false"))
+    if (line.startsWith("if false")) {
       hasIfBlock = row;
-    else if (hasIfBlock != -1 && !line.startsWith("//") &&
-             !line.startsWith("endIf")) {
+    } else if (hasIfBlock != -1 && !line.startsWith("//") &&
+               !line.startsWith("endIf")) {
       // ok, we have hit a non-comment line in if block
       // ==> comment block actually stops just before if false line
       endOfCommentBlock = hasIfBlock;
+    } else if (line.startsWith("endIf")) {
+      hasEndIf = row;
     }
+  }
+  // check if documentation header is inclosed in if false .. endIf
+  // if so, ignore all following comments and do not include them i documentation header
+  if (hasEndIf != -1) {
+    endOfCommentBlock = hasEndIf + 1;
   }
   //
   // extract comment block
@@ -435,7 +441,7 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
   // remove if false and endIf lines
   documentation.removeAll("if false");
   documentation.removeAll("endIf");
-  if (documentation.count() > 0 && documentation.last() == "//_")
+  while (documentation.count() > 0 && documentation.last() == "//_")
     documentation.removeLast();
   headerLinesCount = endOfCommentBlock;
   return documentation;
