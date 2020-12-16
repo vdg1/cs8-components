@@ -429,7 +429,8 @@ QStringList cs8Program::extractDocumentation(const QString &code_,
     }
   }
   // check if documentation header is inclosed in if false .. endIf
-  // if so, ignore all following comments and do not include them i documentation header
+  // if so, ignore all following comments and do not include them i
+  // documentation header
   if (hasEndIf != -1) {
     endOfCommentBlock = hasEndIf + 1;
   }
@@ -766,7 +767,7 @@ bool cs8Program::save(const QString &filePath, bool withCode) {
   //
 
   QFileInfo i(filePath);
-  QString fileName_ = i.isDir() ? filePath + fileName() : filePath;
+  QString fileName_ = i.isDir() ? filePath + "/" + fileName() : filePath;
   // QString fileName_ = filePath + fileName();
   QFile file(fileName_);
   if (!file.open(QIODevice::WriteOnly))
