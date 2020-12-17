@@ -15,7 +15,8 @@
 #define MAX_LENGTH 40
 //
 cs8Program::cs8Program(QObject *parent)
-    : QObject(parent), m_public(false), m_withIfBlock(true) {
+    : QObject(parent), m_public(false), m_withIfBlock(true),
+      m_hasByteOrderMark(true) {
   m_localVariableModel = new cs8LocalVariableModel(this);
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
           &cs8Program::modified);
@@ -28,7 +29,9 @@ cs8Program::cs8Program(QObject *parent)
   m_programCode = "begin\nend";
 }
 
-cs8Program::cs8Program() : QObject(), m_public(false), m_withIfBlock(true) {
+cs8Program::cs8Program()
+    : QObject(), m_public(false), m_withIfBlock(true),
+      m_hasByteOrderMark(true) {
   m_localVariableModel = new cs8LocalVariableModel(this);
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
           &cs8Program::modified);
@@ -188,6 +191,12 @@ void cs8Program::tidyUpCode(QString &code) {
     i = rtrim(i);
   }
   code = list.join("\n");
+}
+
+bool cs8Program::getHasByteOrderMark() const { return m_hasByteOrderMark; }
+
+void cs8Program::setHasByteOrderMark(bool hasByteOrderMark) {
+  m_hasByteOrderMark = hasByteOrderMark;
 }
 
 int cs8Program::getLineNumberCodeSection() const {
@@ -779,7 +788,9 @@ bool cs8Program::save(const QString &filePath, bool withCode) {
     buffer.buffer().insert(0, 0xEF);
   }
   file.write(buffer.buffer());
-
+  qDebug() << "write file: " << fileName_;
+  qDebug() << "start of buffer: " << buffer.buffer().at(0)
+           << buffer.buffer().at(1) << buffer.buffer().at(2);
   return true;
 }
 

@@ -90,8 +90,12 @@ public:
   int getLineNumberCodeSection() const;
   void undoTranslationTags();
 
-  protected:
-  bool parseProgramDoc(const QDomDocument &doc, const QString &code = QString());
+  bool getHasByteOrderMark() const;
+  void setHasByteOrderMark(bool hasByteOrderMark);
+
+protected:
+  bool parseProgramDoc(const QDomDocument &doc,
+                       const QString &code = QString());
   void tidyUpCode(QString &code);
   QString m_detailedDocumentation;
   QString m_cellPath;
