@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "2.3.5"
+#define MyAppVersion "2.3.6"
 #define MyAppPublisher "SAXE Process AB"
 #define MyAppURL "http://www.saxe-group.com"
 #define QT "D:\Qt\5.14.2\msvc2017_64"
@@ -68,8 +68,8 @@ Source: "{#QT}\bin\Qt5QmlModels.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\QtWebEngineProcess.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\resources\*"; DestDir: "{app}\resources\"; Flags: ignoreversion
 Source: "{#QT}\translations\qtwebengine_locales\*"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#QT}\plugins\platforms\qwindows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#QT}\plugins\styles\qwindowsvistastyle.dll"; DestDir: "{app}\styles\"; Flags: ignoreversion
+Source: "{#QT}\plugins\platforms\qwindows.dll"; DestDir: "{app}\plugins\platforms"; Flags: ignoreversion
+Source: "{#QT}\plugins\styles\qwindowsvistastyle.dll"; DestDir: "{app}\plugins\styles\"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [InstallDelete]
