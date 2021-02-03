@@ -164,9 +164,11 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             cs8DestApp->moveParamsToGlobals(newProgram);
             newProgram->setDescription(program->briefDescription(true));
             newProgram->setName(name);
-            //newProgram->setDescription(program->briefDescription(true));
-            newProgram->setDetailedDocumentation(
-                program->detailedDocumentation());
+            // newProgram->setDescription(program->briefDescription(true));
+            QString documentation = program->detailedDocumentation();
+            documentation += "\n\n DO NOT MODIFY THIS PROGRAM! CHANGES WILL BE "
+                             "OVERWRITTEN ON NEXT UPDATE OF SAXEAUTOMATION!";
+            newProgram->setDetailedDocumentation(documentation);
           } else {
             newProgram->setPublic(false);
             newProgram->setCellPath(cs8DestApp->cellPath());
