@@ -100,11 +100,8 @@ void cs8Program::readAndUpdateProgramCode() {
   m_variableTokens = variableTokens(false);
 }
 
-bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
-  QDomElement programsSection = doc.documentElement();
-  Q_ASSERT(!programsSection.isNull());
-  // printChildNodes(m_programsSection);
-  QDomElement programSection = programsSection.firstChild().toElement();
+void cs8Program::parseProgramSection(const QDomElement &programSection,
+                                     const QString &code) {
   setPublic(programSection.attribute("access", "private") == "public" ? true
                                                                       : false);
   m_name = programSection.attribute("name");
@@ -114,27 +111,16 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
     qDebug() << "Reading program section failed";
 
   QDomElement descriptionSection =
-      programsSection.elementsByTagName("Description").at(0).toElement();
+      programSection.elementsByTagName("Description").at(0).toElement();
   m_briefDescription = descriptionSection.text();
 
   QTextCodec::ConverterState state;
-  QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-  bool isAscii = codec->canEncode(m_briefDescription);
-  if (!isAscii)
-    qDebug() << "Brief is not ASCII";
-
-  // const QString text = codec->toUnicode(m_briefDescription.constData(),
-  //                                      m_briefDescription.size(), &state);
-  // if (state.invalidChars > 0) {
-  //    qDebug() << "Not a valid UTF-8 sequence.";
-  //  }
 
   QDomElement paramSection =
       programSection.elementsByTagName("Parameters").at(0).toElement();
   QDomElement localSection =
       programSection.elementsByTagName("Locals").at(0).toElement();
 
-  // qDebug() << m_programSection.elementsByTagName("Code").at(0).nodeType();
   if (code.isEmpty()) {
     QDomElement codeSection =
         programSection.elementsByTagName("Code").at(0).toElement();
@@ -142,20 +128,12 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
     if (codeSection.isNull())
       qDebug() << "Reading code section failed";
     m_programCode = codeSection.text();
-    // remove code section from XML
-    programSection.removeChild(codeSection);
-
-    bool isAscii = codec->canEncode(m_programCode);
-    if (!isAscii)
-      qDebug() << "Code is not ASCII";
 
   } else {
     m_programCode = code;
   }
-  // qDebug() << "program name: " << name () << m_programSection.attribute
-  // ("name");
-  QDomNodeList childList;
 
+  QDomNodeList childList;
   childList = localSection.elementsByTagName("Local");
   for (int i = 0; i < childList.count(); i++) {
     QDomElement item = childList.at(i).toElement();
@@ -170,6 +148,14 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
 
   //
   readAndUpdateProgramCode();
+}
+
+bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
+  QDomElement programsSection = doc.documentElement();
+  Q_ASSERT(!programsSection.isNull());
+  // printChildNodes(m_programsSection);
+  QDomElement programSection = programsSection.firstChild().toElement();
+  parseProgramSection(programSection, code);
   return true;
 }
 
@@ -718,22 +704,7 @@ QString cs8Program::detailedDocumentation() const {
   return m_detailedDocumentation;
 }
 
-bool cs8Program::save(const QString &filePath, bool withCode) {
-  QBuffer buffer;
-  buffer.open(QBuffer::ReadWrite);
-
-  QXmlStreamWriter stream(&buffer);
-  stream.setAutoFormatting(true);
-  stream.setAutoFormattingIndent(2);
-  stream.setCodec("utf-8");
-  stream.writeStartDocument();
-
-  //
-  stream.writeStartElement("Programs");
-  stream.writeAttribute("xmlns:xsi",
-                        "http://www.w3.org/2001/XMLSchema-instance");
-  stream.writeAttribute("xmlns",
-                        "http://www.staubli.com/robotics/VAL3/Program/2");
+void cs8Program::writeXMLStream(QXmlStreamWriter &stream, bool withCode) {
   stream.writeStartElement("Program");
   stream.writeAttribute("name", name());
   if (isPublic())
@@ -765,6 +736,27 @@ bool cs8Program::save(const QString &filePath, bool withCode) {
     }
   }
   stream.writeCDATA(codeText);
+  stream.writeEndElement();
+  stream.writeEndElement();
+}
+
+bool cs8Program::save(const QString &filePath, bool withCode) {
+  QBuffer buffer;
+  buffer.open(QBuffer::ReadWrite);
+
+  QXmlStreamWriter stream(&buffer);
+  stream.setAutoFormatting(true);
+  stream.setAutoFormattingIndent(2);
+  stream.setCodec("utf-8");
+  stream.writeStartDocument();
+
+  //
+  stream.writeStartElement("Programs");
+  stream.writeAttribute("xmlns:xsi",
+                        "http://www.w3.org/2001/XMLSchema-instance");
+  stream.writeAttribute("xmlns",
+                        "http://www.staubli.com/robotics/VAL3/Program/2");
+  writeXMLStream(stream, withCode);
   stream.writeEndDocument();
 
   // match our XML output to XML output of SRS

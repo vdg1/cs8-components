@@ -18,7 +18,8 @@ public:
   ~MainWindow();
 
   void createAPIs(QList<cs8Application *> cs8SourceApps,
-                  bool copyInProjectFolder);
+                  bool copyInProjectFolder = true,
+                  const QString &outputPath = QString());
 private slots:
 
   void on_actionAdd_Folder_triggered();

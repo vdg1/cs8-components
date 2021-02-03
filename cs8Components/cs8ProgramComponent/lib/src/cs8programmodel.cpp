@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QFileInfoList>
 #include <QFont>
+#include <QTextCodec>
 cs8ProgramModel::cs8ProgramModel(QObject *parent) : QAbstractListModel(parent) {
   m_cellPath = "";
 }
@@ -144,16 +145,49 @@ cs8Program *cs8ProgramModel::createProgram(const QString &programName) {
   program->setCellPath(m_cellPath);
   if (!programName.isEmpty())
     program->setName(programName);
-  Q_ASSERT(!programName.isEmpty());
+  // Q_ASSERT(!programName.isEmpty());
   return program;
 }
 
-void cs8ProgramModel::addProgram(const QString &filePath) {
-  // qDebug() << "cs8ProgramModel::addProgram () " << filePath;
-  QFileInfo info(filePath);
-  cs8Program *program = createProgram(info.baseName());
-  if (!program->open(filePath))
-    qDebug() << "Opening program " << filePath << " failed";
+bool cs8ProgramModel::getHasByteOrderMark() const { return m_hasByteOrderMark; }
+
+void cs8ProgramModel::setHasByteOrderMark(bool hasByteOrderMark) {
+  m_hasByteOrderMark = hasByteOrderMark;
+}
+
+bool cs8ProgramModel::addProgramFile(const QString &filePath) {
+  QFile file(filePath);
+  if (!file.open(QIODevice::ReadOnly))
+    return false;
+  m_hasByteOrderMark =
+      QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
+  if (m_hasByteOrderMark)
+    qDebug() << "File has BOM";
+
+  QDomDocument doc;
+  if (!doc.setContent(&file)) {
+    file.close();
+    return false;
+  }
+  file.close();
+
+  QDomElement programsSection = doc.documentElement();
+  Q_ASSERT(!programsSection.isNull());
+  // printChildNodes(m_programsSection);
+
+  for (int i = 0; i < programsSection.childNodes().count(); i++) {
+    QDomElement programSection = programsSection.childNodes().at(i).toElement();
+    cs8Program *program = createProgram();
+    program->setHasByteOrderMark(m_hasByteOrderMark);
+    program->parseProgramSection(programSection, "");
+  }
+  // QDomElement programSection = programsSection.firstChild().toElement();
+  // parseProgramSection(programSection, code);
+
+  // QFileInfo info(filePath);
+  // cs8Program *program = createProgram(info.baseName());
+  // if (!program->open(filePath))
+//    qDebug() << "Opening program " << filePath << " failed";
 #if QT_VERSION >= 0x050000
   beginResetModel();
   endResetModel();

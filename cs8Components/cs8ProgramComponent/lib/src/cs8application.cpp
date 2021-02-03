@@ -49,7 +49,8 @@ void cs8Application::setIncludeLibraryDocuments(bool includeLibraryDocuments) {
 cs8Application::cs8Application(QObject *parent)
     : QObject(parent), m_modified(false), m_withUndocumentedSymbols(false),
       m_includeLibraryDocuments(false), m_projectVersion("7.0"),
-      m_projectStackSize("5000"), m_projectMillimeterUnit("true") {
+      m_projectStackSize("5000"), m_projectMillimeterUnit("true"),
+      m_singleProgramFile(true) {
   m_programModel = new cs8ProgramModel(this);
   m_globalVariableModel = new cs8GlobalVariableModel(this);
   m_libraryAliasModel = new cs8LibraryAliasModel(this);
@@ -662,7 +663,7 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
     QDomNodeList list = m_programSection.elementsByTagName("Program");
     for (int i = 0; i < list.count(); i++) {
       QString fileName = list.at(i).toElement().attribute("file");
-      m_programModel->addProgram(m_projectPath + fileName);
+      m_programModel->addProgramFile(m_projectPath + fileName);
     }
     // load alias
     list = m_aliasSection.elementsByTagName("Library");
@@ -753,6 +754,14 @@ void cs8Application::setModified(bool modified_) {
   emit modified(modified_);
 }
 
+bool cs8Application::getSingleProgramFile() const {
+  return m_singleProgramFile;
+}
+
+void cs8Application::setSingleProgramFile(bool singleProgramFile) {
+  m_singleProgramFile = singleProgramFile;
+}
+
 bool cs8Application::loadDocumentationFile(const QString & /*fileName*/) {
   if (m_programModel->getProgramByName("_globals")) {
   }
@@ -826,10 +835,10 @@ bool cs8Application::saveDataFile(const QString &fileName) {
 }
 
 bool cs8Application::save(const QString &path, const QString &name) {
-  if (!path.isEmpty())
-    m_projectPath = path;
-  if (!name.isEmpty())
-    m_projectName = name;
+  // if (!path.isEmpty())
+  m_projectPath = path;
+  //  if (!name.isEmpty())
+  m_projectName = name;
 
   // check if a global data has documented code or a application documentation
   // exists.
@@ -872,10 +881,51 @@ bool cs8Application::save(const QString &path, const QString &name) {
     return false;
   if (!saveDataFile(m_projectPath + m_projectName + ".dtx"))
     return false;
-  foreach (cs8Program *program, m_programModel->programList()) {
-    qDebug() << __FUNCTION__ << " Save program: " << program->name();
-    if (!program->save(m_projectPath, true))
+  if (m_singleProgramFile) {
+    QBuffer buffer;
+    buffer.open(QBuffer::ReadWrite);
+
+    QXmlStreamWriter stream(&buffer);
+    stream.setAutoFormatting(true);
+    stream.setAutoFormattingIndent(2);
+    stream.setCodec("utf-8");
+    stream.writeStartDocument();
+
+    //
+    stream.writeStartElement("Programs");
+    stream.writeAttribute("xmlns:xsi",
+                          "http://www.w3.org/2001/XMLSchema-instance");
+    stream.writeAttribute("xmlns",
+                          "http://www.staubli.com/robotics/VAL3/Program/2");
+    for (auto program : m_programModel->programList()) {
+      program->writeXMLStream(stream, true);
+    }
+    stream.writeEndDocument();
+
+    // match our XML output to XML output of SRS
+    buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
+    if (buffer.buffer().right(1) == "\n")
+      buffer.buffer().chop(1);
+    buffer.buffer().replace("\n", "\r\n");
+    buffer.buffer().replace("\"/>", "\" />");
+    //
+
+    QFile file(m_projectPath + "/" + m_projectName + ".pgx");
+    if (!file.open(QIODevice::WriteOnly))
       return false;
+
+    if (m_programModel->getHasByteOrderMark()) {
+      buffer.buffer().insert(0, 0xBF);
+      buffer.buffer().insert(0, 0xBB);
+      buffer.buffer().insert(0, 0xEF);
+    }
+    file.write(buffer.buffer());
+  } else {
+    foreach (cs8Program *program, m_programModel->programList()) {
+      qDebug() << __FUNCTION__ << " Save program: " << program->name();
+      if (!program->save(m_projectPath, true))
+        return false;
+    }
   }
   if (!saveProjectData())
     return false;
@@ -894,6 +944,8 @@ QString cs8Application::projectPath(bool cs8Format) {
     return m_projectPath;
   }
 }
+
+bool cs8Application::save() { return save(m_projectPath, m_projectName); }
 
 QString
 cs8Application::moduleDocumentationFormatted(const QString &withSlashes) const {
@@ -1322,10 +1374,16 @@ bool cs8Application::writeProjectFile() {
   stream.writeEndElement();
 
   stream.writeStartElement("Programs");
-  for (auto item : m_programModel->programList()) {
+  if (m_singleProgramFile) {
     stream.writeStartElement("Program");
-    stream.writeAttribute("file", item->fileName());
+    stream.writeAttribute("file", m_projectName + ".pgx");
     stream.writeEndElement();
+  } else {
+    for (auto item : m_programModel->programList()) {
+      stream.writeStartElement("Program");
+      stream.writeAttribute("file", item->fileName());
+      stream.writeEndElement();
+    }
   }
   stream.writeEndElement();
 
