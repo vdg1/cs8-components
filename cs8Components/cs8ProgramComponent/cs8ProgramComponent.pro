@@ -2,7 +2,8 @@ TEMPLATE = subdirs
 SUBDIRS = lib \
     # plugin \
     #testBin \
-    extractPrototype \
+    #extractPrototype \
+    Val3CompactApp \
     extractDoc \
    # extractIODefinitions \
     cs8DocEditor \

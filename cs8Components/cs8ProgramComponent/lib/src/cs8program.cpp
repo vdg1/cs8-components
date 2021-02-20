@@ -67,6 +67,11 @@ bool cs8Program::open(const QString &filePath) {
   return parseProgramDoc(doc);
 }
 
+bool cs8Program::deleteSourceFile() {
+  qDebug() << "delete file: " << m_filePath;
+  return QFile::remove(m_filePath);
+}
+
 void cs8Program::printChildNodes(const QDomElement &element) {
   qDebug() << "Child nodes of: " << element.tagName();
   for (int i = 0; i < element.childNodes().count(); i++)
@@ -178,6 +183,10 @@ void cs8Program::tidyUpCode(QString &code) {
   }
   code = list.join("\n");
 }
+
+QString cs8Program::getFilePath() const { return m_filePath; }
+
+void cs8Program::setFilePath(const QString &filePath) { m_filePath = filePath; }
 
 bool cs8Program::getHasByteOrderMark() const { return m_hasByteOrderMark; }
 
@@ -775,9 +784,9 @@ bool cs8Program::save(const QString &filePath, bool withCode) {
     return false;
 
   if (m_hasByteOrderMark) {
-    buffer.buffer().insert(0, 0xBF);
-    buffer.buffer().insert(0, 0xBB);
-    buffer.buffer().insert(0, 0xEF);
+    buffer.buffer().insert(0, static_cast<char>(0xBF));
+    buffer.buffer().insert(0, static_cast<char>(0xBB));
+    buffer.buffer().insert(0, static_cast<char>(0xEF));
   }
   file.write(buffer.buffer());
   qDebug() << "write file: " << fileName_;

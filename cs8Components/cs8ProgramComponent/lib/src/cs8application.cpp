@@ -50,7 +50,7 @@ cs8Application::cs8Application(QObject *parent)
     : QObject(parent), m_modified(false), m_withUndocumentedSymbols(false),
       m_includeLibraryDocuments(false), m_projectVersion("7.0"),
       m_projectStackSize("5000"), m_projectMillimeterUnit("true"),
-      m_singleProgramFile(true) {
+      m_compactFileMode(true) {
   m_programModel = new cs8ProgramModel(this);
   m_globalVariableModel = new cs8GlobalVariableModel(this);
   m_libraryAliasModel = new cs8LibraryAliasModel(this);
@@ -754,12 +754,10 @@ void cs8Application::setModified(bool modified_) {
   emit modified(modified_);
 }
 
-bool cs8Application::getSingleProgramFile() const {
-  return m_singleProgramFile;
-}
+bool cs8Application::getCompactFileMode() const { return m_compactFileMode; }
 
-void cs8Application::setSingleProgramFile(bool singleProgramFile) {
-  m_singleProgramFile = singleProgramFile;
+void cs8Application::setCompactFileMode(bool singleProgramFile) {
+  m_compactFileMode = singleProgramFile;
 }
 
 bool cs8Application::loadDocumentationFile(const QString & /*fileName*/) {
@@ -834,11 +832,13 @@ bool cs8Application::saveDataFile(const QString &fileName) {
   return true;
 }
 
-bool cs8Application::save(const QString &path, const QString &name) {
+bool cs8Application::save(const QString &path, const QString &name,
+                          bool compactMode) {
   // if (!path.isEmpty())
   m_projectPath = path;
   //  if (!name.isEmpty())
   m_projectName = name;
+  m_compactFileMode = compactMode;
 
   // check if a global data has documented code or a application documentation
   // exists.
@@ -881,7 +881,7 @@ bool cs8Application::save(const QString &path, const QString &name) {
     return false;
   if (!saveDataFile(m_projectPath + m_projectName + ".dtx"))
     return false;
-  if (m_singleProgramFile) {
+  if (m_compactFileMode) {
     QBuffer buffer;
     buffer.open(QBuffer::ReadWrite);
 
@@ -899,6 +899,7 @@ bool cs8Application::save(const QString &path, const QString &name) {
                           "http://www.staubli.com/robotics/VAL3/Program/2");
     for (auto program : m_programModel->programList()) {
       program->writeXMLStream(stream, true);
+      program->deleteSourceFile();
     }
     stream.writeEndDocument();
 
@@ -915,9 +916,9 @@ bool cs8Application::save(const QString &path, const QString &name) {
       return false;
 
     if (m_programModel->getHasByteOrderMark()) {
-      buffer.buffer().insert(0, 0xBF);
-      buffer.buffer().insert(0, 0xBB);
-      buffer.buffer().insert(0, 0xEF);
+      buffer.buffer().insert(0, static_cast<char>(0xBF));
+      buffer.buffer().insert(0, static_cast<char>(0xBB));
+      buffer.buffer().insert(0, static_cast<char>(0xEF));
     }
     file.write(buffer.buffer());
   } else {
@@ -945,7 +946,13 @@ QString cs8Application::projectPath(bool cs8Format) {
   }
 }
 
-bool cs8Application::save() { return save(m_projectPath, m_projectName); }
+bool cs8Application::save(bool compactMode) {
+  return save(m_projectPath, m_projectName, compactMode);
+}
+
+bool cs8Application::save() {
+  return save(m_projectPath, m_projectName, m_compactFileMode);
+}
 
 QString
 cs8Application::moduleDocumentationFormatted(const QString &withSlashes) const {
@@ -1374,7 +1381,7 @@ bool cs8Application::writeProjectFile() {
   stream.writeEndElement();
 
   stream.writeStartElement("Programs");
-  if (m_singleProgramFile) {
+  if (m_compactFileMode) {
     stream.writeStartElement("Program");
     stream.writeAttribute("file", m_projectName + ".pgx");
     stream.writeEndElement();
@@ -1581,15 +1588,19 @@ bool cs8Application::loadProjectData() {
   if (file.open(QFile::ReadOnly))
     m_copyRightMessage = file.readAll();
   file.close();
-  QSettings setting(m_projectPath + ".projectData", QSettings::IniFormat, this);
+  QSettings setting(m_projectPath + ".projectData/settings.ini",
+                    QSettings::IniFormat, this);
   m_withUndocumentedSymbols =
-      setting.value("AddTagForNotDocumentedSymbols", true).toBool();
+      setting.value("AddTagForNotDocumentedSymbols", false).toBool();
   m_includeLibraryDocuments =
-      setting.value("WithLibraryDocuments", true).toBool();
+      setting.value("WithLibraryDocuments", false).toBool();
   return true;
 }
 
 bool cs8Application::saveProjectData() {
+  if (m_copyRightMessage.isEmpty() && !m_withUndocumentedSymbols &&
+      !m_includeLibraryDocuments)
+    return true;
   QString filePath = m_projectPath + ".projectData";
   QDir dir;
   dir.mkpath(filePath);
@@ -1601,7 +1612,8 @@ bool cs8Application::saveProjectData() {
     file.write(m_copyRightMessage.toLatin1());
   file.close();
 
-  QSettings setting(m_projectPath + ".projectData", QSettings::IniFormat, this);
+  QSettings setting(m_projectPath + ".projectData/settings.ini",
+                    QSettings::IniFormat, this);
   setting.setValue("AddTagForNotDocumentedSymbols", m_withUndocumentedSymbols);
   setting.setValue("WithLibraryDocuments", m_includeLibraryDocuments);
   return true;

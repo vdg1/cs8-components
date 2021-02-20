@@ -13,6 +13,7 @@ struct Options {
   QString rootPath;
   QString outputPath;
   bool copyToProjectPath;
+  bool compactMode;
 };
 
 enum CommandLineParseResult {
@@ -29,6 +30,7 @@ CommandLineParseResult parseCommandLine(QCommandLineParser &parser,
   parser.addOptions(
       {{{"rootPath", "r"}, "Root path", "RootPath"},
        {{"copy", "c"}, "Copy API library to root folder of project"},
+       {{"compactMode", "m"}, "Store API library in compact mode"},
        {{"outputPath", "o"},
         "Output path of API library and IO library",
         "OutputPath"}});
@@ -58,6 +60,7 @@ CommandLineParseResult parseCommandLine(QCommandLineParser &parser,
   options->sourcePaths = parser.positionalArguments();
   options->copyToProjectPath = parser.isSet("copy");
   options->outputPath = parser.value("outputPath");
+  options->compactMode = parser.isSet("compactMode");
 
   return CommandLineOk;
 }
@@ -109,7 +112,7 @@ int main(int argc, char *argv[])
         delete cs8SourceApp;
       }
     }
-    w.createAPIs(cs8SourceApps, options.copyToProjectPath,
+    w.createAPIs(cs8SourceApps, options.copyToProjectPath, options.compactMode,
                  options.rootPath + "/" + options.outputPath);
     return 0;
   } else {

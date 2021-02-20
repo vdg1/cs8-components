@@ -14,10 +14,11 @@
 class cs8Variable : public QObject {
 
   Q_OBJECT
-  Q_ENUMS(DeclarationScope)
 
 public:
   enum DeclarationScope { Local, Parameter, Global };
+  Q_ENUM(DeclarationScope)
+
   cs8Variable(QDomElement &element, const QString &descripton = QString(),
               QObject *parent = 0);
   cs8Variable(cs8Variable *var, QObject *parent);

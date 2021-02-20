@@ -180,6 +180,7 @@ bool cs8ProgramModel::addProgramFile(const QString &filePath) {
     cs8Program *program = createProgram();
     program->setHasByteOrderMark(m_hasByteOrderMark);
     program->parseProgramSection(programSection, "");
+    program->setFilePath(filePath);
   }
   // QDomElement programSection = programsSection.firstChild().toElement();
   // parseProgramSection(programSection, code);
@@ -194,6 +195,7 @@ bool cs8ProgramModel::addProgramFile(const QString &filePath) {
 #else
   reset();
 #endif
+  return true;
 }
 
 void cs8ProgramModel::slotGlobalVariableDocumentationFound(

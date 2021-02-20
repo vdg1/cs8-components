@@ -88,7 +88,7 @@ void MainWindow::on_commandLinkButton_clicked() {
 }
 
 void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
-                            bool copyInProjectFolder,
+                            bool copyInProjectFolder, bool compactMode,
                             const QString &outputPath) {
   // QMap<QString, cs8Application *> cs8DestApps;
   cs8Application *cs8DestApp = nullptr;
@@ -307,7 +307,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
         }
         initProgram->setCode("begin\n" + initProgramCode + "end");
 
-        cs8DestApp->save();
+        cs8DestApp->save(compactMode);
         if (copyInProjectFolder) {
           QString sourceDir = cs8DestApp->projectPath();
           QString destDir =
