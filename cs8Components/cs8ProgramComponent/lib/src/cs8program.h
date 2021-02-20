@@ -60,8 +60,10 @@ private:
 
 public:
   cs8Program(QObject *parent);
+  cs8Program();
   // cs8Program(const QString & filePath);
   bool open(const QString &filePath);
+  bool deleteSourceFile();
   QString val3Code(bool withDocumentation = true);
   QString toCSyntax();
   void parseDocumentation(const QString &code);
@@ -73,7 +75,7 @@ public:
   void setCopyrightMessage(const QString &text);
   QString copyrightMessage() const;
 
-  QString briefDescription() const;
+  QString briefDescription(bool trimmed) const;
   void setCellPath(const QString &path);
   QString cellFilePath() const;
 
@@ -85,6 +87,20 @@ public:
   void setMainPageDocumentation(const QString &applicationDocumentation);
 
   QString formattedDescriptionHeader() const;
+
+  int getLineNumberCodeSection() const;
+  void undoTranslationTags();
+
+  bool getHasByteOrderMark() const;
+  void setHasByteOrderMark(bool hasByteOrderMark);
+
+  void parseProgramSection(const QDomElement &programSection,
+                           const QString &code);
+
+  void writeXMLStream(QXmlStreamWriter &stream, bool withCode);
+
+  QString getFilePath() const;
+  void setFilePath(const QString &filePath);
 
 protected:
   bool parseProgramDoc(const QDomDocument &doc,
@@ -100,6 +116,8 @@ protected:
   QString m_programCode;
   bool m_public;
   bool m_withIfBlock;
+  bool m_hasByteOrderMark;
+  int m_lineNumberCodeSection;
 
   void readAndUpdateProgramCode();
 

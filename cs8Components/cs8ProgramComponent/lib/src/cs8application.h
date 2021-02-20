@@ -19,7 +19,9 @@ class cs8Application : public QObject {
 
 public:
   QString projectPath(bool cs8Format = false);
-  bool save(const QString &path = QString(), const QString &name = QString());
+  bool save(bool compactMode);
+  bool save();
+  bool save(const QString &path, const QString &name, bool compactMode);
   bool loadDataFile(const QString &fileName);
   bool saveDataFile(const QString &fileName);
   bool open(const QString &pfxFilePath);
@@ -109,6 +111,9 @@ public:
   QString getProjectMillimeterUnit() const;
   void setProjectMillimeterUnit(const QString &projectMillimeterUnit);
 
+  bool getCompactFileMode() const;
+  void setCompactFileMode(bool singleProgramFile);
+
 protected:
   QHash<QString, QString> m_exportDirectives;
   QHash<QString, QString> m_pragmaList;
@@ -162,6 +167,7 @@ private:
   bool reportHiddenGlobalVariables;
   bool reportParametersPostfix;
   bool reportToDos;
+  bool m_compactFileMode;
   void exportToCppFile(const QString &path) const;
   void exportToHFile(const QString &path) const;
 

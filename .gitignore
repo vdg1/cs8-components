@@ -15,3 +15,8 @@ debug/
 *.pro.user.*
 *.stash
 Output/
+cs8Components/cs8ControllerComponent/errorLogBin/build/qmake/qtvars_x64_Debug.props
+cs8Components/cs8ProgramComponent/bin/
+cs8Components/cs8ControllerComponent/lib/build/
+cs8Components/cs8ControllerComponent/lib/buildd/
+cs8Components/cs8ControllerComponent/bin/

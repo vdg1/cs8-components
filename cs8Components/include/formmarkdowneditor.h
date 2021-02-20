@@ -17,17 +17,25 @@ public:
     explicit FormMarkDownEditor(QWidget *parent = 0);
     ~FormMarkDownEditor();
 
-    void setText(const QString & text);
     QString text() const;
 
-
-
     QString prefixText() const;
+    QString postfixText() const;
+    QString previewText() const;
+
+public slots:
+    void setPostfixText(const QString &postfixText);
+    void setText(const QString & text, bool blockSignal);
     void setPrefixText(const QString &prefixText);
+
+signals:
+    void textChanged(const QString &text);
+    void textEdited(const QString &text);
 
 private:
     Ui::FormMarkDownEditor *ui;
     QString m_prefixText;
+    QString m_postfixText;
     Document m_content;
 };
 
