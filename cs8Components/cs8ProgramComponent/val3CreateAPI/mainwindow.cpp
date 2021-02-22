@@ -88,7 +88,8 @@ void MainWindow::on_commandLinkButton_clicked() {
 }
 
 void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
-                            bool copyInProjectFolder) {
+                            bool copyInProjectFolder, bool compactMode,
+                            const QString &outputPath) {
   // QMap<QString, cs8Application *> cs8DestApps;
   cs8Application *cs8DestApp = nullptr;
   QString moduleBaseName;
@@ -101,7 +102,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
       cs8DestApp = nullptr;
       // create API calls to public programs
       foreach (cs8Program *program,
-               cs8SourceApp->programModel()->programList()) {
+               cs8SourceApp->programModel()->publicPrograms()) {
 
         if ((program->name().startsWith("_") && program->isPublic()) ||
             program->name().startsWith("zz")) {
@@ -117,6 +118,8 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             cs8DestApp = new cs8Application(this);
             cs8DestApp->setName(destAppName);
             cs8DestApp->setCellPath(cs8SourceApps.at(0)->cellPath());
+            if (!outputPath.isEmpty())
+              cs8DestApp->setProjectPath(outputPath + "/" + cs8DestApp->name());
             cs8DestApp->setProjectVersion(
                 cs8SourceApps.at(0)->getProjectVersion());
             // create version variable
@@ -164,6 +167,9 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             cs8DestApp->moveParamsToGlobals(newProgram);
             newProgram->setDescription(program->briefDescription(true));
             newProgram->setName(name);
+            // newProgram->setDescription(program->briefDescription(true));
+            newProgram->setDetailedDocumentation(
+                program->detailedDocumentation());
             // newProgram->setDescription(program->briefDescription(true));
             QString documentation = program->detailedDocumentation();
             documentation += "\n\n DO NOT MODIFY THIS PROGRAM! CHANGES WILL BE "
@@ -306,7 +312,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
         }
         initProgram->setCode("begin\n" + initProgramCode + "end");
 
-        cs8DestApp->save();
+        cs8DestApp->save(compactMode);
         if (copyInProjectFolder) {
           QString sourceDir = cs8DestApp->projectPath();
           QString destDir =

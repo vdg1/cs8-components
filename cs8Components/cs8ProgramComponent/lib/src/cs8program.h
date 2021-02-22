@@ -63,6 +63,7 @@ public:
   cs8Program();
   // cs8Program(const QString & filePath);
   bool open(const QString &filePath);
+  bool deleteSourceFile();
   QString val3Code(bool withDocumentation = true);
   QString toCSyntax();
   void parseDocumentation(const QString &code);
@@ -92,6 +93,14 @@ public:
 
   bool getHasByteOrderMark() const;
   void setHasByteOrderMark(bool hasByteOrderMark);
+
+  void parseProgramSection(const QDomElement &programSection,
+                           const QString &code);
+
+  void writeXMLStream(QXmlStreamWriter &stream, bool withCode);
+
+  QString getFilePath() const;
+  void setFilePath(const QString &filePath);
 
 protected:
   bool parseProgramDoc(const QDomDocument &doc,
