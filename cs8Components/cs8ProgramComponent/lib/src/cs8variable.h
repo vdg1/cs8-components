@@ -54,6 +54,7 @@ public:
 
   QStringList father();
 
+  void setValues(const QDomNodeList &values);
   QDomNodeList values() const;
   QString valuesToString() const;
   QString definition();

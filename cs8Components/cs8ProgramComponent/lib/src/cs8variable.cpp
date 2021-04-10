@@ -80,7 +80,7 @@ QString cs8Variable::documentation(bool withPrefix, bool forCOutput) {
     firstLine = false;
   }
   // qDebug() << "processed: " << out;
-  if (!scope())
+  if (scope() == Parameter)
     return prefix + (forCOutput ? "@param " : "\\param ") + name() + " " + out +
            "\n";
   else
@@ -104,6 +104,14 @@ QStringList cs8Variable::father() {
   }
   list.removeDuplicates();
   return list;
+}
+
+void cs8Variable::setValues(const QDomNodeList &values) {
+  while (m_element.hasChildNodes())
+    m_element.removeChild(m_element.firstChild());
+
+  for (int i = 0; i < values.count(); i++)
+    m_element.appendChild(values.item(i));
 }
 
 void cs8Variable::setPublic(bool m_public) {
@@ -279,9 +287,14 @@ void cs8Variable::writeValueElements(QXmlStreamWriter &stream) {
 }
 
 void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
+  qDebug() << __FUNCTION__ << "Write values of " << name();
   for (int i = 0; i < nodes.count(); i++) {
     QDomElement valueElement = nodes.at(i).toElement();
+    QStringList attributeList;
     QDomNamedNodeMap valueAttributes = valueElement.attributes();
+    for (int i = 0; i < valueAttributes.count(); i++)
+      attributeList << valueAttributes.item(i).nodeName();
+
     QStringList attributeOrder = QStringList() << "key"
                                                << "name"
                                                << "value"
@@ -297,25 +310,27 @@ void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
                                                << "fatherId";
 
     stream.writeStartElement(valueElement.tagName());
+    qDebug() << "attributes before: " << valueElement.attributes().count();
     // write attributes in pre defined order
-    for (auto attr : attributeOrder) {
-      if (valueAttributes.contains(attr)) {
+    for (const auto &attr : qAsConst(attributeOrder)) {
+      if (attributeList.contains(attr)) {
         QDomNode attribute = valueAttributes.namedItem(attr);
         stream.writeAttribute(attribute.nodeName(), attribute.nodeValue());
-        valueAttributes.removeNamedItem(attribute.nodeName());
+        attributeList.removeAll(attr);
       }
     }
     // write remaining attributes
-    while (valueAttributes.length() > 0) {
+    while (attributeList.length() > 0) {
       QDomNode attribute = valueAttributes.item(0);
       stream.writeAttribute(attribute.nodeName(), attribute.nodeValue());
-      valueAttributes.removeNamedItem(attribute.nodeName());
+      attributeList.removeAll(attribute.nodeName());
     }
     // write fields
     if (valueElement.childNodes().count() > 0) {
       writeNodes(stream, valueElement.childNodes());
     }
     stream.writeEndElement();
+    qDebug() << "attributes after : " << valueElement.attributes().count();
   }
 }
 

@@ -184,6 +184,15 @@ void cs8Program::tidyUpCode(QString &code) {
   code = list.join("\n");
 }
 
+QString cs8Program::getAdditionalHintMessage() const {
+  return m_additionalHintMessage;
+}
+
+void cs8Program::setAdditionalHintMessage(
+    const QString &additionalHintMessage) {
+  m_additionalHintMessage = additionalHintMessage;
+}
+
 QString cs8Program::getFilePath() const { return m_filePath; }
 
 void cs8Program::setFilePath(const QString &filePath) { m_filePath = filePath; }
@@ -553,10 +562,12 @@ void cs8Program::parseDocumentation(const QString &code_) {
       tagText.remove(rx);
       // qDebug() << "new tag:" << tagType << ":" << tagName << ":" << tagText;
     } else {
-      // Read tag text from code lines and prepend a \n at end of each read
-      // line. However, do not prepend a \n if it is the first line.
-      tagText += (tagText.isEmpty() ? "" : "\n") +
-                 line.remove(0, 2); //"\n" + line.remove(0, 2);
+      // ignore lines containing additional hint message marker
+      if (!line.startsWith("//[="))
+        // Read tag text from code lines and prepend a \n at end of each read
+        // line. However, do not prepend a \n if it is the first line.
+        tagText += (tagText.isEmpty() ? "" : "\n") +
+                   line.remove(0, 2); //"\n" + line.remove(0, 2);
       // remove double \n at end of tag text
       while (tagText.right(2) == "\n\n")
         tagText.chop(1);
@@ -625,7 +636,7 @@ QString cs8Program::cellFilePath() const {
   return pth;
 }
 
-QString cs8Program::documentation(bool withPrefix) const {
+QString cs8Program::documentation(bool withPrefix, bool forCOutput) const {
   // qDebug() << "documentation: " << name();
   QString out;
   QString prefix = withPrefix ? "/// " : "";
@@ -645,11 +656,11 @@ QString cs8Program::documentation(bool withPrefix) const {
   foreach (QString str, list) {
     if (str.contains("<pre>")) {
       inCodeSection = true;
-      out += prefix + "<br>\n";
+      out += prefix + "\n";
     }
     if (str.contains("</pre>")) {
       inCodeSection = false;
-      out += prefix + "<br>\n";
+      out += prefix + "\n";
     }
     if (inCodeSection) {
       qDebug() << str << "indent: " << indentation;
@@ -664,12 +675,12 @@ QString cs8Program::documentation(bool withPrefix) const {
         str = QString().fill(QChar(' '), indentation * 4) + str.trimmed();
       }
     }
-    out += prefix + str + (inCodeSection ? "<br>" : "") + "\n";
+    out += prefix + str + (inCodeSection ? "" : "") + "\n";
   }
   // out += "\n";
   // out =list.join("\n");
   foreach (cs8Variable *parameter, m_parameterModel->variableList()) {
-    out += parameter->documentation(true, false);
+    out += parameter->documentation(withPrefix, forCOutput);
   }
 
   return out.trimmed();
@@ -830,6 +841,12 @@ QString cs8Program::toDocumentedCode() {
   if (!briefDescription(true).isEmpty()) {
     list << "\\brief";
     list << briefDescription(true).split("\n");
+  }
+
+  if (!m_additionalHintMessage.isEmpty()) {
+    list << "\n";
+    list << QString("[= %1 =]").arg(m_additionalHintMessage);
+    list << "\n ";
   }
 
   if (!m_detailedDocumentation.isEmpty()) {

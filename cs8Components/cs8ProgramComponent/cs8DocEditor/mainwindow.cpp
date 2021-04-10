@@ -113,7 +113,7 @@ void MainWindow::on_action_Open_triggered() {
   }
 }
 
-void MainWindow::on_action_Save_triggered() { m_application->save(); }
+void MainWindow::on_action_Save_triggered() { m_application->save(false); }
 
 void MainWindow::slotSelectionChanged(const QItemSelection &selected,
                                       const QItemSelection & /*deselected*/) {

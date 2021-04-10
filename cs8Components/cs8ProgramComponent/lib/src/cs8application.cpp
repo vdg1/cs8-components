@@ -557,7 +557,7 @@ QString cs8Application::exportToCDefinition() const {
   }
 
   foreach (cs8Program *program, m_programModel->privatePrograms()) {
-    out << program->documentation();
+    out << program->documentation(true, true);
     out << QString("   void %1;").arg(program->definition());
   }
 

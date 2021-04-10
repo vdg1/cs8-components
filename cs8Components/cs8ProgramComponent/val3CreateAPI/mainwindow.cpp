@@ -102,7 +102,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
       cs8DestApp = nullptr;
       // create API calls to public programs
       foreach (cs8Program *program,
-               cs8SourceApp->programModel()->publicPrograms()) {
+               cs8SourceApp->programModel()->programList()) {
 
         if ((program->name().startsWith("_") && program->isPublic()) ||
             program->name().startsWith("zz")) {
@@ -118,10 +118,17 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             cs8DestApp = new cs8Application(this);
             cs8DestApp->setName(destAppName);
             cs8DestApp->setCellPath(cs8SourceApps.at(0)->cellPath());
-            if (!outputPath.isEmpty())
-              cs8DestApp->setProjectPath(outputPath + "/" + cs8DestApp->name());
+            // if (!outputPath.isEmpty())
+            //  cs8DestApp->setProjectPath(outputPath + "/" +
+            //  cs8DestApp->name());
+            cs8DestApp->setProjectPath(cs8SourceApp->projectPath() + "/" +
+                                       cs8DestApp->name());
             cs8DestApp->setProjectVersion(
                 cs8SourceApps.at(0)->getProjectVersion());
+            cs8DestApp->setModuleDocumentation(
+                cs8SourceApp->moduleDocumentation());
+            cs8DestApp->setBriefModuleDocumentation(
+                cs8SourceApp->briefModuleDocumentation());
             // create version variable
             cs8Variable *var =
                 cs8DestApp->globalVariableModel()->createVariable("sVersion",
@@ -171,10 +178,11 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             newProgram->setDetailedDocumentation(
                 program->detailedDocumentation());
             // newProgram->setDescription(program->briefDescription(true));
-            QString documentation = program->detailedDocumentation();
-            documentation += "\n\n DO NOT MODIFY THIS PROGRAM! CHANGES WILL BE "
-                             "OVERWRITTEN ON NEXT UPDATE OF SAXEAUTOMATION!";
-            newProgram->setDetailedDocumentation(documentation);
+            newProgram->setAdditionalHintMessage(
+                "DO NOT MODIFY THIS PROGRAM! CHANGES WILL BE "
+                "OVERWRITTEN ON NEXT UPDATE OF SAXEAUTOMATION!");
+            newProgram->setDetailedDocumentation(
+                program->detailedDocumentation());
           } else {
             newProgram->setPublic(false);
             newProgram->setCellPath(cs8DestApp->cellPath());
@@ -218,6 +226,7 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             globalVar->setPublic(true);
             globalVar->setScope(cs8Variable::Global);
             globalVar->setDimension(var->dimension());
+            globalVar->setValues(var->values());
             // cs8DestApp->globalVariableModel()->addVariable(globalVar);
             for (uint i = 0; i < var->size(); i++) {
 

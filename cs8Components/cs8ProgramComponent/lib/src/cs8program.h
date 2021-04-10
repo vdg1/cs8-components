@@ -30,7 +30,7 @@ public:
   QString fileName() const;
   void setName(const QString &name);
   QString definition() const;
-  QString documentation(bool withPrefix = true) const;
+  QString documentation(bool withPrefix = true, bool forCOutput = false) const;
 
   QString extractCode(const QString &code_) const;
 
@@ -102,6 +102,9 @@ public:
   QString getFilePath() const;
   void setFilePath(const QString &filePath);
 
+  QString getAdditionalHintMessage() const;
+  void setAdditionalHintMessage(const QString &additionalHintMessage);
+
 protected:
   bool parseProgramDoc(const QDomDocument &doc,
                        const QString &code = QString());
@@ -111,7 +114,7 @@ protected:
   QString m_filePath;
   QString m_copyRightMessage;
   QString m_applicationDocumentation, m_mainPageDocumentation,
-      m_briefModuleDocumentation;
+      m_briefModuleDocumentation, m_additionalHintMessage;
   QString m_name;
   QString m_programCode;
   bool m_public;
