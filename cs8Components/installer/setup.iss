@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "2.3.7"
+#define MyAppVersion "3.0.2"
 #define MyAppPublisher "SAXE Process AB"
 #define MyAppURL "http://www.saxe-group.com"
 #define QT "D:\Qt\5.14.2\msvc2017_64"
@@ -38,12 +38,14 @@ Source: "..\cs8ProgramComponent\bin\Val3 Documentation Editor.exe"; DestDir: "{a
 Source: "..\cs8ProgramComponent\bin\val3CompilerDeployment.exe"; DestDir: "{app}"; Flags: ignoreversion
 ;Source: "..\cs8ProgramComponent\bin\val3Check.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\val3CreateAPI.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\val3Compact.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\extractDoc.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\preCompilerPackage\*.exe"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Core.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Xml.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Gui.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Positioning.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
+Source: "{#QT}\bin\Qt5PrintSupport.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\helpFilePackage\*.chm"; DestDir: "{app}\helpFilePackage"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\doxygenTemplateData\*.*"; DestDir: "{app}\doxygenTemplateData"; Flags: ignoreversion recursesubdirs
 
@@ -57,6 +59,8 @@ Source: "{#QT}\bin\Qt5WebEngineWidgets.dll"; DestDir: "{app}"; Flags: ignorevers
 Source: "{#QT}\bin\Qt5WebEngineCore.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5WebChannel.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Quick.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\Qt5Positioning.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#QT}\bin\Qt5PrintSupport.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "{#QT}\bin\opengl32sw.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QT}\bin\libGLESV2.dll"; DestDir: "{app}"; Flags: ignoreversion
