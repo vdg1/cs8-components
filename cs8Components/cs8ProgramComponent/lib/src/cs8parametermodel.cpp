@@ -54,7 +54,7 @@ void cs8ParameterModel::writeXMLStream(QXmlStreamWriter &stream) {
   stream.writeStartElement("Parameters");
   stream.writeAttribute("xmlns",
                         "http://www.staubli.com/robotics/VAL3/Param/1");
-  for (auto item : variableList()) {
+  for (const auto item : variableList()) {
     item->writeXMLStream(stream);
   }
   stream.writeEndElement();

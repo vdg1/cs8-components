@@ -163,7 +163,7 @@ QList<cs8Variable *> cs8VariableModel::findVariablesByType(const QString &type_,
 }
 
 cs8Variable *cs8VariableModel::findVariableByName(const QString &name_) {
-  for (auto var : m_variableList) {
+  for (const auto var : qAsConst(m_variableList)) {
     if (var->name() == name_)
       return var;
   }
@@ -263,7 +263,7 @@ bool cs8VariableModel::setData(const QModelIndex &index, const QVariant &value,
       if (variable->description() != value.toString())
         emit documentationChanged(value.toString());
       variable->setDescription(value.toString());
-      emit(dataChanged(index, index));
+      emit dataChanged(index, index);
     }
   }
   return true;
@@ -326,7 +326,7 @@ QString cs8VariableModel::toDocumentedCode() {
   foreach (cs8Variable *var, m_variableList) {
     QString descr = var->description();
     if (!descr.isEmpty() || m_withUndocumentedSymbols)
-      header += QString("\n\\%1 %3 %2\n").arg(prefix).arg(descr, var->name());
+      header += QString("\n\\%1 %3 %2\n").arg(prefix, descr, var->name());
   }
   // qDebug() << "header: " << header;
   return header;
@@ -346,7 +346,7 @@ void cs8VariableModel::writeXMLStream(QXmlStreamWriter &stream) {
   if (variableList().count() == 0)
     return;
   stream.writeStartElement("Locals");
-  for (auto item : variableList()) {
+  for (const auto item : variableList()) {
     item->writeXMLStream(stream);
   }
   stream.writeEndElement();

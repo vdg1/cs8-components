@@ -59,7 +59,7 @@ QString cs8LibraryAlias::definition() const {
   // qDebug() << "alias: " << m_name << ":" << m_path.split("/").last();
   QString pth = m_path.split("/").last();
   pth.chop(4);
-  return QString("%1 %2").arg(pth).arg(m_name);
+  return QString("%1 %2").arg(pth, m_name);
 }
 
 void cs8LibraryAlias::setDocumentation(const QString doc) {

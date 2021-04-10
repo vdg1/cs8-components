@@ -34,9 +34,9 @@ int main(int argc, char **argv) {
 
   QString destDir = parser.value(destDirOption);
 
-  QStringList sourceDir = parser.values(sourceDirOption);
+  QStringList sourceDirs = parser.values(sourceDirOption);
 
-  qDebug() << "source: " << sourceDir;
+  qDebug() << "source: " << sourceDirs;
   qDebug() << "dest:   " << destDir;
 
   QString nameFilter = "*.pjx";
@@ -44,14 +44,14 @@ int main(int argc, char **argv) {
   QStringList sourceFiles;
 
   // read source dirs
-  for (auto source : sourceDir) {
+  for (const auto &source : qAsConst(sourceDirs)) {
     if (!source.isEmpty()) {
       QFileInfo info(source);
       if (info.isDir()) {
         QDirIterator dirIterator(source, QStringList() << nameFilter,
                                  QDir::Files, QDirIterator::Subdirectories);
         while (dirIterator.hasNext()) {
-          QString filePath = dirIterator.next();
+          // QString filePath = dirIterator.next();
           QFileInfo info = dirIterator.fileInfo();
           qDebug() << "check: " << info;
           if (info.fileName().startsWith("z") ||

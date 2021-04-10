@@ -525,8 +525,9 @@ QString cs8Application::exportToCDefinition() const {
       if (var != nullptr) {
         doc = var->description();
         doc = doc.replace("\n", "\\n");
-      } else
+      } else {
         doc = "";
+      }
       out << QString("     %1 = %4%3 /*!< %4: %2 */\n")
                  .arg(i.value())                   // 1: name of variable
                  .arg(doc)                         // 2: documentation
@@ -1060,7 +1061,7 @@ cs8Application::getEnumerations() const {
     i.next();
 
     constSet = i.value();
-    if (constSet->values().count() < 2)
+    if (constSet->values().size() < 2)
       constSets.remove(i.key());
   }
   return constSets;
