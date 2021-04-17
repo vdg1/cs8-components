@@ -898,7 +898,7 @@ bool cs8Application::save(const QString &path, const QString &name,
                           "http://www.w3.org/2001/XMLSchema-instance");
     stream.writeAttribute("xmlns",
                           "http://www.staubli.com/robotics/VAL3/Program/2");
-    for (auto program : m_programModel->programList()) {
+    for (const auto program : m_programModel->programList()) {
       program->writeXMLStream(stream, true);
       program->deleteSourceFile();
     }

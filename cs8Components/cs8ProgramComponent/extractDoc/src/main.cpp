@@ -52,12 +52,14 @@ int main(int argc, char **argv) {
                                  QDir::Files, QDirIterator::Subdirectories);
         while (dirIterator.hasNext()) {
           // QString filePath = dirIterator.next();
+          dirIterator.next();
           QFileInfo info = dirIterator.fileInfo();
           qDebug() << "check: " << info;
           if (info.fileName().startsWith("z") ||
               info.fileName().startsWith("io")) {
             sourceFiles.append(info.absoluteFilePath());
           }
+
           // qDebug() << "next: " << dirIterator.next();
         }
       } else if (info.isFile() && info.fileName().endsWith(".pjx")) {

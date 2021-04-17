@@ -321,9 +321,10 @@ void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
     }
     // write remaining attributes
     while (attributeList.length() > 0) {
-      QDomNode attribute = valueAttributes.item(0);
+      QDomNode attribute = valueAttributes.namedItem(attributeList.first());
+      Q_ASSERT(attribute.isAttr());
       stream.writeAttribute(attribute.nodeName(), attribute.nodeValue());
-      attributeList.removeAll(attribute.nodeName());
+      attributeList.removeFirst();
     }
     // write fields
     if (valueElement.childNodes().count() > 0) {
