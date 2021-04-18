@@ -9,6 +9,7 @@ SUBDIRS = lib \
     cs8DocEditor \
     testCS8App_ReadWrite \
     testCS8Program \
+    testVal3Linter \
     val3PreCompiler \
     val3CreateAPI \
     val3CompilerDeployment \

@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/rules"/>
+    <qresource prefix="/">
+        <file>compilerRules.xml</file>
+    </qresource>
+</RCC>
