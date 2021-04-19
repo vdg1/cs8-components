@@ -883,6 +883,7 @@ bool cs8Application::save(const QString &path, const QString &name,
   if (!saveDataFile(m_projectPath + m_projectName + ".dtx"))
     return false;
   if (m_compactFileMode) {
+    m_programModel->setHasByteOrderMark(true);
     QBuffer buffer;
     buffer.open(QBuffer::ReadWrite);
 

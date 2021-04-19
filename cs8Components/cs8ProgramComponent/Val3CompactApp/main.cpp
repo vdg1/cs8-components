@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   }
 
   QStringList apps;
-  for (auto path : options.sourcePaths) {
+  for (const auto &path : options.sourcePaths) {
     QFileInfo i(path);
     QString s = path + QDir::separator() + i.baseName() + ".pjx";
     if (QFile::exists(s))
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  for (auto appPath : apps) {
+  for (const auto &appPath : apps) {
     cs8Application app;
     app.open(appPath);
     app.save(options.compactMode);
