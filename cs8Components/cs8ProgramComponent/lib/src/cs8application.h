@@ -18,7 +18,7 @@ class cs8Application : public QObject {
   Q_OBJECT
 
 public:
-  QString projectPath(bool cs8Format = false);
+  QString projectPath(bool cs8Format = false) const;
   bool save(bool compactMode);
   bool save();
   bool save(const QString &path, const QString &name, bool compactMode);
@@ -35,7 +35,7 @@ public:
   QString exportToCImplementation() const;
   QString exportToCDefinition() const;
   QString exportToIOList() const;
-  bool exportInterfacePrototype(const QString &path);
+  bool exportInterfacePrototype(const QString &path) const;
   bool integrateInterface(cs8Application *sourceApplication);
   QString name() const;
   void setName(const QString &name);
@@ -91,7 +91,7 @@ public:
 
   QMap<QString, bool> buildGlobalDataReferenceMap();
   QMap<QString, QList<cs8Program *>> buildCallList();
-  QStringList getCallList(cs8Program *program);
+  QStringList getCallList(cs8Program *program) const;
   QMap<QString, bool> getReferencedMap() const;
 
   QString getProjectPath() const;

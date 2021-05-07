@@ -243,7 +243,7 @@ void cs8Program::setMainPageDocumentation(
 }
 
 // returns the code without documentation header
-QString cs8Program::val3Code(bool withDocumentation) {
+QString cs8Program::val3Code(bool withDocumentation) const {
   // qDebug() << m_codeSection.text();
   return withDocumentation ? m_programCode : extractCode(m_programCode);
 }
@@ -365,6 +365,7 @@ QStringList cs8Program::getCalls() {
   rxCall.setPattern("^\\s*call (\\w*)\\(");
   rxTaskCreate.setPattern(
       "^(\\s*taskCreate\\s*\\\"*\\w*\\\"*\\s*,\\s*\\w*\\s*,\\s*)(\\w*)\\(");
+
   QStringList list;
   foreach (const QString &line, code.split("\n")) {
     if (rxCall.indexIn(line) != -1) {
@@ -376,6 +377,34 @@ QStringList cs8Program::getCalls() {
     }
   }
   return list;
+}
+
+int cs8Program::cyclomaticComplexity() const {
+  int c = 0;
+  int nodes = 0, edges = 0;
+  bool previousLineIsNode = false;
+  QRegularExpression nodeRX(
+      R"RX(^(if|for|elseIf|while|until|case)((\s){1,}|\())RX");
+  // R"RX(^((if|for|else|elseIf|while|until|switch)((\s){1,}|\()|(endIf|endWhile|endFor|endSwitch)))RX");
+  // qDebug() << "rx is valid: " << nodeRX.isValid() << nodeRX.errorString()
+  //         << nodeRX.patternErrorOffset();
+  nodeRX.setPatternOptions(QRegularExpression::DontCaptureOption);
+  for (auto line : val3Code(false).split("\n")) {
+    line = line.trimmed();
+
+    bool isNode = nodeRX.match(line).hasMatch();
+    if (isNode) {
+      nodes++;
+    } else {
+      if (previousLineIsNode)
+        edges++;
+    }
+    previousLineIsNode = isNode;
+  }
+
+  // c = edges - nodes + 2;
+  c = nodes + 1;
+  return c;
 }
 
 QStringList cs8Program::extractDocumentation(const QString &code_,

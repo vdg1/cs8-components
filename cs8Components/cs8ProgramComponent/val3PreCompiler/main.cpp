@@ -1,11 +1,22 @@
 
+#include "cs8linter.h"
+
 #include <QCoreApplication>
 #include <QProcess>
 #include <cs8application.h>
 #include <cs8codevalidation.h>
-#include <iostream>
 
-using namespace std;
+//"C:\Program Files (x86)\Staubli\CS8\s8.12cs9_BS2378\VAL3Check.exe"
+//-R"D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812"
+//-E"<level>%e<line>%l<msg>%m<file>%f" -V"C:\Program Files
+//(x86)\Staubli\CS8\s8.12cs9_BS2378" -KA -LE -s"C:\Program Files
+//(x86)\Staubli\CS8\s8.12cs9_BS2378" -I-
+//"D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation"
+//"D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\dispatcher"
+//"D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\i18n"
+//"D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modRobotCycle"
+//"D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modRobotCycle\tempApplication"
+//"D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\aGripperTest"
 
 // "C:\Program Files\Staubli\CS8\s7.2\VAL3Check.exe"
 // -R"D:\data\Staubli\CS8\Development_7.2" -E"<level>%e<line>%l<msg>%m<file>%f"
@@ -17,59 +28,13 @@ using namespace std;
 // characters<file>Disk://dispatcher/execLow.pgx
 int main(int argc, char *argv[]) {
   QCoreApplication a(argc, argv);
-  QCoreApplication::setApplicationName("Val3PreCompiler");
-  QCoreApplication::setOrganizationName("SAXE Process AB");
+  QCoreApplication::setApplicationName("Val3Linter");
+  QCoreApplication::setOrganizationName("SAXE Group");
 
-  cout << qPrintable("SAXE Process AB: Val3 Pre Compiler\n");
-  // qDebug() << "SAXE Process AB: Val3 Pre Compiler\n";
+  QStringList args = qApp->arguments();
+  args.removeAt(0);
+  QString exe = args.takeAt(0);
+  cs8Linter linter(args, exe);
 
-  if (qApp->arguments().count() > 1) {
-    //
-    // cs8Application app;
-    QString cellPath;
-
-    foreach (QString arg, qApp->arguments()) {
-      if (arg.startsWith("-R")) {
-        cellPath = arg.remove("-R");
-        cellPath = cellPath.remove("\"");
-      }
-    }
-
-    // run original Val3Check.exe
-    QProcess proc;
-    QStringList arg = qApp->arguments();
-    qDebug() << "Arguments " << arg;
-    // remove the first argument as that is the path of the executable
-    arg.removeAt(0);
-    proc.start("Val3Check_orig.exe", arg);
-
-    cs8CodeValidation validator;
-    if (validator.loadRuleFile(":/rules/compilerRules.xml")) {
-      for (int i = qApp->arguments().count(); i--; i > 1) {
-        if (qApp->arguments().at(i).startsWith("-"))
-          break;
-        else {
-          qDebug() << qApp->arguments().at(i);
-          cs8Application app;
-          app.setCellPath(cellPath);
-          app.openFromPathName(qApp->arguments().at(i));
-          // cout << qPrintable(app.performPrecompilerChecks ()+"\n");
-          cout << qPrintable(validator.runValidation(&app).join("\n") + "\n");
-        }
-      }
-    }
-
-    proc.waitForFinished();
-    QString out = proc.readAll();
-    qDebug() << "Result " << out;
-    cout << qPrintable(out);
-    return proc.exitCode();
-  } else {
-    /*
-            MainWindow w;
-            w.show();
-
-            return a.exec();
-            */
-  }
+  a.exec();
 }

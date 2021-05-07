@@ -4,14 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core xml 3dcore
-
+QT       += core xml 3dcore concurrent
 TARGET = val3Check
 TEMPLATE = app
 
 DESTDIR = ../bin/preCompilerPackage
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    cs8linter.cpp
 
 EXTRA_FILES.path    = $${DESTDIR}
 EXTRA_FILES.files   += $$(QTDIR)/bin/Qt5Core.dll
@@ -37,3 +37,6 @@ else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/
 
 RESOURCES += \
     val3precompiler.qrc
+
+HEADERS += \
+    cs8linter.h

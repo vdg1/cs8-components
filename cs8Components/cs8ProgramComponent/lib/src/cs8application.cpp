@@ -308,7 +308,7 @@ bool cs8Application::openFromPathName(const QString &filePath) {
   return result;
 }
 
-bool cs8Application::exportInterfacePrototype(const QString &path) {
+bool cs8Application::exportInterfacePrototype(const QString &path) const {
   QString fileName;
 
   qDebug() << "export prototype to : " << path + "/" + m_projectName;
@@ -937,7 +937,7 @@ bool cs8Application::save(const QString &path, const QString &name,
   return true;
 }
 
-QString cs8Application::projectPath(bool cs8Format) {
+QString cs8Application::projectPath(bool cs8Format) const {
   if (cs8Format) {
     QString pth = QDir::fromNativeSeparators(m_projectPath);
     pth = pth.replace(QDir::fromNativeSeparators(m_cellPath) + "usr/usrapp/",
@@ -1195,7 +1195,7 @@ QMap<QString, QList<cs8Program *>> cs8Application::buildCallList() {
   return callList;
 }
 
-QStringList cs8Application::getCallList(cs8Program *program) {
+QStringList cs8Application::getCallList(cs8Program *program) const {
   QStringList list;
   //
   QMapIterator<QString, QList<cs8Program *>> i(m_callList);

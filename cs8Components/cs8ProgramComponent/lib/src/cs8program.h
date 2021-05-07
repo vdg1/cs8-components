@@ -43,6 +43,7 @@ public:
   QStringList referencedVariables() const;
   QMap<int, QString> todos();
   QStringList getCalls();
+  int cyclomaticComplexity() const;
 
 private:
   cs8VariableModel *m_localVariableModel;
@@ -64,7 +65,7 @@ public:
   // cs8Program(const QString & filePath);
   bool open(const QString &filePath);
   bool deleteSourceFile();
-  QString val3Code(bool withDocumentation = true);
+  QString val3Code(bool withDocumentation = true) const;
   QString toCSyntax();
   void parseDocumentation(const QString &code);
 

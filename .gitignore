@@ -20,3 +20,8 @@ cs8Components/cs8ProgramComponent/bin/
 cs8Components/cs8ControllerComponent/lib/build/
 cs8Components/cs8ControllerComponent/lib/buildd/
 cs8Components/cs8ControllerComponent/bin/
+cs8Components/cs8ProgramComponent/.vs/
+*.bak
+cs8Components/SRS 2019/
+*.orig
+cs8Components/cs8ControllerComponent/.vs/

@@ -80,7 +80,7 @@ QList<cs8Variable *> &cs8VariableModel::rvariableList() {
   return m_variableList;
 }
 
-QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) {
+QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) const {
   if (type.isEmpty()) {
     return m_variableList;
   } else {
@@ -94,7 +94,7 @@ QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) {
 }
 
 QList<cs8Variable *>
-cs8VariableModel::variableList(const QRegularExpression &rx) {
+cs8VariableModel::variableList(const QRegularExpression &rx) const {
   QList<cs8Variable *> list;
   foreach (cs8Variable *var, m_variableList) {
     QRegularExpressionMatch match = rx.match(var->type());

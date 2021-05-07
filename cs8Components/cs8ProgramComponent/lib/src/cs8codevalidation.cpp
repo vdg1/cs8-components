@@ -16,6 +16,8 @@ bool cs8CodeValidation::loadRuleFile(const QString &fileName) {
   int errorColumn, errorLine;
   if (!rules.setContent(&file, &errorMessage, &errorLine, &errorColumn)) {
     file.close();
+    qDebug() << "Failed to load validation file: " << errorMessage << errorLine
+             << errorColumn;
     // QString message =
     //    QString("The rule file %1 could not be loaded: %2, line %3, column
     //    %4")
@@ -41,7 +43,7 @@ bool cs8CodeValidation::loadRuleFile(const QString &fileName) {
 }
 
 QStringList cs8CodeValidation::runDataValidationRule(
-    cs8Application *app, cs8Program *program,
+    const cs8Application *app, cs8Program *program,
     QList<cs8Variable *> *variableList, QDomNodeList ruleList) {
   QStringList validationMessages;
   for (int i = 0; i < ruleList.count(); i++) {
@@ -86,6 +88,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
               QString msg = message;
               msg.replace("%varType%", var->type());
               msg.replace("%varName%", var->name());
+              msg.replace("%lineNumber%", var->name());
 
               if (program == nullptr) {
                 msg.replace("%fileName%", app->cellDataFilePath(true));
@@ -176,18 +179,30 @@ QStringList cs8CodeValidation::runDataValidationRule(
           }
         }
       }
+    } else if (ruleNode.nodeName() == "documentation") {
+      if (checkProperty == "brief") {
+        if (program->briefDescription(true).isEmpty()) {
+          QString msg = message;
+          msg.replace("%progName%", program->name());
+          msg.replace("%fileName%", program->cellFilePath());
+
+          validationMessages << msg;
+        }
+      }
     }
   }
+
   return validationMessages;
 }
 
-QStringList cs8CodeValidation::runValidation(cs8Application *app) {
+QStringList cs8CodeValidation::runValidation(const cs8Application *app) {
   QStringList validationMessages;
   // run global data rules
 
   validationMessages << runDataValidationRule(
       app, 0, &app->globalVariableModel()->variableList(), globalDataRules);
   foreach (cs8Program *program, app->programModel()->programList()) {
+
     validationMessages << runDataValidationRule(
         app, program, &program->parameterModel()->variableList(),
         parameterRules);
