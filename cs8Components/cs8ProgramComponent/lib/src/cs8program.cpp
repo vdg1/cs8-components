@@ -650,18 +650,22 @@ void cs8Program::parseDocumentation(const QString &code_) {
     }
   }
   // qDebug() << documentationList;
+  m_headerLines = headerLines;
 }
 
 QString cs8Program::briefDescription(bool trimmed) const {
   return trimmed ? m_briefDescription.trimmed() : m_briefDescription;
 }
 
-void cs8Program::setCellPath(const QString &path) { m_cellPath = path; }
+void cs8Program::setCellPath(const QString &path) {
+  // qDebug() << __FUNCTION__ << path;
+  m_cellPath = path;
+}
 
 QString cs8Program::cellFilePath() const {
-  QString pth = QDir::toNativeSeparators(m_filePath);
-  pth = pth.replace(m_cellPath + "/usr/usrapp", "Disk://");
-  pth = QDir::toNativeSeparators(pth);
+  QString pth = QDir::fromNativeSeparators(m_filePath);
+  // qDebug() << __FUNCTION__ << pth << m_cellPath;
+  pth = pth.replace(m_cellPath + "usr/usrapp/", "Disk://");
   return pth;
 }
 

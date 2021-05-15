@@ -11,6 +11,7 @@
 #include <QStringList>
 
 //
+
 class cs8Program : public QObject {
   Q_OBJECT
 
@@ -122,6 +123,7 @@ protected:
   bool m_withIfBlock;
   bool m_hasByteOrderMark;
   int m_lineNumberCodeSection;
+  int m_headerLines;
 
   void readAndUpdateProgramCode();
 

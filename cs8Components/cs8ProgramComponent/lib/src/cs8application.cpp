@@ -1315,9 +1315,10 @@ void cs8Application::setCellPath(const QString &path) {
   int pos = 0;
 
   if ((pos = pth.indexOf(QDir::fromNativeSeparators("usr/usrapp"))) != -1)
-    m_cellPath = pth.left(pos - 1) + QDir::separator();
+    m_cellPath = pth.left(pos - 1);
   else
     m_cellPath = QDir::currentPath();
+  m_cellPath = QDir::cleanPath(m_cellPath) + "/";
   if (m_projectPath.isEmpty())
     m_projectPath =
         m_cellPath +
