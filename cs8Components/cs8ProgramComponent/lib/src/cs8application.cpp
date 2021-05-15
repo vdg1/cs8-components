@@ -105,7 +105,7 @@ void cs8Application::setProjectPath(const QString &pth) {
   p.chop(m_projectName.length() + 1);
   setCellPath(p);
 }
-
+/*
 bool cs8Application::importVPlusFile(const QString &fileName) {
   QFile file(fileName);
   if (!file.open(QIODevice::ReadOnly))
@@ -230,6 +230,7 @@ bool cs8Application::importVPlusFile(const QString &fileName) {
   qDebug() << globalVariableModel()->toDtxDocument();
   return true;
 }
+*/
 
 QString cs8Application::briefModuleDocumentation() const {
   return m_briefModuleDocumentation;

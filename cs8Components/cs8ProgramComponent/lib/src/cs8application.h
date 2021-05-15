@@ -97,7 +97,7 @@ public:
   QString getProjectPath() const;
 
   void setProjectPath(const QString &pth);
-  bool importVPlusFile(const QString &fileName);
+  // bool importVPlusFile(const QString &fileName);
 
   QString briefModuleDocumentation() const;
   void setBriefModuleDocumentation(const QString &briefModuleDocumentation);
