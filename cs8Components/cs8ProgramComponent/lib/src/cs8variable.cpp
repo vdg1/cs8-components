@@ -335,6 +335,10 @@ void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
   }
 }
 
+const QList<cs8Variable::symbolPosition> &cs8Variable::lineOccurences() const {
+  return m_lineOccurences;
+}
+
 void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
   switch (scope()) {
   case Parameter:
@@ -369,6 +373,13 @@ void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
     stream.writeEndElement();
     break;
   }
+}
+
+void cs8Variable::clearLineOccurences() { m_lineOccurences.clear(); }
+
+void cs8Variable::addLineOccurence(int lineNumber, int column,
+                                   const QString &programName) {
+  m_lineOccurences.append(symbolPosition(lineNumber, column, programName));
 }
 
 void cs8Variable::setUse(QString value) {
@@ -468,3 +479,13 @@ void cs8Variable::setName(QString value) {
 QString cs8Variable::name() const { return m_element.attribute("name"); }
 
 //
+
+cs8Variable::symbolPosition::symbolPosition(int l, int c, const QString &p)
+    : line(l), column(c), program(p) {}
+
+cs8Variable::symbolPosition::symbolPosition() : line(0), column(0) {}
+
+QDebug operator<<(QDebug dbg, const cs8Variable::symbolPosition &type) {
+  dbg.nospace() << "symbolPosition(" << type.line << "," << type.column << ")";
+  return dbg.maybeSpace();
+}

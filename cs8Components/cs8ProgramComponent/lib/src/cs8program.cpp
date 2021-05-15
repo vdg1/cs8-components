@@ -43,7 +43,6 @@ cs8Program::cs8Program()
   m_globalDocContainer = false;
   m_programCode = "begin\nend";
 }
-//
 
 bool cs8Program::open(const QString &filePath) {
   // qDebug() << "cs8Program::open () " << filePath;
@@ -78,10 +77,8 @@ void cs8Program::printChildNodes(const QDomElement &element) {
     qDebug() << i << element.childNodes().at(i).nodeName();
 }
 
-/*!
- \fn cs8Program::parseProgramDoc(const QDomDocument & doc)
- */
-void cs8Program::readAndUpdateProgramCode() {
+void cs8Program::updateCodeModel() {
+  qDebug() << __FUNCTION__ << name();
   QStringList referencedVariables = variableTokens(true);
   auto *app = qobject_cast<cs8Application *>(parent());
   if (app) {
@@ -103,6 +100,66 @@ void cs8Program::readAndUpdateProgramCode() {
   parseDocumentation(val3Code());
   // update token list
   m_variableTokens = variableTokens(false);
+  // update variable occurences
+  QString c = val3Code(false);
+  QRegularExpression rx;
+  QString pattern = R"RX((\b(%1)\b)(?=([^\"]*\"[^\"]*\")*[^\"]*$))RX";
+  foreach (cs8Variable *var, m_localVariableModel->variableList()) {
+    var->clearLineOccurences();
+    rx.setPattern(pattern.arg(var->name()));
+    QRegularExpressionMatchIterator i = rx.globalMatch(c);
+    while (i.hasNext()) {
+      QRegularExpressionMatch match = i.next();
+      QString word = match.captured(2);
+      int symbolPos = match.capturedStart(2);
+      int line = c.left(symbolPos).count(QRegExp("\n")) + 1 + m_headerLines;
+      int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
+      int column = symbolPos - lineStart;
+      if (!c.mid(lineStart, column).trimmed().startsWith("//"))
+        var->addLineOccurence(line, column, "");
+    }
+    qDebug() << "occurence of local var:" << var->name() << ":"
+             << var->lineOccurences();
+  }
+
+  foreach (cs8Variable *var, m_parameterModel->variableList()) {
+    var->clearLineOccurences();
+    rx.setPattern(pattern.arg(var->name()));
+    QRegularExpressionMatchIterator i = rx.globalMatch(c);
+    while (i.hasNext()) {
+      QRegularExpressionMatch match = i.next();
+      QString word = match.captured(2);
+      int symbolPos = match.capturedStart(2);
+      int line = c.left(symbolPos).count(QRegExp("\n")) + 1 + m_headerLines;
+      int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
+      int column = symbolPos - lineStart;
+      if (!c.mid(lineStart, column).trimmed().startsWith("//"))
+        var->addLineOccurence(line, column, name());
+    }
+    qDebug() << "occurence of parameter:" << var->name() << ":"
+             << var->lineOccurences();
+  }
+
+  if (app) {
+    foreach (cs8Variable *var, app->globalVariableModel()->variableList()) {
+      var->clearLineOccurences();
+      rx.setPattern(pattern.arg(var->name()));
+      QRegularExpressionMatchIterator i = rx.globalMatch(c);
+      while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        QString word = match.captured(2);
+        int symbolPos = match.capturedStart(2);
+        int line = c.left(symbolPos).count(QRegExp("\n")) + 1 + m_headerLines;
+        int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
+        int column = symbolPos - lineStart;
+        if (!c.mid(lineStart, column).trimmed().startsWith("//"))
+          var->addLineOccurence(line, column, name());
+      }
+      if (var->lineOccurences().count() > 0)
+        qDebug() << "occurence of global var" << var->name() << ":"
+                 << var->lineOccurences();
+    }
+  }
 }
 
 void cs8Program::parseProgramSection(const QDomElement &programSection,
@@ -152,7 +209,7 @@ void cs8Program::parseProgramSection(const QDomElement &programSection,
   }
 
   //
-  readAndUpdateProgramCode();
+  updateCodeModel();
 }
 
 bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
@@ -318,7 +375,7 @@ QStringList cs8Program::variableTokens(bool onlyModifiedVars) {
 void cs8Program::setCode(const QString &code, bool parseDoc_) {
   m_programCode = code;
   if (parseDoc_)
-    readAndUpdateProgramCode();
+    updateCodeModel();
 }
 
 void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel) {
@@ -343,16 +400,16 @@ void cs8Program::setWithUndocumentedSymbols(bool withUndocumentedSymbols) {
 
 QStringList cs8Program::referencedVariables() const { return m_variableTokens; }
 
-QMap<int, QString> cs8Program::todos() {
+QMap<int, QString> cs8Program::todos() const {
   QString code = val3Code(true);
   QMap<int, QString> todos;
-  qDebug() << "Check todos in " << name();
+  // qDebug() << "Check todos in " << name();
   QRegExp rx;
   rx.setPattern(R"(^\s*//[/\\]{1}\s*TODO.*)");
   int codeLine = 0;
   foreach (const QString &line, code.split("\n")) {
     if (rx.indexIn(line) != -1)
-      todos.insert(codeLine, line);
+      todos.insert(codeLine, line.trimmed());
     codeLine++;
   }
   return todos;
@@ -389,7 +446,7 @@ int cs8Program::cyclomaticComplexity() const {
   // qDebug() << "rx is valid: " << nodeRX.isValid() << nodeRX.errorString()
   //         << nodeRX.patternErrorOffset();
   nodeRX.setPatternOptions(QRegularExpression::DontCaptureOption);
-  for (auto line : val3Code(false).split("\n")) {
+  foreach (auto line, val3Code(false).split("\n")) {
     line = line.trimmed();
 
     bool isNode = nodeRX.match(line).hasMatch();

@@ -16,6 +16,13 @@ class cs8Variable : public QObject {
   Q_OBJECT
 
 public:
+  struct symbolPosition {
+    symbolPosition(int l, int c, const QString &p);
+    symbolPosition();
+    int line, column;
+    QString program;
+  };
+
   enum DeclarationScope { Local, Parameter, Global };
   Q_ENUM(DeclarationScope)
 
@@ -76,6 +83,10 @@ public:
                                 QString &index);
 
   void writeXMLStream(QXmlStreamWriter &stream);
+  void clearLineOccurences();
+  void addLineOccurence(int lineNumber, int column, const QString &programName);
+
+  const QList<symbolPosition> &lineOccurences() const;
 
 protected:
   QStringList m_buildInTypes;
@@ -88,8 +99,11 @@ protected:
 
   void writeValueElements(QXmlStreamWriter &stream);
   void writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes);
+  QList<symbolPosition> m_lineOccurences;
 
 signals:
   void modified();
 };
+QDebug operator<<(QDebug dbg, const cs8Variable::symbolPosition &type);
+
 #endif

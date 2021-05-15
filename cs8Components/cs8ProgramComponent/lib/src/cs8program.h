@@ -42,7 +42,7 @@ public:
   void clearDocumentationTags();
   void setWithUndocumentedSymbols(bool withUndocumentedSymbols);
   QStringList referencedVariables() const;
-  QMap<int, QString> todos();
+  QMap<int, QString> todos() const;
   QStringList getCalls();
   int cyclomaticComplexity() const;
 
@@ -125,7 +125,7 @@ protected:
   int m_lineNumberCodeSection;
   int m_headerLines;
 
-  void readAndUpdateProgramCode();
+  void updateCodeModel();
 
 signals:
   void globalVariableDocumentationFound(const QString &name,

@@ -125,7 +125,7 @@ QVariant cs8ProgramModel::data(const QModelIndex &index, int role) const {
 }
 
 cs8Program *cs8ProgramModel::createProgram(const QString &programName) {
-  cs8Program *program = new cs8Program(this);
+  cs8Program *program = new cs8Program(this->parent());
 
   m_programList.append(program);
   connect(program, &cs8Program::globalVariableDocumentationFound, this,
