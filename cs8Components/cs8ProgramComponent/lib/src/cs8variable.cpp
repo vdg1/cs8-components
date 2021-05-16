@@ -335,8 +335,18 @@ void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
   }
 }
 
-const QList<cs8Variable::symbolPosition> &cs8Variable::lineOccurences() const {
+const QList<cs8Variable::symbolPosition> &
+cs8Variable::symbolReferences() const {
+  // qDebug() << __FUNCTION__ << this << name() << ":" << m_lineOccurences;
   return m_lineOccurences;
+}
+
+const QString &cs8Variable::linterDirective() const {
+  return m_linterDirective;
+}
+
+void cs8Variable::setLinterDirective(const QString &newLinterDirective) {
+  m_linterDirective = newLinterDirective;
 }
 
 void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
@@ -375,10 +385,10 @@ void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
   }
 }
 
-void cs8Variable::clearLineOccurences() { m_lineOccurences.clear(); }
+void cs8Variable::clearSymbolReferences() { m_lineOccurences.clear(); }
 
-void cs8Variable::addLineOccurence(int lineNumber, int column,
-                                   const QString &programName) {
+void cs8Variable::addSymbolReference(int lineNumber, int column,
+                                     const QString &programName) {
   m_lineOccurences.append(symbolPosition(lineNumber, column, programName));
 }
 
@@ -480,12 +490,14 @@ QString cs8Variable::name() const { return m_element.attribute("name"); }
 
 //
 
-cs8Variable::symbolPosition::symbolPosition(int l, int c, const QString &p)
-    : line(l), column(c), program(p) {}
+cs8Variable::symbolPosition::symbolPosition(int l, int c, const QString &r)
+    : line(l), column(c), reference(r) {}
 
-cs8Variable::symbolPosition::symbolPosition() : line(0), column(0) {}
+cs8Variable::symbolPosition::symbolPosition()
+    : line(0), column(0), reference("") {}
 
 QDebug operator<<(QDebug dbg, const cs8Variable::symbolPosition &type) {
-  dbg.nospace() << "symbolPosition(" << type.line << "," << type.column << ")";
+  dbg.nospace() << "reference(" << type.line << "," << type.column
+                << type.reference << ")";
   return dbg.maybeSpace();
 }

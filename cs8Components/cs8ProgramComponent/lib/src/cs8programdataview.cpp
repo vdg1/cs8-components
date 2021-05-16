@@ -56,11 +56,12 @@ void cs8ProgramDataView::slotSelectionChanged(
       varModel = ((cs8Application *)m_masterView->model()->parent())
                      ->globalVariableModel();
       break;
-
-    case ReferencedGlobalData:
-      varModel = ((cs8ProgramModel *)m_masterView->model())
-                     ->referencedGlobalVriableModel(selected.indexes().at(0));
-      break;
+      /*
+          case ReferencedGlobalData:
+            varModel = ((cs8ProgramModel *)m_masterView->model())
+                           ->referencedGlobalVriableModel(selected.indexes().at(0));
+            break;
+        */
     }
     setModel(varModel);
     resizeColumnsToContents();

@@ -50,7 +50,6 @@ public:
 
   QString formattedDocument(const QString &doc,
                             const QString &withSlashes = QString("/// ")) const;
-  QString performPrecompilerChecks();
   void setCellPath(const QString &path);
   QString cellPath() const;
   QString cellProjectFilePath(bool cs8Format = false) const;
@@ -75,7 +74,6 @@ public:
   QMap<QString, QMap<QString, QString> *> getEnumerations() const;
   void checkPrograms(QStringList &output);
   void checkEnumerations(QStringList &output);
-  void checkGlobalData(QStringList &output);
   void checkObsoleteProgramFiles(QStringList &output);
   QString moduleDocumentation() const;
   void setModuleDocumentation(const QString &moduleDocumentation);
@@ -89,10 +87,8 @@ public:
   bool includeLibraryDocuments() const;
   void setIncludeLibraryDocuments(bool includeLibraryDocuments);
 
-  QMap<QString, bool> buildGlobalDataReferenceMap();
   QMap<QString, QList<cs8Program *>> buildCallList();
   QStringList getCallList(cs8Program *program) const;
-  QMap<QString, bool> getReferencedMap() const;
 
   QString getProjectPath() const;
 
@@ -117,7 +113,6 @@ public:
 protected:
   QHash<QString, QString> m_exportDirectives;
   QHash<QString, QString> m_pragmaList;
-  QMap<QString, bool> m_globalDataReferencedMap;
   QMap<QString, QList<cs8Program *>> m_callList;
   QString m_projectName;
   QString m_projectPath;

@@ -23,14 +23,13 @@ cs8Program::cs8Program(QObject *parent)
   m_parameterModel = new cs8ParameterModel(this);
   connect(m_parameterModel, &cs8LocalVariableModel::modified, this,
           &cs8Program::modified);
-  m_referencedGlobalVarModel =
-      new cs8VariableModel(this, cs8VariableModel::ReferencedGlobal);
   m_globalDocContainer = false;
   m_programCode = "begin\nend";
+  m_application = qobject_cast<cs8Application *>(parent);
 }
 
 cs8Program::cs8Program()
-    : QObject(), m_public(false), m_withIfBlock(true),
+    : QObject(), m_application(0), m_public(false), m_withIfBlock(true),
       m_hasByteOrderMark(true) {
   m_localVariableModel = new cs8LocalVariableModel(this);
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
@@ -38,8 +37,6 @@ cs8Program::cs8Program()
   m_parameterModel = new cs8ParameterModel(this);
   connect(m_parameterModel, &cs8LocalVariableModel::modified, this,
           &cs8Program::modified);
-  m_referencedGlobalVarModel =
-      new cs8VariableModel(this, cs8VariableModel::ReferencedGlobal);
   m_globalDocContainer = false;
   m_programCode = "begin\nend";
 }
@@ -79,24 +76,6 @@ void cs8Program::printChildNodes(const QDomElement &element) {
 
 void cs8Program::updateCodeModel() {
   qDebug() << __FUNCTION__ << name();
-  QStringList referencedVariables = variableTokens(true);
-  auto *app = qobject_cast<cs8Application *>(parent());
-  if (app) {
-    foreach (const QString &var, referencedVariables) {
-      if (app->globalVariableModel()->variableNameList().contains(var) &&
-          !m_localVariableModel->variableNameList().contains(var) &&
-          !m_referencedGlobalVarModel->variableNameList().contains(var)) {
-        auto *refVar = new cs8Variable(this);
-        cs8Variable *globalVar = app->globalVariableModel()->getVarByName(var);
-
-        refVar->setScope(cs8Variable::Global);
-        refVar->setName(globalVar->name());
-        refVar->setType(globalVar->type());
-        refVar->setAllSizes(globalVar->allSizes());
-        m_referencedGlobalVarModel->addVariable(refVar);
-      }
-    }
-  }
   parseDocumentation(val3Code());
   // update token list
   m_variableTokens = variableTokens(false);
@@ -105,7 +84,7 @@ void cs8Program::updateCodeModel() {
   QRegularExpression rx;
   QString pattern = R"RX((\b(%1)\b)(?=([^\"]*\"[^\"]*\")*[^\"]*$))RX";
   foreach (cs8Variable *var, m_localVariableModel->variableList()) {
-    var->clearLineOccurences();
+    var->clearSymbolReferences();
     rx.setPattern(pattern.arg(var->name()));
     QRegularExpressionMatchIterator i = rx.globalMatch(c);
     while (i.hasNext()) {
@@ -116,14 +95,14 @@ void cs8Program::updateCodeModel() {
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
       int column = symbolPos - lineStart;
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
-        var->addLineOccurence(line, column, "");
+        var->addSymbolReference(line, column, "");
     }
     qDebug() << "occurence of local var:" << var->name() << ":"
-             << var->lineOccurences();
+             << var->symbolReferences();
   }
 
   foreach (cs8Variable *var, m_parameterModel->variableList()) {
-    var->clearLineOccurences();
+    var->clearSymbolReferences();
     rx.setPattern(pattern.arg(var->name()));
     QRegularExpressionMatchIterator i = rx.globalMatch(c);
     while (i.hasNext()) {
@@ -134,15 +113,16 @@ void cs8Program::updateCodeModel() {
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
       int column = symbolPos - lineStart;
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
-        var->addLineOccurence(line, column, name());
+        var->addSymbolReference(line, column, name());
     }
     qDebug() << "occurence of parameter:" << var->name() << ":"
-             << var->lineOccurences();
+             << var->symbolReferences();
   }
 
-  if (app) {
-    foreach (cs8Variable *var, app->globalVariableModel()->variableList()) {
-      var->clearLineOccurences();
+  if (m_application) {
+    foreach (cs8Variable *var,
+             m_application->globalVariableModel()->variableList()) {
+      // var->clearLineOccurences();
       rx.setPattern(pattern.arg(var->name()));
       QRegularExpressionMatchIterator i = rx.globalMatch(c);
       while (i.hasNext()) {
@@ -153,11 +133,11 @@ void cs8Program::updateCodeModel() {
         int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
         int column = symbolPos - lineStart;
         if (!c.mid(lineStart, column).trimmed().startsWith("//"))
-          var->addLineOccurence(line, column, name());
+          var->addSymbolReference(line, column, name());
       }
-      if (var->lineOccurences().count() > 0)
+      if (var->symbolReferences().count() > 0)
         qDebug() << "occurence of global var" << var->name() << ":"
-                 << var->lineOccurences();
+                 << var->symbolReferences();
     }
   }
 }
@@ -239,6 +219,18 @@ void cs8Program::tidyUpCode(QString &code) {
     i = rtrim(i);
   }
   code = list.join("\n");
+}
+
+void cs8Program::setLinterDirective(const QString &directive,
+                                    const QString &symbolName) {
+  auto var = m_localVariableModel->getVarByName(symbolName);
+  if (!var)
+    var = m_parameterModel->getVarByName(symbolName);
+  if (!var)
+    var = m_application->globalVariableModel()->getVarByName(symbolName);
+
+  if (var)
+    var->setLinterDirective(directive);
 }
 
 QString cs8Program::getAdditionalHintMessage() const {
@@ -578,15 +570,18 @@ void cs8Program::parseDocumentation(const QString &code_) {
       // qDebug() << "process tag:" << tagType << ":" << tagName << ":" <<
       // tagText;
       if (tagType == "param") {
-        if (m_parameterModel->getVarByName(tagName) != nullptr)
-          m_parameterModel->getVarByName(tagName)->setDescription(tagText);
+        auto var = m_parameterModel->getVarByName(tagName);
+        if (var != nullptr)
+          var->setDescription(tagText);
       } else if (tagType == "local" || tagType == "var") {
         if (m_localVariableModel->getVarByName(tagName) != nullptr)
           m_localVariableModel->getVarByName(tagName)->setDescription(tagText);
       } else if (tagType == "refGlobal") {
-        if (m_referencedGlobalVarModel->getVarByName(tagName) != nullptr)
-          m_referencedGlobalVarModel->getVarByName(tagName)->setDescription(
-              tagText);
+        if (m_application && m_application->globalVariableModel()->getVarByName(
+                                 tagName) != nullptr)
+          m_application->globalVariableModel()
+              ->getVarByName(tagName)
+              ->setDescription(tagText);
       } else if (tagType == "global") {
         // qDebug() << "global var: " << tagName << ":" << tagText;
         emit globalVariableDocumentationFound(tagName, tagText);
@@ -612,6 +607,8 @@ void cs8Program::parseDocumentation(const QString &code_) {
         emit exportDirectiveFound(tagName, tagText);
       } else if (tagType == "copyright") {
         setCopyrightMessage(tagText);
+      } else if (tagType == "linter") {
+        setLinterDirective(tagName, tagText);
       } else {
         // unknown tag
         if (tagText.isEmpty())
@@ -673,9 +670,11 @@ void cs8Program::parseDocumentation(const QString &code_) {
       // qDebug() << "global var: " << tagName << ":" << tagText;
       emit globalVariableDocumentationFound(tagName, tagText);
     } else if (tagType == "refGlobal") {
-      if (m_referencedGlobalVarModel->getVarByName(tagName) != nullptr)
-        m_referencedGlobalVarModel->getVarByName(tagName)->setDescription(
-            tagText);
+      if (m_application && m_application->globalVariableModel()->getVarByName(
+                               tagName) != nullptr)
+        m_application->globalVariableModel()
+            ->getVarByName(tagName)
+            ->setDescription(tagText);
     } else if (tagType == "brief") {
       setDescription(tagText);
     } else if (tagType == "doc") {
@@ -697,6 +696,8 @@ void cs8Program::parseDocumentation(const QString &code_) {
       emit exportDirectiveFound(tagName, tagText);
     } else if (tagType == "copyright") {
       setCopyrightMessage(tagText);
+    } else if (tagType == "linter") {
+      setLinterDirective(tagName, tagText);
     } else {
       if (tagText.isEmpty())
         tagText = tagName;
@@ -904,8 +905,9 @@ cs8VariableModel *cs8Program::localVariableModel() const {
   return m_localVariableModel;
 }
 
-cs8VariableModel *cs8Program::referencedGlobalVariables() const {
-  return m_referencedGlobalVarModel;
+QList<cs8Variable *> cs8Program::referencedGlobalVariables() const {
+  return m_application->globalVariableModel()->findVariablesReferencedByProgram(
+      name());
 }
 
 void cs8Program::setPublic(bool value) { m_public = value; }
@@ -946,7 +948,9 @@ QString cs8Program::toDocumentedCode() {
 
   detailedDocumentation += m_parameterModel->toDocumentedCode();
   detailedDocumentation += m_localVariableModel->toDocumentedCode();
-  detailedDocumentation += m_referencedGlobalVarModel->toDocumentedCode();
+  // if (m_application)
+  // detailedDocumentation +=
+  // m_application->globalVariableModel()->toDocumentedCode();
 
   if (!m_briefModuleDocumentation.isEmpty()) {
     detailedDocumentation += "\\briefmodule\n";

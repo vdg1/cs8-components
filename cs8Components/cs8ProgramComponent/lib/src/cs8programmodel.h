@@ -12,8 +12,9 @@
 #ifndef CS8PROGRAMMODEL_H
 #define CS8PROGRAMMODEL_H
 
-#include <QAbstractListModel>
+#include "cs8variable.h"
 
+#include <QAbstractListModel>
 #include <QList>
 
 class cs8Program;
@@ -28,7 +29,7 @@ public:
   QList<cs8Program *> programList() { return m_programList; }
   cs8VariableModel *localVariableModel(const QModelIndex &index);
   cs8VariableModel *parameterModel(const QModelIndex &index);
-  cs8VariableModel *referencedGlobalVriableModel(const QModelIndex &index);
+  QList<cs8Variable *> referencedGlobalVriableModel(const QModelIndex &index);
 
   void clear();
   bool addProgramFile(const QString &filePath);

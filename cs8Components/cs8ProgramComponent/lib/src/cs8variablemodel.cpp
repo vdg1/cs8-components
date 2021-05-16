@@ -162,6 +162,18 @@ QList<cs8Variable *> cs8VariableModel::findVariablesByType(const QString &type_,
   return list;
 }
 
+QList<cs8Variable *> cs8VariableModel::findVariablesReferencedByProgram(
+    const QString &program) const {
+  QList<cs8Variable *> list;
+  foreach (cs8Variable *variable, m_variableList) {
+    foreach (auto p, variable->symbolReferences()) {
+      if (p.reference == program)
+        list.append(variable);
+    }
+  }
+  return list;
+}
+
 cs8Variable *cs8VariableModel::findVariableByName(const QString &name_) {
   for (const auto var : qAsConst(m_variableList)) {
     if (var->name() == name_)
@@ -274,7 +286,7 @@ bool cs8VariableModel::setData(const QModelIndex &index, const QVariant &value,
  */
 cs8Variable *cs8VariableModel::getVarByName(const QString &name) {
   foreach (cs8Variable *var, m_variableList) {
-    QString n = name;
+    QString n = name.trimmed();
     n.remove(QRegExp("\\[.*\\]"));
     if (var->name().compare(n) == 0)
       return var;
@@ -327,6 +339,9 @@ QString cs8VariableModel::toDocumentedCode() {
     QString descr = var->description();
     if (!descr.isEmpty() || m_withUndocumentedSymbols)
       header += QString("\n\\%1 %3 %2\n").arg(prefix, descr, var->name());
+    if (!var->linterDirective().isEmpty())
+      header += QString("\n\\linter %1 %2\n")
+                    .arg(var->linterDirective(), var->name());
   }
   // qDebug() << "header: " << header;
   return header;

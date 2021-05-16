@@ -275,7 +275,6 @@ bool cs8Application::open(const QString &pfxFilePath) {
   m_briefModuleDocumentation = "";
   m_exportDirectives.clear();
   m_pragmaList.clear();
-  m_globalDataReferencedMap.clear();
 
   QDomDocument doc("Project");
   QFile file(pth);
@@ -705,7 +704,14 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
       }
     }
     //
-    m_globalDataReferencedMap = buildGlobalDataReferenceMap();
+    foreach (auto testVar, m_globalVariableModel->variableList()) {
+      foreach (auto var, m_globalVariableModel->variableList()) {
+        if (var->type() == "pointRx" || var->type() == "pointRs" ||
+            var->type() == "frame")
+          if (var->father().contains(testVar->name()))
+            testVar->addSymbolReference(0, 0, var->type() + " " + var->name());
+      }
+    }
     m_callList = buildCallList();
     return true;
   } else {
@@ -1140,48 +1146,6 @@ void cs8Application::checkEnumerations(QStringList &output) {
   }
 }
 
-QMap<QString, bool> cs8Application::buildGlobalDataReferenceMap() {
-  QMap<QString, bool> referencedMap;
-
-  // build map
-  foreach (cs8Variable *globalVariable, m_globalVariableModel->variableList()) {
-    // qDebug() << "Checking global variable: " << globalVariable->name();
-
-    referencedMap.insert(globalVariable->name(), false);
-    // ignore variable if it is listed in a pragma statement
-    if (m_pragmaList.contains(globalVariable->name()))
-      referencedMap[globalVariable->name()] = true;
-
-    // check if global frame is father to a frame or point
-    if (globalVariable->type() == "frame") {
-      foreach (cs8Variable *var, m_globalVariableModel->variableList()) {
-        QString varType = var->type();
-        if (varType == "frame" || varType.startsWith("point")) {
-          if (var->father().contains(globalVariable->name())) {
-            referencedMap[globalVariable->name()] = true;
-            break;
-          }
-        }
-      }
-    }
-
-    // check if a local variable hides the global variable
-    foreach (cs8Program *program, m_programModel->programList()) {
-      // qDebug() << "  Checking program: " << program->name ();
-      // check if global variable name is also declared as local variable
-      if (program->localVariableModel()->variableNameList().contains(
-              globalVariable->name())) {
-
-      } else
-          // if global variable is not hidden, check if it is used
-          if (program->referencedVariables().contains(globalVariable->name())) {
-        referencedMap[globalVariable->name()] = true;
-      }
-    }
-  }
-  return referencedMap;
-}
-
 QMap<QString, QList<cs8Program *>> cs8Application::buildCallList() {
   QMap<QString, QList<cs8Program *>> callList;
   // check if a local variable hides the global variable
@@ -1211,65 +1175,7 @@ QStringList cs8Application::getCallList(cs8Program *program) const {
   return list;
 }
 
-QMap<QString, bool> cs8Application::getReferencedMap() const {
-  return m_globalDataReferencedMap;
-}
 QString cs8Application::getProjectPath() const { return m_projectPath; }
-
-void cs8Application::checkGlobalData(QStringList &output) {
-  // QMap<QString, bool> referencedMap = buildGlobalDataReferenceMap();
-
-  foreach (cs8Variable *globalVariable, m_globalVariableModel->variableList()) {
-
-    // check if a local variable hides the global variable
-    foreach (cs8Program *program, m_programModel->programList()) {
-      // qDebug() << "  Checking program: " << program->name ();
-      // check if global variable name is also declared as local variable
-      if (program->localVariableModel()->variableNameList().contains(
-              globalVariable->name())) {
-        if (reportHiddenGlobalVariables) {
-          qDebug() << "Warning: Global variable '" << globalVariable->name()
-                   << "'' is hidden in program " << program->name();
-          // output.append (QString("Warning: Global variable '" + var->name ()
-          // + "' is hidden in program " + program->name()+" by a local variable
-          // of the same name"));
-          output.append(
-              QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>1<"
-                      "msg>%2<file>%3")
-                  .arg(program->name())
-                  .arg("Warning: Global variable '" + globalVariable->name() +
-                           "' is hidden in program by a local variable "
-                           "of the same name",
-                       program->cellFilePath()));
-        }
-      } else
-          // if global variable is not hidden, check if it is used
-          if (program->referencedVariables().contains(globalVariable->name())) {
-        m_globalDataReferencedMap[globalVariable->name()] = true;
-      }
-    }
-    if (m_globalDataReferencedMap[globalVariable->name()] == false) {
-      if (!globalVariable->isPublic()) {
-        output.append(
-            QString(
-                "<level>Warning<CLASS>DATA<P1>%1<P2>%4<line>1<msg>%2<file>%3")
-                .arg(globalVariable->type())
-                .arg("Warning: Global variable '" + globalVariable->name() +
-                     "' is not used")
-                .arg(cellDataFilePath(true), globalVariable->name() + "[0]"));
-      } else {
-        if (reportUnusedPublicGlobalVariables)
-          output.append(
-              QString(
-                  "<level>Warning<CLASS>DATA<P1>%1<P2>%4<line>1<msg>%2<file>%3")
-                  .arg(globalVariable->type(),
-                       "Warning: Global variable '" + globalVariable->name() +
-                           "' is not used, but is set as PUBLIC",
-                       cellDataFilePath(true), globalVariable->name() + "[0]"));
-      }
-    }
-  }
-}
 
 void cs8Application::checkObsoleteProgramFiles(QStringList &output) {
   // check for obsolete PGX files
@@ -1292,6 +1198,7 @@ void cs8Application::checkObsoleteProgramFiles(QStringList &output) {
     }
   }
 }
+
 QString cs8Application::moduleDocumentation() const {
   return m_moduleDocumentation;
 }
@@ -1299,15 +1206,6 @@ QString cs8Application::moduleDocumentation() const {
 void cs8Application::setModuleDocumentation(
     const QString &applicationDocumentation) {
   m_moduleDocumentation = applicationDocumentation;
-}
-
-QString cs8Application::performPrecompilerChecks() {
-  QStringList output;
-  checkGlobalData(output);
-  checkEnumerations(output);
-  checkPrograms(output);
-  checkObsoleteProgramFiles(output);
-  return output.join("\n");
 }
 
 void cs8Application::setCellPath(const QString &path) {

@@ -11,16 +11,19 @@
 #include <QStringList>
 
 //
-
+class cs8Application;
 class cs8Program : public QObject {
   Q_OBJECT
 
 public:
+  cs8Program(QObject *parent);
+  cs8Program();
+
   QString toDocumentedCode();
   bool save(const QString &projectPath, bool withCode = true);
   cs8ParameterModel *parameterModel() const;
   cs8VariableModel *localVariableModel() const;
-  cs8VariableModel *referencedGlobalVariables() const;
+  QList<cs8Variable *> referencedGlobalVariables() const;
 
   void setPublic(bool value);
 
@@ -49,7 +52,7 @@ public:
 private:
   cs8VariableModel *m_localVariableModel;
   cs8ParameterModel *m_parameterModel;
-  cs8VariableModel *m_referencedGlobalVarModel;
+  cs8Application *m_application;
   QMultiMap<QString, QString> m_tags;
   void printChildNodes(const QDomElement &element);
 
@@ -61,8 +64,6 @@ private:
   QStringList m_variableTokens;
 
 public:
-  cs8Program(QObject *parent);
-  cs8Program();
   // cs8Program(const QString & filePath);
   bool open(const QString &filePath);
   bool deleteSourceFile();
@@ -111,6 +112,8 @@ protected:
   bool parseProgramDoc(const QDomDocument &doc,
                        const QString &code = QString());
   void tidyUpCode(QString &code);
+  void setLinterDirective(const QString &directive, const QString &symbolName);
+
   QString m_detailedDocumentation;
   QString m_cellPath;
   QString m_filePath;

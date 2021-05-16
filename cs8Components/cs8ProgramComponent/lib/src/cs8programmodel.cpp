@@ -254,12 +254,12 @@ cs8VariableModel *cs8ProgramModel::parameterModel(const QModelIndex &index) {
     return 0;
 }
 
-cs8VariableModel *
+QList<cs8Variable *>
 cs8ProgramModel::referencedGlobalVriableModel(const QModelIndex &index) {
   if (index.isValid())
     return m_programList.at(index.row())->referencedGlobalVariables();
   else
-    return 0;
+    return QList<cs8Variable *>();
 }
 
 bool cs8ProgramModel::setData(const QModelIndex &index, const QVariant &value,

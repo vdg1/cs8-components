@@ -35,6 +35,8 @@ public:
   QString toDtxDocument();
   QList<cs8Variable *> findVariablesByType(const QString &type_,
                                            bool public_ = true);
+  QList<cs8Variable *>
+  findVariablesReferencedByProgram(const QString &program) const;
   cs8Variable *findVariableByName(const QString &name_);
   void clear();
   QList<cs8Variable *> publicVariables();
