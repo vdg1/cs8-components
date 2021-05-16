@@ -161,8 +161,8 @@ bool cs8ProgramModel::addProgramFile(const QString &filePath) {
     return false;
   m_hasByteOrderMark =
       QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
-  if (m_hasByteOrderMark)
-    qDebug() << "File has BOM";
+  // if (m_hasByteOrderMark)
+  //    qDebug() << "File has BOM";
 
   QDomDocument doc;
   if (!doc.setContent(&file)) {

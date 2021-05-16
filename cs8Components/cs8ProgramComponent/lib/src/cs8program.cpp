@@ -49,8 +49,8 @@ bool cs8Program::open(const QString &filePath) {
     return false;
   m_hasByteOrderMark =
       QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
-  if (m_hasByteOrderMark)
-    qDebug() << "File has BOM";
+  // if (m_hasByteOrderMark)
+  // qDebug() << "File has BOM";
 
   QDomDocument doc;
   if (!doc.setContent(&file)) {
@@ -64,7 +64,7 @@ bool cs8Program::open(const QString &filePath) {
 }
 
 bool cs8Program::deleteSourceFile() {
-  qDebug() << "delete file: " << m_filePath;
+  // qDebug() << "delete file: " << m_filePath;
   return QFile::remove(m_filePath);
 }
 
@@ -75,7 +75,7 @@ void cs8Program::printChildNodes(const QDomElement &element) {
 }
 
 void cs8Program::updateCodeModel() {
-  qDebug() << __FUNCTION__ << name();
+  // qDebug() << __FUNCTION__ << name();
   parseDocumentation(val3Code());
   // update token list
   m_variableTokens = variableTokens(false);
@@ -263,7 +263,7 @@ void cs8Program::undoTranslationTags() {
   QRegularExpressionMatch m;
 
   m = rx.match(m_programCode);
-  qDebug() << m.hasMatch() << m.lastCapturedIndex() << m.capturedTexts();
+  // qDebug() << m.hasMatch() << m.lastCapturedIndex() << m.capturedTexts();
   while (m.hasMatch() && m.lastCapturedIndex() == 3) {
     m_programCode.replace(m.capturedStart(3), m.capturedLength(3), "\")");
     m_programCode.replace(m.capturedStart(1), m.capturedLength(1), "(\"");
@@ -754,7 +754,7 @@ QString cs8Program::documentation(bool withPrefix, bool forCOutput) const {
       out += prefix + "\n";
     }
     if (inCodeSection) {
-      qDebug() << str << "indent: " << indentation;
+      // qDebug() << str << "indent: " << indentation;
       if (str.simplified().indexOf(
               QRegExp("begin|if |for | while |do |switch| case")) == 0) {
         str = QString().fill(QChar(' '), indentation * 4) + str.trimmed();
@@ -891,9 +891,9 @@ bool cs8Program::save(const QString &filePath, bool withCode) {
     buffer.buffer().insert(0, static_cast<char>(0xEF));
   }
   file.write(buffer.buffer());
-  qDebug() << "write file: " << fileName_;
-  qDebug() << "start of buffer: " << buffer.buffer().at(0)
-           << buffer.buffer().at(1) << buffer.buffer().at(2);
+  // qDebug() << "write file: " << fileName_;
+  // qDebug() << "start of buffer: " << buffer.buffer().at(0)
+  //         << buffer.buffer().at(1) << buffer.buffer().at(2);
   return true;
 }
 

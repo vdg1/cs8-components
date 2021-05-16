@@ -265,7 +265,7 @@ void cs8Application::setProjectMillimeterUnit(
 }
 
 bool cs8Application::open(const QString &pfxFilePath) {
-  qDebug() << Q_FUNC_INFO << "path:" << pfxFilePath;
+  // qDebug() << Q_FUNC_INFO << "path:" << pfxFilePath;
   QString pth = QDir::fromNativeSeparators(pfxFilePath);
   if (pth.startsWith("Disk://")) {
     pth.replace(QString("Disk://"), m_cellPath + "/usr/usrapp/");
@@ -303,7 +303,7 @@ bool cs8Application::openFromPathName(const QString &filePath) {
       filePath_ + "/" +
       filePath_.right(filePath_.length() - filePath_.lastIndexOf("/", -2)) +
       ".pjx";
-  qDebug() << Q_FUNC_INFO << ":" << name;
+  // qDebug() << Q_FUNC_INFO << ":" << name;
   bool result = open(name);
   return result;
 }
@@ -932,7 +932,7 @@ bool cs8Application::save(const QString &path, const QString &name,
     file.write(buffer.buffer());
   } else {
     foreach (cs8Program *program, m_programModel->programList()) {
-      qDebug() << __FUNCTION__ << " Save program: " << program->name();
+      // qDebug() << __FUNCTION__ << " Save program: " << program->name();
       if (!program->save(m_projectPath, true))
         return false;
     }
@@ -1225,6 +1225,7 @@ void cs8Application::setCellPath(const QString &path) {
              ? "/"
              : "/usr/usrapp/") +
         m_projectName + QDir::separator();
+  // qDebug() << __FUNCTION__ << m_cellPath;
 }
 
 QString cs8Application::cellPath() const { return m_cellPath; }

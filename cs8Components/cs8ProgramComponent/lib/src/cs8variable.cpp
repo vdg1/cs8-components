@@ -8,7 +8,7 @@ cs8Variable::cs8Variable(QDomElement &element, const QString &description,
   m_description = description;
   m_buildInTypes = setBuildInVariableTypes();
   m_name = name();
-  qDebug() << definition() << valuesToString();
+  // qDebug() << definition() << valuesToString();
 }
 
 cs8Variable::cs8Variable(QObject *parent) : QObject(parent) {
