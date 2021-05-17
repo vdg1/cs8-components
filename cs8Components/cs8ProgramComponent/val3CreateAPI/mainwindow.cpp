@@ -13,8 +13,8 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
-  QCoreApplication::setOrganizationName("SAXE Swiss System");
-  QCoreApplication::setOrganizationDomain("hsh.as");
+  QCoreApplication::setOrganizationName("Saxe Group");
+  QCoreApplication::setOrganizationDomain("saxe-group.com");
   QCoreApplication::setApplicationName("Val3 Create API");
 
   ui->setupUi(this);

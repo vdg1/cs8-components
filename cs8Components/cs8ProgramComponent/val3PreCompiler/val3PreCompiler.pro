@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core xml 3dcore concurrent
+QT       += core xml concurrent
+CONFIG += console
 TARGET = val3Check
 TEMPLATE = app
 

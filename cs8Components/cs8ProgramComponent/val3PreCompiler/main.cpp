@@ -2,6 +2,7 @@
 #include "cs8linter.h"
 
 #include <QCoreApplication>
+#include <QFileInfo>
 #include <QProcess>
 #include <cs8application.h>
 #include <cs8codevalidation.h>
@@ -27,14 +28,18 @@
 // <level>Error<CLASS>PRG<P1>execLow<P2>CODE<line>10<msg>? : unexpected trailing
 // characters<file>Disk://dispatcher/execLow.pgx
 int main(int argc, char *argv[]) {
+
+  QString VAL3CHECKORIG = "VAL3Check_Orig.exe";
+
   QCoreApplication a(argc, argv);
   QCoreApplication::setApplicationName("Val3Linter");
-  QCoreApplication::setOrganizationName("SAXE Group");
+  QCoreApplication::setOrganizationName("Saxe Group");
+  QCoreApplication::setOrganizationDomain("saxe-group.com");
 
   QStringList args = qApp->arguments();
+  qDebug() << "Linter started with arguments " << args;
   args.removeAt(0);
-  QString exe = args.takeAt(0);
-  cs8Linter linter(args, exe);
+  cs8Linter linter(args, VAL3CHECKORIG);
 
   a.exec();
 }

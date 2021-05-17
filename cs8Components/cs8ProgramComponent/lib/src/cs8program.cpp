@@ -97,8 +97,8 @@ void cs8Program::updateCodeModel() {
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
         var->addSymbolReference(line, column, "");
     }
-    qDebug() << "occurence of local var:" << var->name() << ":"
-             << var->symbolReferences();
+    // qDebug() << "occurence of local var:" << var->name() << ":"
+    //         << var->symbolReferences();
   }
 
   foreach (cs8Variable *var, m_parameterModel->variableList()) {
@@ -115,8 +115,8 @@ void cs8Program::updateCodeModel() {
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
         var->addSymbolReference(line, column, name());
     }
-    qDebug() << "occurence of parameter:" << var->name() << ":"
-             << var->symbolReferences();
+    // qDebug() << "occurence of parameter:" << var->name() << ":"
+    //         << var->symbolReferences();
   }
 
   if (m_application) {
@@ -135,9 +135,9 @@ void cs8Program::updateCodeModel() {
         if (!c.mid(lineStart, column).trimmed().startsWith("//"))
           var->addSymbolReference(line, column, name());
       }
-      if (var->symbolReferences().count() > 0)
-        qDebug() << "occurence of global var" << var->name() << ":"
-                 << var->symbolReferences();
+      // if (var->symbolReferences().count() > 0)
+      //  qDebug() << "occurence of global var" << var->name() << ":"
+      //           << var->symbolReferences();
     }
   }
 }

@@ -6,14 +6,14 @@
 int main(int argc, char *argv[]) {
   cs8Application app;
   if (!app.openFromPathName(
-          R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s882\usr\usrapp\SAXEAutomation\modules\modIMM)")) {
+          R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\testLinter)")) {
     qDebug() << "Failed to open application";
   }
 
   cs8CodeValidation validator;
   if (validator.loadRuleFile(":/compilerRules.xml")) {
-    QStringList msg = validator.runValidation(&app);
-    for (const auto &m : msg)
+    QStringList msg = validator.runValidation(&app, 0);
+    for (const auto &m : qAsConst(msg))
       qDebug() << m;
   } else {
     qDebug() << "Failed to load validation rules";

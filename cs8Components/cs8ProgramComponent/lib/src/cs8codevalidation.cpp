@@ -5,7 +5,8 @@
 #include <QFile>
 #include <QMessageBox>
 
-cs8CodeValidation::cs8CodeValidation(QObject *parent) : QObject(parent) {}
+cs8CodeValidation::cs8CodeValidation(QObject *parent)
+    : QObject(parent), m_reportingLevel(0) {}
 
 bool cs8CodeValidation::loadRuleFile(const QString &fileName) {
 
@@ -14,7 +15,8 @@ bool cs8CodeValidation::loadRuleFile(const QString &fileName) {
     return false;
   QString errorMessage;
   int errorColumn, errorLine;
-  if (!rules.setContent(&file, &errorMessage, &errorLine, &errorColumn)) {
+  if (!m_validationRules.setContent(&file, &errorMessage, &errorLine,
+                                    &errorColumn)) {
     file.close();
     qDebug() << "Failed to load validation file: " << errorMessage << errorLine
              << errorColumn;
@@ -29,22 +31,53 @@ bool cs8CodeValidation::loadRuleFile(const QString &fileName) {
   }
   file.close();
 
-  globalDataRules = rules.documentElement()
-                        .elementsByTagName("globalData")
-                        .at(0)
-                        .childNodes();
-  parameterRules =
-      rules.documentElement().elementsByTagName("parameter").at(0).childNodes();
-  localDataRules =
-      rules.documentElement().elementsByTagName("localData").at(0).childNodes();
-  programRules =
-      rules.documentElement().elementsByTagName("program").at(0).childNodes();
+  m_GlobalDataRules = m_validationRules.documentElement()
+                          .elementsByTagName("globalData")
+                          .at(0)
+                          .childNodes();
+  m_GlobalDataRulesSeverity = m_validationRules.documentElement()
+                                  .elementsByTagName("globalData")
+                                  .at(0)
+                                  .toElement()
+                                  .attribute("severity", 0)
+                                  .toInt();
+  m_ParameterRules = m_validationRules.documentElement()
+                         .elementsByTagName("parameter")
+                         .at(0)
+                         .childNodes();
+  m_ParameterRulesSeverity = m_validationRules.documentElement()
+                                 .elementsByTagName("parameter")
+                                 .at(0)
+                                 .toElement()
+                                 .attribute("severity", 0)
+                                 .toInt();
+  m_LocalDataRules = m_validationRules.documentElement()
+                         .elementsByTagName("localData")
+                         .at(0)
+                         .childNodes();
+  m_LocalDataRulesSeverity = m_validationRules.documentElement()
+                                 .elementsByTagName("localData")
+                                 .at(0)
+                                 .toElement()
+                                 .attribute("severity", 0)
+                                 .toInt();
+  m_ProgramRules = m_validationRules.documentElement()
+                       .elementsByTagName("program")
+                       .at(0)
+                       .childNodes();
+  m_ProgramRulesSeverity = m_validationRules.documentElement()
+                               .elementsByTagName("program")
+                               .at(0)
+                               .toElement()
+                               .attribute("severity", 0)
+                               .toInt();
   return true;
 }
 
 QStringList cs8CodeValidation::runDataValidationRule(
     const cs8Application *app, cs8Program *program,
-    QList<cs8Variable *> *variableList, QDomNodeList ruleList) {
+    QList<cs8Variable *> *variableList, QDomNodeList ruleList,
+    int nodeSeverity) {
   QStringList validationMessages;
   for (int i = 0; i < ruleList.count(); i++) {
     QDomElement ruleNode = ruleList.at(i).toElement();
@@ -55,48 +88,69 @@ QStringList cs8CodeValidation::runDataValidationRule(
     QString message =
         ruleNode.elementsByTagName("message").at(0).toElement().text();
     int minNameLength = ruleNode.attribute("minLength", "-1").toInt();
+    nodeSeverity =
+        ruleNode.attribute("severity", QString("%1").arg(nodeSeverity)).toInt();
+    QString level;
 
+    switch (qMax(0, nodeSeverity + m_reportingLevel)) {
+    case 0:
+      level = "Message";
+      break;
+    case 1:
+      level = "Warning";
+      break;
+    default:
+      level = "Error";
+      break;
+    }
     if (ruleNode.nodeName() == "variable") {
       QString varType = ruleNode.attribute("type");
-      qDebug() << "Check rule " << varType;
+      // qDebug() << "Check rule " << varType;
 
       //
       if (variableList != nullptr)
         foreach (cs8Variable *var, *variableList) {
-          qDebug() << "apply rule to var:" << var->name() << ":" << var->type();
+          // qDebug() << "apply rule to var:" << var->name() << ":" <<
+          // var->type();
+          if (!var->linterDirective().contains("ignore")) {
 
-          if (varType == "%USER%")
-            if (!var->isBuildInType()) {
-              varType = var->type();
-              QRegExp r(R"(%(\w*)\((\d*)\)%)");
-              int pos = r.indexIn(expressionString);
-              int matchedLength = r.matchedLength();
-              if (pos != -1 && r.captureCount() == 2) {
-                if (r.cap(1) == "PREFIX") {
-                  qDebug() << r.pattern();
-                  expressionString.replace(pos, matchedLength,
-                                           var->type().left(r.cap(2).toInt()));
-                  rx.setPattern(expressionString);
+            if (varType == "%USER%")
+              if (!var->isBuildInType()) {
+                varType = var->type();
+                QRegExp r(R"(%(\w*)\((\d*)\)%)");
+                int pos = r.indexIn(expressionString);
+                int matchedLength = r.matchedLength();
+                if (pos != -1 && r.captureCount() == 2) {
+                  if (r.cap(1) == "PREFIX") {
+                    // qDebug() << r.pattern();
+                    expressionString.replace(
+                        pos, matchedLength, var->type().left(r.cap(2).toInt()));
+                    rx.setPattern(expressionString);
+                  }
                 }
               }
-            }
-          if (checkProperty == "name" &&
-              (minNameLength == -1 || var->name().length() >= minNameLength) &&
-              (varType == var->type() || varType.isEmpty())) {
-            // apply name rule on variable name
-            if (rx.indexIn(var->name()) == -1 || rx.pattern().isEmpty()) {
-              QString msg = message;
-              msg.replace("%varType%", var->type());
-              msg.replace("%varName%", var->name());
-              msg.replace("%lineNumber%", var->name());
+            if (checkProperty == "name" &&
+                (minNameLength == -1 ||
+                 var->name().length() >= minNameLength) &&
+                (varType == var->type() || varType.isEmpty())) {
+              // apply name rule on variable name
+              if (rx.indexIn(var->name()) == -1 || rx.pattern().isEmpty()) {
+                QString msg = message;
+                msg.replace("%varType%", var->type());
+                msg.replace("%varName%", var->name());
+                msg.replace("%level%", level);
+                msg.replace(
+                    "%lineNumber%",
+                    QString("%1").arg(var->symbolReferences().value(0).line));
 
-              if (program == nullptr) {
-                msg.replace("%fileName%", app->cellDataFilePath(true));
-              } else {
-                msg.replace("%progName%", program->name());
-                msg.replace("%fileName%", program->cellFilePath());
+                if (program == nullptr) {
+                  msg.replace("%fileName%", app->cellDataFilePath(true));
+                } else {
+                  msg.replace("%progName%", program->name());
+                  msg.replace("%fileName%", program->cellFilePath());
+                }
+                validationMessages << msg;
               }
-              validationMessages << msg;
             }
           }
         }
@@ -111,43 +165,49 @@ QStringList cs8CodeValidation::runDataValidationRule(
       // check if variable list is passed
       if (variableList != nullptr) {
         foreach (cs8Variable *var, *variableList) {
-          // apply name rule on variable name
-          if (rx.indexIn(var->name()) != -1 || rx.pattern().isEmpty()) {
-            if (checkProperty == "notReferenced") {
-              bool referenced =
-                  program == nullptr
-                      ? app->getReferencedMap()[var->name()] == true
-                      : program->referencedVariables().contains(var->name());
-              if (((var->isPublic() && (variableScope < 2)) ||
-                   (!var->isPublic() && variableScope == 1)) &&
-                  !referenced) {
-                // apply name rule on variable name
-                if (rx.indexIn(var->name()) == -1 || rx.pattern().isEmpty()) {
-                  QString msg = message;
-                  msg.replace("%varType%", var->type());
-                  msg.replace("%varName%", var->name());
-                  if (program == nullptr) {
-                    msg.replace("%fileName%", app->cellDataFilePath(true));
-                  } else {
-                    msg.replace("%progName%", program->name());
-                    msg.replace("%fileName%", program->cellFilePath());
+          if (!var->linterDirective().contains("ignore")) {
+            // apply name rule on variable name
+            if (rx.indexIn(var->name()) != -1 || rx.pattern().isEmpty()) {
+              if (checkProperty == "notReferenced") {
+                bool referenced = (var->symbolReferences().count() != 0);
+                //: program->referencedVariables().contains(var->name());
+
+                if (((var->isPublic() && variableScope == 1) ||
+                     (!var->isPublic() && variableScope == 2) ||
+                     variableScope == 0) &&
+                    !referenced) {
+                  // apply name rule on variable name
+                  if (rx.indexIn(var->name()) == -1 || rx.pattern().isEmpty()) {
+                    QString msg = message;
+                    msg.replace("%varType%", var->type());
+                    msg.replace("%varName%", var->name());
+                    msg.replace("%lineNumber%", "1");
+                    msg.replace("%level%", level);
+                    if (program == nullptr) {
+                      msg.replace("%fileName%", app->cellDataFilePath(true));
+                    } else {
+                      msg.replace("%progName%", program->name());
+                      msg.replace("%fileName%", program->cellFilePath());
+                    }
+                    validationMessages << msg;
                   }
-                  validationMessages << msg;
                 }
-              }
-            } else if (checkProperty == "hidden") {
+              } else if (checkProperty == "hidden") {
 
-              foreach (cs8Program *prog, app->programModel()->programList()) {
-                if (prog->localVariableModel()->variableNameList().contains(
-                        var->name())) {
+                foreach (cs8Program *prog, app->programModel()->programList()) {
+                  if (prog->localVariableModel()->variableNameList().contains(
+                          var->name())) {
 
-                  QString msg = message;
-                  msg.replace("%progName%", prog->name());
-                  msg.replace("%varName%", var->name());
-
-                  msg.replace("%progName%", prog->name());
-                  msg.replace("%fileName%", prog->cellFilePath());
-                  validationMessages << msg;
+                    QString msg = message;
+                    msg.replace("%progName%", prog->name());
+                    msg.replace("%varName%", var->name());
+                    msg.replace("%fileName%", prog->cellFilePath());
+                    msg.replace("%level%", level);
+                    msg.replace("%lineNumber%",
+                                QString("%1").arg(
+                                    var->symbolReferences().value(0).line));
+                    validationMessages << msg;
+                  }
                 }
               }
             }
@@ -160,9 +220,9 @@ QStringList cs8CodeValidation::runDataValidationRule(
         if (rx.indexIn(program->name()) == -1 || rx.pattern().isEmpty()) {
           if (checkProperty == "notReferenced") {
             bool referenced = app->getCallList(program).count() != 0;
-            qDebug() << "check program  " << program->name()
-                     << "referenced: " << referenced
-                     << "public: " << program->isPublic();
+            // qDebug() << "check program  " << program->name()
+            //                     << "referenced: " << referenced
+            //                     << "public: " << program->isPublic();
             if (((program->isPublic() && (variableScope < 2)) ||
                  (!program->isPublic() && variableScope == 2)) &&
                 !referenced) {
@@ -172,7 +232,8 @@ QStringList cs8CodeValidation::runDataValidationRule(
                 QString msg = message;
                 msg.replace("%progName%", program->name());
                 msg.replace("%fileName%", program->cellFilePath());
-
+                msg.replace("%lineNumber%", "0");
+                msg.replace("%level%", level);
                 validationMessages << msg;
               }
             }
@@ -185,7 +246,8 @@ QStringList cs8CodeValidation::runDataValidationRule(
           QString msg = message;
           msg.replace("%progName%", program->name());
           msg.replace("%fileName%", program->cellFilePath());
-
+          msg.replace("%lineNumber%", "1");
+          msg.replace("%level%", level);
           validationMessages << msg;
         }
       }
@@ -195,21 +257,28 @@ QStringList cs8CodeValidation::runDataValidationRule(
   return validationMessages;
 }
 
-QStringList cs8CodeValidation::runValidation(const cs8Application *app) {
+QStringList cs8CodeValidation::runValidation(const cs8Application *app,
+                                             int reportingLevel) {
   QStringList validationMessages;
+  m_reportingLevel = reportingLevel;
   // run global data rules
 
   validationMessages << runDataValidationRule(
-      app, 0, &app->globalVariableModel()->variableList(), globalDataRules);
+      app, 0, &app->globalVariableModel()->variableList(), m_GlobalDataRules,
+      m_GlobalDataRulesSeverity);
+
   foreach (cs8Program *program, app->programModel()->programList()) {
 
     validationMessages << runDataValidationRule(
         app, program, &program->parameterModel()->variableList(),
-        parameterRules);
+        m_ParameterRules, m_ParameterRulesSeverity);
+
     validationMessages << runDataValidationRule(
         app, program, &program->localVariableModel()->variableList(),
-        localDataRules);
-    validationMessages << runDataValidationRule(app, program, 0, programRules);
+        m_LocalDataRules, m_LocalDataRulesSeverity);
+
+    validationMessages << runDataValidationRule(app, program, 0, m_ProgramRules,
+                                                m_ProgramRulesSeverity);
 
     // check TODOs in code
     QMapIterator<int, QString> i(program->todos());
@@ -218,7 +287,7 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app) {
       validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
                                     "line>%4<msg>%2<file>%3")
                                 .arg(program->name())
-                                .arg("Warning: " + i.value())
+                                .arg(i.value())
                                 .arg(program->cellFilePath())
                                 .arg(i.key());
     }

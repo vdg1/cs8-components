@@ -19,6 +19,7 @@ using namespace chm;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), m_autoExit(0) {
   ui->setupUi(this);
+  loadSettings();
   setup();
 
   // check arguments
@@ -43,7 +44,7 @@ void MainWindow::setup() {
 
   ui->tableWidget->blockSignals(true);
   ui->tableWidget->setRowCount(0);
-  int row = 0;
+
   foreach (QString path, settings.allKeys()) {
     if ((path.contains("/s7.") || path.contains("/s8.")) &&
         path.endsWith("/path")) {
@@ -80,9 +81,9 @@ void MainWindow::setup() {
         ui->tableWidget->setItem(0, 1, new QTableWidgetItem());
         ui->tableWidget->item(0, 1)->setCheckState(
             activeHelpFile ? Qt::Checked : Qt::Unchecked);
-        ui->tableWidget->item(0, 1)->setFlags(Qt::ItemIsEnabled);
+        ui->tableWidget->item(0, 1)->setFlags(0);
         ui->tableWidget->item(0, 1)->setTextAlignment(Qt::AlignCenter);
-        ui->tableWidget->item(0, 0)->setToolTip(
+        ui->tableWidget->item(0, 1)->setToolTip(
             tr("Double click to activate or deactivate"));
 
         ui->tableWidget->item(0, 0)->setFlags(Qt::ItemIsEnabled);
@@ -94,13 +95,14 @@ void MainWindow::setup() {
         ui->tableWidget->item(0, 4)->setFlags(Qt::ItemIsEnabled);
         ui->tableWidget->setItem(0, 5, new QTableWidgetItem(fileVersion));
         ui->tableWidget->item(0, 5)->setFlags(Qt::ItemIsEnabled);
-        row++;
       }
     }
   }
-  ui->tableWidget->sortByColumn(2);
-  ui->tableWidget->resizeColumnsToContents();
   ui->tableWidget->blockSignals(false);
+
+  ui->tableWidget->sortItems(2);
+  // ui->tableWidget->sortByColumn(2);
+  ui->tableWidget->resizeColumnsToContents();
 }
 
 void MainWindow::processActivation(const QModelIndex &index) {
@@ -249,8 +251,25 @@ void MainWindow::uninstallAll() {
     qApp->exit();
 }
 
-void MainWindow::on_tableWidget_itemChanged(QTableWidgetItem *item) {}
-
 void MainWindow::on_tableWidget_doubleClicked(const QModelIndex &index) {
   processActivation(index);
 }
+
+void MainWindow::storeSettings() {
+  QSettings settings;
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("windowState", saveState());
+}
+
+void MainWindow::loadSettings() {
+  QSettings settings;
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  storeSettings();
+  QMainWindow::closeEvent(event);
+}
+
+void MainWindow::on_actionAbout_Qt_triggered() { qApp->aboutQt(); }

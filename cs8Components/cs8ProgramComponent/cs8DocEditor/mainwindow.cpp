@@ -12,9 +12,6 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
-  QCoreApplication::setOrganizationName("SAXE Swiss System");
-  QCoreApplication::setOrganizationDomain("hsh.as");
-  QCoreApplication::setApplicationName("Val3 Documentation Editor");
 
   /*
   QDirIterator it(":", QDirIterator::Subdirectories);
