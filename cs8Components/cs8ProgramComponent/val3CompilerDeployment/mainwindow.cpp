@@ -1,8 +1,8 @@
 #include "mainwindow.h"
+#include "../common/versionInfo.h"
 #include "dialogdeploy.h"
 #include "ui_mainwindow.h"
 #include "val3PrecompilerSettings.h"
-#include "versionInfo.h"
 #include "windows.h"
 
 #include <QDebug>
@@ -20,7 +20,12 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), m_autoExit(0) {
   ui->setupUi(this);
   loadSettings();
-  setup();
+
+  getProductName(QCoreApplication::applicationDirPath() +
+                     "/preCompilerPackage/" + VAL3CHECK,
+                 m_productName, m_linterVersion);
+
+  fillTableView();
 
   // check arguments
   qDebug() << "arguments:" << qApp->arguments();
@@ -31,19 +36,27 @@ MainWindow::MainWindow(QWidget *parent)
   else if (qApp->arguments().contains("--uninstall")) {
     QTimer::singleShot(0, this, SLOT(uninstallAll()));
   }
+
   if (qApp->arguments().contains("--exitWhenReady")) {
     m_autoExit = true;
+  }
+
+  if (qApp->arguments().count() == 1) {
+    QTimer::singleShot(0, this, [this]() { checkUpdateLinter(); });
   }
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::setup() {
+void MainWindow::fillTableView() {
   QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Wow6432Node\\Staubli\\CS8",
                      QSettings::NativeFormat);
 
   ui->tableWidget->blockSignals(true);
   ui->tableWidget->setRowCount(0);
+  ui->tableWidget->setSortingEnabled(false);
+  ui->tableWidget->hideColumn(1);
+  ui->tableWidget->hideColumn(3);
 
   foreach (QString path, settings.allKeys()) {
     if ((path.contains("/s7.") || path.contains("/s8.")) &&
@@ -55,7 +68,9 @@ void MainWindow::setup() {
       if (getProductName(systemPath + "\\VAL3Check.exe", productName,
                          fileVersion)) {
         if (productName.isEmpty())
-          productName = QString("Staubli");
+          productName = QString("Staubli Val3 Check");
+        else
+          productName = QString("SAXE Linter & Staubli Val3 Check");
 
         bool activePrecompiler =
             productName.startsWith("Val3") || productName.startsWith("SAXE");
@@ -95,13 +110,18 @@ void MainWindow::setup() {
         ui->tableWidget->item(0, 4)->setFlags(Qt::ItemIsEnabled);
         ui->tableWidget->setItem(0, 5, new QTableWidgetItem(fileVersion));
         ui->tableWidget->item(0, 5)->setFlags(Qt::ItemIsEnabled);
+        ui->tableWidget->setItem(0, 6, new QTableWidgetItem());
+        ui->tableWidget->item(0, 6)->setFlags(0);
+        bool outDated = !ui->tableWidget->item(0, 5)->text().isEmpty() &&
+                        (ui->tableWidget->item(0, 5)->text() < m_linterVersion);
+        ui->tableWidget->item(0, 6)->setCheckState(outDated ? Qt::Checked
+                                                            : Qt::Unchecked);
       }
     }
   }
   ui->tableWidget->blockSignals(false);
 
-  ui->tableWidget->sortItems(2);
-  // ui->tableWidget->sortByColumn(2);
+  ui->tableWidget->sortItems(2, Qt::DescendingOrder);
   ui->tableWidget->resizeColumnsToContents();
 }
 
@@ -178,7 +198,7 @@ void MainWindow::processActivation(const QModelIndex &index) {
       }
     }
   }
-  setup();
+  fillTableView();
 }
 
 void MainWindow::on_actionPrecompiler_Settings_triggered() {
@@ -186,9 +206,9 @@ void MainWindow::on_actionPrecompiler_Settings_triggered() {
   dlg.exec();
 }
 
-void MainWindow::slotStartup() { installAll(); }
+void MainWindow::slotStartup() { installAll(false); }
 
-void MainWindow::installAll() {
+void MainWindow::installAll(bool onlyUpdate) {
   DialogDeploy dlg(this);
   dlg.show();
 
@@ -197,16 +217,23 @@ void MainWindow::installAll() {
     QString path = ui->tableWidget->item(index.row(), 3)->text();
     bool active =
         ui->tableWidget->item(index.row(), 0)->checkState() == Qt::Checked;
-    if (active) {
+    bool outDated =
+        !ui->tableWidget->item(index.row(), 5)->text().isEmpty() &&
+        (ui->tableWidget->item(index.row(), 5)->text() < m_linterVersion);
+    qDebug() << __FUNCTION__ << ui->tableWidget->item(index.row(), 5)->text()
+             << m_linterVersion;
+    if (!onlyUpdate || (onlyUpdate && outDated)) {
+      if (active) {
+
+        dlg.setPath(path);
+        dlg.show();
+        dlg.activatePreCompiler(false);
+      }
 
       dlg.setPath(path);
       dlg.show();
-      dlg.activatePreCompiler(false);
+      dlg.activatePreCompiler(true);
     }
-
-    dlg.setPath(path);
-    dlg.show();
-    dlg.activatePreCompiler(true);
 
     active = ui->tableWidget->item(index.row(), 1)->checkState() == Qt::Checked;
     if (active) {
@@ -221,8 +248,8 @@ void MainWindow::installAll() {
 
     qApp->processEvents();
   }
-  dlg.exec();
-  setup();
+  // dlg.exec();
+  fillTableView();
 }
 
 void MainWindow::uninstallAll() {
@@ -251,17 +278,34 @@ void MainWindow::uninstallAll() {
     qApp->exit();
 }
 
+void MainWindow::checkUpdateLinter() {
+  bool atLeastOneNeedsUpdate = false;
+  for (int row = 0; row < ui->tableWidget->rowCount(); row++) {
+    atLeastOneNeedsUpdate =
+        atLeastOneNeedsUpdate |
+        (ui->tableWidget->item(row, 6)->checkState() == Qt::Checked);
+  }
+  if (atLeastOneNeedsUpdate &&
+      QMessageBox::question(
+          this, tr("New linter version available"),
+          tr("At least one SAXE Linter is outdated, do you want to update?"))) {
+    installAll(true);
+  }
+}
+
 void MainWindow::on_tableWidget_doubleClicked(const QModelIndex &index) {
   processActivation(index);
 }
 
 void MainWindow::storeSettings() {
+  qDebug() << __FUNCTION__;
   QSettings settings;
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
 }
 
 void MainWindow::loadSettings() {
+  qDebug() << __FUNCTION__;
   QSettings settings;
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
@@ -273,3 +317,5 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::on_actionAbout_Qt_triggered() { qApp->aboutQt(); }
+
+void MainWindow::on_actionRefresh_triggered() { fillTableView(); }

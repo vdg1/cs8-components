@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>767</width>
-    <height>358</height>
+    <width>886</width>
+    <height>354</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,7 +49,7 @@
       </column>
       <column>
        <property name="text">
-        <string>SAXE help file integration</string>
+        <string>SAXE Help Extension</string>
        </property>
       </column>
       <column>
@@ -72,6 +72,11 @@
         <string>SAXE Linter Version</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>Update Available</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>
@@ -81,7 +86,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>767</width>
+     <width>886</width>
      <height>21</height>
     </rect>
    </property>
@@ -89,6 +94,7 @@
     <property name="title">
      <string>Action</string>
     </property>
+    <addaction name="actionRefresh"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -114,6 +120,14 @@
   <action name="actionAbout_Qt">
    <property name="text">
     <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
    </property>
   </action>
  </widget>

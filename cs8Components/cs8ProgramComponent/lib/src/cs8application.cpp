@@ -710,6 +710,10 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
             var->type() == "frame")
           if (var->father().contains(testVar->name()))
             testVar->addSymbolReference(0, 0, var->type() + " " + var->name());
+
+        if (var->type() == "tool")
+          if (var->father().contains(testVar->name()))
+            testVar->addSymbolReference(0, 0, var->type() + " " + var->name());
       }
     }
     m_callList = buildCallList();

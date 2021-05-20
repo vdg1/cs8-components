@@ -38,8 +38,9 @@ int main(int argc, char *argv[]) {
 
   QStringList args = qApp->arguments();
   qDebug() << "Linter started with arguments " << args;
+  // remove 1st argument, that points to the executable itself
   args.removeAt(0);
-  cs8Linter linter(args, VAL3CHECKORIG);
+  cs8Linter linter(args, VAL3CHECKORIG, true);
 
   a.exec();
 }

@@ -23,12 +23,15 @@ private slots:
 
   void slotStartup();
 
-  void installAll();
+  void installAll(bool onlyUpdate);
   void uninstallAll();
+  void checkUpdateLinter();
 
   void on_tableWidget_doubleClicked(const QModelIndex &index);
 
   void on_actionAbout_Qt_triggered();
+
+  void on_actionRefresh_triggered();
 
 private:
   void storeSettings();
@@ -36,7 +39,9 @@ private:
   void closeEvent(QCloseEvent *event) override;
   Ui::MainWindow *ui;
   bool m_autoExit;
-  void setup();
+  QString m_productName;
+  QString m_linterVersion;
+  void fillTableView();
   // QString GetFileVersionOfApplication(const QString &fileName);
 };
 

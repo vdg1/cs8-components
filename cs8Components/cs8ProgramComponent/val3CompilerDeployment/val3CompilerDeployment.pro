@@ -14,15 +14,15 @@ TEMPLATE = app
 DESTDIR = ../bin
 
 SOURCES += main.cpp\
+    ../common/versionInfo.cpp \
         mainwindow.cpp \
-    versionInfo.cpp \
     dialogdeploy.cpp \
     val3PrecompilerSettings.cpp \
     chm.cpp \
     tagreader.cpp
 
 HEADERS  += mainwindow.h \
-    versionInfo.h \
+    ../common/versionInfo.h \
     dialogdeploy.h \
     val3PrecompilerSettings.h \
     chmxx.h \

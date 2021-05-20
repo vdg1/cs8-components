@@ -41,6 +41,7 @@ QStringList cs8Variable::setBuildInVariableTypes() {
                        << "num"
                        << "pointRs"
                        << "pointRx"
+                       << "point"
                        << "sio"
                        << "string"
                        << "tool"

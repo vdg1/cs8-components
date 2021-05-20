@@ -130,8 +130,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                 }
               }
             if (checkProperty == "name" &&
-                (minNameLength == -1 ||
-                 var->name().length() >= minNameLength) &&
+                (minNameLength == -1 || var->name().length() > minNameLength) &&
                 (varType == var->type() || varType.isEmpty())) {
               // apply name rule on variable name
               if (rx.indexIn(var->name()) == -1 || rx.pattern().isEmpty()) {

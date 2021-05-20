@@ -398,7 +398,7 @@ QMap<int, QString> cs8Program::todos() const {
   // qDebug() << "Check todos in " << name();
   QRegExp rx;
   rx.setPattern(R"(^\s*//[/\\]{1}\s*TODO.*)");
-  int codeLine = 0;
+  int codeLine = 1;
   foreach (const QString &line, code.split("\n")) {
     if (rx.indexIn(line) != -1)
       todos.insert(codeLine, line.trimmed());
@@ -410,21 +410,26 @@ QMap<int, QString> cs8Program::todos() const {
 QStringList cs8Program::getCalls() {
   QString code = val3Code(true);
   // qDebug() << "Get calls in " << name();
-  QRegExp rxCall, rxTaskCreate;
+  QRegExp rxCall;
+
   rxCall.setPattern("^\\s*call (\\w*)\\(");
-  rxTaskCreate.setPattern(
-      "^(\\s*taskCreate\\s*\\\"*\\w*\\\"*\\s*,\\s*\\w*\\s*,\\s*)(\\w*)\\(");
+  QRegularExpression rxTaskCreate = QRegularExpression(
+      R"RX(^\s*taskCreate(Sync){0,1}(.*),(.*)(,.*){0,1},(.*)\()RX",
+      QRegularExpression::MultilineOption);
 
   QStringList list;
   foreach (const QString &line, code.split("\n")) {
     if (rxCall.indexIn(line) != -1) {
       if (rxCall.captureCount() == 1)
         list << rxCall.cap(1);
-    } else if (rxTaskCreate.indexIn(line) != -1) {
-      if (rxTaskCreate.captureCount() == 2)
-        list << rxTaskCreate.cap(2);
+    } else {
+      QRegularExpressionMatch match = rxTaskCreate.match(line);
+      if (match.hasMatch()) {
+        list << match.captured(5);
+      }
     }
   }
+  // qDebug() << "Get calls in " << name() << ":" << list;
   return list;
 }
 
