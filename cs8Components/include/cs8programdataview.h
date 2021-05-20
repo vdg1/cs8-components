@@ -17,32 +17,26 @@
 /**
     @author Volker Drewer-Gutland <volker.drewer@gmx.de>
 */
-class cs8ProgramDataView : public QTableView
-{
-    Q_OBJECT
+class cs8ProgramDataView : public QTableView {
+  Q_OBJECT
 public:
+  enum Mode { GlobalData, LocalData, ParameterData, ReferencedGlobalData };
 
-        enum Mode{
-                    GlobalData,
-                    LocalData,
-            ParameterData,
-            ReferencedGlobalData
-                };
+  cs8ProgramDataView(QWidget *parent = 0);
 
-    cs8ProgramDataView ( QWidget * parent=0 );
+  ~cs8ProgramDataView();
 
-    ~cs8ProgramDataView();
-
-    void setMasterView ( QAbstractItemView* theValue );
-    void setMode ( Mode theValue );
-    int mode() const;
+  void setMasterView(QAbstractItemView *theValue);
+  void setMode(Mode theValue);
+  int mode() const;
 
 protected:
-    QAbstractItemView* m_masterView;
-    int m_mode;
+  QAbstractItemView *m_masterView;
+  int m_mode;
 
 protected slots:
-    void slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected );
+  void slotSelectionChanged(const QItemSelection &selected,
+                            const QItemSelection &);
 };
 
 #endif

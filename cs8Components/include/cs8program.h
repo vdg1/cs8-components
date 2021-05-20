@@ -11,15 +11,19 @@
 #include <QStringList>
 
 //
+class cs8Application;
 class cs8Program : public QObject {
   Q_OBJECT
 
 public:
+  cs8Program(QObject *parent);
+  cs8Program();
+
   QString toDocumentedCode();
   bool save(const QString &projectPath, bool withCode = true);
   cs8ParameterModel *parameterModel() const;
   cs8VariableModel *localVariableModel() const;
-  cs8VariableModel *referencedGlobalVariables() const;
+  QList<cs8Variable *> referencedGlobalVariables() const;
 
   void setPublic(bool value);
 
@@ -30,7 +34,7 @@ public:
   QString fileName() const;
   void setName(const QString &name);
   QString definition() const;
-  QString documentation(bool withPrefix = true) const;
+  QString documentation(bool withPrefix = true, bool forCOutput = false) const;
 
   QString extractCode(const QString &code_) const;
 
@@ -41,13 +45,14 @@ public:
   void clearDocumentationTags();
   void setWithUndocumentedSymbols(bool withUndocumentedSymbols);
   QStringList referencedVariables() const;
-  QMap<int, QString> todos();
+  QMap<int, QString> todos() const;
   QStringList getCalls();
+  int cyclomaticComplexity() const;
 
 private:
   cs8VariableModel *m_localVariableModel;
   cs8ParameterModel *m_parameterModel;
-  cs8VariableModel *m_referencedGlobalVarModel;
+  cs8Application *m_application;
   QMultiMap<QString, QString> m_tags;
   void printChildNodes(const QDomElement &element);
 
@@ -59,11 +64,10 @@ private:
   QStringList m_variableTokens;
 
 public:
-  cs8Program(QObject *parent);
-  cs8Program();
   // cs8Program(const QString & filePath);
   bool open(const QString &filePath);
-  QString val3Code(bool withDocumentation = true);
+  bool deleteSourceFile();
+  QString val3Code(bool withDocumentation = true) const;
   QString toCSyntax();
   void parseDocumentation(const QString &code);
 
@@ -93,24 +97,38 @@ public:
   bool getHasByteOrderMark() const;
   void setHasByteOrderMark(bool hasByteOrderMark);
 
+  void parseProgramSection(const QDomElement &programSection,
+                           const QString &code);
+
+  void writeXMLStream(QXmlStreamWriter &stream, bool withCode);
+
+  QString getFilePath() const;
+  void setFilePath(const QString &filePath);
+
+  QString getAdditionalHintMessage() const;
+  void setAdditionalHintMessage(const QString &additionalHintMessage);
+
 protected:
   bool parseProgramDoc(const QDomDocument &doc,
                        const QString &code = QString());
   void tidyUpCode(QString &code);
+  void setLinterDirective(const QString &directive, const QString &symbolName);
+
   QString m_detailedDocumentation;
   QString m_cellPath;
   QString m_filePath;
   QString m_copyRightMessage;
   QString m_applicationDocumentation, m_mainPageDocumentation,
-      m_briefModuleDocumentation;
+      m_briefModuleDocumentation, m_additionalHintMessage;
   QString m_name;
   QString m_programCode;
   bool m_public;
   bool m_withIfBlock;
   bool m_hasByteOrderMark;
   int m_lineNumberCodeSection;
+  int m_headerLines;
 
-  void readAndUpdateProgramCode();
+  void updateCodeModel();
 
 signals:
   void globalVariableDocumentationFound(const QString &name,

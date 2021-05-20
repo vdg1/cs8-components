@@ -12,8 +12,9 @@
 #ifndef CS8PROGRAMMODEL_H
 #define CS8PROGRAMMODEL_H
 
-#include <QAbstractListModel>
+#include "cs8variable.h"
 
+#include <QAbstractListModel>
 #include <QList>
 
 class cs8Program;
@@ -28,10 +29,10 @@ public:
   QList<cs8Program *> programList() { return m_programList; }
   cs8VariableModel *localVariableModel(const QModelIndex &index);
   cs8VariableModel *parameterModel(const QModelIndex &index);
-  cs8VariableModel *referencedGlobalVriableModel(const QModelIndex &index);
+  QList<cs8Variable *> referencedGlobalVriableModel(const QModelIndex &index);
 
   void clear();
-  void addProgram(const QString &filePath);
+  bool addProgramFile(const QString &filePath);
   cs8ProgramModel(QObject *parent = 0);
 
   ~cs8ProgramModel();
@@ -47,11 +48,15 @@ public:
   void append(cs8Program *program);
 
   // void createProgram(cs8Program *program);
-  cs8Program *createProgram(const QString &programName);
+  cs8Program *createProgram(const QString &programName = QString());
+
+  bool getHasByteOrderMark() const;
+  void setHasByteOrderMark(bool hasByteOrderMark);
 
 protected:
   QList<cs8Program *> m_programList;
   QString m_cellPath;
+  bool m_hasByteOrderMark;
 
 protected slots:
   void slotGlobalVariableDocumentationFound(const QString &name,

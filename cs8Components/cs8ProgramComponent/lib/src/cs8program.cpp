@@ -226,7 +226,7 @@ void cs8Program::setLinterDirective(const QString &directive,
   auto var = m_localVariableModel->getVarByName(symbolName);
   if (!var)
     var = m_parameterModel->getVarByName(symbolName);
-  if (!var)
+  if (!var && m_application)
     var = m_application->globalVariableModel()->getVarByName(symbolName);
 
   if (var)
@@ -911,8 +911,9 @@ cs8VariableModel *cs8Program::localVariableModel() const {
 }
 
 QList<cs8Variable *> cs8Program::referencedGlobalVariables() const {
-  return m_application->globalVariableModel()->findVariablesReferencedByProgram(
-      name());
+  return m_application ? m_application->globalVariableModel()
+                             ->findVariablesReferencedByProgram(name())
+                       : QList<cs8Variable *>();
 }
 
 void cs8Program::setPublic(bool value) { m_public = value; }

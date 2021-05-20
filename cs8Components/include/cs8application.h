@@ -18,8 +18,10 @@ class cs8Application : public QObject {
   Q_OBJECT
 
 public:
-  QString projectPath(bool cs8Format = false);
-  bool save(const QString &path = QString(), const QString &name = QString());
+  QString projectPath(bool cs8Format = false) const;
+  bool save(bool compactMode);
+  bool save();
+  bool save(const QString &path, const QString &name, bool compactMode);
   bool loadDataFile(const QString &fileName);
   bool saveDataFile(const QString &fileName);
   bool open(const QString &pfxFilePath);
@@ -33,7 +35,7 @@ public:
   QString exportToCImplementation() const;
   QString exportToCDefinition() const;
   QString exportToIOList() const;
-  bool exportInterfacePrototype(const QString &path);
+  bool exportInterfacePrototype(const QString &path) const;
   bool integrateInterface(cs8Application *sourceApplication);
   QString name() const;
   void setName(const QString &name);
@@ -48,7 +50,6 @@ public:
 
   QString formattedDocument(const QString &doc,
                             const QString &withSlashes = QString("/// ")) const;
-  QString performPrecompilerChecks();
   void setCellPath(const QString &path);
   QString cellPath() const;
   QString cellProjectFilePath(bool cs8Format = false) const;
@@ -73,7 +74,6 @@ public:
   QMap<QString, QMap<QString, QString> *> getEnumerations() const;
   void checkPrograms(QStringList &output);
   void checkEnumerations(QStringList &output);
-  void checkGlobalData(QStringList &output);
   void checkObsoleteProgramFiles(QStringList &output);
   QString moduleDocumentation() const;
   void setModuleDocumentation(const QString &moduleDocumentation);
@@ -87,15 +87,13 @@ public:
   bool includeLibraryDocuments() const;
   void setIncludeLibraryDocuments(bool includeLibraryDocuments);
 
-  QMap<QString, bool> buildGlobalDataReferenceMap();
   QMap<QString, QList<cs8Program *>> buildCallList();
-  QStringList getCallList(cs8Program *program);
-  QMap<QString, bool> getReferencedMap() const;
+  QStringList getCallList(cs8Program *program) const;
 
   QString getProjectPath() const;
 
   void setProjectPath(const QString &pth);
-  bool importVPlusFile(const QString &fileName);
+  // bool importVPlusFile(const QString &fileName);
 
   QString briefModuleDocumentation() const;
   void setBriefModuleDocumentation(const QString &briefModuleDocumentation);
@@ -109,10 +107,12 @@ public:
   QString getProjectMillimeterUnit() const;
   void setProjectMillimeterUnit(const QString &projectMillimeterUnit);
 
+  bool getCompactFileMode() const;
+  void setCompactFileMode(bool singleProgramFile);
+
 protected:
   QHash<QString, QString> m_exportDirectives;
   QHash<QString, QString> m_pragmaList;
-  QMap<QString, bool> m_globalDataReferencedMap;
   QMap<QString, QList<cs8Program *>> m_callList;
   QString m_projectName;
   QString m_projectPath;
@@ -162,6 +162,7 @@ private:
   bool reportHiddenGlobalVariables;
   bool reportParametersPostfix;
   bool reportToDos;
+  bool m_compactFileMode;
   void exportToCppFile(const QString &path) const;
   void exportToHFile(const QString &path) const;
 

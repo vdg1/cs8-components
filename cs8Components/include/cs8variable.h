@@ -14,10 +14,18 @@
 class cs8Variable : public QObject {
 
   Q_OBJECT
-  Q_ENUMS(DeclarationScope)
 
 public:
+  struct symbolPosition {
+    symbolPosition(int l, int c, const QString &r);
+    symbolPosition();
+    int line, column;
+    QString reference;
+  };
+
   enum DeclarationScope { Local, Parameter, Global };
+  Q_ENUM(DeclarationScope)
+
   cs8Variable(QDomElement &element, const QString &descripton = QString(),
               QObject *parent = 0);
   cs8Variable(cs8Variable *var, QObject *parent);
@@ -53,6 +61,7 @@ public:
 
   QStringList father();
 
+  void setValues(const QDomNodeList &values);
   QDomNodeList values() const;
   QString valuesToString() const;
   QString definition();
@@ -74,6 +83,14 @@ public:
                                 QString &index);
 
   void writeXMLStream(QXmlStreamWriter &stream);
+  void clearSymbolReferences();
+  void addSymbolReference(int lineNumber, int column,
+                          const QString &programName);
+
+  const QList<symbolPosition> &symbolReferences() const;
+
+  const QString &linterDirective() const;
+  void setLinterDirective(const QString &newLinterDirective);
 
 protected:
   QStringList m_buildInTypes;
@@ -82,12 +99,16 @@ protected:
   QString m_name;
   QDomDocumentFragment m_docFragment;
   QDomDocument m_doc;
+  QString m_linterDirective;
   static QStringList setBuildInVariableTypes();
 
   void writeValueElements(QXmlStreamWriter &stream);
   void writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes);
+  QList<symbolPosition> m_lineOccurences;
 
 signals:
   void modified();
 };
+QDebug operator<<(QDebug dbg, const cs8Variable::symbolPosition &type);
+
 #endif
