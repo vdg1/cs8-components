@@ -48,6 +48,7 @@ public:
   QMap<int, QString> todos() const;
   QStringList getCalls();
   int cyclomaticComplexity() const;
+  static int cyclomaticComplexity(const QString &code);
 
 private:
   cs8VariableModel *m_localVariableModel;

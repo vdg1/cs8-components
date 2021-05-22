@@ -434,16 +434,24 @@ QStringList cs8Program::getCalls() {
 }
 
 int cs8Program::cyclomaticComplexity() const {
+  return cyclomaticComplexity(val3Code(false));
+}
+
+int cs8Program::cyclomaticComplexity(const QString &code) {
   int c = 0;
   int nodes = 0, edges = 0;
   bool previousLineIsNode = false;
   QRegularExpression nodeRX(
-      R"RX(^(if|for|elseIf|while|until|case)((\s){1,}|\())RX");
+      R"RX(^\s*(if|for|elseIf|while|until|case)((\s){1,}|\())RX");
+
   // R"RX(^((if|for|else|elseIf|while|until|switch)((\s){1,}|\()|(endIf|endWhile|endFor|endSwitch)))RX");
   // qDebug() << "rx is valid: " << nodeRX.isValid() << nodeRX.errorString()
   //         << nodeRX.patternErrorOffset();
-  nodeRX.setPatternOptions(QRegularExpression::DontCaptureOption);
-  foreach (auto line, val3Code(false).split("\n")) {
+  nodeRX.setPatternOptions(QRegularExpression::DontCaptureOption |
+                           QRegularExpression::MultilineOption);
+  QRegularExpressionMatchIterator i = nodeRX.globalMatch(code);
+
+  foreach (auto line, code.split("\n")) {
     line = line.trimmed();
 
     bool isNode = nodeRX.match(line).hasMatch();
