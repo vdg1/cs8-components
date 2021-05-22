@@ -153,6 +153,16 @@ QStringList cs8CodeValidation::runDataValidationRule(
             }
           }
         }
+    } else if (ruleNode.nodeName() == "enumeration") {
+      // check if variable list is passed
+      if (variableList != nullptr) {
+        foreach (cs8Variable *var, *variableList) {
+          if (!var->linterDirective().contains("ignore")) {
+            if (checkProperty == "value") {
+            }
+          }
+        }
+      }
     } else if (ruleNode.nodeName() == "reference") {
       QString scope = ruleNode.attribute("scope", "");
       int variableScope = 0;
@@ -226,7 +236,8 @@ QStringList cs8CodeValidation::runDataValidationRule(
                  (!program->isPublic() && variableScope == 2)) &&
                 !referenced) {
               // apply name rule on variable name
-              // if (rx.indexIn(program->name())==-1 || rx.pattern().isEmpty())
+              // if (rx.indexIn(program->name())==-1 ||
+              // rx.pattern().isEmpty())
               {
                 QString msg = message;
                 msg.replace("%progName%", program->name());
@@ -291,6 +302,9 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
                                 .arg(i.key());
     }
   }
+
+  // check values of ENUMS
+  // validationMessages << app->checkEnumerations();
 
   // check for obsolete PGX files
   // retrieve list of pgx files from file system

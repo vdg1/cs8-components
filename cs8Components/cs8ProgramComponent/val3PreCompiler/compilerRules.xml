@@ -43,6 +43,9 @@
     <reference checkProperty="hidden" severity="2">
       <message><![CDATA[<level>%level%<CLASS>PRG<P1>%progName%<P2>CODE<line>%lineNumber%<msg>Global variable %varName% is hidden in program by a local variable of the same name<file>%fileName%]]></message>
     </reference>
+    <enumeration checkProperty="value" severity="2">
+      <message><![CDATA[<level>%level%<CLASS>DATA<P1>%varType%<P2>%varName%<line>%lineNumber%<msg>Enumeration items %varNames% have same value '%value%'<file>%fileName%]]></message>
+    </enumeration>
   </globalData>
   <parameter>
     <variable checkProperty="name" expression="^.*_$">

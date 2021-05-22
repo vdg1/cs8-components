@@ -1122,7 +1122,8 @@ void cs8Application::checkPrograms(QStringList &output) {
   }
 }
 
-void cs8Application::checkEnumerations(QStringList &output) {
+QStringList cs8Application::checkEnumerations() const {
+  QStringList output;
   QMap<QString, QMap<QString, QString> *> constSets = getEnumerations();
 
   QMap<QString, QString> *constSet;
@@ -1130,24 +1131,48 @@ void cs8Application::checkEnumerations(QStringList &output) {
     QMapIterator<QString, QString> i(*constSet);
     while (i.hasNext()) {
       i.next();
-      if (constSet->values(i.key()).count() > 1) {
+      if (constSet->values(i.key()).size() > 1) {
         QString msg;
-        for (auto &key : constSet->values(i.key())) {
+        for (const auto &key : constSet->values(i.key())) {
           msg += key + ", ";
         }
         msg.chop(2);
         output.append(
             QString(
-                "<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
+                "<level>Error<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
                 .arg("")
-                .arg("Warning: Global variables '" + msg +
-                     "' have the same value '" + i.key() + "'")
+                .arg("Global variables '" + msg + "' have the same value '" +
+                     i.key() + "'")
                 .arg(cellDataFilePath(true))
                 .arg(0));
         break;
       }
     }
   }
+  return output;
+}
+
+QMap<QString, QString> cs8Application::ambigousEnumerationItems() const {
+  QMap<QString, QString> output;
+  QMap<QString, QMap<QString, QString> *> constSets = getEnumerations();
+
+  QMap<QString, QString> *constSet;
+  foreach (constSet, constSets) {
+    QMapIterator<QString, QString> i(*constSet);
+    while (i.hasNext()) {
+      i.next();
+      if (constSet->values(i.key()).size() > 1) {
+        QString msg;
+        for (const auto &key : constSet->values(i.key())) {
+          msg += key + ", ";
+        }
+        msg.chop(2);
+        output.insert(msg, i.key());
+        break;
+      }
+    }
+  }
+  return output;
 }
 
 QMap<QString, QList<cs8Program *>> cs8Application::buildCallList() {

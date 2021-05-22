@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "3.0.3"
+#define MyAppVersion "4.0.0"
 #define MyAppPublisher "SAXE Process AB"
 #define MyAppURL "http://www.saxe-group.com"
 #define QT "D:\Qt\5.14.2\msvc2017_64"
@@ -21,7 +21,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={pf}\Saxe Process Val3 Tools
+DefaultDirName={pf}\Saxe Val3 Tools
 DefaultGroupName={#MyAppName}
 OutputDir=.
 OutputBaseFilename={#MyAppName}-setup-{#MyAppVersion}
@@ -35,7 +35,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Source: "..\cs8ProgramComponent\bin\extractPrototype.exe"; DestDir: "{app}"; Flags: ignoreversion
 ;Source: "..\cs8ProgramComponent\bin\val3PreCompilerSettings.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\Val3 Documentation Editor.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\cs8ProgramComponent\bin\val3CompilerDeployment.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\val3LinterControlPanel.exe"; DestDir: "{app}"; Flags: ignoreversion
 ;Source: "..\cs8ProgramComponent\bin\val3Check.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\val3CreateAPI.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\val3Compact.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -81,15 +81,15 @@ Type: files; Name:  "{app}\preCompilerPackage\*.*";
 
 [Icons]
 Name: "{group}\Val3 Documentation Editor"; Filename: "{app}\Val3 Documentation Editor.exe"
-Name: "{group}\Val3 Compiler Deployment"; Filename: "{app}\val3CompilerDeployment.exe"
+Name: "{group}\Val3 Linter Deployment"; Filename: "{app}\val3LinterControlPanel.exe"
 Name: "{group}\Val3 Create API"; Filename: "{app}\val3CreateAPI.exe"
 ;Name: "{group}\Val3 Compiler Settings"; Filename: "{app}\val3PreCompilerSettings.exe"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 
 [Run]
-;Filename: "{app}\val3CompilerDeployment.EXE"; Parameters: "--install"; Description: "Install Precompiler for SRC7.x versions"; Flags: postinstall nowait shellexec
+Filename: "{app}\val3LinterControlPanel.EXE"; Parameters: "--install"; Description: "Install SAXE Val3 Linter for SRC7.x and SRC8.x versions"; Flags: postinstall nowait shellexec
 
 
 [UninstallRun]
-Filename: "{app}\val3CompilerDeployment.EXE"; Parameters: "--uninstall --exitWhenReady";
+Filename: "{app}\val3LinterControlPanel.EXE"; Parameters: "--uninstall --exitWhenReady";
 

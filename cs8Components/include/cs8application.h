@@ -73,7 +73,8 @@ public:
 
   QMap<QString, QMap<QString, QString> *> getEnumerations() const;
   void checkPrograms(QStringList &output);
-  void checkEnumerations(QStringList &output);
+  QStringList checkEnumerations() const;
+  QMap<QString, QString> ambigousEnumerationItems() const;
   void checkObsoleteProgramFiles(QStringList &output);
   QString moduleDocumentation() const;
   void setModuleDocumentation(const QString &moduleDocumentation);
