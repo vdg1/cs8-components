@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
   cs8Application app;
   if (!app.openFromPathName(
-          R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\testLinter)")) {
+          R"(D:\data\Staubli\SRS\04 NovoNordisk\33119-reset-tube-by-flex\Controller1\usr\usrapp\io_User)")) {
     qDebug() << "Failed to open application";
   }
 

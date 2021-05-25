@@ -288,7 +288,8 @@ void MainWindow::checkUpdateLinter() {
   if (atLeastOneNeedsUpdate &&
       QMessageBox::question(
           this, tr("New linter version available"),
-          tr("At least one SAXE Linter is outdated, do you want to update?"))) {
+          tr("At least one SAXE Linter is outdated, do you want to update?")) ==
+          QMessageBox::Yes) {
     installAll(true);
   }
 }

@@ -89,7 +89,7 @@
     <variable type="tool" checkProperty="name" expression="^(lt).*$" minLength="3">
       <message><![CDATA[<level>%level%<CLASS>PRG<P1>%progName%<P2>CODE<line>%lineNumber%<msg>%varName% : Local variable does not start with recommended prefix 'lt'<file>%fileName%]]></message>
     </variable>
-    <variable type="dio" checkProperty="name" expression="^(ldi|ldo).*$" minLength="3">
+    <variable type="dio" checkProperty="name" expression="^(ld|ld).*$" minLength="3">
       <message><![CDATA[<level>%level%<CLASS>PRG<P1>%progName%<P2>CODE<line>%lineNumber%<msg>%varName% : Local variable does not start with recommended prefix 'ldi' or 'ldo'<file>%fileName%]]></message>
     </variable>
     <variable type="aio" checkProperty="name" expression="^(lai|lao|lwi|lwo|lfi|lfo).*$" minLength="3">

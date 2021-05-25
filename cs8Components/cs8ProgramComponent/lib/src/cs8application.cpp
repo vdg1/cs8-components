@@ -570,8 +570,8 @@ QString cs8Application::exportToCDefinition() const {
 QString cs8Application::exportToIOList() const {
   QString data;
 
-  foreach (cs8Variable *variable,
-           m_globalVariableModel->variableList(QRegularExpression("[asd]io"))) {
+  foreach (cs8Variable *variable, m_globalVariableModel->variableListByType(
+                                      QRegularExpression("[asd]io"))) {
     data += QString("%1;%2;%3;%4\n")
                 .arg(variable->name())
                 .arg(variable->type())
@@ -704,8 +704,8 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
       }
     }
     //
-    foreach (auto testVar, m_globalVariableModel->variableList()) {
-      foreach (auto var, m_globalVariableModel->variableList()) {
+    foreach (auto testVar, m_globalVariableModel->variableListByType()) {
+      foreach (auto var, m_globalVariableModel->variableListByType()) {
         if (var->type() == "pointRx" || var->type() == "pointRs" ||
             var->type() == "frame")
           if (var->father().contains(testVar->name()))
@@ -879,7 +879,8 @@ bool cs8Application::save(const QString &path, const QString &name,
       prog->setMainPageDocumentation(m_mainPageDocumentation);
     }
 
-    foreach (cs8Variable *globalVar, m_globalVariableModel->variableList()) {
+    foreach (cs8Variable *globalVar,
+             m_globalVariableModel->variableListByType()) {
       QString doc = globalVar->documentation(false, false);
       qDebug() << "global var: " << globalVar->name() << ":" << doc;
       if (!doc.isEmpty() || m_withUndocumentedSymbols) {
@@ -1047,8 +1048,9 @@ cs8Application::getEnumerations() const {
   QString prefix;
   QMap<QString, QString> *constSet;
   QMap<QString, QMap<QString, QString> *> constSets;
-  foreach (cs8Variable *var, m_globalVariableModel->variableList()) {
-    if (var->hasConstPrefix(&prefix)) {
+  foreach (cs8Variable *var, m_globalVariableModel->variableListByType()) {
+    if (var->hasConstPrefix(&prefix) &&
+        (var->type() == "num" || var->type() == "string")) {
 
       // qDebug() << "Found prefix " << prefix << ": " << var->name();
       if (!constSets.contains(prefix)) {
@@ -1081,7 +1083,8 @@ cs8Application::getEnumerations() const {
 
 void cs8Application::checkPrograms(QStringList &output) {
   foreach (cs8Program *program, m_programModel->programList()) {
-    foreach (cs8Variable *lvar, program->localVariableModel()->variableList()) {
+    foreach (cs8Variable *lvar,
+             program->localVariableModel()->variableListByType()) {
       if (!program->referencedVariables().contains(lvar->name())) {
         output.append(
             QString(
@@ -1094,7 +1097,8 @@ void cs8Application::checkPrograms(QStringList &output) {
     }
 
     if (reportParametersPostfix) {
-      foreach (cs8Variable *lvar, program->parameterModel()->variableList()) {
+      foreach (cs8Variable *lvar,
+               program->parameterModel()->variableListByType()) {
         if (!lvar->name().endsWith('_')) {
           output.append(QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>1<"
                                 "msg>%2<file>%3")
@@ -1134,17 +1138,19 @@ QStringList cs8Application::checkEnumerations() const {
       if (constSet->values(i.key()).size() > 1) {
         QString msg;
         for (const auto &key : constSet->values(i.key())) {
-          msg += key + ", ";
+          if (m_globalVariableModel->findVariableByName(key)
+                  ->linterDirective() != "ignore")
+            msg += key + ", ";
         }
         msg.chop(2);
-        output.append(
-            QString(
-                "<level>Error<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
-                .arg("")
-                .arg("Global variables '" + msg + "' have the same value '" +
-                     i.key() + "'")
-                .arg(cellDataFilePath(true))
-                .arg(0));
+        if (!msg.isEmpty())
+          output.append(QString("<level>Error<CLASS>DATA<P1>%1<P2>CODE<line>%4<"
+                                "msg>%2<file>%3")
+                            .arg("")
+                            .arg("Global variables '" + msg +
+                                 "' have the same value '" + i.key() + "'")
+                            .arg(cellDataFilePath(true))
+                            .arg(0));
         break;
       }
     }
@@ -1404,7 +1410,7 @@ void cs8Application::moveParamsToGlobals(cs8Program *program) {
       // remove trailing '_'
       if (newName.endsWith('_'))
         newName.chop(1);
-      var->setName(newName);
+      var->setName(newName, false);
       parameters << newName;
       // add variable to global list if it does not exist yet
       if (!m_globalVariableModel->variableNameList().contains(newName)) {
@@ -1431,7 +1437,8 @@ void cs8Application::moveParamsToGlobals(cs8Program *program) {
       program->setCode(code);
       i--;
     } else {
-      parameters << program->parameterModel()->variableList().at(i)->name();
+      parameters
+          << program->parameterModel()->variableListByType().at(i)->name();
     }
   }
   emit modified(true);
