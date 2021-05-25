@@ -83,13 +83,13 @@ void cs8Program::updateCodeModel() {
   QString c = val3Code(false);
   QRegularExpression rx;
   QString pattern = R"RX((\b(%1)\b)(?=([^\"]*\"[^\"]*\")*[^\"]*$))RX";
-  foreach (cs8Variable *var, m_localVariableModel->variableList()) {
+  foreach (cs8Variable *var, m_localVariableModel->variableListByType()) {
     var->clearSymbolReferences();
     rx.setPattern(pattern.arg(var->name()));
     QRegularExpressionMatchIterator i = rx.globalMatch(c);
     while (i.hasNext()) {
       QRegularExpressionMatch match = i.next();
-      QString word = match.captured(2);
+      // QString word = match.captured(2);
       int symbolPos = match.capturedStart(2);
       int line = c.left(symbolPos).count(QRegExp("\n")) + 1 + m_headerLines;
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
@@ -101,13 +101,13 @@ void cs8Program::updateCodeModel() {
     //         << var->symbolReferences();
   }
 
-  foreach (cs8Variable *var, m_parameterModel->variableList()) {
+  foreach (cs8Variable *var, m_parameterModel->variableListByType()) {
     var->clearSymbolReferences();
     rx.setPattern(pattern.arg(var->name()));
     QRegularExpressionMatchIterator i = rx.globalMatch(c);
     while (i.hasNext()) {
       QRegularExpressionMatch match = i.next();
-      QString word = match.captured(2);
+      // QString word = match.captured(2);
       int symbolPos = match.capturedStart(2);
       int line = c.left(symbolPos).count(QRegExp("\n")) + 1 + m_headerLines;
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
@@ -121,13 +121,13 @@ void cs8Program::updateCodeModel() {
 
   if (m_application) {
     foreach (cs8Variable *var,
-             m_application->globalVariableModel()->variableList()) {
+             m_application->globalVariableModel()->variableListByType()) {
       // var->clearLineOccurences();
       rx.setPattern(pattern.arg(var->name()));
       QRegularExpressionMatchIterator i = rx.globalMatch(c);
       while (i.hasNext()) {
         QRegularExpressionMatch match = i.next();
-        QString word = match.captured(2);
+        // QString word = match.captured(2);
         int symbolPos = match.capturedStart(2);
         int line = c.left(symbolPos).count(QRegExp("\n")) + 1 + m_headerLines;
         int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
@@ -223,14 +223,28 @@ void cs8Program::tidyUpCode(QString &code) {
 
 void cs8Program::setLinterDirective(const QString &directive,
                                     const QString &symbolName) {
-  auto var = m_localVariableModel->getVarByName(symbolName);
-  if (!var)
-    var = m_parameterModel->getVarByName(symbolName);
-  if (!var && m_application)
-    var = m_application->globalVariableModel()->getVarByName(symbolName);
-
-  if (var)
+  QRegExp rx;
+  rx.setPattern(symbolName.trimmed());
+  rx.setPatternSyntax(QRegExp::Wildcard);
+  //
+  foreach (auto var, m_localVariableModel->variableListByName(rx))
     var->setLinterDirective(directive);
+  foreach (auto var, m_parameterModel->variableListByName(rx))
+    var->setLinterDirective(directive);
+  if (m_application)
+    foreach (auto var,
+             m_application->globalVariableModel()->variableListByName(rx))
+      var->setLinterDirective(directive);
+  /*
+auto var = m_localVariableModel->getVarByName(symbolName);
+if (!var)
+  var = m_parameterModel->getVarByName(symbolName);
+if (!var && m_application)
+  var = m_application->globalVariableModel()->getVarByName(symbolName);
+
+if (var)
+  var->setLinterDirective(directive);
+*/
 }
 
 QString cs8Program::getAdditionalHintMessage() const {
@@ -372,7 +386,7 @@ void cs8Program::setCode(const QString &code, bool parseDoc_) {
 
 void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel) {
   m_parameterModel->clear();
-  foreach (cs8Variable *param, sourceModel->variableList()) {
+  foreach (cs8Variable *param, sourceModel->variableListByType()) {
     QDomElement element = param->element().cloneNode(true).toElement();
     m_parameterModel->addVariable(element, param->description());
   }
@@ -783,7 +797,7 @@ QString cs8Program::documentation(bool withPrefix, bool forCOutput) const {
   }
   // out += "\n";
   // out =list.join("\n");
-  foreach (cs8Variable *parameter, m_parameterModel->variableList()) {
+  foreach (cs8Variable *parameter, m_parameterModel->variableListByType()) {
     out += parameter->documentation(withPrefix, forCOutput);
   }
 
@@ -795,16 +809,17 @@ QString cs8Program::formattedDescriptionHeader() const {
   while (txt.endsWith("\n"))
     txt.chop(1);
   // retrieve documentation of parameters
-  for (int i = 0; i <= m_parameterModel->variableList().count() - 1; i++) {
+  for (int i = 0; i <= m_parameterModel->variableListByType().count() - 1;
+       i++) {
     if (i == 0)
       txt += "\n";
-    if (m_parameterModel->variableList()
+    if (m_parameterModel->variableListByType()
             .at(i)
             ->documentation(false, false)
             .length() > 2)
-      txt += m_parameterModel->variableList().at(i)->name().leftJustified(18,
-                                                                          ' ') +
-             ": " + m_parameterModel->variableList().at(i)->description();
+      txt += m_parameterModel->variableListByType().at(i)->name().leftJustified(
+                 18, ' ') +
+             ": " + m_parameterModel->variableListByType().at(i)->description();
   }
   QRegularExpression rx("(\\s|^)((\\w*)\\\\_)");
   while (rx.match(txt).hasMatch()) {

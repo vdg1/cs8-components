@@ -339,7 +339,7 @@ void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
 const QList<cs8Variable::symbolPosition> &
 cs8Variable::symbolReferences() const {
   // qDebug() << __FUNCTION__ << this << name() << ":" << m_lineOccurences;
-  return m_lineOccurences;
+  return m_references;
 }
 
 const QString &cs8Variable::linterDirective() const {
@@ -386,11 +386,11 @@ void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
   }
 }
 
-void cs8Variable::clearSymbolReferences() { m_lineOccurences.clear(); }
+void cs8Variable::clearSymbolReferences() { m_references.clear(); }
 
 void cs8Variable::addSymbolReference(int lineNumber, int column,
                                      const QString &programName) {
-  m_lineOccurences.append(symbolPosition(lineNumber, column, programName));
+  m_references.append(symbolPosition(lineNumber, column, programName));
 }
 
 void cs8Variable::setUse(QString value) {
@@ -481,10 +481,12 @@ QString cs8Variable::xsiType() const {
   return m_element.attribute("xsi:type", "array");
 }
 
-void cs8Variable::setName(QString value) {
+void cs8Variable::setName(QString value, bool includeReferences) {
   emit modified();
   m_name = value;
   m_element.setAttribute("name", value);
+  if (includeReferences) {
+  }
 }
 
 QString cs8Variable::name() const { return m_element.attribute("name"); }

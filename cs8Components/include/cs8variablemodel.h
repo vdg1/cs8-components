@@ -44,8 +44,10 @@ public:
   cs8Variable *variable(QModelIndex index);
   QStringList variableNameList();
   QList<cs8Variable *> &rvariableList();
-  QList<cs8Variable *> variableList(const QString &type = QString()) const;
-  QList<cs8Variable *> variableList(const QRegularExpression &rx) const;
+  QList<cs8Variable *>
+  variableListByType(const QString &type = QString()) const;
+  QList<cs8Variable *> variableListByType(const QRegularExpression &rx) const;
+  QList<cs8Variable *> variableListByName(const QRegExp &rx) const;
 
   cs8Variable *createVariable(const QString &name, const QString &type);
   bool hasDocumentation();

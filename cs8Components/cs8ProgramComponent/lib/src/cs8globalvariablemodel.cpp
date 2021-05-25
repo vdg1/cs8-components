@@ -6,7 +6,7 @@ cs8GlobalVariableModel::cs8GlobalVariableModel(QObject *parent)
 void cs8GlobalVariableModel::writeXMLStream(QXmlStreamWriter &stream) {
   stream.writeStartElement("Datas");
 
-  for (const auto item : variableList()) {
+  for (const auto item : variableListByType()) {
     item->writeXMLStream(stream);
   }
   stream.writeEndElement();

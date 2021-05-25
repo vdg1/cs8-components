@@ -80,7 +80,8 @@ QList<cs8Variable *> &cs8VariableModel::rvariableList() {
   return m_variableList;
 }
 
-QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) const {
+QList<cs8Variable *>
+cs8VariableModel::variableListByType(const QString &type) const {
   if (type.isEmpty()) {
     return m_variableList;
   } else {
@@ -94,7 +95,7 @@ QList<cs8Variable *> cs8VariableModel::variableList(const QString &type) const {
 }
 
 QList<cs8Variable *>
-cs8VariableModel::variableList(const QRegularExpression &rx) const {
+cs8VariableModel::variableListByType(const QRegularExpression &rx) const {
   QList<cs8Variable *> list;
   foreach (cs8Variable *var, m_variableList) {
     QRegularExpressionMatch match = rx.match(var->type());
@@ -104,10 +105,20 @@ cs8VariableModel::variableList(const QRegularExpression &rx) const {
   return list;
 }
 
+QList<cs8Variable *>
+cs8VariableModel::variableListByName(const QRegExp &rx) const {
+  QList<cs8Variable *> list;
+  foreach (cs8Variable *var, m_variableList) {
+    if (rx.indexIn(var->name()) != -1)
+      list.append(var);
+  }
+  return list;
+}
+
 cs8Variable *cs8VariableModel::createVariable(const QString &name,
                                               const QString &type) {
   auto *variable = new cs8Variable(this);
-  variable->setName(name);
+  variable->setName(name, false);
   variable->setType(type);
   // variable->setParent(this);
   m_variableList.append(variable);
@@ -358,10 +369,10 @@ void cs8VariableModel::setWithUndocumentedSymbols(
 }
 
 void cs8VariableModel::writeXMLStream(QXmlStreamWriter &stream) {
-  if (variableList().count() == 0)
+  if (variableListByType().count() == 0)
     return;
   stream.writeStartElement("Locals");
-  for (const auto item : variableList()) {
+  for (const auto item : variableListByType()) {
     item->writeXMLStream(stream);
   }
   stream.writeEndElement();

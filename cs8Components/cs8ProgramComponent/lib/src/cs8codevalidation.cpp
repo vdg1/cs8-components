@@ -274,17 +274,17 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
   // run global data rules
 
   validationMessages << runDataValidationRule(
-      app, 0, &app->globalVariableModel()->variableList(), m_GlobalDataRules,
-      m_GlobalDataRulesSeverity);
+      app, 0, &app->globalVariableModel()->variableListByType(),
+      m_GlobalDataRules, m_GlobalDataRulesSeverity);
 
   foreach (cs8Program *program, app->programModel()->programList()) {
 
     validationMessages << runDataValidationRule(
-        app, program, &program->parameterModel()->variableList(),
+        app, program, &program->parameterModel()->variableListByType(),
         m_ParameterRules, m_ParameterRulesSeverity);
 
     validationMessages << runDataValidationRule(
-        app, program, &program->localVariableModel()->variableList(),
+        app, program, &program->localVariableModel()->variableListByType(),
         m_LocalDataRules, m_LocalDataRulesSeverity);
 
     validationMessages << runDataValidationRule(app, program, 0, m_ProgramRules,
@@ -304,7 +304,7 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
   }
 
   // check values of ENUMS
-  // validationMessages << app->checkEnumerations();
+  validationMessages << app->checkEnumerations();
 
   // check for obsolete PGX files
   // retrieve list of pgx files from file system

@@ -50,7 +50,7 @@ public:
   void setXsiType(const QString &type);
   QString xsiType() const;
 
-  void setName(QString value);
+  void setName(QString value, bool includeReferences);
   QString name() const;
 
   QString toString(bool withTypeDefinition = true);
@@ -104,7 +104,7 @@ protected:
 
   void writeValueElements(QXmlStreamWriter &stream);
   void writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes);
-  QList<symbolPosition> m_lineOccurences;
+  QList<symbolPosition> m_references;
 
 signals:
   void modified();
