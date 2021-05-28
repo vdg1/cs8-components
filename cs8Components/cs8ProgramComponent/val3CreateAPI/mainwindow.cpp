@@ -172,14 +172,14 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                     .arg(program->parameterModel()->toString(false)));
 
             cs8DestApp->moveParamsToGlobals(newProgram);
-            newProgram->setDescription(program->briefDescription(true));
+            newProgram->setBriefDescription(program->briefDescription(true));
             newProgram->setName(name);
             // newProgram->setDescription(program->briefDescription(true));
             newProgram->setDetailedDocumentation(
                 program->detailedDocumentation());
             // newProgram->setDescription(program->briefDescription(true));
             newProgram->setAdditionalHintMessage(
-                "DO NOT MODIFY THIS PROGRAM! CHANGES WILL BE "
+                "DO NOT MODIFY THIS APPLICATION! CHANGES WILL BE "
                 "OVERWRITTEN ON NEXT UPDATE OF SAXEAUTOMATION!");
             newProgram->setDetailedDocumentation(
                 program->detailedDocumentation());
@@ -210,6 +210,8 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             cs8DestApp->programModel()->createProgram("init");
         initProgram->setName("init");
         initProgram->setPublic(true);
+        initProgram->setBriefDescription("Initialization of API library. Do "
+                                         "not call this program directly!");
         // initProgram->localVariableModel()->createVariable("i", "num");
         QString initProgramCode;
         // create public CONSTS

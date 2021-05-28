@@ -54,7 +54,7 @@ public:
   QString name() const;
 
   QString toString(bool withTypeDefinition = true);
-  QString documentation(bool withPrefix, bool forCOutput);
+  QString documentation(bool withPrefix, bool forCOutput) const;
   bool isPublic() const;
   void setPublic(bool m_public);
   QString publicStr() const;

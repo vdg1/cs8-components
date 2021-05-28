@@ -836,6 +836,11 @@ bool cs8Application::saveDataFile(const QString &fileName) {
   if (buffer.buffer().right(1) == "\n")
     buffer.buffer().chop(1);
   //
+  // insert BOM
+  buffer.buffer().insert(0, static_cast<char>(0xBF));
+  buffer.buffer().insert(0, static_cast<char>(0xBB));
+  buffer.buffer().insert(0, static_cast<char>(0xEF));
+  //
   QString fileName_ = fileName;
   QFile file(fileName_);
   if (!file.open(QIODevice::WriteOnly))
@@ -865,6 +870,8 @@ bool cs8Application::save(const QString &path, const QString &name,
 
     cs8Program *prog = m_programModel->getProgramByName("zzDocumentation");
     prog->setGlobalDocContainer(true);
+    if (prog->briefDescription(true).isEmpty())
+      prog->setBriefDescription("This program contains documentation tags");
     prog->clearDocumentationTags();
 
     if (!m_briefModuleDocumentation.isEmpty() || true) {
@@ -879,13 +886,15 @@ bool cs8Application::save(const QString &path, const QString &name,
       prog->setMainPageDocumentation(m_mainPageDocumentation);
     }
 
-    foreach (cs8Variable *globalVar,
+    foreach (const cs8Variable *globalVar,
              m_globalVariableModel->variableListByType()) {
       QString doc = globalVar->documentation(false, false);
-      qDebug() << "global var: " << globalVar->name() << ":" << doc;
+      // qDebug() << "global var: " << globalVar->name() << ":" << doc;
       if (!doc.isEmpty() || m_withUndocumentedSymbols) {
         prog->addTag("global", globalVar->name(), doc);
       }
+      if (!globalVar->linterDirective().isEmpty())
+        prog->addTag("linter", globalVar->linterDirective(), globalVar->name());
     }
   }
   QDir dir;
@@ -1137,20 +1146,25 @@ QStringList cs8Application::checkEnumerations() const {
       i.next();
       if (constSet->values(i.key()).size() > 1) {
         QString msg;
+        QString firstName;
         for (const auto &key : constSet->values(i.key())) {
           if (m_globalVariableModel->findVariableByName(key)
-                  ->linterDirective() != "ignore")
+                  ->linterDirective() != "ignore") {
+            if (msg.isEmpty())
+              firstName = key;
             msg += key + ", ";
+          }
         }
         msg.chop(2);
         if (!msg.isEmpty())
-          output.append(QString("<level>Error<CLASS>DATA<P1>%1<P2>CODE<line>%4<"
+          output.append(QString("<level>Error<CLASS>DATA<P1>%1<P2>%5<line>%4<"
                                 "msg>%2<file>%3")
                             .arg("")
                             .arg("Global variables '" + msg +
                                  "' have the same value '" + i.key() + "'")
                             .arg(cellDataFilePath(true))
-                            .arg(0));
+                            .arg(0)
+                            .arg(firstName));
         break;
       }
     }
@@ -1324,7 +1338,7 @@ bool cs8Application::writeProjectFile() {
     stream.writeAttribute("file", m_projectName + ".pgx");
     stream.writeEndElement();
   } else {
-    for (auto item : m_programModel->programList()) {
+    for (const auto item : m_programModel->programList()) {
       stream.writeStartElement("Program");
       stream.writeAttribute("file", item->fileName());
       stream.writeEndElement();
@@ -1339,7 +1353,7 @@ bool cs8Application::writeProjectFile() {
   stream.writeEndElement();
 
   stream.writeStartElement("Libraries");
-  for (auto item : m_libraryAliasModel->list()) {
+  for (const auto item : m_libraryAliasModel->list()) {
     stream.writeStartElement("Library");
     stream.writeAttribute("alias", item->name());
     stream.writeAttribute("path", item->path());
@@ -1349,14 +1363,16 @@ bool cs8Application::writeProjectFile() {
   }
   stream.writeEndElement();
 
-  stream.writeStartElement("Types");
-  for (auto item : m_typeModel->list()) {
-    stream.writeStartElement("Type");
-    stream.writeAttribute("name", item->name());
-    stream.writeAttribute("path", item->path());
+  if (m_typeModel->list().count() > 0) {
+    stream.writeStartElement("Types");
+    for (const auto item : m_typeModel->list()) {
+      stream.writeStartElement("Type");
+      stream.writeAttribute("name", item->name());
+      stream.writeAttribute("path", item->path());
+      stream.writeEndElement();
+    }
     stream.writeEndElement();
   }
-  stream.writeEndElement();
 
   stream.writeEndDocument();
 
@@ -1364,6 +1380,11 @@ bool cs8Application::writeProjectFile() {
   buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
   if (buffer.buffer().right(1) == "\n")
     buffer.buffer().chop(1);
+  //
+  // insert BOM
+  buffer.buffer().insert(0, static_cast<char>(0xBF));
+  buffer.buffer().insert(0, static_cast<char>(0xBB));
+  buffer.buffer().insert(0, static_cast<char>(0xEF));
   //
   QString fileName_ = m_projectPath + m_projectName + ".pjx";
   QFile file(fileName_);

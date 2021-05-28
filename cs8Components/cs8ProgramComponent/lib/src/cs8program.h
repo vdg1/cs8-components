@@ -72,7 +72,7 @@ public:
   QString toCSyntax();
   void parseDocumentation(const QString &code);
 
-  void setDescription(const QString &theValue);
+  void setBriefDescription(const QString &theValue);
   void setDetailedDocumentation(const QString &doc);
   QString detailedDocumentation() const;
 

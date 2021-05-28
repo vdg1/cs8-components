@@ -613,7 +613,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
         // qDebug() << "global var: " << tagName << ":" << tagText;
         emit globalVariableDocumentationFound(tagName, tagText);
       } else if (tagType == "brief") {
-        setDescription(tagText);
+        setBriefDescription(tagText);
       } else if (tagType == "doc") {
         setDetailedDocumentation(tagText);
       } else if (tagType == "module") {
@@ -703,7 +703,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
             ->getVarByName(tagName)
             ->setDescription(tagText);
     } else if (tagType == "brief") {
-      setDescription(tagText);
+      setBriefDescription(tagText);
     } else if (tagType == "doc") {
       setDetailedDocumentation(tagText);
     } else if (tagType == "briefmodule") {
@@ -829,7 +829,7 @@ QString cs8Program::formattedDescriptionHeader() const {
   return txt.trimmed();
 }
 
-void cs8Program::setDescription(const QString &theValue) {
+void cs8Program::setBriefDescription(const QString &theValue) {
   m_briefDescription = theValue;
   emit modified();
 }

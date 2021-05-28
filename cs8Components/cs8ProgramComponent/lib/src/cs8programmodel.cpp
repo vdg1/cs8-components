@@ -271,7 +271,7 @@ bool cs8ProgramModel::setData(const QModelIndex &index, const QVariant &value,
     m_programList.at(index.row())->setDetailedDocumentation(value.toString());
 
   if (role == Qt::UserRole + 11)
-    m_programList.at(index.row())->setDescription(value.toString());
+    m_programList.at(index.row())->setBriefDescription(value.toString());
 
   return true;
 }

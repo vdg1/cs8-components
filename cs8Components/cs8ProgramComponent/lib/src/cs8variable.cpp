@@ -56,7 +56,7 @@ QString cs8Variable::toString(bool withTypeDefinition) {
     return QString("%1").arg(name());
 }
 
-QString cs8Variable::documentation(bool withPrefix, bool forCOutput) {
+QString cs8Variable::documentation(bool withPrefix, bool forCOutput) const {
   QString out;
   QString prefix = withPrefix ? "///" : "";
   if (m_description.isEmpty())
@@ -305,17 +305,33 @@ void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
                                                << "rx"
                                                << "ry"
                                                << "rz"
+                                               << "j1"
+                                               << "j2"
+                                               << "j3"
+                                               << "j4"
+                                               << "j5"
+                                               << "j6"
+                                               << "accel"
+                                               << "vel"
+                                               << "decel"
+                                               << "leave"
+                                               << "reach"
                                                << "xsi:type"
                                                << "type"
                                                << "size"
+                                               << "shoulder"
+                                               << "elbow"
+                                               << "wrist"
                                                << "fatherId";
 
     stream.writeStartElement(valueElement.tagName());
-    qDebug() << "attributes before: " << valueElement.attributes().count();
+    // qDebug() << "attributes before: " << valueElement.attributes().count()
+    //         << attributeList;
     // write attributes in pre defined order
     for (const auto &attr : qAsConst(attributeOrder)) {
       if (attributeList.contains(attr)) {
         QDomNode attribute = valueAttributes.namedItem(attr);
+        // qDebug() << "write ordered attribute" << attribute.nodeName();
         stream.writeAttribute(attribute.nodeName(), attribute.nodeValue());
         attributeList.removeAll(attr);
       }
@@ -324,6 +340,7 @@ void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
     while (attributeList.length() > 0) {
       QDomNode attribute = valueAttributes.namedItem(attributeList.first());
       Q_ASSERT(attribute.isAttr());
+      // qDebug() << "write remaining attribute" << attribute.nodeName();
       stream.writeAttribute(attribute.nodeName(), attribute.nodeValue());
       attributeList.removeFirst();
     }
@@ -332,7 +349,7 @@ void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
       writeNodes(stream, valueElement.childNodes());
     }
     stream.writeEndElement();
-    qDebug() << "attributes after : " << valueElement.attributes().count();
+    // qDebug() << "attributes after : " << valueElement.attributes().count();
   }
 }
 

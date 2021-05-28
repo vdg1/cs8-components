@@ -52,7 +52,7 @@
       <message><![CDATA[<level>%level%<CLASS>PRG<P1>%progName%<P2>CODE<line>%lineNumber%<msg>Parameter %varName% does not end with '_'<file>%fileName%]]></message>
     </variable>
     <reference checkProperty="notReferenced" severity="1">
-      <message><![CDATA[<level>%level%<CLASS>DATA<P1>%varType%<P2>%varName%<line>%lineNumber%<msg>Program parameter %varName% is not used in program %progName%<file>%fileName%]]></message>
+      <message><![CDATA[<level>%level%<CLASS>PRG<P1>%progName%<P2>%varName%<line>%lineNumber%<msg>Program parameter %varName% is not used in program %progName%<file>%fileName%]]></message>
     </reference>
   </parameter>
   <localData>
