@@ -39,8 +39,7 @@ else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/
 
 LIBS += -lversion
 
-RESOURCES += \
-    val3precompiler.qrc
+RESOURCES +=
 
 HEADERS += \
     ../common/versionInfo.h \

@@ -88,6 +88,7 @@ win32 {
 }
 
 RESOURCES += \
+    resources/linterRules.qrc \
     resources/markdowneditor.qrc
 
 
