@@ -1,9 +1,11 @@
 #include "cs8variable.h"
+#include "cs8application.h"
+#include "cs8variablemodel.h"
 #include <QStringList>
 //
 cs8Variable::cs8Variable(QDomElement &element, const QString &description,
                          QObject *parent)
-    : QObject(parent) {
+    : QObject(parent), cs8ReferencesAndLinter() {
   m_element = element;
   m_description = description;
   m_buildInTypes = setBuildInVariableTypes();
@@ -11,7 +13,8 @@ cs8Variable::cs8Variable(QDomElement &element, const QString &description,
   // qDebug() << definition() << valuesToString();
 }
 
-cs8Variable::cs8Variable(QObject *parent) : QObject(parent) {
+cs8Variable::cs8Variable(QObject *parent)
+    : QObject(parent), cs8ReferencesAndLinter() {
   m_docFragment = m_doc.createDocumentFragment();
   m_element = m_doc.createElement("Data");
   m_docFragment.appendChild(m_element);
@@ -353,20 +356,6 @@ void cs8Variable::writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes) {
   }
 }
 
-const QList<cs8Variable::symbolPosition> &
-cs8Variable::symbolReferences() const {
-  // qDebug() << __FUNCTION__ << this << name() << ":" << m_lineOccurences;
-  return m_references;
-}
-
-const QString &cs8Variable::linterDirective() const {
-  return m_linterDirective;
-}
-
-void cs8Variable::setLinterDirective(const QString &newLinterDirective) {
-  m_linterDirective = newLinterDirective;
-}
-
 void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
   switch (scope()) {
   case Parameter:
@@ -401,13 +390,6 @@ void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
     stream.writeEndElement();
     break;
   }
-}
-
-void cs8Variable::clearSymbolReferences() { m_references.clear(); }
-
-void cs8Variable::addSymbolReference(int lineNumber, int column,
-                                     const QString &programName) {
-  m_references.append(symbolPosition(lineNumber, column, programName));
 }
 
 void cs8Variable::setUse(QString value) {
@@ -498,26 +480,25 @@ QString cs8Variable::xsiType() const {
   return m_element.attribute("xsi:type", "array");
 }
 
-void cs8Variable::setName(QString value, bool includeReferences) {
-  emit modified();
-  m_name = value;
-  m_element.setAttribute("name", value);
-  if (includeReferences) {
+bool cs8Variable::setName(QString value, cs8Application *application) {
+  cs8VariableModel *m = qobject_cast<cs8VariableModel *>(parent());
+  if (m_name == value)
+    return true;
+  else if (m->getVarByName(value) != nullptr)
+    return false;
+  else {
+    emit modified();
+    QString oldName = m_name;
+    m_name = value;
+    m_element.setAttribute("name", value);
+    if (application) {
+      updateReference(application, oldName, value);
+      application->programModel()->updateCodeModel();
+    }
   }
+  return true;
 }
 
 QString cs8Variable::name() const { return m_element.attribute("name"); }
 
 //
-
-cs8Variable::symbolPosition::symbolPosition(int l, int c, const QString &r)
-    : line(l), column(c), reference(r) {}
-
-cs8Variable::symbolPosition::symbolPosition()
-    : line(0), column(0), reference("") {}
-
-QDebug operator<<(QDebug dbg, const cs8Variable::symbolPosition &type) {
-  dbg.nospace() << "reference(" << type.line << "," << type.column
-                << type.reference << ")";
-  return dbg.maybeSpace();
-}

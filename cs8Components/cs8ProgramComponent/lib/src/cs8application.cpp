@@ -717,6 +717,7 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
       }
     }
     m_callList = buildCallList();
+    m_programModel->updateCodeModel();
     return true;
   } else {
     qDebug() << "failed to parse project file of application" << name();

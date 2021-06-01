@@ -4,7 +4,9 @@
 #include "cs8globalvariablemodel.h"
 #include "cs8localvariablemodel.h"
 #include "cs8parametermodel.h"
+#include "cs8referencesandlinter.h"
 #include "cs8variablemodel.h"
+
 #include <QDebug>
 #include <QDomDocument>
 #include <QObject>
@@ -12,7 +14,7 @@
 
 //
 class cs8Application;
-class cs8Program : public QObject {
+class cs8Program : public QObject, public cs8ReferencesAndLinter {
   Q_OBJECT
 
 public:
@@ -32,7 +34,7 @@ public:
   QString name() const;
 
   QString fileName() const;
-  void setName(const QString &name);
+  bool setName(const QString &name, cs8Application *application = nullptr);
   QString definition() const;
   QString documentation(bool withPrefix = true, bool forCOutput = false) const;
 

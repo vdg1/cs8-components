@@ -125,7 +125,7 @@ QVariant cs8ProgramModel::data(const QModelIndex &index, int role) const {
 }
 
 cs8Program *cs8ProgramModel::createProgram(const QString &programName) {
-  cs8Program *program = new cs8Program(this->parent());
+  cs8Program *program = new cs8Program(this);
 
   m_programList.append(program);
   connect(program, &cs8Program::globalVariableDocumentationFound, this,
@@ -144,7 +144,7 @@ cs8Program *cs8ProgramModel::createProgram(const QString &programName) {
 
   program->setCellPath(m_cellPath);
   if (!programName.isEmpty())
-    program->setName(programName);
+    program->setName(programName, nullptr);
   // Q_ASSERT(!programName.isEmpty());
   return program;
 }
@@ -153,6 +153,15 @@ bool cs8ProgramModel::getHasByteOrderMark() const { return m_hasByteOrderMark; }
 
 void cs8ProgramModel::setHasByteOrderMark(bool hasByteOrderMark) {
   m_hasByteOrderMark = hasByteOrderMark;
+}
+
+void cs8ProgramModel::updateCodeModel() {
+  for (auto prog : qAsConst(m_programList)) {
+    prog->clearSymbolReferences();
+  }
+  for (auto prog : qAsConst(m_programList)) {
+    prog->updateCodeModel();
+  }
 }
 
 bool cs8ProgramModel::addProgramFile(const QString &filePath) {

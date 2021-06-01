@@ -1,6 +1,7 @@
 HEADERS += src/cs8project.h \
     src/cs8program.h \
     src/cs8programmodel.h \
+    src/cs8referencesandlinter.h \
     src/cs8variable.h \
     src/cs8variablemodel.h \
     src/cs8parameter.h \
@@ -27,6 +28,7 @@ HEADERS += src/cs8project.h \
 SOURCES += src/cs8project.cpp \
     src/cs8program.cpp \
     src/cs8programmodel.cpp \
+    src/cs8referencesandlinter.cpp \
     src/cs8variable.cpp \
     src/cs8variablemodel.cpp \
     src/cs8parameter.cpp \

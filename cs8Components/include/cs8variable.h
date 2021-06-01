@@ -1,6 +1,7 @@
 #ifndef CS8VARIABLE_H
 #define CS8VARIABLE_H
 //
+#include "cs8referencesandlinter.h"
 #include <QDebug>
 #include <QDomElement>
 #include <QHash>
@@ -10,19 +11,12 @@
 #include <QVariant>
 #include <QXmlStreamWriter>
 //
-
-class cs8Variable : public QObject {
+class cs8Application;
+class cs8Variable : public QObject, public cs8ReferencesAndLinter {
 
   Q_OBJECT
 
 public:
-  struct symbolPosition {
-    symbolPosition(int l, int c, const QString &r);
-    symbolPosition();
-    int line, column;
-    QString reference;
-  };
-
   enum DeclarationScope { Local, Parameter, Global };
   Q_ENUM(DeclarationScope)
 
@@ -50,7 +44,7 @@ public:
   void setXsiType(const QString &type);
   QString xsiType() const;
 
-  void setName(QString value, bool includeReferences);
+  bool setName(QString value, cs8Application *application);
   QString name() const;
 
   QString toString(bool withTypeDefinition = true);
@@ -83,14 +77,6 @@ public:
                                 QString &index);
 
   void writeXMLStream(QXmlStreamWriter &stream);
-  void clearSymbolReferences();
-  void addSymbolReference(int lineNumber, int column,
-                          const QString &programName);
-
-  const QList<symbolPosition> &symbolReferences() const;
-
-  const QString &linterDirective() const;
-  void setLinterDirective(const QString &newLinterDirective);
 
 protected:
   QStringList m_buildInTypes;
@@ -99,16 +85,13 @@ protected:
   QString m_name;
   QDomDocumentFragment m_docFragment;
   QDomDocument m_doc;
-  QString m_linterDirective;
   static QStringList setBuildInVariableTypes();
 
   void writeValueElements(QXmlStreamWriter &stream);
   void writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes);
-  QList<symbolPosition> m_references;
 
 signals:
   void modified();
 };
-QDebug operator<<(QDebug dbg, const cs8Variable::symbolPosition &type);
 
 #endif

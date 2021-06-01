@@ -15,8 +15,8 @@
 #define MAX_LENGTH 40
 //
 cs8Program::cs8Program(QObject *parent)
-    : QObject(parent), m_public(false), m_withIfBlock(true),
-      m_hasByteOrderMark(true) {
+    : QObject(parent), cs8ReferencesAndLinter(), m_public(false),
+      m_withIfBlock(true), m_hasByteOrderMark(true) {
   m_localVariableModel = new cs8LocalVariableModel(this);
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
           &cs8Program::modified);
@@ -25,12 +25,12 @@ cs8Program::cs8Program(QObject *parent)
           &cs8Program::modified);
   m_globalDocContainer = false;
   m_programCode = "begin\nend";
-  m_application = qobject_cast<cs8Application *>(parent);
+  m_application = qobject_cast<cs8Application *>(parent->parent());
 }
 
 cs8Program::cs8Program()
-    : QObject(), m_application(0), m_public(false), m_withIfBlock(true),
-      m_hasByteOrderMark(true) {
+    : QObject(), cs8ReferencesAndLinter(), m_application(0), m_public(false),
+      m_withIfBlock(true), m_hasByteOrderMark(true) {
   m_localVariableModel = new cs8LocalVariableModel(this);
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
           &cs8Program::modified);
@@ -75,12 +75,12 @@ void cs8Program::printChildNodes(const QDomElement &element) {
 }
 
 void cs8Program::updateCodeModel() {
-  // qDebug() << __FUNCTION__ << name();
+  qDebug() << __FUNCTION__ << name();
   parseDocumentation(val3Code());
   // update token list
   m_variableTokens = variableTokens(false);
   // update variable occurences
-  QString c = val3Code(false);
+  QString c = val3Code(true);
   QRegularExpression rx;
   QString pattern = R"RX((\b(%1)\b)(?=([^\"]*\"[^\"]*\")*[^\"]*$))RX";
   foreach (cs8Variable *var, m_localVariableModel->variableListByType()) {
@@ -91,11 +91,11 @@ void cs8Program::updateCodeModel() {
       QRegularExpressionMatch match = i.next();
       // QString word = match.captured(2);
       int symbolPos = match.capturedStart(2);
-      int line = c.left(symbolPos).count(QRegExp("\n")) + 1 + m_headerLines;
+      int line = c.left(symbolPos).count(QRegExp("\n"));
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
-      int column = symbolPos - lineStart;
+      int column = symbolPos - lineStart - 1;
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
-        var->addSymbolReference(line, column, "");
+        var->addSymbolReference(line, column, name());
     }
     // qDebug() << "occurence of local var:" << var->name() << ":"
     //         << var->symbolReferences();
@@ -109,9 +109,9 @@ void cs8Program::updateCodeModel() {
       QRegularExpressionMatch match = i.next();
       // QString word = match.captured(2);
       int symbolPos = match.capturedStart(2);
-      int line = c.left(symbolPos).count(QRegExp("\n")) + 1 + m_headerLines;
+      int line = c.left(symbolPos).count(QRegExp("\n"));
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
-      int column = symbolPos - lineStart;
+      int column = symbolPos - lineStart - 1;
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
         var->addSymbolReference(line, column, name());
     }
@@ -122,22 +122,37 @@ void cs8Program::updateCodeModel() {
   if (m_application) {
     foreach (cs8Variable *var,
              m_application->globalVariableModel()->variableListByType()) {
-      // var->clearLineOccurences();
+      var->clearSymbolReferences(name());
       rx.setPattern(pattern.arg(var->name()));
       QRegularExpressionMatchIterator i = rx.globalMatch(c);
       while (i.hasNext()) {
         QRegularExpressionMatch match = i.next();
         // QString word = match.captured(2);
         int symbolPos = match.capturedStart(2);
-        int line = c.left(symbolPos).count(QRegExp("\n")) + 1 + m_headerLines;
+        int line = c.left(symbolPos).count(QRegExp("\n"));
         int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
-        int column = symbolPos - lineStart;
+        int column = symbolPos - lineStart - 1;
         if (!c.mid(lineStart, column).trimmed().startsWith("//"))
           var->addSymbolReference(line, column, name());
       }
       // if (var->symbolReferences().count() > 0)
-      //  qDebug() << "occurence of global var" << var->name() << ":"
-      //           << var->symbolReferences();
+      //   qDebug() << "occurence of global var" << var->name() << ":"
+      //            << var->symbolReferences();
+    }
+    foreach (cs8Program *prog, m_application->programModel()->programList()) {
+      // prog->clearSymbolReferences(name());
+      rx.setPattern(pattern.arg(prog->name()));
+      QRegularExpressionMatchIterator i = rx.globalMatch(c);
+      while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        // QString word = match.captured(2);
+        int symbolPos = match.capturedStart(2);
+        int line = c.left(symbolPos).count(QRegExp("\n"));
+        int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
+        int column = symbolPos - lineStart - 1;
+        if (!c.mid(lineStart, column).trimmed().startsWith("//"))
+          prog->addSymbolReference(line, column, name());
+      }
     }
   }
 }
@@ -189,7 +204,7 @@ void cs8Program::parseProgramSection(const QDomElement &programSection,
   }
 
   //
-  updateCodeModel();
+  // updateCodeModel();
 }
 
 bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
@@ -198,6 +213,7 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
   // printChildNodes(m_programsSection);
   QDomElement programSection = programsSection.firstChild().toElement();
   parseProgramSection(programSection, code);
+  updateCodeModel();
   return true;
 }
 
@@ -950,7 +966,23 @@ QString cs8Program::name() const {
 
 QString cs8Program::fileName() const { return name() + ".pgx"; }
 
-void cs8Program::setName(const QString &name) { m_name = name; }
+bool cs8Program::setName(const QString &name, cs8Application *application) {
+  cs8ProgramModel *m = qobject_cast<cs8ProgramModel *>(parent());
+  if (m_name == name)
+    return true;
+  else if (m->getProgramByName(name) != nullptr)
+    return false;
+  else {
+    emit modified();
+    QString oldName = m_name;
+    m_name = name;
+    if (application) {
+      updateReference(application, oldName, name);
+      m->updateCodeModel();
+    }
+  }
+  return true;
+}
 
 QString cs8Program::toDocumentedCode() {
   // QString documentation;
