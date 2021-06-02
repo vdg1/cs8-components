@@ -148,6 +148,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                   msg.replace("%progName%", program->name());
                   msg.replace("%fileName%", program->cellFilePath());
                 }
+                var->setLinterMessages(msg);
                 validationMessages << msg;
               }
             }
@@ -198,6 +199,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                       msg.replace("%progName%", program->name());
                       msg.replace("%fileName%", program->cellFilePath());
                     }
+                    var->setLinterMessages(msg);
                     validationMessages << msg;
                   }
                 }
@@ -215,6 +217,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                     msg.replace("%lineNumber%",
                                 QString("%1").arg(
                                     var->symbolReferences().value(0).line));
+                    var->setLinterMessages(msg);
                     validationMessages << msg;
                   }
                 }
@@ -244,6 +247,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                 msg.replace("%fileName%", program->cellFilePath());
                 msg.replace("%lineNumber%", "0");
                 msg.replace("%level%", level);
+                program->setLinterMessages(msg);
                 validationMessages << msg;
               }
             }
@@ -258,6 +262,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
           msg.replace("%fileName%", program->cellFilePath());
           msg.replace("%lineNumber%", "1");
           msg.replace("%level%", level);
+          program->setLinterMessages(msg);
           validationMessages << msg;
         }
       }

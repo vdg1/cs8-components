@@ -26,6 +26,10 @@ void cs8ReferencesAndLinter::setLinterDirective(
   m_linterDirective = newLinterDirective;
 }
 
+void cs8ReferencesAndLinter::setLinterMessages(const QString msg) {
+  m_linterMessage = msg;
+}
+
 void cs8ReferencesAndLinter::clearSymbolReferences(const QString &name) {
   if (name.isEmpty())
     m_references.clear();

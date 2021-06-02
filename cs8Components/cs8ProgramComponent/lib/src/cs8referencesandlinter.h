@@ -24,10 +24,12 @@ public:
 
   const QString &linterDirective() const;
   void setLinterDirective(const QString &newLinterDirective);
+  void setLinterMessages(const QString msg);
 
 protected:
   QList<symbolPosition> m_references;
   QString m_linterDirective;
+  QString m_linterMessage;
   void updateReference(cs8Application *application, const QString &from,
                        const QString &to);
 };
