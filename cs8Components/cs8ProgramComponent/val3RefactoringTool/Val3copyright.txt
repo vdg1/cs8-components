@@ -1,0 +1,8 @@
+********************************************************************
+* Copyright (C) 2010-2016 SAXE Process AB <process@saxe-group.com> *
+*                                                                  *
+* This file is part of SAXE Automation System.                     *
+*                                                                  *
+* SAXE Automation System can not be copied and/or distributed      *
+* without the expressed permission of SAXE Process AB              *
+********************************************************************

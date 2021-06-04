@@ -14,7 +14,9 @@ SUBDIRS = lib \
     val3PreCompiler \
     val3CreateAPI \
     val3CompilerDeployment \
-    chmlib
+    chmlib\
+    val3RefactoringTool\
+    mdi
    # importVPlus
 
 
@@ -28,3 +30,4 @@ val3CreateAPI.depends=lib
 val3CompilerDeployment.depends=lib
 saveAsS6.depends=lib
 testVal3Linter.depends=lib
+mdi.depends=lib

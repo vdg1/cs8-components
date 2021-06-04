@@ -14,8 +14,9 @@
 
 #include "formmarkdowneditor.h"
 #include <QAbstractItemModel>
-#include <QItemSelectionModel>
 #include <QAbstractItemView>
+#include <QItemSelectionModel>
+#include <QPointer>
 
 /**
     @author Volker Drewer-Gutland <volker.drewer@gmx.de>
@@ -23,32 +24,33 @@
 
 class QPlainTextEdit;
 class QLineEdit;
+class cs8Program;
 
-class cs8ProgramHeaderView : public QWidget
-{
-    Q_OBJECT
+class cs8ProgramHeaderView : public QWidget {
+  Q_OBJECT
 public:
-    cs8ProgramHeaderView ( QWidget *parent = 0 );
+  cs8ProgramHeaderView(QWidget *parent = 0);
 
-    ~cs8ProgramHeaderView();
+  ~cs8ProgramHeaderView();
 
-    void setMasterView ( QAbstractItemView* theValue );
+  void setMasterView(QAbstractItemView *theValue);
+  void setProgram(cs8Program *program);
 
-
-
-    FormMarkDownEditor *documentation() const;
+  FormMarkDownEditor *documentation() const;
 
 protected slots:
-    void slotSelectionChanged ( const QItemSelection & selected, const QItemSelection & deselected ) ;
-    void slotModified();
+  void slotSelectionChanged(const QItemSelection &selected,
+                            const QItemSelection &deselected);
+  void slotModified();
 
 signals:
-    void modified(bool);
+  void modified(bool);
 
 protected:
-    QAbstractItemView* m_masterView;
-    FormMarkDownEditor *m_documentation;
-    QLineEdit *m_briefText;
+  QAbstractItemView *m_masterView;
+  FormMarkDownEditor *m_documentation;
+  QLineEdit *m_briefText;
+  QPointer<cs8Program> m_program;
 };
 
 #endif

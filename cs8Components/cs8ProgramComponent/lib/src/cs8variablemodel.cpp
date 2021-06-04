@@ -283,9 +283,10 @@ bool cs8VariableModel::setData(const QModelIndex &index, const QVariant &value,
   if (role == Qt::EditRole) {
     if (index.column() == 3) {
       cs8Variable *variable = m_variableList.at(index.row());
-      if (variable->description() != value.toString())
-        emit documentationChanged(value.toString());
+      bool doEmit = (variable->description() != value.toString());
       variable->setDescription(value.toString());
+      if (doEmit)
+        emit documentationChanged(value.toString());
       emit dataChanged(index, index);
     }
   }

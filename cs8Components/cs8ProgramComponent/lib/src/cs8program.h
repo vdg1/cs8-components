@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QDomDocument>
 #include <QObject>
+#include <QPointer>
 #include <QStringList>
 
 //
@@ -19,7 +20,7 @@ class cs8Program : public QObject, public cs8ReferencesAndLinter {
 
 public:
   cs8Program(QObject *parent);
-  cs8Program();
+  // cs8Program();
 
   QString toDocumentedCode();
   bool save(const QString &projectPath, bool withCode = true);
@@ -51,6 +52,7 @@ public:
   QStringList getCalls();
   int cyclomaticComplexity() const;
   static int cyclomaticComplexity(const QString &code);
+  QPointer<QObject> view;
 
 private:
   cs8VariableModel *m_localVariableModel;
@@ -74,8 +76,8 @@ public:
   QString toCSyntax();
   void parseDocumentation(const QString &code);
 
-  void setBriefDescription(const QString &theValue);
-  void setDetailedDocumentation(const QString &doc);
+  void setBriefDescription(const QString &theValue, bool notify = false);
+  void setDetailedDocumentation(const QString &doc, bool notify = false);
   QString detailedDocumentation() const;
 
   void setCopyrightMessage(const QString &text);
@@ -88,9 +90,12 @@ public:
   bool globalDocContainer() const;
   void setGlobalDocContainer(bool globalDocContainer);
 
-  void setApplicationDocumentation(const QString &applicationDocumentation);
-  void setBriefModuleDocumentation(const QString &briefDocumentation);
-  void setMainPageDocumentation(const QString &applicationDocumentation);
+  void setApplicationDocumentation(const QString &applicationDocumentation,
+                                   bool notify = false);
+  void setBriefModuleDocumentation(const QString &briefDocumentation,
+                                   bool notify = false);
+  void setMainPageDocumentation(const QString &applicationDocumentation,
+                                bool notify = false);
 
   QString formattedDescriptionHeader() const;
 
@@ -113,6 +118,8 @@ public:
 
   void updateCodeModel();
 
+  bool isModified() const;
+
 protected:
   bool parseProgramDoc(const QDomDocument &doc,
                        const QString &code = QString());
@@ -132,6 +139,7 @@ protected:
   bool m_hasByteOrderMark;
   int m_lineNumberCodeSection;
   int m_headerLines;
+  bool m_isModified;
 
 signals:
   void globalVariableDocumentationFound(const QString &name,
@@ -143,5 +151,9 @@ signals:
   void unknownTagFound(const QString &tagType, const QString &tagName,
                        const QString &tagText);
   void modified();
+  void codeChanged();
+
+private slots:
+  void documentationChanged();
 };
 #endif

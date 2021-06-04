@@ -21,13 +21,17 @@ cs8Program::cs8Program(QObject *parent)
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
           &cs8Program::modified);
   m_parameterModel = new cs8ParameterModel(this);
-  connect(m_parameterModel, &cs8LocalVariableModel::modified, this,
+  connect(m_parameterModel, &cs8ParameterModel::modified, this,
           &cs8Program::modified);
+  connect(m_localVariableModel, &cs8LocalVariableModel::documentationChanged,
+          this, &cs8Program::documentationChanged);
+  connect(m_parameterModel, &cs8ParameterModel::documentationChanged, this,
+          &cs8Program::documentationChanged);
   m_globalDocContainer = false;
   m_programCode = "begin\nend";
   m_application = qobject_cast<cs8Application *>(parent->parent());
 }
-
+/*
 cs8Program::cs8Program()
     : QObject(), cs8ReferencesAndLinter(), m_application(0), m_public(false),
       m_withIfBlock(true), m_hasByteOrderMark(true) {
@@ -40,6 +44,7 @@ cs8Program::cs8Program()
   m_globalDocContainer = false;
   m_programCode = "begin\nend";
 }
+*/
 
 bool cs8Program::open(const QString &filePath) {
   // qDebug() << "cs8Program::open () " << filePath;
@@ -189,6 +194,7 @@ void cs8Program::parseProgramSection(const QDomElement &programSection,
   } else {
     m_programCode = code;
   }
+  emit codeChanged();
 
   QDomNodeList childList;
   childList = localSection.elementsByTagName("Local");
@@ -263,6 +269,14 @@ if (var)
 */
 }
 
+void cs8Program::documentationChanged() {
+  qDebug() << __FUNCTION__;
+  setCode(toDocumentedCode(), true);
+  emit codeChanged();
+}
+
+bool cs8Program::isModified() const { return m_isModified; }
+
 QString cs8Program::getAdditionalHintMessage() const {
   return m_additionalHintMessage;
 }
@@ -299,6 +313,7 @@ void cs8Program::undoTranslationTags() {
     m_programCode.replace(m.capturedStart(1), m.capturedLength(1), "(\"");
     m = rx.match(m_programCode);
   }
+  emit codeChanged();
 }
 // QDomElement cs8Program::programsSection() const { return m_programsSection; }
 
@@ -307,18 +322,24 @@ void cs8Program::undoTranslationTags() {
 //}
 
 void cs8Program::setApplicationDocumentation(
-    const QString &applicationDocumentation) {
+    const QString &applicationDocumentation, bool notify) {
   m_applicationDocumentation = applicationDocumentation;
+  if (notify)
+    emit documentationChanged();
 }
 
-void cs8Program::setBriefModuleDocumentation(
-    const QString &briefDocumentation) {
+void cs8Program::setBriefModuleDocumentation(const QString &briefDocumentation,
+                                             bool notify) {
   m_briefModuleDocumentation = briefDocumentation;
+  if (notify)
+    emit documentationChanged();
 }
 
 void cs8Program::setMainPageDocumentation(
-    const QString &applicationDocumentation) {
+    const QString &applicationDocumentation, bool notify) {
   m_mainPageDocumentation = applicationDocumentation;
+  if (notify)
+    emit documentationChanged();
 }
 
 // returns the code without documentation header
@@ -398,6 +419,7 @@ void cs8Program::setCode(const QString &code, bool parseDoc_) {
   m_programCode = code;
   if (parseDoc_)
     updateCodeModel();
+  emit codeChanged();
 }
 
 void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel) {
@@ -845,14 +867,18 @@ QString cs8Program::formattedDescriptionHeader() const {
   return txt.trimmed();
 }
 
-void cs8Program::setBriefDescription(const QString &theValue) {
+void cs8Program::setBriefDescription(const QString &theValue, bool notify) {
   m_briefDescription = theValue;
   emit modified();
+  if (notify)
+    emit documentationChanged();
 }
 
-void cs8Program::setDetailedDocumentation(const QString &doc) {
+void cs8Program::setDetailedDocumentation(const QString &doc, bool notify) {
   m_detailedDocumentation = doc;
   emit modified();
+  if (notify)
+    emit documentationChanged();
 }
 
 QString cs8Program::detailedDocumentation() const {
