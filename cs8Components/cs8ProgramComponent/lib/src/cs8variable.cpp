@@ -400,6 +400,7 @@ void cs8Variable::setUse(QString value) {
 QString cs8Variable::use() const { return m_element.attribute("use", "value"); }
 
 void cs8Variable::setDescription(QString value) {
+  qDebug() << __FUNCTION__ << name() << ":" << value;
   emit modified();
   m_description = value;
 }

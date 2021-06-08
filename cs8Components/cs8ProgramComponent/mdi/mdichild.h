@@ -51,9 +51,9 @@
 #ifndef MDICHILD_H
 #define MDICHILD_H
 
+#include "cs8program.h"
 #include <QPlainTextEdit>
 #include <QWidget>
-#include <cs8program.h>
 
 namespace Ui {
 class val3ProgramEditorView;
@@ -65,13 +65,10 @@ class MdiChild : public QWidget {
 public:
   MdiChild(QWidget *parent);
 
-  bool save();
-  bool saveAs();
-  bool saveFile(const QString &fileName);
-  QString userFriendlyCurrentFile();
-  QString currentFile() { return curFile; }
   QPlainTextEdit *editor() const;
   void setProgram(cs8Program *program);
+
+  cs8Program *program() const;
 
 protected:
   void closeEvent(QCloseEvent *event) override;
@@ -80,12 +77,6 @@ private slots:
   void documentWasModified();
 
 private:
-  bool maybeSave();
-  void setCurrentFile(const QString &fileName);
-  QString strippedName(const QString &fullFileName);
-
-  QString curFile;
-  bool isUntitled;
   cs8Program *m_program;
 
 private:

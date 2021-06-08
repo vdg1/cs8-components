@@ -94,9 +94,10 @@ QVariant cs8ProgramModel::data(const QModelIndex &index, int role) const {
 
   if (role == Qt::DisplayRole) {
     switch (index.column()) {
-    case 0:
-      return m_programList.at(index.row())->name();
-      break;
+    case 0: {
+      auto prog = m_programList.at(index.row());
+      return prog->definition() + (prog->isModified() ? +"*" : "");
+    } break;
 
     case 1:
       return m_programList.at(index.row())->definition();
@@ -140,7 +141,10 @@ cs8Program *cs8ProgramModel::createProgram(const QString &programName) {
           &cs8ProgramModel::slotExportDirectiveFound);
   connect(program, &cs8Program::unknownTagFound, this,
           &cs8ProgramModel::slotUnknownTagFound);
-  connect(program, &cs8Program::modified, this, &cs8ProgramModel::slotModified);
+  connect(program, &cs8Program::modifiedChanged, [=](bool modified) {
+    slotModified(modified);
+    dataChanged(index(0, 0), index(m_programList.count() - 1, 3));
+  });
 
   program->setCellPath(m_cellPath);
   if (!programName.isEmpty())
@@ -236,7 +240,9 @@ void cs8ProgramModel::slotUnknownTagFound(const QString &tagType,
   emit unknownTagFound(tagType, tagName, tagText);
 }
 
-void cs8ProgramModel::slotModified() { emit modified(true); }
+void cs8ProgramModel::slotModified(bool modified) {
+  emit modifiedChanged(modified);
+}
 
 void cs8ProgramModel::clear() {
   m_programList.clear();

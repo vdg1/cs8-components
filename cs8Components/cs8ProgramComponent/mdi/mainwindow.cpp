@@ -225,17 +225,11 @@ void MainWindow::openRecentFile() {
 }
 
 void MainWindow::save() {
-  if (activeMdiChild() && activeMdiChild()->save())
-    statusBar()->showMessage(tr("File saved"), 2000);
+  // if (activeMdiChild() && activeMdiChild()->save())
+  //   statusBar()->showMessage(tr("File saved"), 2000);
 }
 
-void MainWindow::saveAs() {
-  MdiChild *child = activeMdiChild();
-  if (child && child->saveAs()) {
-    statusBar()->showMessage(tr("File saved"), 2000);
-    MainWindow::prependToRecentFiles(child->currentFile());
-  }
-}
+void MainWindow::saveAs() {}
 
 #ifndef QT_NO_CLIPBOARD
 void MainWindow::cut() {
@@ -305,9 +299,9 @@ void MainWindow::updateWindowMenu() {
 
     QString text;
     if (i < 9) {
-      text = tr("&%1 %2").arg(i + 1).arg(child->userFriendlyCurrentFile());
+      text = tr("&%1 %2").arg(i + 1).arg(child->program()->name());
     } else {
-      text = tr("%1 %2").arg(i + 1).arg(child->userFriendlyCurrentFile());
+      text = tr("%1 %2").arg(i + 1).arg(child->program()->name());
     }
     QAction *action =
         windowMenu->addAction(text, mdiSubWindow, [this, mdiSubWindow]() {
@@ -320,7 +314,8 @@ void MainWindow::updateWindowMenu() {
 
 MdiChild *MainWindow::createMdiChild() {
   MdiChild *child = new MdiChild(this);
-  ui->mdiArea->addSubWindow(child);
+  auto c = ui->mdiArea->addSubWindow(child);
+  ui->mdiArea->setActiveSubWindow(c);
 
 #ifndef QT_NO_CLIPBOARD
   connect(child->editor(), &QPlainTextEdit::copyAvailable, cutAct,
@@ -385,11 +380,6 @@ void MainWindow::createActions() {
   recentFileSeparator = fileMenu->addSeparator();
 
   setRecentFilesVisible(MainWindow::hasRecentFiles());
-
-  fileMenu->addAction(tr("Switch layout direction"), this,
-                      &MainWindow::switchLayoutDirection);
-
-  fileMenu->addSeparator();
 
   //! [0]
   const QIcon exitIcon = QIcon::fromTheme("application-exit");
@@ -517,7 +507,8 @@ MdiChild *MainWindow::activeMdiChild() const {
 }
 
 QMdiSubWindow *MainWindow::findMdiChild(const QString &fileName) const {
-  QString canonicalFilePath = QFileInfo(fileName).canonicalFilePath();
+  /*
+   * QString canonicalFilePath = QFileInfo(fileName).canonicalFilePath();
 
   const QList<QMdiSubWindow *> subWindows = ui->mdiArea->subWindowList();
   for (QMdiSubWindow *window : subWindows) {
@@ -525,12 +516,6 @@ QMdiSubWindow *MainWindow::findMdiChild(const QString &fileName) const {
     if (mdiChild->currentFile() == canonicalFilePath)
       return window;
   }
+*/
   return nullptr;
-}
-
-void MainWindow::switchLayoutDirection() {
-  if (layoutDirection() == Qt::LeftToRight)
-    QGuiApplication::setLayoutDirection(Qt::RightToLeft);
-  else
-    QGuiApplication::setLayoutDirection(Qt::LeftToRight);
 }

@@ -93,7 +93,6 @@ private slots:
   void updateMenus();
   void updateWindowMenu();
   MdiChild *createMdiChild();
-  void switchLayoutDirection();
   void slotSelectionChanged(const QItemSelection &selected,
                             const QItemSelection & /*deselected*/);
 

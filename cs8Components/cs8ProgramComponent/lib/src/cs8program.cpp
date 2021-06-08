@@ -16,17 +16,19 @@
 //
 cs8Program::cs8Program(QObject *parent)
     : QObject(parent), cs8ReferencesAndLinter(), m_public(false),
-      m_withIfBlock(true), m_hasByteOrderMark(true) {
+      m_withIfBlock(true), m_hasByteOrderMark(true), m_isModified(false) {
   m_localVariableModel = new cs8LocalVariableModel(this);
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
-          &cs8Program::modified);
+          &cs8Program::modifiedChanged);
   m_parameterModel = new cs8ParameterModel(this);
   connect(m_parameterModel, &cs8ParameterModel::modified, this,
-          &cs8Program::modified);
+          &cs8Program::modifiedChanged);
   connect(m_localVariableModel, &cs8LocalVariableModel::documentationChanged,
           this, &cs8Program::documentationChanged);
   connect(m_parameterModel, &cs8ParameterModel::documentationChanged, this,
           &cs8Program::documentationChanged);
+  connect(this, &cs8Program::modifiedChanged,
+          [this](bool modified) { m_isModified = modified; });
   m_globalDocContainer = false;
   m_programCode = "begin\nend";
   m_application = qobject_cast<cs8Application *>(parent->parent());
@@ -164,6 +166,7 @@ void cs8Program::updateCodeModel() {
 
 void cs8Program::parseProgramSection(const QDomElement &programSection,
                                      const QString &code) {
+  qDebug() << __FUNCTION__;
   setPublic(programSection.attribute("access", "private") == "public" ? true
                                                                       : false);
   m_name = programSection.attribute("name");
@@ -220,6 +223,7 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
   QDomElement programSection = programsSection.firstChild().toElement();
   parseProgramSection(programSection, code);
   updateCodeModel();
+  emit modifiedChanged(false);
   return true;
 }
 
@@ -415,11 +419,15 @@ QStringList cs8Program::variableTokens(bool onlyModifiedVars) {
   return list;
 }
 
-void cs8Program::setCode(const QString &code, bool parseDoc_) {
+void cs8Program::setCode(const QString &code, bool parseDoc_, bool notify) {
+  if (m_programCode == code)
+    return;
+  qDebug() << __FUNCTION__;
   m_programCode = code;
   if (parseDoc_)
     updateCodeModel();
-  emit codeChanged();
+  if (notify)
+    emit codeChanged();
 }
 
 void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel) {
@@ -869,14 +877,14 @@ QString cs8Program::formattedDescriptionHeader() const {
 
 void cs8Program::setBriefDescription(const QString &theValue, bool notify) {
   m_briefDescription = theValue;
-  emit modified();
+  emit modifiedChanged(true);
   if (notify)
     emit documentationChanged();
 }
 
 void cs8Program::setDetailedDocumentation(const QString &doc, bool notify) {
   m_detailedDocumentation = doc;
-  emit modified();
+  emit modifiedChanged(true);
   if (notify)
     emit documentationChanged();
 }
@@ -964,6 +972,7 @@ bool cs8Program::save(const QString &filePath, bool withCode) {
   // qDebug() << "write file: " << fileName_;
   // qDebug() << "start of buffer: " << buffer.buffer().at(0)
   //         << buffer.buffer().at(1) << buffer.buffer().at(2);
+  emit modifiedChanged(false);
   return true;
 }
 
@@ -999,7 +1008,7 @@ bool cs8Program::setName(const QString &name, cs8Application *application) {
   else if (m->getProgramByName(name) != nullptr)
     return false;
   else {
-    emit modified();
+    emit modifiedChanged(true);
     QString oldName = m_name;
     m_name = name;
     if (application) {
@@ -1127,7 +1136,7 @@ QString cs8Program::definition() const {
 
 void cs8Program::setCopyrightMessage(const QString &text) {
   m_copyRightMessage = text.trimmed();
-  emit modified();
+  emit modifiedChanged(true);
 }
 
 QString cs8Program::copyrightMessage() const { return m_copyRightMessage; }

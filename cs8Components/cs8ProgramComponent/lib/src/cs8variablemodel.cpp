@@ -25,6 +25,14 @@ bool cs8VariableModel::addVariable(QDomElement &element,
 #else
     reset();
 #endif
+    connect(variable, &cs8Variable::modified, [=]() {
+#if QT_VERSION >= 0x050000
+      beginResetModel();
+      endResetModel();
+#else
+    reset();
+#endif
+    });
   } else if (element.tagName() == "Parameter") {
     cs8Variable *variable = new cs8Variable(element, "", this);
 
@@ -35,9 +43,19 @@ bool cs8VariableModel::addVariable(QDomElement &element,
     endResetModel();
 #else
     reset();
+    connect(variable, &cs8Variable::modified, [=]() {
+      qDebug() << __FUNCTION__;
+#if QT_VERSION >= 0x050000
+      beginResetModel();
+      endResetModel();
+#else
+            reset();
+#endif
+    });
 #endif
   } else
     return false;
+
   return true;
 }
 

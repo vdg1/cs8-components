@@ -48,6 +48,7 @@
 **
 ****************************************************************************/
 
+#include <QTimer>
 #include <QtWidgets>
 
 #include "mdichild.h"
@@ -57,55 +58,7 @@ MdiChild::MdiChild(QWidget *parent)
     : QWidget(parent), ui(new Ui::val3ProgramEditorView) {
   ui->setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
-  isUntitled = true;
 }
-
-bool MdiChild::save() {
-  if (isUntitled) {
-    return saveAs();
-  } else {
-    return saveFile(curFile);
-  }
-}
-
-bool MdiChild::saveAs() {
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"), curFile);
-  if (fileName.isEmpty())
-    return false;
-
-  return saveFile(fileName);
-}
-
-bool MdiChild::saveFile(const QString &fileName) {
-  QString errorMessage;
-
-  QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-  QSaveFile file(fileName);
-  if (file.open(QFile::WriteOnly | QFile::Text)) {
-    QTextStream out(&file);
-    // out << toPlainText();
-    if (!file.commit()) {
-      errorMessage =
-          tr("Cannot write file %1:\n%2.")
-              .arg(QDir::toNativeSeparators(fileName), file.errorString());
-    }
-  } else {
-    errorMessage =
-        tr("Cannot open file %1 for writing:\n%2.")
-            .arg(QDir::toNativeSeparators(fileName), file.errorString());
-  }
-  QGuiApplication::restoreOverrideCursor();
-
-  if (!errorMessage.isEmpty()) {
-    QMessageBox::warning(this, tr("MDI"), errorMessage);
-    return false;
-  }
-
-  setCurrentFile(fileName);
-  return true;
-}
-
-QString MdiChild::userFriendlyCurrentFile() { return m_program->name(); }
 
 QPlainTextEdit *MdiChild::editor() const { return ui->plainTextEditCode; }
 
@@ -117,54 +70,23 @@ void MdiChild::setProgram(cs8Program *program) {
   ui->tableViewPars->setModel(program->parameterModel());
   ui->tableViewVars->setModel(program->localVariableModel());
   ui->widgetDocumentation->setProgram(m_program);
-  ui->widgetDocumentation->setWindowTitle(program->name() + "[*]");
-  connect(program, &cs8Program::modified,
+  setWindowTitle(program->name() + "[*]");
+  connect(program, &cs8Program::modifiedChanged,
           [this]() { setWindowModified(true); });
+
+  connect(ui->plainTextEditCode, &CodeEditor::textChanged, [this]() {
+    qDebug() << __FUNCTION__ << "text changed";
+    m_program->setCode(ui->plainTextEditCode->toPlainText(), true, false);
+  });
   connect(program, &cs8Program::codeChanged,
           [=]() { ui->plainTextEditCode->setPlainText(program->val3Code()); });
   setWindowModified(false);
 }
 
-void MdiChild::closeEvent(QCloseEvent *event) {
-  if (maybeSave()) {
-    event->accept();
-  } else {
-    event->ignore();
-  }
-}
+void MdiChild::closeEvent(QCloseEvent *event) { event->accept(); }
 
 void MdiChild::documentWasModified() {
   // setWindowModified(m_program.isModified());
 }
 
-bool MdiChild::maybeSave() {
-  if (!editor()->document()->isModified())
-    return true;
-  const QMessageBox::StandardButton ret = QMessageBox::warning(
-      this, tr("MDI"),
-      tr("'%1' has been modified.\n"
-         "Do you want to save your changes?")
-          .arg(userFriendlyCurrentFile()),
-      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-  switch (ret) {
-  case QMessageBox::Save:
-    return save();
-  case QMessageBox::Cancel:
-    return false;
-  default:
-    break;
-  }
-  return true;
-}
-
-void MdiChild::setCurrentFile(const QString &fileName) {
-  curFile = QFileInfo(fileName).canonicalFilePath();
-  isUntitled = false;
-  editor()->document()->setModified(false);
-  setWindowModified(false);
-  setWindowTitle(userFriendlyCurrentFile() + "[*]");
-}
-
-QString MdiChild::strippedName(const QString &fullFileName) {
-  return QFileInfo(fullFileName).fileName();
-}
+cs8Program *MdiChild::program() const { return m_program; }

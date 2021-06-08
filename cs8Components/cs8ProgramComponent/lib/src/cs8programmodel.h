@@ -68,7 +68,7 @@ protected slots:
   void slotExportDirectiveFound(const QString &module, const QString &function);
   void slotUnknownTagFound(const QString &tagType, const QString &tagName,
                            const QString &tagText);
-  void slotModified();
+  void slotModified(bool modified);
 
 signals:
   void globalVariableDocumentationFound(const QString &name,
@@ -79,7 +79,7 @@ signals:
   void exportDirectiveFound(const QString &module, const QString &function);
   void unknownTagFound(const QString &tagType, const QString &tagName,
                        const QString &tagText);
-  void modified(bool);
+  void modifiedChanged(bool);
 };
 
 #endif

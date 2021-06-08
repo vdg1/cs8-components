@@ -41,7 +41,7 @@ public:
 
   QString extractCode(const QString &code_) const;
 
-  void setCode(const QString &code, bool parseDoc_ = false);
+  void setCode(const QString &code, bool parseDoc_ = false, bool notify = true);
   void copyFromParameterModel(cs8ParameterModel *sourceModel);
   void addTag(const QString &tagType, const QString &tagName,
               const QString &tagText);
@@ -150,7 +150,7 @@ signals:
   void exportDirectiveFound(const QString &module, const QString &routine);
   void unknownTagFound(const QString &tagType, const QString &tagName,
                        const QString &tagText);
-  void modified();
+  void modifiedChanged(bool);
   void codeChanged();
 
 private slots:

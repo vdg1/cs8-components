@@ -76,7 +76,7 @@ cs8Application::cs8Application(QObject *parent)
   connect(m_programModel, &cs8ProgramModel::unknownTagFound, this,
           &cs8Application::slotUnknownTagFound);
 
-  connect(m_programModel, &cs8ProgramModel::modified, this,
+  connect(m_programModel, &cs8ProgramModel::modifiedChanged, this,
           &cs8Application::setModified);
   connect(m_globalVariableModel, &cs8VariableModel::modified, this,
           &cs8Application::setModified);
