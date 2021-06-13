@@ -1,12 +1,14 @@
 #include "cs8variablemodel.h"
+#include "cs8application.h"
 #include "cs8variable.h"
 #include <QDebug>
 #include <QRegularExpression>
 #include <QStringList>
 //
-cs8VariableModel::cs8VariableModel(QObject *parent, modelType mode)
+cs8VariableModel::cs8VariableModel(cs8Application *application, QObject *parent,
+                                   modelType mode)
     : QAbstractTableModel(parent), m_mode(mode),
-      m_withUndocumentedSymbols(false) {
+      m_withUndocumentedSymbols(false), m_application(application) {
   // m_variableList = new QList<cs8Variable*>;
 }
 //
@@ -19,40 +21,24 @@ bool cs8VariableModel::addVariable(QDomElement &element,
 
     variable->setDescription(description);
     m_variableList.append(variable);
-#if QT_VERSION >= 0x050000
     beginResetModel();
     endResetModel();
-#else
-    reset();
-#endif
-    connect(variable, &cs8Variable::modified, [=]() {
-#if QT_VERSION >= 0x050000
+    connect(variable, &cs8Variable::modificationChanged, [=]() {
       beginResetModel();
       endResetModel();
-#else
-    reset();
-#endif
     });
   } else if (element.tagName() == "Parameter") {
     cs8Variable *variable = new cs8Variable(element, "", this);
 
     variable->setDescription(description);
     m_variableList.append(variable);
-#if QT_VERSION >= 0x050000
     beginResetModel();
     endResetModel();
-#else
-    reset();
-    connect(variable, &cs8Variable::modified, [=]() {
+    connect(variable, &cs8Variable::modificationChanged, [=]() {
       qDebug() << __FUNCTION__;
-#if QT_VERSION >= 0x050000
       beginResetModel();
       endResetModel();
-#else
-            reset();
-#endif
     });
-#endif
   } else
     return false;
 
@@ -136,7 +122,7 @@ cs8VariableModel::variableListByName(const QRegExp &rx) const {
 cs8Variable *cs8VariableModel::createVariable(const QString &name,
                                               const QString &type) {
   auto *variable = new cs8Variable(this);
-  variable->setName(name, false);
+  variable->setName(name, nullptr);
   variable->setType(type);
   // variable->setParent(this);
   m_variableList.append(variable);
@@ -284,9 +270,9 @@ QVariant cs8VariableModel::headerData(int section, Qt::Orientation orientation,
  */
 Qt::ItemFlags cs8VariableModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
-    return nullptr;
+    return Qt::ItemFlags();
 
-  if (index.column() == 3)
+  if (index.column() == 3 || index.column() == 0)
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
 
   return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
@@ -298,6 +284,7 @@ Qt::ItemFlags cs8VariableModel::flags(const QModelIndex &index) const {
  */
 bool cs8VariableModel::setData(const QModelIndex &index, const QVariant &value,
                                int role) {
+  qDebug() << __FUNCTION__;
   if (role == Qt::EditRole) {
     if (index.column() == 3) {
       cs8Variable *variable = m_variableList.at(index.row());
@@ -305,7 +292,11 @@ bool cs8VariableModel::setData(const QModelIndex &index, const QVariant &value,
       variable->setDescription(value.toString());
       if (doEmit)
         emit documentationChanged(value.toString());
-      emit dataChanged(index, index);
+      // emit dataChanged(index, index);
+    }
+    if (index.column() == 0) {
+      cs8Variable *variable = m_variableList.at(index.row());
+      variable->setName(value.toString(), m_application);
     }
   }
   return true;
@@ -378,6 +369,12 @@ QString cs8VariableModel::toDocumentedCode() {
 }
 
 void cs8VariableModel::slotModified() { emit modified(true); }
+
+cs8Application *cs8VariableModel::application() const { return m_application; }
+
+void cs8VariableModel::setApplication(cs8Application *newApplication) {
+  m_application = newApplication;
+}
 bool cs8VariableModel::withUndocumentedSymbols() const {
   return m_withUndocumentedSymbols;
 }

@@ -48,16 +48,22 @@
 **
 ****************************************************************************/
 
-#include <QTimer>
-#include <QtWidgets>
-
 #include "mdichild.h"
 #include "ui_mdichild.h"
+
+#include <QTimer>
 
 MdiChild::MdiChild(QWidget *parent)
     : QWidget(parent), ui(new Ui::val3ProgramEditorView) {
   ui->setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
+  ui->splitter->setStretchFactor(0, 1);
+  ui->splitter->setStretchFactor(1, 6);
+  updateCodeModelTimer = new QTimer(this);
+  updateCodeModelTimer->setSingleShot(true);
+  connect(updateCodeModelTimer, &QTimer::timeout, [this]() {
+    m_program->setCode(ui->plainTextEditCode->toPlainText(), true, false);
+  });
 }
 
 QPlainTextEdit *MdiChild::editor() const { return ui->plainTextEditCode; }
@@ -76,11 +82,13 @@ void MdiChild::setProgram(cs8Program *program) {
 
   connect(ui->plainTextEditCode, &CodeEditor::textChanged, [this]() {
     qDebug() << __FUNCTION__ << "text changed";
-    m_program->setCode(ui->plainTextEditCode->toPlainText(), true, false);
+    updateCodeModelTimer->stop();
+    updateCodeModelTimer->start(1000);
   });
+
   connect(program, &cs8Program::codeChanged,
           [=]() { ui->plainTextEditCode->setPlainText(program->val3Code()); });
-  setWindowModified(false);
+  setWindowModified(program->isModified());
 }
 
 void MdiChild::closeEvent(QCloseEvent *event) { event->accept(); }

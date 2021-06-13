@@ -1,7 +1,9 @@
 #include "cs8globalvariablemodel.h"
+#include "cs8application.h"
 
-cs8GlobalVariableModel::cs8GlobalVariableModel(QObject *parent)
-    : cs8VariableModel(parent, cs8VariableModel::Global) {}
+cs8GlobalVariableModel::cs8GlobalVariableModel(cs8Application *application,
+                                               QObject *parent)
+    : cs8VariableModel(application, parent, cs8VariableModel::Global) {}
 
 void cs8GlobalVariableModel::writeXMLStream(QXmlStreamWriter &stream) {
   stream.writeStartElement("Datas");

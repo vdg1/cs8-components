@@ -26,6 +26,15 @@ class QPlainTextEdit;
 class QLineEdit;
 class cs8Program;
 
+class FocusWatcher : public QObject {
+  Q_OBJECT
+public:
+  explicit FocusWatcher(QObject *parent = nullptr);
+  virtual bool eventFilter(QObject *obj, QEvent *event) override;
+Q_SIGNALS:
+  void focusChanged(bool in);
+};
+
 class cs8ProgramHeaderView : public QWidget {
   Q_OBJECT
 public:
@@ -36,19 +45,16 @@ public:
   void setMasterView(QAbstractItemView *theValue);
   void setProgram(cs8Program *program);
 
-  FormMarkDownEditor *documentation() const;
+  QTextEdit *documentation() const;
 
 protected slots:
   void slotSelectionChanged(const QItemSelection &selected,
                             const QItemSelection &deselected);
   void slotModified();
 
-signals:
-  void modified(bool);
-
 protected:
   QAbstractItemView *m_masterView;
-  FormMarkDownEditor *m_documentation;
+  QTextEdit *m_documentation;
   QLineEdit *m_briefText;
   QPointer<cs8Program> m_program;
 };

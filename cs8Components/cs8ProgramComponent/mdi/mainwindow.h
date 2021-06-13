@@ -78,7 +78,6 @@ protected:
   void closeEvent(QCloseEvent *event) override;
 
 private slots:
-  void newFile();
   void open();
   void save();
   void saveAs();
@@ -92,9 +91,10 @@ private slots:
   void about();
   void updateMenus();
   void updateWindowMenu();
-  MdiChild *createMdiChild();
-  void slotSelectionChanged(const QItemSelection &selected,
-                            const QItemSelection & /*deselected*/);
+  MdiChild *createMdiChild(cs8Program *program);
+  void programSelectionChanged(const QItemSelection &selected,
+                               const QItemSelection & /*deselected*/);
+  void programSelectionClicked(const QModelIndex index);
 
 private:
   enum { MaxRecentFiles = 5 };

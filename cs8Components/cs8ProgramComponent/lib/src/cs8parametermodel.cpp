@@ -1,8 +1,10 @@
 #include "cs8parametermodel.h"
+#include "cs8application.h"
 #include "cs8variable.h"
 //
-cs8ParameterModel::cs8ParameterModel(QObject *parent)
-    : cs8VariableModel(parent, cs8VariableModel::Parameter) {
+cs8ParameterModel::cs8ParameterModel(cs8Application *application,
+                                     QObject *parent)
+    : cs8VariableModel(application, parent, cs8VariableModel::Parameter) {
   // TODO
 }
 //

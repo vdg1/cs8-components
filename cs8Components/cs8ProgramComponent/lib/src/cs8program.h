@@ -120,6 +120,8 @@ public:
 
   bool isModified() const;
 
+  void setIsModified(bool newIsModified);
+
 protected:
   bool parseProgramDoc(const QDomDocument &doc,
                        const QString &code = QString());
@@ -152,8 +154,11 @@ signals:
                        const QString &tagText);
   void modifiedChanged(bool);
   void codeChanged();
+  void documentationChanged();
+  void briefDescriptionChanged();
+  void detailedDescriptionChanged();
 
 private slots:
-  void documentationChanged();
+  void slotDocumentationChanged();
 };
 #endif

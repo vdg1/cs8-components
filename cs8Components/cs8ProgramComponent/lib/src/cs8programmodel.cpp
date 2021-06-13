@@ -81,6 +81,7 @@ QList<cs8Program *> cs8ProgramModel::privatePrograms() {
  \fn cs8ProgramModel::data(const QModelIndex & index, int role)
  */
 QVariant cs8ProgramModel::data(const QModelIndex &index, int role) const {
+  qDebug() << __FUNCTION__ << index << role;
   if (!index.isValid())
     return QVariant();
 
@@ -142,8 +143,9 @@ cs8Program *cs8ProgramModel::createProgram(const QString &programName) {
   connect(program, &cs8Program::unknownTagFound, this,
           &cs8ProgramModel::slotUnknownTagFound);
   connect(program, &cs8Program::modifiedChanged, [=](bool modified) {
+    qDebug() << __FUNCTION__ << "Update program model" << modified;
     slotModified(modified);
-    dataChanged(index(0, 0), index(m_programList.count() - 1, 3));
+    emit dataChanged(index(0, 0), index(m_programList.count() - 1, 3));
   });
 
   program->setCellPath(m_cellPath);

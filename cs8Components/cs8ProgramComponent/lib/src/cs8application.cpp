@@ -764,6 +764,9 @@ void cs8Application::slotUnknownTagFound(const QString &tagType,
 
 void cs8Application::setModified(bool modified_) {
   m_modified = modified_;
+  for (auto prog : m_programModel->programList()) {
+    prog->setIsModified(false);
+  }
   emit modified(modified_);
 }
 
@@ -1432,7 +1435,7 @@ void cs8Application::moveParamsToGlobals(cs8Program *program) {
       // remove trailing '_'
       if (newName.endsWith('_'))
         newName.chop(1);
-      var->setName(newName, false);
+      var->setName(newName, this);
       parameters << newName;
       // add variable to global list if it does not exist yet
       if (!m_globalVariableModel->variableNameList().contains(newName)) {

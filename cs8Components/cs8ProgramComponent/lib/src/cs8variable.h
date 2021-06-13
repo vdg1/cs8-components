@@ -91,7 +91,7 @@ protected:
   void writeNodes(QXmlStreamWriter &stream, QDomNodeList nodes);
 
 signals:
-  void modified();
+  void modificationChanged(bool);
 };
 
 #endif

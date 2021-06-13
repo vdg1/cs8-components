@@ -34,8 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
 
   ui->widgetDocumentation->setMasterView(ui->listViewProgams);
 
-  connect(ui->widgetDocumentation, &cs8ProgramHeaderView::modified, this,
-          &MainWindow::slotModified);
   connect(ui->listViewProgams->selectionModel(),
           &QItemSelectionModel::selectionChanged, this,
           &MainWindow::slotSelectionChanged);
@@ -111,9 +109,6 @@ void MainWindow::slotSelectionChanged(const QItemSelection &selected,
   cs8Program *program = m_application->programModel()->programList().at(index);
   ui->plainTextEditCode->setPlainText(program->toDocumentedCode());
   ui->labelDeclaration->setText(program->definition());
-  connect(program->parameterModel(), &cs8VariableModel::documentationChanged,
-          ui->widgetDocumentation->documentation(),
-          &FormMarkDownEditor::setPostfixText);
 }
 
 void MainWindow::openRecentFile() {
@@ -133,7 +128,7 @@ void MainWindow::slotModified(bool modified_) {
     cs8Program *program =
         m_application->programModel()->programList().at(index);
     program->setDetailedDocumentation(
-        ui->widgetDocumentation->documentation()->text());
+        ui->widgetDocumentation->documentation()->toMarkdown());
     ui->plainTextEditCode->setPlainText(program->toDocumentedCode());
   }
 }

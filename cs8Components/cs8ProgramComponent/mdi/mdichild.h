@@ -52,8 +52,11 @@
 #define MDICHILD_H
 
 #include "cs8program.h"
-#include <QPlainTextEdit>
+
 #include <QWidget>
+
+class QCloseEvent;
+class QPlainTextEdit;
 
 namespace Ui {
 class val3ProgramEditorView;
@@ -81,6 +84,7 @@ private:
 
 private:
   Ui::val3ProgramEditorView *ui;
+  QTimer *updateCodeModelTimer;
 };
 
 #endif

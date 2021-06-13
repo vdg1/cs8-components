@@ -51,6 +51,7 @@
 #include <QStandardPaths>
 #include <QtWidgets>
 
+#include "formmdichildtest.h"
 #include "mainwindow.h"
 #include "mdichild.h"
 #include "ui_mainwindow.h"
@@ -84,12 +85,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   }
 }
 
-void MainWindow::newFile() {
-  MdiChild *child = createMdiChild();
-  // child->newFile();
-  child->show();
-}
-
 void MainWindow::open() {
   const QString fileName = QFileDialog::getOpenFileName(
       this, tr("Open Val3 Application"),
@@ -107,33 +102,46 @@ bool MainWindow::openFile(const QString &fileName) {
     prependToRecentFiles(fileName);
     ui->listViewProgams->setModel(m_application->programModel());
     ui->globalDataView->setModel(m_application->globalVariableModel());
-    connect(ui->listViewProgams->selectionModel(),
-            &QItemSelectionModel::selectionChanged, this,
-            &MainWindow::slotSelectionChanged);
+    // connect(ui->listViewProgams->selectionModel(),
+    //        &QItemSelectionModel::selectionChanged, this,
+    //        &MainWindow::programSelectionChanged);
+    connect(ui->listViewProgams, &QListView::clicked,
+            [this](QModelIndex index) { programSelectionClicked(index); });
     return true;
   } else
     return false;
 }
 
-void MainWindow::slotSelectionChanged(const QItemSelection &selected,
-                                      const QItemSelection & /*deselected*/) {
+void MainWindow::programSelectionChanged(
+    const QItemSelection &selected, const QItemSelection & /*deselected*/) {
   qDebug() << __FUNCTION__;
-  int index = selected.indexes().at(0).row();
+  const int index = selected.indexes().constFirst().row();
   cs8Program *program = m_application->programModel()->programList().at(index);
   if (program->view) {
     QMdiSubWindow *childView = qobject_cast<QMdiSubWindow *>(program->view);
     ui->mdiArea->setActiveSubWindow(childView);
   } else {
-    MdiChild *child = createMdiChild();
-    child->setProgram(program);
+    createMdiChild(program);
   }
-  /*
-   * ui->plainTextEditCode->setPlainText(program->toDocumentedCode());
-  ui->labelDeclaration->setText(program->definition());
-  connect(program->parameterModel(), &cs8VariableModel::documentationChanged,
-          ui->widgetDocumentation->documentation(),
-          &FormMarkDownEditor::setPostfixText);
-*/
+}
+
+void MainWindow::programSelectionClicked(const QModelIndex index) {
+  qDebug() << __FUNCTION__;
+  /// TODO testing - add a simple sub window
+  // FormMdiChildTest *child = new FormMdiChildTest(this);
+  // auto c = ui->mdiArea->addSubWindow(child);
+  // ui->mdiArea->setActiveSubWindow(c);
+  // return;
+  /// TODO ignore rest of function while testing
+  cs8Program *program =
+      m_application->programModel()->programList().at(index.row());
+  if (program->view) {
+    QMdiSubWindow *childView = qobject_cast<QMdiSubWindow *>(program->view);
+    ui->mdiArea->setActiveSubWindow(childView);
+  } else {
+    auto c = createMdiChild(program);
+    c->show();
+  }
 }
 
 bool MainWindow::loadFile(const QString &fileName) {
@@ -256,6 +264,7 @@ void MainWindow::about() {
 }
 
 void MainWindow::updateMenus() {
+  qDebug() << __FUNCTION__;
   bool hasMdiChild = (activeMdiChild() != nullptr);
   saveAct->setEnabled(hasMdiChild);
   saveAsAct->setEnabled(hasMdiChild);
@@ -312,8 +321,9 @@ void MainWindow::updateWindowMenu() {
   }
 }
 
-MdiChild *MainWindow::createMdiChild() {
+MdiChild *MainWindow::createMdiChild(cs8Program *program) {
   MdiChild *child = new MdiChild(this);
+  child->setProgram(program);
   auto c = ui->mdiArea->addSubWindow(child);
   ui->mdiArea->setActiveSubWindow(c);
 
@@ -336,7 +346,7 @@ void MainWindow::createActions() {
   newAct = new QAction(newIcon, tr("&New"), this);
   newAct->setShortcuts(QKeySequence::New);
   newAct->setStatusTip(tr("Create a new file"));
-  connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
+  // connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
   fileMenu->addAction(newAct);
   fileToolBar->addAction(newAct);
 
@@ -501,12 +511,14 @@ void MainWindow::writeSettings() {
 }
 
 MdiChild *MainWindow::activeMdiChild() const {
+  qDebug() << __FUNCTION__;
   if (QMdiSubWindow *activeSubWindow = ui->mdiArea->activeSubWindow())
     return qobject_cast<MdiChild *>(activeSubWindow->widget());
   return nullptr;
 }
 
 QMdiSubWindow *MainWindow::findMdiChild(const QString &fileName) const {
+  qDebug() << __FUNCTION__;
   /*
    * QString canonicalFilePath = QFileInfo(fileName).canonicalFilePath();
 

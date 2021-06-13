@@ -6,6 +6,7 @@
 #include <QXmlStreamWriter>
 
 class cs8Variable;
+class cs8Application;
 //
 class cs8VariableModel : public QAbstractTableModel {
   Q_OBJECT
@@ -26,7 +27,8 @@ public:
   bool addVariable(QDomElement &element,
                    const QString &description = QString());
   void addVariable(cs8Variable *variable);
-  cs8VariableModel(QObject *parent = 0, modelType mode = Local);
+  cs8VariableModel(cs8Application *application, QObject *parent = 0,
+                   modelType mode = Local);
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole);
   Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -57,6 +59,9 @@ public:
 
   void writeXMLStream(QXmlStreamWriter &stream);
 
+  cs8Application *application() const;
+  void setApplication(cs8Application *newApplication);
+
 signals:
   void modified(bool);
   void documentationChanged(const QString &documentation);
@@ -67,5 +72,6 @@ protected slots:
 private:
   modelType m_mode;
   bool m_withUndocumentedSymbols;
+  cs8Application *m_application;
 };
 #endif

@@ -16,10 +16,24 @@
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 
+FocusWatcher::FocusWatcher(QObject *parent) : QObject(parent) {
+  if (parent)
+    parent->installEventFilter(this);
+}
+bool FocusWatcher::eventFilter(QObject *obj, QEvent *event) {
+  Q_UNUSED(obj)
+  if (event->type() == QEvent::FocusIn)
+    emit focusChanged(true);
+  else if (event->type() == QEvent::FocusOut)
+    emit focusChanged(false);
+
+  return false;
+}
+
 cs8ProgramHeaderView::cs8ProgramHeaderView(QWidget *parent)
     : QWidget(parent), m_program(nullptr) {
 
-  m_documentation = new FormMarkDownEditor(this);
+  m_documentation = new QTextEdit(this);
 
   m_briefText = new QLineEdit(this);
   QFont m_font;
@@ -33,7 +47,7 @@ cs8ProgramHeaderView::cs8ProgramHeaderView(QWidget *parent)
 
   setLayout(layout);
 
-  connect(m_documentation, &FormMarkDownEditor::textEdited, this,
+  connect(m_documentation, &QTextEdit::textChanged, this,
           &cs8ProgramHeaderView::slotModified);
   connect(m_briefText, &QLineEdit::textEdited, this,
           &cs8ProgramHeaderView::slotModified);
@@ -51,7 +65,7 @@ void cs8ProgramHeaderView::slotSelectionChanged(
   m_briefText->blockSignals(true);
   if (deselected.count() > 0) {
     m_masterView->model()->setData(deselected.indexes().at(0),
-                                   m_documentation->text().trimmed(),
+                                   m_documentation->toMarkdown().trimmed(),
                                    Qt::UserRole + 10);
     m_masterView->model()->setData(deselected.indexes().at(0),
                                    m_briefText->text().trimmed(),
@@ -61,24 +75,21 @@ void cs8ProgramHeaderView::slotSelectionChanged(
   m_briefText->blockSignals(false);
 
   if (selected.count() > 0) {
-    m_documentation->setText(
+    m_documentation->setMarkdown(
         m_masterView->model()
             ->data(selected.indexes().at(0), Qt::UserRole + 10)
-            .toString(),
-        true);
+            .toString());
     m_briefText->setText(m_masterView->model()
                              ->data(selected.indexes().at(0), Qt::UserRole + 11)
                              .toString());
   }
-  m_documentation->setPrefixText(m_briefText->text());
 }
 
 void cs8ProgramHeaderView::slotModified() {
-  emit modified(true);
-  m_documentation->setPrefixText(m_briefText->text());
+  // m_documentation->setPrefixText(m_briefText->text());
 }
 
-FormMarkDownEditor *cs8ProgramHeaderView::documentation() const {
+QTextEdit *cs8ProgramHeaderView::documentation() const {
   return m_documentation;
 }
 
@@ -91,11 +102,47 @@ void cs8ProgramHeaderView::setMasterView(QAbstractItemView *theValue) {
 
 void cs8ProgramHeaderView::setProgram(cs8Program *program) {
   m_program = program;
-  m_documentation->setText(m_program->detailedDocumentation(), true);
+  m_documentation->setMarkdown(m_program->detailedDocumentation());
   m_briefText->setText(m_program->briefDescription(true));
-  connect(
-      m_documentation, &FormMarkDownEditor::textEdited,
-      [=](const QString &t) { m_program->setDetailedDocumentation(t, true); });
-  connect(m_briefText, &QLineEdit::textEdited,
-          [=](const QString &t) { m_program->setBriefDescription(t, true); });
+  /*
+  connect(m_documentation, &FormMarkDownEditor::textEdited,
+          [=](const QString &t) {
+            qDebug() << __FUNCTION__ << "detailed doc changed";
+            m_program->setDetailedDocumentation(t, true);
+          });
+  */
+  connect(new FocusWatcher(m_documentation), &FocusWatcher::focusChanged,
+          [=](bool gotFocus) {
+            qDebug() << __FUNCTION__ << "detailed doc changed";
+            if (!gotFocus)
+              m_program->setDetailedDocumentation(m_documentation->toMarkdown(),
+                                                  true);
+          });
+
+  connect(new FocusWatcher(m_briefText), &FocusWatcher::focusChanged,
+          [=](bool gotFocus) {
+            qDebug() << __FUNCTION__ << "brief doc changed";
+            if (!gotFocus)
+              m_program->setBriefDescription(m_briefText->text(), true);
+          });
+  /*
+  connect(m_briefText, &QLineEdit::textEdited, [=](const QString &t) {
+      qDebug() << __FUNCTION__ << "brief doc changed";
+      m_program->setBriefDescription(t, true);
+  });
+  */
+
+  connect(m_program, &cs8Program::codeChanged, [=]() {
+    // qDebug() << __FUNCTION__ << "Update docs from changes in code";
+    // m_documentation->setText(m_program->detailedDocumentation(), true);
+    // m_briefText->setText(m_program->briefDescription(true));
+  });
+  connect(m_program, &cs8Program::briefDescriptionChanged, [=]() {
+    qDebug() << __FUNCTION__ << "Update brief docs from changes in code";
+    m_briefText->setText(m_program->briefDescription(true));
+  });
+  connect(m_program, &cs8Program::detailedDescriptionChanged, [=]() {
+    qDebug() << __FUNCTION__ << "Update detailed docs from changes in code";
+    m_documentation->setMarkdown(m_program->detailedDocumentation());
+  });
 }

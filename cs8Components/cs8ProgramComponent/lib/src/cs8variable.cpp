@@ -119,7 +119,7 @@ void cs8Variable::setValues(const QDomNodeList &values) {
 }
 
 void cs8Variable::setPublic(bool m_public) {
-  emit modified();
+  emit modificationChanged(true);
   m_element.setAttribute("access", m_public ? "public" : "private");
 }
 
@@ -145,7 +145,7 @@ QString cs8Variable::definition() {
 }
 
 void cs8Variable::setScope(DeclarationScope scope) {
-  emit modified();
+  emit modificationChanged(true);
   switch (scope) {
   case Local:
     m_element.setTagName("Local");
@@ -200,7 +200,7 @@ QString cs8Variable::allSizes() {
 }
 
 void cs8Variable::setAllSizes(const QString &sizes) {
-  emit modified();
+  emit modificationChanged(true);
   m_element.setAttribute("size", sizes);
 }
 
@@ -393,7 +393,7 @@ void cs8Variable::writeXMLStream(QXmlStreamWriter &stream) {
 }
 
 void cs8Variable::setUse(QString value) {
-  emit modified();
+  emit modificationChanged(true);
   m_element.setAttribute("use", value);
 }
 
@@ -401,7 +401,7 @@ QString cs8Variable::use() const { return m_element.attribute("use", "value"); }
 
 void cs8Variable::setDescription(QString value) {
   qDebug() << __FUNCTION__ << name() << ":" << value;
-  emit modified();
+  emit modificationChanged(true);
   m_description = value;
 }
 
@@ -439,7 +439,7 @@ void cs8Variable::setDimension(const QString &dim) {
 }
 
 void cs8Variable::setType(QString value) {
-  emit modified();
+  emit modificationChanged(true);
   m_element.setAttribute("type", value);
 }
 
@@ -488,7 +488,7 @@ bool cs8Variable::setName(QString value, cs8Application *application) {
   else if (m->getVarByName(value) != nullptr)
     return false;
   else {
-    emit modified();
+    emit modificationChanged(true);
     QString oldName = m_name;
     m_name = value;
     m_element.setAttribute("name", value);

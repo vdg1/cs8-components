@@ -17,21 +17,25 @@
 cs8Program::cs8Program(QObject *parent)
     : QObject(parent), cs8ReferencesAndLinter(), m_public(false),
       m_withIfBlock(true), m_hasByteOrderMark(true), m_isModified(false) {
-  m_localVariableModel = new cs8LocalVariableModel(this);
+  m_application = qobject_cast<cs8Application *>(parent->parent());
+  connect(this, &cs8Program::modifiedChanged, [this](bool modified) {
+    qDebug() << __FUNCTION__ << modified;
+    m_isModified = modified;
+  });
+  m_localVariableModel = new cs8LocalVariableModel(m_application, this);
   connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
           &cs8Program::modifiedChanged);
-  m_parameterModel = new cs8ParameterModel(this);
+  m_parameterModel = new cs8ParameterModel(m_application, this);
   connect(m_parameterModel, &cs8ParameterModel::modified, this,
           &cs8Program::modifiedChanged);
   connect(m_localVariableModel, &cs8LocalVariableModel::documentationChanged,
-          this, &cs8Program::documentationChanged);
+          this, &cs8Program::slotDocumentationChanged);
   connect(m_parameterModel, &cs8ParameterModel::documentationChanged, this,
-          &cs8Program::documentationChanged);
-  connect(this, &cs8Program::modifiedChanged,
-          [this](bool modified) { m_isModified = modified; });
+          &cs8Program::slotDocumentationChanged);
+  connect(this, &cs8Program::documentationChanged, this,
+          &cs8Program::slotDocumentationChanged);
   m_globalDocContainer = false;
   m_programCode = "begin\nend";
-  m_application = qobject_cast<cs8Application *>(parent->parent());
 }
 /*
 cs8Program::cs8Program()
@@ -223,7 +227,7 @@ bool cs8Program::parseProgramDoc(const QDomDocument &doc, const QString &code) {
   QDomElement programSection = programsSection.firstChild().toElement();
   parseProgramSection(programSection, code);
   updateCodeModel();
-  emit modifiedChanged(false);
+  // emit modifiedChanged(false);
   return true;
 }
 
@@ -273,7 +277,11 @@ if (var)
 */
 }
 
-void cs8Program::documentationChanged() {
+void cs8Program::setIsModified(bool newIsModified) {
+  m_isModified = newIsModified;
+}
+
+void cs8Program::slotDocumentationChanged() {
   qDebug() << __FUNCTION__;
   setCode(toDocumentedCode(), true);
   emit codeChanged();
@@ -334,9 +342,11 @@ void cs8Program::setApplicationDocumentation(
 
 void cs8Program::setBriefModuleDocumentation(const QString &briefDocumentation,
                                              bool notify) {
-  m_briefModuleDocumentation = briefDocumentation;
-  if (notify)
-    emit documentationChanged();
+  if (briefDocumentation != m_briefModuleDocumentation) {
+    m_briefModuleDocumentation = briefDocumentation;
+    if (notify)
+      emit documentationChanged();
+  }
 }
 
 void cs8Program::setMainPageDocumentation(
@@ -440,7 +450,7 @@ void cs8Program::copyFromParameterModel(cs8ParameterModel *sourceModel) {
 
 void cs8Program::addTag(const QString &tagType, const QString &tagName,
                         const QString &tagText) {
-  m_tags.insertMulti(tagType, tagName + " " + tagText);
+  m_tags.insert(tagType, tagName + " " + tagText);
 }
 
 void cs8Program::clearDocumentationTags() { m_tags.clear(); }
@@ -659,7 +669,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
         // qDebug() << "global var: " << tagName << ":" << tagText;
         emit globalVariableDocumentationFound(tagName, tagText);
       } else if (tagType == "brief") {
-        setBriefDescription(tagText);
+        setBriefDescription(tagText, true);
       } else if (tagType == "doc") {
         setDetailedDocumentation(tagText);
       } else if (tagType == "module") {
@@ -749,7 +759,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
             ->getVarByName(tagName)
             ->setDescription(tagText);
     } else if (tagType == "brief") {
-      setBriefDescription(tagText);
+      setBriefDescription(tagText, true);
     } else if (tagType == "doc") {
       setDetailedDocumentation(tagText);
     } else if (tagType == "briefmodule") {
@@ -765,7 +775,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
       tagText = tagText.simplified();
       if (tagText.isEmpty())
         tagText = name();
-      m_tags.insertMulti(tagType, tagName + " " + tagText);
+      m_tags.insert(tagType, tagName + " " + tagText);
       emit exportDirectiveFound(tagName, tagText);
     } else if (tagType == "copyright") {
       setCopyrightMessage(tagText);
@@ -774,7 +784,7 @@ void cs8Program::parseDocumentation(const QString &code_) {
     } else {
       if (tagText.isEmpty())
         tagText = tagName;
-      m_tags.insertMulti(tagType, tagText);
+      m_tags.insert(tagType, tagText);
       emit unknownTagFound(tagType, tagName, tagText);
       // m_description += QString("\n\\%1
       // %2\n%3").arg(tagType).arg(tagName).arg(tagText);
@@ -876,17 +886,25 @@ QString cs8Program::formattedDescriptionHeader() const {
 }
 
 void cs8Program::setBriefDescription(const QString &theValue, bool notify) {
-  m_briefDescription = theValue;
-  emit modifiedChanged(true);
-  if (notify)
-    emit documentationChanged();
+  qDebug() << __FUNCTION__;
+  if (theValue != m_briefDescription) {
+    m_briefDescription = theValue;
+    emit modifiedChanged(true);
+    emit briefDescriptionChanged();
+    if (notify)
+      emit documentationChanged();
+  }
 }
 
 void cs8Program::setDetailedDocumentation(const QString &doc, bool notify) {
-  m_detailedDocumentation = doc;
-  emit modifiedChanged(true);
-  if (notify)
-    emit documentationChanged();
+  qDebug() << __FUNCTION__;
+  if (doc != m_detailedDocumentation) {
+    m_detailedDocumentation = doc;
+    emit modifiedChanged(true);
+    emit detailedDescriptionChanged();
+    if (notify)
+      emit documentationChanged();
+  }
 }
 
 QString cs8Program::detailedDocumentation() const {

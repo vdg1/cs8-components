@@ -3,16 +3,19 @@ requires(qtConfig(filedialog))
 
 HEADERS       = mainwindow.h \
                 codeeditor.h \
+                formmdichildtest.h \
                 highlighter.h \
                 mdichild.h
 SOURCES       = main.cpp \
                 codeeditor.cpp \
+                formmdichildtest.cpp \
                 highlighter.cpp \
                 mainwindow.cpp \
                 mdichild.cpp
 RESOURCES     = mdi.qrc
 
 FORMS += \
+    formmdichildtest.ui \
     mainwindow.ui\
     mdichild.ui
 
