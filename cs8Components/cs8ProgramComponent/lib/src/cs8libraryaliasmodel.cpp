@@ -66,6 +66,13 @@ bool cs8LibraryAliasModel::contains(const QString &alias_) {
   return false;
 }
 
+QStringList cs8LibraryAliasModel::aliasNameList() const {
+  QStringList list;
+  foreach (cs8LibraryAlias *alias, m_aliasList)
+    list << alias->name();
+  return list;
+}
+
 QVariant cs8LibraryAliasModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
@@ -150,6 +157,10 @@ cs8LibraryAlias *cs8LibraryAliasModel::getAliasByName(const QString &name) {
       return m_aliasList.at(i);
   }
   return nullptr;
+}
+
+QList<cs8LibraryAlias *> cs8LibraryAliasModel::list() const {
+  return m_aliasList;
 }
 
 QString cs8LibraryAliasModel::toDocumentedCode() {

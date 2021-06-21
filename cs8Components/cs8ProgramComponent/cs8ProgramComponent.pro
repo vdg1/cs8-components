@@ -10,6 +10,7 @@ SUBDIRS = lib \
     testCS8App_ReadWrite \
     testCS8Program \
     testCyclomaticComplexity \
+    testScintillaLexer \
     testVal3Linter \
     val3PreCompiler \
     val3CreateAPI \

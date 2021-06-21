@@ -56,7 +56,7 @@
 #include <QWidget>
 
 class QCloseEvent;
-class QPlainTextEdit;
+class QsciScintilla;
 
 namespace Ui {
 class val3ProgramEditorView;
@@ -68,7 +68,7 @@ class MdiChild : public QWidget {
 public:
   MdiChild(QWidget *parent);
 
-  QPlainTextEdit *editor() const;
+  QsciScintilla *editor() const;
   void setProgram(cs8Program *program);
 
   cs8Program *program() const;

@@ -49,6 +49,7 @@
 ****************************************************************************/
 
 #include <QStandardPaths>
+#include <Qsci/qsciscintilla.h>
 #include <QtWidgets>
 
 #include "formmdichildtest.h"
@@ -280,8 +281,8 @@ void MainWindow::updateMenus() {
   windowMenuSeparatorAct->setVisible(hasMdiChild);
 
 #ifndef QT_NO_CLIPBOARD
-  bool hasSelection = (activeMdiChild() &&
-                       activeMdiChild()->editor()->textCursor().hasSelection());
+  bool hasSelection =
+      (activeMdiChild() && activeMdiChild()->editor()->hasSelectedText());
   cutAct->setEnabled(hasSelection);
   copyAct->setEnabled(hasSelection);
 #endif
@@ -328,10 +329,14 @@ MdiChild *MainWindow::createMdiChild(cs8Program *program) {
   ui->mdiArea->setActiveSubWindow(c);
 
 #ifndef QT_NO_CLIPBOARD
-  connect(child->editor(), &QPlainTextEdit::copyAvailable, cutAct,
+  /// TODO
+  ///
+  /*
+  connect(child->editor(), &QsciScintilla::copyAvailable, cutAct,
           &QAction::setEnabled);
-  connect(child->editor(), &QPlainTextEdit::copyAvailable, copyAct,
+  connect(child->editor(), &QsciScintilla::copyAvailable, copyAct,
           &QAction::setEnabled);
+*/
 #endif
 
   return child;

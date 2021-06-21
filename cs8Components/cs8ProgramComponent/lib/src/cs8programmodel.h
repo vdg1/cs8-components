@@ -26,7 +26,8 @@ class cs8VariableModel;
 class cs8ProgramModel : public QAbstractListModel {
   Q_OBJECT
 public:
-  QList<cs8Program *> programList() { return m_programList; }
+  QList<cs8Program *> programList() const;
+  QStringList programNameList(bool withSignature) const;
   cs8VariableModel *localVariableModel(const QModelIndex &index);
   cs8VariableModel *parameterModel(const QModelIndex &index);
   QList<cs8Variable *> referencedGlobalVriableModel(const QModelIndex &index);

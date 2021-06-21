@@ -59,19 +59,22 @@ MdiChild::MdiChild(QWidget *parent)
   setAttribute(Qt::WA_DeleteOnClose);
   ui->splitter->setStretchFactor(0, 1);
   ui->splitter->setStretchFactor(1, 6);
+  ui->plainTextEditCode->setIndentationGuides(true);
+  ui->plainTextEditCode->setMarginWidth(0, "000");
+  ui->plainTextEditCode->setMarginLineNumbers(0, true);
   updateCodeModelTimer = new QTimer(this);
   updateCodeModelTimer->setSingleShot(true);
   connect(updateCodeModelTimer, &QTimer::timeout, [this]() {
-    m_program->setCode(ui->plainTextEditCode->toPlainText(), true, false);
+    m_program->setCode(ui->plainTextEditCode->text(), true, false);
   });
 }
 
-QPlainTextEdit *MdiChild::editor() const { return ui->plainTextEditCode; }
+QsciScintilla *MdiChild::editor() const { return ui->plainTextEditCode; }
 
 void MdiChild::setProgram(cs8Program *program) {
   program->view = this;
   m_program = program;
-  ui->plainTextEditCode->setPlainText(program->val3Code());
+  ui->plainTextEditCode->setText(program->val3Code());
   ui->labelDeclaration->setText(program->definition());
   ui->tableViewPars->setModel(program->parameterModel());
   ui->tableViewVars->setModel(program->localVariableModel());
@@ -80,14 +83,14 @@ void MdiChild::setProgram(cs8Program *program) {
   connect(program, &cs8Program::modifiedChanged,
           [this]() { setWindowModified(true); });
 
-  connect(ui->plainTextEditCode, &CodeEditor::textChanged, [this]() {
+  connect(ui->plainTextEditCode, &QsciScintilla::textChanged, [this]() {
     qDebug() << __FUNCTION__ << "text changed";
     updateCodeModelTimer->stop();
     updateCodeModelTimer->start(1000);
   });
 
   connect(program, &cs8Program::codeChanged,
-          [=]() { ui->plainTextEditCode->setPlainText(program->val3Code()); });
+          [=]() { ui->plainTextEditCode->setText(program->val3Code()); });
   setWindowModified(program->isModified());
 }
 

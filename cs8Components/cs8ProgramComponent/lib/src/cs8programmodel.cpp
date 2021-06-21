@@ -256,6 +256,18 @@ void cs8ProgramModel::clear() {
 #endif
 }
 
+QList<cs8Program *> cs8ProgramModel::programList() const {
+  return m_programList;
+}
+
+QStringList cs8ProgramModel::programNameList(bool withSignature) const {
+  QStringList list;
+  for (auto prog : qAsConst(m_programList)) {
+    list << (withSignature ? prog->definition() : prog->name());
+  }
+  return list;
+}
+
 cs8VariableModel *
 cs8ProgramModel::localVariableModel(const QModelIndex &index) {
   if (index.isValid())

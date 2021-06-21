@@ -1,25 +1,34 @@
-QT += widgets xml webchannel webengine webenginewidgets 3dcore
-requires(qtConfig(filedialog))
+QT       += core gui xml
 
-HEADERS       = mainwindow.h \
-                codeeditor.h \
-                formmdichildtest.h \
-                highlighter.h \
-                mdichild.h
-SOURCES       = main.cpp \
-                codeeditor.cpp \
-                formmdichildtest.cpp \
-                highlighter.cpp \
-                mainwindow.cpp \
-                mdichild.cpp
-RESOURCES     = mdi.qrc
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += c++11
+
+# You can make your code fail to compile if it uses deprecated APIs.
+# In order to do so, uncomment the following line.
+#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
+SOURCES += \
+    csscilexer.cpp \
+    main.cpp \
+    mainwindow.cpp \
+    qscilexerval3.cpp
+
+HEADERS += \
+    csscilexer.h \
+    mainwindow.h \
+    qscilexerval3.h
+
+FORMS += \
+    mainwindow.ui
+
 
 CONFIG += qscintilla2
 
-FORMS += \
-    formmdichildtest.ui \
-    mainwindow.ui\
-    mdichild.ui
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../lib/ -lcs8ProjectComponent
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../lib/ -lcs8ProjectComponentd
@@ -31,4 +40,3 @@ win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/libcs8ProjectComponentd.a
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/cs8ProjectComponent.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../../lib/cs8ProjectComponentd.lib
-
