@@ -127,7 +127,7 @@ void MainWindow::cursorPositionChanged(int currLine, int currPos) {
           ui->textEdit->setIndentation(line, indentation);
         }
         if (line == currLine) {
-          qDebug() << "Adjust cursor position" << line << currLine;
+          qDebug() << "Adjust cursor position" << line << lineText.length();
           ui->textEdit->setCursorPosition(line, lineText.length());
         }
       }

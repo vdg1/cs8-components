@@ -49,10 +49,12 @@ cs8Application *csSciLexer::app() const { return m_app; }
 
 void csSciLexer::setApp(cs8Application *newApp) {
   m_app = newApp;
-  for (auto var : m_app->globalVariableModel()->variableNameList())
+  for (const auto &var : m_app->globalVariableModel()->variableNameList())
     m_api->add(var);
-  for (auto prog : m_app->programModel()->programNameList(true))
+  for (const auto &prog : m_app->programModel()->programNameList(true))
     m_api->add(prog);
+  for (const auto &alias : m_app->libraryModel()->aliasNameList())
+    m_api->add(alias);
   m_api->prepare();
 }
 
@@ -64,7 +66,7 @@ csSciLexer::csSciLexer(QObject *parent) : QsciLexerCustom(parent) {
   // tokenRx.setPattern(R"RX(\n+|\s+|\w+|\W+)RX");
 
   tokenRx.setPattern(
-      R"RX((?<number>[-]?([0-9]*[.])?[0-9]+)|:|,|\)|\(|"|\+|=|//|\n{1}|\s+|\w+|\W+)RX");
+      R"RX((?<number>[-]?([0-9]*[.])?[0-9]+)|!|:|,|\)|\(|"|\+|=|//|\n{1}|\s+|\w+|\W+)RX");
 
   keywords =
       QString(
