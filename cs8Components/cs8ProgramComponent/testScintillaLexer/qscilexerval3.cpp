@@ -64,7 +64,7 @@ const char *QsciLexerVal3::blockStart(int *style) const {
   if (style)
     *style = Operator;
 
-  return "{";
+  return "begin";
 }
 
 // Return the list of characters that can end a block.
@@ -72,7 +72,7 @@ const char *QsciLexerVal3::blockEnd(int *style) const {
   if (style)
     *style = Operator;
 
-  return "}";
+  return "end";
 }
 
 // Return the style used for braces.

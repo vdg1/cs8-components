@@ -53,9 +53,28 @@ void csSciLexer::setApp(cs8Application *newApp) {
     m_api->add(var);
   for (const auto &prog : m_app->programModel()->programNameList(true))
     m_api->add(prog);
-  for (const auto &alias : m_app->libraryModel()->aliasNameList())
-    m_api->add(alias);
+  for (const auto &alias : m_app->libraryModel()->list()) {
+    if (alias->application()) {
+      for (const auto p :
+           alias->application()->programModel()->publicPrograms())
+        m_api->add(alias->name() + ":" + p->definition());
+      for (const auto p :
+           alias->application()->globalVariableModel()->publicVariables())
+        m_api->add(alias->name() + ":" + p->name());
+    }
+  }
   m_api->prepare();
+}
+
+// Return the set of character sequences that can separate auto-completion
+// words.
+QStringList csSciLexer::autoCompletionWordSeparators() const {
+  QStringList wl;
+
+  wl << ":"
+     << ".";
+
+  return wl;
 }
 
 csSciLexer::csSciLexer(QObject *parent) : QsciLexerCustom(parent) {

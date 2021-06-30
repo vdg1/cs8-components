@@ -33,9 +33,11 @@ public:
 
   const char *language() const override;
   QString description(int style) const override;
+  QStringList autoCompletionWordSeparators() const override;
 
   cs8Application *app() const;
   void setApp(cs8Application *newApp);
+
 
 private:
   QRegularExpression tokenRx;

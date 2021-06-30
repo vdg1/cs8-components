@@ -6,6 +6,7 @@
 
 QT_BEGIN_NAMESPACE
 
+class cs8ApplicationModel;
 class cs8Application;
 namespace Ui {
 class MainWindow;
@@ -29,6 +30,7 @@ private:
   bool m_updateIndentationNeeded;
   QStringList m_blockStart, m_blockEnd;
   QRegularExpression m_rxFirstWord;
+  cs8ApplicationModel *m_pool;
   cs8Application *m_app;
 };
 #endif // MAINWINDOW_H
