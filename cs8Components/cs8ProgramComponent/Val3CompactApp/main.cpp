@@ -9,6 +9,7 @@ struct Options {
   QStringList sourcePaths;
   bool recursive;
   bool compactMode;
+  QStringList ignoreFolders;
 };
 
 enum CommandLineParseResult {
@@ -24,9 +25,12 @@ CommandLineParseResult parseCommandLine(QCommandLineParser &parser,
   parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
   parser.addOptions(
       {{{"recursive", "r"}, "Crawl through all subfolders"},
+       {{"ignore", "i"}, "Ignore folder", "ignoreFolder"},
        {{"compactMode", "c"}, "Store API library in compact mode"}});
 
   parser.addPositionalArgument("source", "Source path to scan", "SourcePath");
+  qDebug() << "Options" << parser.optionNames();
+
   const QCommandLineOption helpOption = parser.addHelpOption();
   const QCommandLineOption versionOption = parser.addVersionOption();
 
@@ -49,6 +53,7 @@ CommandLineParseResult parseCommandLine(QCommandLineParser &parser,
   options->sourcePaths = parser.positionalArguments();
   options->recursive = parser.isSet("recursive");
   options->compactMode = parser.isSet("compactMode");
+  options->ignoreFolders = parser.values("ignore");
 
   return CommandLineOk;
 }
@@ -78,7 +83,7 @@ int main(int argc, char *argv[]) {
   }
 
   QStringList apps;
-  for (const auto &path : options.sourcePaths) {
+  for (const auto &path : qAsConst(options.sourcePaths)) {
     QFileInfo i(path);
     QString s = path + QDir::separator() + i.baseName() + ".pjx";
     if (QFile::exists(s))
@@ -88,12 +93,19 @@ int main(int argc, char *argv[]) {
       QDirIterator it(path, QStringList() << "*.pjx",
                       QDir::Files | QDir::NoDotAndDotDot,
                       QDirIterator::Subdirectories);
-      while (it.hasNext())
-        apps << it.next();
+      while (it.hasNext()) {
+        QString subApp = it.next();
+        bool ignore = false;
+        for (const auto &ignorePath : qAsConst(options.ignoreFolders))
+          if (subApp.contains(ignorePath))
+            ignore = true;
+        if (!ignore)
+          apps << subApp;
+      }
     }
   }
 
-  for (const auto &appPath : apps) {
+  for (const auto &appPath : qAsConst(apps)) {
     cs8Application app;
     app.open(appPath);
     app.save(options.compactMode);
