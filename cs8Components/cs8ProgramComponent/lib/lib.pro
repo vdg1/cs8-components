@@ -1,4 +1,5 @@
 HEADERS += src/cs8project.h \
+    src/cs8applicationmodel.h \
     src/cs8program.h \
     src/cs8programmodel.h \
     src/cs8referencesandlinter.h \
@@ -26,6 +27,7 @@ HEADERS += src/cs8project.h \
     src/previewpage.h
 
 SOURCES += src/cs8project.cpp \
+    src/cs8applicationmodel.cpp \
     src/cs8program.cpp \
     src/cs8programmodel.cpp \
     src/cs8referencesandlinter.cpp \

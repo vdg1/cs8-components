@@ -27,8 +27,9 @@ public:
   int rowCount(const QModelIndex &index) const;
   QVariant data(const QModelIndex &index, int role) const;
   int columnCount(const QModelIndex &index) const;
-  bool add(const QDomElement &element, const QString & = QString());
-  bool add(const QString &aliasName, const QString &path,
+  bool add(cs8Application *app, const QDomElement &element,
+           const QString & = QString());
+  bool add(cs8Application *app, const QString &aliasName, const QString &path,
            const bool autoLoad = true);
   cs8LibraryAliasModel(QObject *parent = 0);
   bool setData(const QModelIndex &index, const QVariant &value,

@@ -298,11 +298,16 @@ bool cs8Application::open(const QString &pfxFilePath) {
 }
 
 bool cs8Application::openFromPathName(const QString &filePath) {
-  QString filePath_ = QDir::cleanPath(filePath);
-  QString name =
-      filePath_ + "/" +
-      filePath_.right(filePath_.length() - filePath_.lastIndexOf("/", -2)) +
-      ".pjx";
+  QString filePath_ = filePath;
+  if (filePath.startsWith("Disk://"))
+    filePath_.replace("Disk://", m_cellPath + "usr/usrapp/");
+  filePath_ = QDir::cleanPath(filePath_);
+  QString name = filePath_;
+  if (!filePath_.endsWith(".pjx"))
+    name =
+        filePath_ + "/" +
+        filePath_.right(filePath_.length() - filePath_.lastIndexOf("/", -2)) +
+        ".pjx";
   // qDebug() << Q_FUNC_INFO << ":" << name;
   bool result = open(name);
   return result;
@@ -669,7 +674,7 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
     // load alias
     list = m_aliasSection.elementsByTagName("Library");
     for (int i = 0; i < list.count(); i++) {
-      m_libraryAliasModel->add(list.at(i).toElement());
+      m_libraryAliasModel->add(this, list.at(i).toElement());
     }
     // load types
     list = m_typesSection.elementsByTagName("Type");

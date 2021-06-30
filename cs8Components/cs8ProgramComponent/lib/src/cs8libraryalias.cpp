@@ -6,13 +6,18 @@
  */
 
 #include "cs8libraryalias.h"
+#include "cs8application.h"
 #include <QStringList>
 
-cs8LibraryAlias::cs8LibraryAlias(const QString &name, const QString &path,
-                                 bool autoLoad) {
+cs8LibraryAlias::cs8LibraryAlias(QObject *parent,
+                                 cs8Application *parentApplication,
+                                 const QString &name, const QString &localPath,
+                                 bool autoLoad)
+    : m_application(0) {
   m_name = name;
-  m_path = path;
+  m_path = localPath;
   m_autoLoad = autoLoad;
+  m_parentApplication = parentApplication;
 }
 
 cs8LibraryAlias::~cs8LibraryAlias() {
@@ -64,4 +69,15 @@ QString cs8LibraryAlias::definition() const {
 
 void cs8LibraryAlias::setDocumentation(const QString doc) {
   m_documentation = doc;
+}
+
+cs8Application *cs8LibraryAlias::application() {
+  if (!m_parentApplication) {
+    return nullptr;
+  } else if (!m_application) {
+    m_application = new cs8Application(this);
+    m_application->setCellPath(m_parentApplication->cellPath() + "usr/usrapp");
+    m_application->openFromPathName(m_path);
+  }
+  return m_application;
 }

@@ -16,14 +16,14 @@ cs8LibraryAliasModel::cs8LibraryAliasModel(QObject *parent)
 }
 //
 
-bool cs8LibraryAliasModel::add(const QDomElement &element,
+bool cs8LibraryAliasModel::add(cs8Application *app, const QDomElement &element,
                                const QString & /*description*/) {
   QString path = element.attribute("path");
   QString name = element.attribute("alias");
   bool autoLoad =
       element.attribute("autoload", "true") == "true" ? true : false;
 
-  add(name, path, autoLoad);
+  add(app, name, path, autoLoad);
 
   // cs8LibraryAlias * alias = new cs8LibraryAlias(name, path, autoLoad);
   // m_aliasList.append(alias);
@@ -32,9 +32,9 @@ bool cs8LibraryAliasModel::add(const QDomElement &element,
   return true;
 }
 
-bool cs8LibraryAliasModel::add(const QString &aliasName, const QString &path,
-                               const bool autoLoad) {
-  auto *alias = new cs8LibraryAlias(aliasName, path, autoLoad);
+bool cs8LibraryAliasModel::add(cs8Application *app, const QString &aliasName,
+                               const QString &path, const bool autoLoad) {
+  auto *alias = new cs8LibraryAlias(this, app, aliasName, path, autoLoad);
   connect(alias, SIGNAL(modified()), this, SLOT(slotModified()));
   m_aliasList.append(alias);
 #if QT_VERSION >= 0x050000

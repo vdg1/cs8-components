@@ -14,11 +14,13 @@
 #include <QString>
 #include <QVariant>
 
+class cs8Application;
 class cs8LibraryAlias : public QObject {
   Q_OBJECT
 
 public:
-  cs8LibraryAlias(const QString &name, const QString &path,
+  cs8LibraryAlias(QObject *parent, cs8Application *parentApplication,
+                  const QString &name, const QString &localPath,
                   bool autoLoad = true);
   virtual ~cs8LibraryAlias();
   QString name() const;
@@ -38,11 +40,15 @@ public:
   QString definition() const;
   void setDocumentation(const QString doc);
 
+  cs8Application *application();
+
 private:
   QString m_name;
   QString m_path;
   QString m_documentation;
   bool m_autoLoad;
+  cs8Application *m_application;
+  cs8Application *m_parentApplication;
 
 signals:
   void modified();
