@@ -25,8 +25,8 @@ jobs:
   
     - uses: actions/checkout@v2
     - name: make
-      run: nmake
+      run: make
     - name: make check
-      run: nmake check
+      run: make check
     - name: make distcheck
-      run: nmake distcheck
+      run: make distcheck
