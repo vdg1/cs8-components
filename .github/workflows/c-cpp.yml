@@ -24,6 +24,8 @@ jobs:
        cached: true
   
     - uses: actions/checkout@v2
+    - name: qmake
+      run: qmake
     - name: make
       run: make
     - name: make check
