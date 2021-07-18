@@ -21,6 +21,7 @@ jobs:
        host: win64_msvc2019_64
     # Architecture for Windows/Android
        arch: in64_msvc2019_64
+       dir: '${{ github.workspace }}/qt/'
        cached: true
   
     - uses: actions/checkout@v2
