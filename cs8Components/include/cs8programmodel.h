@@ -52,6 +52,7 @@ public:
 
   bool getHasByteOrderMark() const;
   void setHasByteOrderMark(bool hasByteOrderMark);
+  void updateCodeModel();
 
 protected:
   QList<cs8Program *> m_programList;
