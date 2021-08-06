@@ -32,14 +32,32 @@ int main(int argc, char *argv[]) {
   QString VAL3CHECKORIG = "VAL3Check_Orig.exe";
 
   QCoreApplication a(argc, argv);
-  QCoreApplication::setApplicationName("Val3Linter");
   QCoreApplication::setOrganizationName("Saxe Group");
   QCoreApplication::setOrganizationDomain("saxe-group.com");
+  QCoreApplication::setApplicationName("Val3 Linter");
 
   QStringList args = qApp->arguments();
+
+  /*
+  args
+      = QStringList()
+        << R"("C:\Program Files (x86)\Staubli\CS8\s8.12.2cs9_BS2561\VAL3Check.exe)"
+        << R"(-R"D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812)"
+        << R"(-E"<level>%e<line>%l<msg>%m<file>%f" -V"C:\Program Files (x86)\Staubli\CS8\s8.12.2cs9_BS2561)"
+        << R"(-KA)"
+        << R"(-LE)"
+        << R"(-s"C:\Program Files (x86)\Staubli\CS8\s8.12.2cs9_BS2561)"
+        << R"(-I+)"
+        << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modUserDisp)"
+        << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modStatusModel)"
+        << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\io_User)"
+        << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modSignalSlot)";
+
+*/
   qDebug() << "Linter started with arguments " << args;
   // remove 1st argument, that points to the executable itself
   args.removeAt(0);
+
   cs8Linter linter(args, VAL3CHECKORIG, true);
 
   a.exec();

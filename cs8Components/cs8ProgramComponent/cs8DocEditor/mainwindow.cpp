@@ -12,7 +12,6 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
-
   /*
   QDirIterator it(":", QDirIterator::Subdirectories);
   while (it.hasNext()) {

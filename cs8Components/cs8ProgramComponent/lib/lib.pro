@@ -96,3 +96,5 @@ headers.files   += $$HEADERS
 INSTALLS       += headers
 
 DISTFILES +=
+
+CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT

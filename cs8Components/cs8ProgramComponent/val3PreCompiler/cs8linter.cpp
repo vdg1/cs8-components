@@ -68,6 +68,7 @@ void cs8Linter::executeLinter() {
       qDebug() << "Rules loaded, executing linter for " << m_arguments;
       foreach (const auto arg, m_applicationsToCheck) {
         qDebug() << "Linting now: " << arg;
+        std::cout << qPrintable("Linting now:" + arg + "\n");
         cs8Application app;
         app.setCellPath(m_cellPath);
         app.openFromPathName(arg);
@@ -103,29 +104,46 @@ void cs8Linter::startLinterAndChecker() {
 }
 
 cs8Linter::cs8Linter(const QStringList &arguments,
-                     const QString &val3checkExecutable, bool overrideIOCheck,
+                     const QString &val3checkExecutable,
+                     bool overrideIOCheck,
                      QObject *parent)
-    : QObject(parent), m_val3checkDone(false), m_linterDone(false),
-      m_val3checkExitCode(0) {
-  m_arguments = arguments;
-  m_val3checkExecutable = val3checkExecutable;
+    : QObject(parent)
+    , m_val3checkDone(false)
+    , m_linterDone(false)
+    , m_val3checkExitCode(0)
+{
+    m_arguments = arguments;
+    m_val3checkExecutable = val3checkExecutable;
 
-  QMutableListIterator<QString> i(m_arguments);
-  while (i.hasNext()) {
-    QString arg = i.next();
+    QMutableListIterator<QString> i(m_arguments);
+    while (i.hasNext()) {
+        QString arg = i.next();
 
-    qDebug() << "A" << arg;
-    if (!arg.startsWith("-")) {
-      m_applicationsToCheck << arg;
+        qDebug() << "A" << arg;
+        if (!arg.startsWith("-")) {
+            m_applicationsToCheck << arg;
+        }
+        if (arg.startsWith("-R")) {
+            m_cellPath = arg;
+            m_cellPath = m_cellPath.remove("\"").remove("-R").trimmed();
+        }
+        if (arg == "-I+" && overrideIOCheck)
+            i.setValue("-I-");
     }
-    if (arg.startsWith("-R")) {
-      m_cellPath = arg;
-      m_cellPath = m_cellPath.remove("\"").remove("-R").trimmed();
+    // filter application list for linter
+    QSettings settings;
+    QString activeProfile = settings.value("activeProfile", "Application programmer").toString();
+    if (activeProfile == "Application programmer") {
+        QMutableStringListIterator i(m_applicationsToCheck);
+        while (i.hasNext()) {
+            QString val = i.next();
+            if (val.contains("\\SAXEAutomation\\") || val.contains("\\z") || val.contains("/z")) {
+                i.remove();
+            }
+        }
     }
-    if (arg == "-I+" && overrideIOCheck)
-      i.setValue("-I-");
-  }
-  // filter application list for linter
+
+    /*
   // only lint applications that are in usrapp/ if multiple applications are to
   // be checked
   if (m_applicationsToCheck.count() > 1) {
@@ -137,11 +155,12 @@ cs8Linter::cs8Linter(const QStringList &arguments,
     }
     m_applicationsToCheck = n;
   }
+*/
 
-  initConnections();
+    initConnections();
 
-  qDebug() << "Arguments:" << m_arguments;
-  qDebug() << "Cell Path: " << m_cellPath;
+    qDebug() << "Arguments:" << m_arguments;
+    qDebug() << "Cell Path: " << m_cellPath;
 
-  QTimer::singleShot(0, this, SLOT(startLinterAndChecker()));
+    QTimer::singleShot(0, this, SLOT(startLinterAndChecker()));
 }

@@ -8,7 +8,7 @@ SUBDIRS = lib \
    # extractIODefinitions \
     cs8DocEditor \
     testCS8App_ReadWrite \
-    testCS8Program \
+   # testCS8Program \
     testCyclomaticComplexity \
     testVal3Linter \
     val3PreCompiler \

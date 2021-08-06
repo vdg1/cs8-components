@@ -5,6 +5,7 @@
 #include <QModelIndex>
 #include <QTableWidget>
 
+class QActionGroup;
 namespace Ui {
 class MainWindow;
 }
@@ -41,6 +42,7 @@ private:
   bool m_autoExit;
   QString m_productName;
   QString m_linterVersion;
+  QActionGroup *m_group;
   void fillTableView();
   // QString GetFileVersionOfApplication(const QString &fileName);
 };

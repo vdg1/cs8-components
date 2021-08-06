@@ -17,33 +17,38 @@ using namespace std;
 using namespace chm;
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), m_autoExit(0) {
-  ui->setupUi(this);
-  loadSettings();
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , m_autoExit(0)
+{
+    ui->setupUi(this);
 
-  getProductName(QCoreApplication::applicationDirPath() +
-                     "/preCompilerPackage/" + VAL3CHECK,
-                 m_productName, m_linterVersion);
+    m_group = new QActionGroup(this);
+    loadSettings();
 
-  fillTableView();
+    getProductName(QCoreApplication::applicationDirPath() + "/preCompilerPackage/" + VAL3CHECK,
+                   m_productName,
+                   m_linterVersion);
 
-  // check arguments
-  qDebug() << "arguments:" << qApp->arguments();
-  if (qApp->arguments().contains("--install")) {
-    QTimer::singleShot(0, this, SLOT(slotStartup()));
-  }
+    fillTableView();
 
-  else if (qApp->arguments().contains("--uninstall")) {
-    QTimer::singleShot(0, this, SLOT(uninstallAll()));
-  }
+    // check arguments
+    qDebug() << "arguments:" << qApp->arguments();
+    if (qApp->arguments().contains("--install")) {
+        QTimer::singleShot(0, this, SLOT(slotStartup()));
+    }
 
-  if (qApp->arguments().contains("--exitWhenReady")) {
-    m_autoExit = true;
-  }
+    else if (qApp->arguments().contains("--uninstall")) {
+        QTimer::singleShot(0, this, SLOT(uninstallAll()));
+    }
 
-  if (qApp->arguments().count() == 1) {
-    QTimer::singleShot(0, this, [this]() { checkUpdateLinter(); });
-  }
+    if (qApp->arguments().contains("--exitWhenReady")) {
+        m_autoExit = true;
+    }
+
+    if (qApp->arguments().count() == 1) {
+        QTimer::singleShot(0, this, [this]() { checkUpdateLinter(); });
+    }
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -303,6 +308,21 @@ void MainWindow::storeSettings() {
   QSettings settings;
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
+  QMenu *m = ui->menuProfile;
+  QString activeProfile = "";
+  settings.beginWriteArray("profiles");
+  int i = 0;
+  for (auto item : m->actions()) {
+      settings.setArrayIndex(i++);
+      settings.setValue("name", item->text());
+      settings.setValue("active", item->isChecked());
+      settings.setValue("data", item->data());
+      if (item->isChecked()) {
+          activeProfile = item->text();
+      }
+  }
+  settings.endArray();
+  settings.setValue("activeProfile", activeProfile);
 }
 
 void MainWindow::loadSettings() {
@@ -310,6 +330,37 @@ void MainWindow::loadSettings() {
   QSettings settings;
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
+  QMenu *m = ui->menuProfile;
+
+  int size = settings.beginReadArray("profiles");
+  if (size != 0) {
+      for (int i = 0; i < size; i++) {
+          settings.setArrayIndex(i);
+          QAction *act = new QAction(this);
+          act->setCheckable(true);
+          act->setText(settings.value("name").toString());
+          act->setChecked(settings.value("active").toBool());
+          act->setData(settings.value("data"));
+          m_group->addAction(act);
+          m->addAction(act);
+      }
+      settings.endArray();
+  } else {
+      QAction *profileItem = new QAction(this);
+      m_group->addAction(profileItem);
+      profileItem->setText("System developer");
+      profileItem->setData(0);
+      profileItem->setCheckable(true);
+      m->addAction(profileItem);
+
+      profileItem = new QAction(this);
+      m_group->addAction(profileItem);
+      profileItem->setText("Application programmer");
+      profileItem->setData(1);
+      profileItem->setCheckable(true);
+      profileItem->setChecked(true);
+      m->addAction(profileItem);
+  }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

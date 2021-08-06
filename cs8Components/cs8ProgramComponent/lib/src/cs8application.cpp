@@ -836,6 +836,7 @@ bool cs8Application::saveDataFile(const QString &fileName) {
   buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
   if (buffer.buffer().right(1) == "\n")
     buffer.buffer().chop(1);
+  buffer.buffer().replace("\"/>\n", "\" />\n");
   //
   // insert BOM
   buffer.buffer().insert(0, static_cast<char>(0xBF));
