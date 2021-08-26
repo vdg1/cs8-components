@@ -833,9 +833,8 @@ QString cs8Program::formattedDescriptionHeader() const {
             .at(i)
             ->documentation(false, false)
             .length() > 2)
-      txt += m_parameterModel->variableListByType().at(i)->name().leftJustified(
-                 18, ' ') +
-             ": " + m_parameterModel->variableListByType().at(i)->description();
+        txt += m_parameterModel->variableListByType().at(i)->name().leftJustified(18, ' ') + ": "
+               + m_parameterModel->variableListByType().at(i)->description(true);
   }
   QRegularExpression rx("(\\s|^)((\\w*)\\\\_)");
   while (rx.match(txt).hasMatch()) {

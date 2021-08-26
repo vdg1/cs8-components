@@ -1,6 +1,7 @@
 #include "cs8variable.h"
 #include "cs8application.h"
 #include "cs8variablemodel.h"
+#include <QRegularExpression>
 #include <QStringList>
 //
 cs8Variable::cs8Variable(QDomElement &element, const QString &description,
@@ -404,7 +405,17 @@ void cs8Variable::setDescription(QString value) {
   m_description = value;
 }
 
-QString cs8Variable::description() const { return m_description; }
+QString cs8Variable::description(bool formatted) const
+{
+    if (!formatted) {
+        return m_description;
+    } else {
+        QString t = m_description;
+        t = t.replace(QRegularExpression(R"RX(\((\d+)\)\s+)RX"),
+                      QString("\n").leftJustified(20) + "\\1: ");
+        return t;
+    }
+}
 
 uint cs8Variable::size(int dimension) {
   QStringList list = m_element.attribute("size", "").split(" ");

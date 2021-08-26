@@ -30,7 +30,7 @@ public:
   QString use() const;
 
   void setDescription(QString value);
-  QString description() const;
+  QString description(bool formatted = false) const;
 
   uint size(int dimension = 0);
 
