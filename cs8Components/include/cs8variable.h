@@ -44,7 +44,7 @@ public:
   void setXsiType(const QString &type);
   QString xsiType() const;
 
-  bool setName(QString value, cs8Application *application);
+  bool setName(QString value, cs8Application *application = nullptr);
   QString name() const;
 
   QString toString(bool withTypeDefinition = true);

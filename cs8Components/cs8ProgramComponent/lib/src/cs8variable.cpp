@@ -412,7 +412,9 @@ QString cs8Variable::description(bool formatted) const
     } else {
         QString t = m_description;
         t = t.replace(QRegularExpression(R"RX(\((\d+)\)\s+)RX"),
-                      QString("\n").leftJustified(20) + "\\1: ");
+                      QString("\n").leftJustified(20) + "\\1: ")
+                .trimmed()
+            + "\n";
         return t;
     }
 }
@@ -491,23 +493,24 @@ QString cs8Variable::xsiType() const {
   return m_element.attribute("xsi:type", "array");
 }
 
-bool cs8Variable::setName(QString value, cs8Application *application) {
-  cs8VariableModel *m = qobject_cast<cs8VariableModel *>(parent());
-  if (m_name == value)
-    return true;
-  else if (m->getVarByName(value) != nullptr)
-    return false;
-  else {
-    emit modified();
-    QString oldName = m_name;
-    m_name = value;
-    m_element.setAttribute("name", value);
-    if (application) {
-      updateReference(application, oldName, value);
-      application->programModel()->updateCodeModel();
+bool cs8Variable::setName(QString value, cs8Application *application)
+{
+    cs8VariableModel *m = qobject_cast<cs8VariableModel *>(parent());
+    if (m_name == value)
+        return true;
+    else if (m != nullptr && m->getVarByName(value) != nullptr)
+        return false;
+    else {
+        emit modified();
+        QString oldName = m_name;
+        m_name = value;
+        m_element.setAttribute("name", value);
+        if (application) {
+            updateReference(application, oldName, value);
+            application->programModel()->updateCodeModel();
+        }
     }
-  }
-  return true;
+    return true;
 }
 
 QString cs8Variable::name() const { return m_element.attribute("name"); }

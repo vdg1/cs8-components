@@ -15,17 +15,21 @@
 #define MAX_LENGTH 40
 //
 cs8Program::cs8Program(QObject *parent)
-    : QObject(parent), cs8ReferencesAndLinter(), m_public(false),
-      m_withIfBlock(true), m_hasByteOrderMark(true) {
-  m_localVariableModel = new cs8LocalVariableModel(this);
-  connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
-          &cs8Program::modified);
-  m_parameterModel = new cs8ParameterModel(this);
-  connect(m_parameterModel, &cs8LocalVariableModel::modified, this,
-          &cs8Program::modified);
-  m_globalDocContainer = false;
-  m_programCode = "begin\nend";
-  m_application = qobject_cast<cs8Application *>(parent->parent());
+    : QObject(parent)
+    , cs8ReferencesAndLinter()
+    , m_application(0)
+    , m_public(false)
+    , m_withIfBlock(true)
+    , m_hasByteOrderMark(true)
+{
+    m_localVariableModel = new cs8LocalVariableModel(this);
+    connect(m_localVariableModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
+    m_parameterModel = new cs8ParameterModel(this);
+    connect(m_parameterModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
+    m_globalDocContainer = false;
+    m_programCode = "begin\nend";
+    if (parent)
+        m_application = qobject_cast<cs8Application *>(parent->parent());
 }
 
 cs8Program::cs8Program()
@@ -969,8 +973,8 @@ bool cs8Program::setName(const QString &name, cs8Application *application) {
   cs8ProgramModel *m = qobject_cast<cs8ProgramModel *>(parent());
   if (m_name == name)
     return true;
-  else if (m->getProgramByName(name) != nullptr)
-    return false;
+  else if (m != nullptr && m->getProgramByName(name) != nullptr)
+      return false;
   else {
     emit modified();
     QString oldName = m_name;
