@@ -1,6 +1,7 @@
 #include "cs8variablemodel.h"
 #include "cs8variable.h"
 #include <QDebug>
+#include <QRegExp>
 #include <QRegularExpression>
 #include <QStringList>
 //
@@ -185,12 +186,15 @@ QList<cs8Variable *> cs8VariableModel::findVariablesReferencedByProgram(
   return list;
 }
 
-cs8Variable *cs8VariableModel::findVariableByName(const QString &name_) {
-  for (const auto var : qAsConst(m_variableList)) {
-    if (var->name() == name_)
-      return var;
-  }
-  return Q_NULLPTR;
+cs8Variable *cs8VariableModel::findVariableByName(const QString &name_)
+{
+    QString n = name_;
+    n = n.replace(QRegExp("\\[.*\\]"), "");
+    for (const auto var : qAsConst(m_variableList)) {
+        if (var->name() == n)
+            return var;
+    }
+    return Q_NULLPTR;
 }
 
 int cs8VariableModel::rowCount(const QModelIndex &index) const {
