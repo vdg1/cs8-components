@@ -32,7 +32,7 @@ public:
   QList<cs8Variable *> referencedGlobalVriableModel(const QModelIndex &index);
 
   void clear();
-  bool addProgramFile(const QString &filePath);
+  bool addProgramFile(const QString &projectPath, const QString &filePath);
   cs8ProgramModel(QObject *parent = 0);
 
   ~cs8ProgramModel();

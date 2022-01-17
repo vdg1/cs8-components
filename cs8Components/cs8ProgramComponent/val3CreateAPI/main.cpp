@@ -95,16 +95,15 @@ int main(int argc, char *argv[])
     QStringList dirs;
 
     QDir dir;
-    for (auto dirTxt : options.sourcePaths) {
+    for (const auto &dirTxt : qAsConst(options.sourcePaths)) {
       dir.setPath(options.rootPath + "/" + dirTxt);
       qDebug() << "Scanning dir: " << dir.absolutePath();
-      for (const QString &pth :
-           dir.entryList(QDir::NoDotAndDotDot | QDir::Dirs))
+        for (const QString &pth : dir.entryList(QDir::NoDotAndDotDot | QDir::Dirs))
         dirs << dir.absolutePath() + "/" + pth;
     }
 
     QList<cs8Application *> cs8SourceApps;
-    for (auto pth : dirs) {
+    for (const auto &pth : qAsConst(dirs)) {
       cs8Application *cs8SourceApp = new cs8Application();
       if (cs8SourceApp->openFromPathName(pth)) {
         cs8SourceApps.append(cs8SourceApp);

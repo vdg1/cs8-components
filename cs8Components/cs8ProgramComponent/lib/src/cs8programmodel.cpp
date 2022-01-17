@@ -164,39 +164,39 @@ void cs8ProgramModel::updateCodeModel() {
   }
 }
 
-bool cs8ProgramModel::addProgramFile(const QString &filePath) {
-  QFile file(filePath);
-  if (!file.open(QIODevice::ReadOnly))
-    return false;
-  m_hasByteOrderMark =
-      QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
-  // if (m_hasByteOrderMark)
-  //    qDebug() << "File has BOM";
+bool cs8ProgramModel::addProgramFile(const QString &projectPath, const QString &filePath)
+{
+    QFile file(projectPath + filePath);
+    if (!file.open(QIODevice::ReadOnly))
+        return false;
+    m_hasByteOrderMark = QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
+    // if (m_hasByteOrderMark)
+    //    qDebug() << "File has BOM";
 
-  QDomDocument doc;
-  if (!doc.setContent(&file)) {
+    QDomDocument doc;
+    if (!doc.setContent(&file)) {
+        file.close();
+        return false;
+    }
     file.close();
-    return false;
-  }
-  file.close();
 
-  QDomElement programsSection = doc.documentElement();
-  Q_ASSERT(!programsSection.isNull());
-  // printChildNodes(m_programsSection);
+    QDomElement programsSection = doc.documentElement();
+    Q_ASSERT(!programsSection.isNull());
+    // printChildNodes(m_programsSection);
 
-  for (int i = 0; i < programsSection.childNodes().count(); i++) {
-    QDomElement programSection = programsSection.childNodes().at(i).toElement();
-    cs8Program *program = createProgram();
-    program->setHasByteOrderMark(m_hasByteOrderMark);
-    program->parseProgramSection(programSection, "");
-    program->setFilePath(filePath);
-  }
-  // QDomElement programSection = programsSection.firstChild().toElement();
-  // parseProgramSection(programSection, code);
+    for (int i = 0; i < programsSection.childNodes().count(); i++) {
+        QDomElement programSection = programsSection.childNodes().at(i).toElement();
+        cs8Program *program = createProgram();
+        program->setHasByteOrderMark(m_hasByteOrderMark);
+        program->parseProgramSection(programSection, "");
+        program->setFilePath(projectPath, filePath);
+    }
+    // QDomElement programSection = programsSection.firstChild().toElement();
+    // parseProgramSection(programSection, code);
 
-  // QFileInfo info(filePath);
-  // cs8Program *program = createProgram(info.baseName());
-  // if (!program->open(filePath))
+    // QFileInfo info(filePath);
+    // cs8Program *program = createProgram(info.baseName());
+    // if (!program->open(filePath))
 //    qDebug() << "Opening program " << filePath << " failed";
 #if QT_VERSION >= 0x050000
   beginResetModel();

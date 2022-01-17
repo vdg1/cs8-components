@@ -67,51 +67,50 @@ private:
   QStringList m_variableTokens;
 
 public:
-  // cs8Program(const QString & filePath);
-  bool open(const QString &filePath);
-  bool deleteSourceFile();
-  QString val3Code(bool withDocumentation = true) const;
-  QString toCSyntax();
-  void parseDocumentation(const QString &code);
+    // cs8Program(const QString & filePath);
+    bool open(const QString &projectPath, const QString &filePath);
+    bool deleteSourceFile();
+    QString val3Code(bool withDocumentation = true) const;
+    QString toCSyntax();
+    void parseDocumentation(const QString &code);
 
-  void setBriefDescription(const QString &theValue);
-  void setDetailedDocumentation(const QString &doc);
-  QString detailedDocumentation() const;
+    void setBriefDescription(const QString &theValue);
+    void setDetailedDocumentation(const QString &doc);
+    QString detailedDocumentation() const;
 
-  void setCopyrightMessage(const QString &text);
-  QString copyrightMessage() const;
+    void setCopyrightMessage(const QString &text);
+    QString copyrightMessage() const;
 
-  QString briefDescription(bool trimmed) const;
-  void setCellPath(const QString &path);
-  QString cellFilePath() const;
+    QString briefDescription(bool trimmed) const;
+    void setCellPath(const QString &path);
+    QString cellFilePath() const;
 
-  bool globalDocContainer() const;
-  void setGlobalDocContainer(bool globalDocContainer);
+    bool globalDocContainer() const;
+    void setGlobalDocContainer(bool globalDocContainer);
 
-  void setApplicationDocumentation(const QString &applicationDocumentation);
-  void setBriefModuleDocumentation(const QString &briefDocumentation);
-  void setMainPageDocumentation(const QString &applicationDocumentation);
+    void setApplicationDocumentation(const QString &applicationDocumentation);
+    void setBriefModuleDocumentation(const QString &briefDocumentation);
+    void setMainPageDocumentation(const QString &applicationDocumentation);
 
-  QString formattedDescriptionHeader() const;
+    QString formattedDescriptionHeader() const;
 
-  int getLineNumberCodeSection() const;
-  void undoTranslationTags();
+    int getLineNumberCodeSection() const;
+    void undoTranslationTags();
 
-  bool getHasByteOrderMark() const;
-  void setHasByteOrderMark(bool hasByteOrderMark);
+    bool getHasByteOrderMark() const;
+    void setHasByteOrderMark(bool hasByteOrderMark);
 
-  void parseProgramSection(const QDomElement &programSection,
-                           const QString &code);
+    void parseProgramSection(const QDomElement &programSection, const QString &code);
 
-  void writeXMLStream(QXmlStreamWriter &stream, bool withCode);
+    void writeXMLStream(QXmlStreamWriter &stream, bool withCode);
 
-  QString getFilePath() const;
-  void setFilePath(const QString &filePath);
+    QString getFilePath() const;
+    void setFilePath(const QString &projectPath, const QString &filePath);
 
-  QString getAdditionalHintMessage() const;
-  void setAdditionalHintMessage(const QString &additionalHintMessage);
+    QString getAdditionalHintMessage() const;
+    void setAdditionalHintMessage(const QString &additionalHintMessage);
 
-  void updateCodeModel();
+    void updateCodeModel();
 
 protected:
   bool parseProgramDoc(const QDomDocument &doc,
@@ -122,6 +121,7 @@ protected:
   QString m_detailedDocumentation;
   QString m_cellPath;
   QString m_filePath;
+  QString m_projectPath;
   QString m_copyRightMessage;
   QString m_applicationDocumentation, m_mainPageDocumentation,
       m_briefModuleDocumentation, m_additionalHintMessage;

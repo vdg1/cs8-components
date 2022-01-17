@@ -307,7 +307,7 @@ bool cs8Application::openFromPathName(const QString &filePath) {
   bool result = open(name);
   return result;
 }
-
+/*
 bool cs8Application::exportInterfacePrototype(const QString &path) const {
   QString fileName;
 
@@ -361,11 +361,6 @@ bool cs8Application::exportInterfacePrototype(const QString &path) const {
   QDomNode dataSection = m_dataSection.cloneNode();
   projectElement.appendChild(dataSection);
 
-  /*
-     QDomNode aliasSection = m_aliasSection.cloneNode();
-     projectElement.appendChild(aliasSection);
-   */
-  // for interface prototype no libraries are needed
   QDomElement aliasSection = doc.createElement("Libraries");
   projectElement.appendChild(aliasSection);
 
@@ -383,6 +378,7 @@ bool cs8Application::exportInterfacePrototype(const QString &path) const {
   qDebug() << "saving pjx done";
   return true;
 }
+*/
 
 bool cs8Application::integrateInterface(cs8Application *sourceApplication) {
   // integrate global symbols
@@ -664,7 +660,7 @@ bool cs8Application::parseProject(const QDomDocument &doc) {
     QDomNodeList list = m_programSection.elementsByTagName("Program");
     for (int i = 0; i < list.count(); i++) {
       QString fileName = list.at(i).toElement().attribute("file");
-      m_programModel->addProgramFile(m_projectPath + fileName);
+      m_programModel->addProgramFile(m_projectPath, fileName);
     }
     // load alias
     list = m_aliasSection.elementsByTagName("Library");
@@ -859,8 +855,7 @@ bool cs8Application::save(const QString &path, const QString &name,
   m_projectName = name;
   m_compactFileMode = compactMode;
 
-  // check if a global data has documented code or a application documentation
-  // exists.
+  // check if a global data has documented code or application documentation exists.
   // If it does, we select program zzDocumentation() - if it does not exist yet
   // we append it here
   if (m_globalVariableModel->hasDocumentation() ||
@@ -923,8 +918,8 @@ bool cs8Application::save(const QString &path, const QString &name,
     stream.writeAttribute("xmlns",
                           "http://www.staubli.com/robotics/VAL3/Program/2");
     for (const auto program : m_programModel->programList()) {
-      program->writeXMLStream(stream, true);
-      program->deleteSourceFile();
+        program->writeXMLStream(stream, true);
+        program->deleteSourceFile();
     }
     stream.writeEndDocument();
 

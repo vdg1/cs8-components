@@ -35,7 +35,7 @@ public:
   QString exportToCImplementation() const;
   QString exportToCDefinition() const;
   QString exportToIOList() const;
-  bool exportInterfacePrototype(const QString &path) const;
+  //bool exportInterfacePrototype(const QString &path) const;
   bool integrateInterface(cs8Application *sourceApplication);
   QString name() const;
   void setName(const QString &name);

@@ -45,31 +45,32 @@ cs8Program::cs8Program()
   m_programCode = "begin\nend";
 }
 
-bool cs8Program::open(const QString &filePath) {
-  // qDebug() << "cs8Program::open () " << filePath;
+bool cs8Program::open(const QString &projectPath, const QString &filePath)
+{
+    // qDebug() << "cs8Program::open () " << filePath;
 
-  QFile file(filePath);
-  if (!file.open(QIODevice::ReadOnly))
-    return false;
-  m_hasByteOrderMark =
-      QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
-  // if (m_hasByteOrderMark)
-  // qDebug() << "File has BOM";
+    QFile file(projectPath + filePath);
+    if (!file.open(QIODevice::ReadOnly))
+        return false;
+    m_hasByteOrderMark = QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
+    // if (m_hasByteOrderMark)
+    // qDebug() << "File has BOM";
 
-  QDomDocument doc;
-  if (!doc.setContent(&file)) {
+    QDomDocument doc;
+    if (!doc.setContent(&file)) {
+        file.close();
+        return false;
+    }
     file.close();
-    return false;
-  }
-  file.close();
 
-  m_filePath = filePath;
-  return parseProgramDoc(doc);
+    m_filePath = filePath;
+    m_projectPath = projectPath;
+    return parseProgramDoc(doc);
 }
 
 bool cs8Program::deleteSourceFile() {
   // qDebug() << "delete file: " << m_filePath;
-  return QFile::remove(m_filePath);
+  return QFile::remove(m_projectPath + m_filePath);
 }
 
 void cs8Program::printChildNodes(const QDomElement &element) {
@@ -278,7 +279,11 @@ void cs8Program::setAdditionalHintMessage(
 
 QString cs8Program::getFilePath() const { return m_filePath; }
 
-void cs8Program::setFilePath(const QString &filePath) { m_filePath = filePath; }
+void cs8Program::setFilePath(const QString &projectPath, const QString &filePath)
+{
+    m_filePath = filePath;
+    m_projectPath = projectPath;
+}
 
 bool cs8Program::getHasByteOrderMark() const { return m_hasByteOrderMark; }
 
@@ -767,8 +772,9 @@ void cs8Program::setCellPath(const QString &path) {
   m_cellPath = path;
 }
 
-QString cs8Program::cellFilePath() const {
-  QString pth = QDir::fromNativeSeparators(m_filePath);
+QString cs8Program::cellFilePath() const
+{
+    QString pth = QDir::fromNativeSeparators(m_projectPath + m_filePath);
   // qDebug() << __FUNCTION__ << pth << m_cellPath;
   pth = pth.replace(m_cellPath + "usr/usrapp/", "Disk://");
   return pth;
@@ -898,50 +904,49 @@ void cs8Program::writeXMLStream(QXmlStreamWriter &stream, bool withCode) {
   stream.writeEndElement();
 }
 
-bool cs8Program::save(const QString &filePath, bool withCode) {
-  QBuffer buffer;
-  buffer.open(QBuffer::ReadWrite);
+bool cs8Program::save(const QString &projectPath, bool withCode)
+{
+    QBuffer buffer;
+    buffer.open(QBuffer::ReadWrite);
 
-  QXmlStreamWriter stream(&buffer);
-  stream.setAutoFormatting(true);
-  stream.setAutoFormattingIndent(2);
-  stream.setCodec("utf-8");
-  stream.writeStartDocument();
+    QXmlStreamWriter stream(&buffer);
+    stream.setAutoFormatting(true);
+    stream.setAutoFormattingIndent(2);
+    stream.setCodec("utf-8");
+    stream.writeStartDocument();
 
-  //
-  stream.writeStartElement("Programs");
-  stream.writeAttribute("xmlns:xsi",
-                        "http://www.w3.org/2001/XMLSchema-instance");
-  stream.writeAttribute("xmlns",
-                        "http://www.staubli.com/robotics/VAL3/Program/2");
-  writeXMLStream(stream, withCode);
-  stream.writeEndDocument();
+    //
+    stream.writeStartElement("Programs");
+    stream.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    stream.writeAttribute("xmlns", "http://www.staubli.com/robotics/VAL3/Program/2");
+    writeXMLStream(stream, withCode);
+    stream.writeEndDocument();
 
-  // match our XML output to XML output of SRS
-  buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
-  if (buffer.buffer().right(1) == "\n")
-    buffer.buffer().chop(1);
-  buffer.buffer().replace("\n", "\r\n");
-  buffer.buffer().replace("\"/>", "\" />");
-  //
+    // match our XML output to XML output of SRS
+    buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
+    if (buffer.buffer().right(1) == "\n")
+        buffer.buffer().chop(1);
+    buffer.buffer().replace("\n", "\r\n");
+    buffer.buffer().replace("\"/>", "\" />");
+    //
 
-  QFileInfo i(filePath);
-  QString fileName_ = i.isDir() ? filePath + "/" + fileName() : filePath;
-  // QString fileName_ = filePath + fileName();
-  QFile file(fileName_);
-  if (!file.open(QIODevice::WriteOnly))
-    return false;
+    QFileInfo i(projectPath);
+    QString fileName_ = i.isDir() ? projectPath + "/" + fileName() : projectPath;
+    // QString fileName_ = filePath + fileName();
+    QFile file(fileName_);
+    if (!file.open(QIODevice::WriteOnly))
+        return false;
 
-  if (m_hasByteOrderMark) {
-    buffer.buffer().insert(0, static_cast<char>(0xBF));
-    buffer.buffer().insert(0, static_cast<char>(0xBB));
-    buffer.buffer().insert(0, static_cast<char>(0xEF));
-  }
-  file.write(buffer.buffer());
-  // qDebug() << "write file: " << fileName_;
-  // qDebug() << "start of buffer: " << buffer.buffer().at(0)
-  //         << buffer.buffer().at(1) << buffer.buffer().at(2);
-  return true;
+    if (m_hasByteOrderMark) {
+        buffer.buffer().insert(0, static_cast<char>(0xBF));
+        buffer.buffer().insert(0, static_cast<char>(0xBB));
+        buffer.buffer().insert(0, static_cast<char>(0xEF));
+    }
+    file.write(buffer.buffer());
+    // qDebug() << "write file: " << fileName_;
+    // qDebug() << "start of buffer: " << buffer.buffer().at(0)
+    //         << buffer.buffer().at(1) << buffer.buffer().at(2);
+    return true;
 }
 
 cs8ParameterModel *cs8Program::parameterModel() const {
@@ -967,7 +972,10 @@ QString cs8Program::name() const {
   return m_name;
 }
 
-QString cs8Program::fileName() const { return name() + ".pgx"; }
+QString cs8Program::fileName() const
+{
+    return m_filePath;
+}
 
 bool cs8Program::setName(const QString &name, cs8Application *application) {
   cs8ProgramModel *m = qobject_cast<cs8ProgramModel *>(parent());
@@ -979,6 +987,7 @@ bool cs8Program::setName(const QString &name, cs8Application *application) {
     emit modified();
     QString oldName = m_name;
     m_name = name;
+    m_filePath = m_name + ".pgx";
     if (application) {
       updateReference(application, oldName, name);
       m->updateCodeModel();
