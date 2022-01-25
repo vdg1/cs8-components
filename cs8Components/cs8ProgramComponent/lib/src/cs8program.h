@@ -71,6 +71,7 @@ public:
     bool open(const QString &projectPath, const QString &filePath);
     bool deleteSourceFile();
     QString val3Code(bool withDocumentation = true) const;
+    QStringList val3CodeList() const;
     QString toCSyntax();
     void parseDocumentation(const QString &code);
 

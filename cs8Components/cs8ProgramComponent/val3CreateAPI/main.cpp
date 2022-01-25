@@ -96,20 +96,20 @@ int main(int argc, char *argv[])
 
     QDir dir;
     for (const auto &dirTxt : qAsConst(options.sourcePaths)) {
-      dir.setPath(options.rootPath + "/" + dirTxt);
-      qDebug() << "Scanning dir: " << dir.absolutePath();
+        dir.setPath(options.rootPath + "/" + dirTxt);
+        qDebug() << "Scanning dir: " << dir.absolutePath();
         for (const QString &pth : dir.entryList(QDir::NoDotAndDotDot | QDir::Dirs))
-        dirs << dir.absolutePath() + "/" + pth;
+            dirs << dir.absolutePath() + "/" + pth;
     }
 
     QList<cs8Application *> cs8SourceApps;
     for (const auto &pth : qAsConst(dirs)) {
-      cs8Application *cs8SourceApp = new cs8Application();
-      if (cs8SourceApp->openFromPathName(pth)) {
-        cs8SourceApps.append(cs8SourceApp);
-      } else {
-        delete cs8SourceApp;
-      }
+        cs8Application *cs8SourceApp = new cs8Application();
+        if (cs8SourceApp->openFromPathName(pth)) {
+            cs8SourceApps.append(cs8SourceApp);
+        } else {
+            delete cs8SourceApp;
+        }
     }
     w.createAPIs(cs8SourceApps, options.copyToProjectPath, options.compactMode,
                  options.rootPath + "/" + options.outputPath);

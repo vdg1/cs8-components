@@ -96,7 +96,7 @@ void cs8Program::updateCodeModel() {
       QRegularExpressionMatch match = i.next();
       // QString word = match.captured(2);
       int symbolPos = match.capturedStart(2);
-      int line = c.left(symbolPos).count(QRegExp("\n"));
+      int line = c.left(symbolPos).count(QRegExp("\n")) + 1;
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
       int column = symbolPos - lineStart - 1;
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
@@ -114,7 +114,7 @@ void cs8Program::updateCodeModel() {
       QRegularExpressionMatch match = i.next();
       // QString word = match.captured(2);
       int symbolPos = match.capturedStart(2);
-      int line = c.left(symbolPos).count(QRegExp("\n"));
+      int line = c.left(symbolPos).count(QRegExp("\n")) + 1;
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
       int column = symbolPos - lineStart - 1;
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
@@ -134,7 +134,7 @@ void cs8Program::updateCodeModel() {
         QRegularExpressionMatch match = i.next();
         // QString word = match.captured(2);
         int symbolPos = match.capturedStart(2);
-        int line = c.left(symbolPos).count(QRegExp("\n"));
+        int line = c.left(symbolPos).count(QRegExp("\n")) + 1;
         int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
         int column = symbolPos - lineStart - 1;
         if (!c.mid(lineStart, column).trimmed().startsWith("//"))
@@ -152,7 +152,7 @@ void cs8Program::updateCodeModel() {
         QRegularExpressionMatch match = i.next();
         // QString word = match.captured(2);
         int symbolPos = match.capturedStart(2);
-        int line = c.left(symbolPos).count(QRegExp("\n"));
+        int line = c.left(symbolPos).count(QRegExp("\n")) + 1;
         int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
         int column = symbolPos - lineStart - 1;
         if (!c.mid(lineStart, column).trimmed().startsWith("//"))
@@ -331,9 +331,15 @@ void cs8Program::setMainPageDocumentation(
 }
 
 // returns the code without documentation header
-QString cs8Program::val3Code(bool withDocumentation) const {
-  // qDebug() << m_codeSection.text();
-  return withDocumentation ? m_programCode : extractCode(m_programCode);
+QString cs8Program::val3Code(bool withDocumentation) const
+{
+    // qDebug() << m_codeSection.text();
+    return withDocumentation ? m_programCode : extractCode(m_programCode);
+}
+
+QStringList cs8Program::val3CodeList() const
+{
+    return val3Code(true).split("\n");
 }
 
 QString cs8Program::toCSyntax() {
@@ -660,16 +666,17 @@ void cs8Program::parseDocumentation(const QString &code_) {
       } else if (tagType == "copyright") {
         setCopyrightMessage(tagText);
       } else if (tagType == "linter") {
-        setLinterDirective(tagName, tagText);
+          setLinterDirective(tagName, tagText);
+          m_tags.insertMulti(tagType, tagName + " " + tagText);
       } else {
-        // unknown tag
-        if (tagText.isEmpty())
-          tagText = tagName;
-        m_tags.insertMulti(tagType, tagText);
-        emit unknownTagFound(tagType, tagName, tagText);
-        // unknown tag type
-        // m_description += QString("\n\\%1
-        // %2\n%3").arg(tagType).arg(tagName).arg(tagText);
+          // unknown tag
+          if (tagText.isEmpty())
+              tagText = tagName;
+          m_tags.insertMulti(tagType, tagName + " " + tagText);
+          emit unknownTagFound(tagType, tagName, tagText);
+          // unknown tag type
+          // m_description += QString("\n\\%1
+          // %2\n%3").arg(tagType).arg(tagName).arg(tagText);
       }
     }
     // a new tag
@@ -749,14 +756,15 @@ void cs8Program::parseDocumentation(const QString &code_) {
     } else if (tagType == "copyright") {
       setCopyrightMessage(tagText);
     } else if (tagType == "linter") {
-      setLinterDirective(tagName, tagText);
+        setLinterDirective(tagName, tagText);
+        m_tags.insertMulti(tagType, tagName + " " + tagText);
     } else {
-      if (tagText.isEmpty())
-        tagText = tagName;
-      m_tags.insertMulti(tagType, tagText);
-      emit unknownTagFound(tagType, tagName, tagText);
-      // m_description += QString("\n\\%1
-      // %2\n%3").arg(tagType).arg(tagName).arg(tagText);
+        if (tagText.isEmpty())
+            tagText = tagName;
+        m_tags.insertMulti(tagType, tagText);
+        emit unknownTagFound(tagType, tagName, tagText);
+        // m_description += QString("\n\\%1
+        // %2\n%3").arg(tagType).arg(tagName).arg(tagText);
     }
   }
   // qDebug() << documentationList;
@@ -775,9 +783,9 @@ void cs8Program::setCellPath(const QString &path) {
 QString cs8Program::cellFilePath() const
 {
     QString pth = QDir::fromNativeSeparators(m_projectPath + m_filePath);
-  // qDebug() << __FUNCTION__ << pth << m_cellPath;
-  pth = pth.replace(m_cellPath + "usr/usrapp/", "Disk://");
-  return pth;
+    // qDebug() << __FUNCTION__ << pth << m_cellPath;
+    pth = pth.replace(m_cellPath + "usr/usrapp/", "Disk://");
+    return pth;
 }
 
 QString cs8Program::documentation(bool withPrefix, bool forCOutput) const {
