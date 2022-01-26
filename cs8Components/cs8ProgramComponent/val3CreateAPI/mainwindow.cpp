@@ -238,6 +238,21 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
                                      .arg(cs8SourceApp->name());
             }
           }
+          // public global variable is a dio or aio and name starts with '_'
+          if (var->name().at(0) == "_" && (var->type() == "dio" || var->type() == "aio")) {
+              QString n = var->name();
+              n = n.remove(0, 1);
+              cs8Variable *globalVar = cs8DestApp->globalVariableModel()->createVariable(n, var->type());
+
+              globalVar->setPublic(true);
+              globalVar->setScope(cs8Variable::Global);
+              globalVar->setDimension(var->dimension());
+              //globalVar->setValues(var->values());
+              // cs8DestApp->globalVariableModel()->addVariable(globalVar);
+              for (uint i = 0; i < var->size(); i++) {
+                  initProgramCode += QString("  dioLink(%1[%2],%3:%4[%2])\n").arg(globalVar->name()).arg(i).arg(cs8SourceApp->name()).arg(var->name());
+              }
+          }
         }
 
         // try to load ioMap library
