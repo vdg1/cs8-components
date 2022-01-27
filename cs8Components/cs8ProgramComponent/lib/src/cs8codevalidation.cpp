@@ -84,12 +84,12 @@ QStringList cs8CodeValidation::runDataValidationRule(
     QString expressionString = ruleNode.attribute("expression");
 
     QRegExp rx(expressionString);
+    rx.setCaseSensitivity(Qt::CaseInsensitive);
     QString checkProperty = ruleNode.attribute("checkProperty");
     QString message =
         ruleNode.elementsByTagName("message").at(0).toElement().text();
     int minNameLength = ruleNode.attribute("minLength", "-1").toInt();
-    nodeSeverity =
-        ruleNode.attribute("severity", QString("%1").arg(nodeSeverity)).toInt();
+    nodeSeverity = ruleNode.attribute("severity", QString("%1").arg(nodeSeverity)).toInt();
     QString level;
 
     switch (qMax(0, nodeSeverity + m_reportingLevel)) {
@@ -312,6 +312,16 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
                                       .arg(program->cellFilePath())
                                       .arg(i);
         }
+    }
+
+    // check lines of code
+    if (program->linesOfCodeAndComments() == 0 || (program->linesOfCodeAndComments() <= (program->linesOfComments() + program->linesOfNoCode()))) {
+        validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
+                                      "line>%4<msg>%2<file>%3")
+                                  .arg(program->name())
+                                  .arg("Program does not contain any active code")
+                                  .arg(program->cellFilePath())
+                                  .arg(0);
     }
   }
 

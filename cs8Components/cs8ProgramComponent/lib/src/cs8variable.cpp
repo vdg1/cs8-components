@@ -33,23 +33,24 @@ cs8Variable::cs8Variable(cs8Variable *var, QObject *parent) : QObject(parent) {
 }
 
 QStringList cs8Variable::setBuildInVariableTypes() {
-  return QStringList() << "aio"
-                       << "bool"
-                       << "configRs"
-                       << "configRx"
-                       << "dio"
-                       << "frame"
-                       << "jointRs"
-                       << "jointRx"
-                       << "mdesc"
-                       << "num"
-                       << "pointRs"
-                       << "pointRx"
-                       << "point"
-                       << "sio"
-                       << "string"
-                       << "tool"
-                       << "trsf";
+    return QStringList() << "aio"
+                         << "bool"
+                         << "configRs"
+                         << "configRx"
+                         << "dio"
+                         << "frame"
+                         << "jointRs"
+                         << "jointRx"
+                         << "joint"
+                         << "mdesc"
+                         << "num"
+                         << "pointRs"
+                         << "pointRx"
+                         << "point"
+                         << "sio"
+                         << "string"
+                         << "tool"
+                         << "trsf";
 }
 
 QString cs8Variable::toString(bool withTypeDefinition) {
@@ -411,10 +412,7 @@ QString cs8Variable::description(bool formatted) const
         return m_description;
     } else {
         QString t = m_description;
-        t = t.replace(QRegularExpression(R"RX(\((\d+)\)\s+)RX"),
-                      QString("\n").leftJustified(20) + "\\1: ")
-                .trimmed()
-            + "\n";
+        t = t.replace(QRegularExpression(R"RX((\R{0,1}\s*)\((\d+)\)\s+)RX"), QString("\n                   ") + "\\2: ").trimmed() + "\n";
         return t;
     }
 }

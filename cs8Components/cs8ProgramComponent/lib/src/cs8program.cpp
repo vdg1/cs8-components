@@ -15,12 +15,8 @@
 #define MAX_LENGTH 40
 //
 cs8Program::cs8Program(QObject *parent)
-    : QObject(parent)
-    , cs8ReferencesAndLinter()
-    , m_application(0)
-    , m_public(false)
-    , m_withIfBlock(true)
-    , m_hasByteOrderMark(true)
+    : QObject(parent), cs8ReferencesAndLinter(), m_application(0), m_public(false), m_withIfBlock(true), m_hasByteOrderMark(true),
+      m_lineNumberCodeSection(0), m_linesOfCodeAndComments(0), m_linesOfComments(0)
 {
     m_localVariableModel = new cs8LocalVariableModel(this);
     connect(m_localVariableModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
@@ -33,16 +29,15 @@ cs8Program::cs8Program(QObject *parent)
 }
 
 cs8Program::cs8Program()
-    : QObject(), cs8ReferencesAndLinter(), m_application(0), m_public(false),
-      m_withIfBlock(true), m_hasByteOrderMark(true) {
-  m_localVariableModel = new cs8LocalVariableModel(this);
-  connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
-          &cs8Program::modified);
-  m_parameterModel = new cs8ParameterModel(this);
-  connect(m_parameterModel, &cs8LocalVariableModel::modified, this,
-          &cs8Program::modified);
-  m_globalDocContainer = false;
-  m_programCode = "begin\nend";
+    : QObject(), cs8ReferencesAndLinter(), m_application(0), m_public(false), m_withIfBlock(true), m_hasByteOrderMark(true),
+      m_lineNumberCodeSection(0), m_linesOfCodeAndComments(0), m_linesOfComments(0)
+{
+    m_localVariableModel = new cs8LocalVariableModel(this);
+    connect(m_localVariableModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
+    m_parameterModel = new cs8ParameterModel(this);
+    connect(m_parameterModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
+    m_globalDocContainer = false;
+    m_programCode = "begin\nend";
 }
 
 bool cs8Program::open(const QString &projectPath, const QString &filePath)
@@ -85,7 +80,25 @@ void cs8Program::updateCodeModel() {
   // update token list
   m_variableTokens = variableTokens(false);
   // update variable occurences
-  QString c = val3Code(true);
+  QString c = val3Code(false);
+  // calculate code line metrics
+  QStringList l = c.split("\n");
+  do {
+      l.removeFirst();
+  } while (!l.isEmpty() && (l.first().trimmed().isEmpty() || l.first().trimmed() == "begin"));
+  do {
+      l.removeLast();
+  } while (!l.isEmpty() && (l.last().trimmed().isEmpty() || l.last().trimmed() == "end"));
+  m_linesOfCodeAndComments = l.length();
+  m_linesOfComments = 0;
+  m_linesOfNoCode = 0;
+  for (const QString &s : qAsConst(l)) {
+      if (s.trimmed().startsWith("//"))
+          m_linesOfComments++;
+      if (s.trimmed().isEmpty())
+          m_linesOfNoCode++;
+  }
+  //
   QRegularExpression rx;
   QString pattern = R"RX((\b(%1)\b)(?=([^\"]*\"[^\"]*\")*[^\"]*$))RX";
   foreach (cs8Variable *var, m_localVariableModel->variableListByType()) {
@@ -266,6 +279,21 @@ if (!var && m_application)
 if (var)
   var->setLinterDirective(directive);
 */
+}
+
+uint cs8Program::linesOfNoCode() const
+{
+    return m_linesOfNoCode;
+}
+
+uint cs8Program::linesOfComments() const
+{
+    return m_linesOfComments;
+}
+
+uint cs8Program::linesOfCodeAndComments() const
+{
+    return m_linesOfCodeAndComments;
 }
 
 QString cs8Program::getAdditionalHintMessage() const {

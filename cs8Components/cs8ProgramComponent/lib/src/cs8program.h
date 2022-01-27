@@ -113,36 +113,41 @@ public:
 
     void updateCodeModel();
 
-protected:
-  bool parseProgramDoc(const QDomDocument &doc,
-                       const QString &code = QString());
-  void tidyUpCode(QString &code);
-  void setLinterDirective(const QString &directive, const QString &symbolName);
+    uint linesOfCodeAndComments() const;
 
-  QString m_detailedDocumentation;
-  QString m_cellPath;
-  QString m_filePath;
-  QString m_projectPath;
-  QString m_copyRightMessage;
-  QString m_applicationDocumentation, m_mainPageDocumentation,
-      m_briefModuleDocumentation, m_additionalHintMessage;
-  QString m_name;
-  QString m_programCode;
-  bool m_public;
-  bool m_withIfBlock;
-  bool m_hasByteOrderMark;
-  int m_lineNumberCodeSection;
-  int m_headerLines;
+    uint linesOfComments() const;
+
+    uint linesOfNoCode() const;
+
+protected:
+    bool parseProgramDoc(const QDomDocument &doc, const QString &code = QString());
+    void tidyUpCode(QString &code);
+    void setLinterDirective(const QString &directive, const QString &symbolName);
+
+    QString m_detailedDocumentation;
+    QString m_cellPath;
+    QString m_filePath;
+    QString m_projectPath;
+    QString m_copyRightMessage;
+    QString m_applicationDocumentation, m_mainPageDocumentation, m_briefModuleDocumentation, m_additionalHintMessage;
+    QString m_name;
+    QString m_programCode;
+    bool m_public;
+    bool m_withIfBlock;
+    bool m_hasByteOrderMark;
+    uint m_lineNumberCodeSection;
+    uint m_headerLines;
+    uint m_linesOfCodeAndComments;
+    uint m_linesOfComments;
+    uint m_linesOfNoCode;
 
 signals:
-  void globalVariableDocumentationFound(const QString &name,
-                                        const QString &document);
-  void moduleDocumentationFound(const QString &document);
-  void moduleBriefDocumentationFound(const QString &document);
-  void mainPageDocumentationFound(const QString &document);
-  void exportDirectiveFound(const QString &module, const QString &routine);
-  void unknownTagFound(const QString &tagType, const QString &tagName,
-                       const QString &tagText);
-  void modified();
+    void globalVariableDocumentationFound(const QString &name, const QString &document);
+    void moduleDocumentationFound(const QString &document);
+    void moduleBriefDocumentationFound(const QString &document);
+    void mainPageDocumentationFound(const QString &document);
+    void exportDirectiveFound(const QString &module, const QString &routine);
+    void unknownTagFound(const QString &tagType, const QString &tagName, const QString &tagText);
+    void modified();
 };
 #endif

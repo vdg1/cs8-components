@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT       += core xml concurrent
-CONFIG += console
 TARGET = val3Check
 TEMPLATE = app
 
