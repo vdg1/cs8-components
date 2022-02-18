@@ -21,21 +21,21 @@ MainWindow::MainWindow(QWidget *parent)
 
   ui->setupUi(this);
   m_application = new cs8Application(this);
-  connect(m_application, &cs8Application::modified, this,
-          &MainWindow::slotModified);
+
+  connect(m_application, &cs8Application::modified, this, &MainWindow::slotModified);
   ui->listViewProgams->setModel(m_application->programModel());
 
-  ui->tableViewPars->setMode(cs8ProgramDataView::ParameterData);
+  ui->tableViewPars->setMode(cs8ProgramDataView::Mode::ParameterData);
   ui->tableViewPars->setMasterView(ui->listViewProgams);
 
-  ui->tableViewVars->setMode(cs8ProgramDataView::LocalData);
+  ui->tableViewVars->setMode(cs8ProgramDataView::Mode::LocalData);
   ui->tableViewVars->setMasterView(ui->listViewProgams);
 
-  ui->tableViewReferencedGlobalVaribales->setMode(
-      cs8ProgramDataView::ReferencedGlobalData);
+  //>>
+  ui->tableViewReferencedGlobalVaribales->setMode(cs8ProgramDataView::Mode::ReferencedGlobalData);
   ui->tableViewReferencedGlobalVaribales->setMasterView(ui->listViewProgams);
-
-  ui->globalDataView->setMode(cs8ProgramDataView::GlobalData);
+  //<<
+  ui->globalDataView->setMode(cs8ProgramDataView::Mode::GlobalData);
   ui->globalDataView->setMasterView(ui->listViewProgams);
 
   ui->widgetDocumentation->setMasterView(ui->listViewProgams);
@@ -111,15 +111,16 @@ void MainWindow::on_action_Open_triggered() {
 
 void MainWindow::on_action_Save_triggered() { m_application->save(false); }
 
-void MainWindow::slotSelectionChanged(const QItemSelection &selected,
-                                      const QItemSelection & /*deselected*/) {
-  int index = selected.indexes().at(0).row();
-  cs8Program *program = m_application->programModel()->programList().at(index);
-  ui->plainTextEditCode->setPlainText(program->toDocumentedCode());
-  ui->labelDeclaration->setText(program->definition());
-  connect(program->parameterModel(), &cs8VariableModel::documentationChanged,
-          ui->widgetDocumentation->documentation(),
-          &FormMarkDownEditor::setPostfixText);
+void MainWindow::slotSelectionChanged(const QItemSelection &selected, const QItemSelection & /*deselected*/)
+{
+    int index = selected.indexes().at(0).row();
+    cs8Program *program = m_application->programModel()->programList().at(index);
+    ui->plainTextEditCode->setPlainText(program->toDocumentedCode());
+    ui->labelDeclaration->setText(program->definition());
+    connect(program->parameterModel(),
+            &cs8VariableModel::documentationChanged,
+            ui->widgetDocumentation->documentation(),
+            &FormMarkDownEditor::setPostfixText);
 }
 
 void MainWindow::openRecentFile() {
@@ -130,18 +131,17 @@ void MainWindow::openRecentFile() {
   }
 }
 
-void MainWindow::slotModified(bool modified_) {
-  setWindowModified(modified_);
-  QModelIndexList l = ui->listViewProgams->selectionModel()->selectedIndexes();
-  /// TODO
-  if (l.count() > 0 && false) {
-    int index = l.at(0).row();
-    cs8Program *program =
-        m_application->programModel()->programList().at(index);
-    program->setDetailedDocumentation(
-        ui->widgetDocumentation->documentation()->text());
-    ui->plainTextEditCode->setPlainText(program->toDocumentedCode());
-  }
+void MainWindow::slotModified(bool modified_)
+{
+    setWindowModified(modified_);
+    QModelIndexList l = ui->listViewProgams->selectionModel()->selectedIndexes();
+    /// TODO
+    if (l.count() > 0 && false) {
+        int index = l.at(0).row();
+        cs8Program *program = m_application->programModel()->programList().at(index);
+        program->setDetailedDocumentation(ui->widgetDocumentation->documentation()->text());
+        ui->plainTextEditCode->setPlainText(program->toDocumentedCode());
+    }
 }
 
 void MainWindow::on_tableViewPars_doubleClicked(QModelIndex index) {
@@ -173,14 +173,13 @@ bool MainWindow::maybeSave() {
 }
 
 void MainWindow::openApplication(const QString &applicationName) {
-  setCurrentFile(applicationName);
-  m_application->open(applicationName);
-  ui->listViewProgams->setCurrentIndex(
-      m_application->programModel()->index(0, 0));
-  ui->actionAdd_tags_for_undocumented_symbols->setChecked(
-      m_application->withUndocumentedSymbols());
-  ui->actionInclude_documentation_of_Libraries->setChecked(
-      m_application->includeLibraryDocuments());
+    qDebug() << __FUNCTION__;
+    setCurrentFile(applicationName);
+    m_application->open(applicationName);
+    qDebug() << "Application loaded";
+    ui->listViewProgams->setCurrentIndex(m_application->programModel()->index(0, 0));
+    ui->actionAdd_tags_for_undocumented_symbols->setChecked(m_application->withUndocumentedSymbols());
+    ui->actionInclude_documentation_of_Libraries->setChecked(m_application->includeLibraryDocuments());
 }
 
 void MainWindow::updateRecentFileActions() {

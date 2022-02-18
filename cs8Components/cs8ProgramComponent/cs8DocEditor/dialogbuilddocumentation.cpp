@@ -24,7 +24,11 @@ DialogBuildDocumentation::DialogBuildDocumentation(QWidget *parent)
   configFile = new QTemporaryFile(this);
 }
 
-DialogBuildDocumentation::~DialogBuildDocumentation() { delete ui; }
+DialogBuildDocumentation::~DialogBuildDocumentation()
+{
+    qDebug() << __FUNCTION__;
+    delete ui;
+}
 
 bool DialogBuildDocumentation::build(cs8Application *application) {
   QSettings settings;

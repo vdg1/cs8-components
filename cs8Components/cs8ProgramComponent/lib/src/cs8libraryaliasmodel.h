@@ -34,11 +34,9 @@ public:
             Qt::EditRole);
     Qt::ItemFlags flags(const QModelIndex & index) const;
     cs8LibraryAlias* getAliasByName(const QString & name);
-    QList<cs8LibraryAlias*> list() {
-        return m_aliasList;
-    }
+    QList<cs8LibraryAlias *> list() const;
     void clear();
-    void setProjectVersion(uint version){m_projectVersion=version;}
+    void setProjectVersion(uint version);
     bool contains(const QString &alias_);
 
 signals:

@@ -12,6 +12,7 @@
 #ifndef CS8PROGRAMDATAVIEW_H
 #define CS8PROGRAMDATAVIEW_H
 
+#include "cs8variablemodel.h"
 #include <QTableView>
 
 /**
@@ -19,8 +20,8 @@
 */
 class cs8ProgramDataView : public QTableView {
   Q_OBJECT
-public:
-  enum Mode { GlobalData, LocalData, ParameterData, ReferencedGlobalData };
+  public:
+  enum class Mode { GlobalData, LocalData, ParameterData, ReferencedGlobalData };
 
   cs8ProgramDataView(QWidget *parent = 0);
 
@@ -28,13 +29,14 @@ public:
 
   void setMasterView(QAbstractItemView *theValue);
   void setMode(Mode theValue);
-  int mode() const;
+  Mode mode() const;
 
-protected:
+  protected:
   QAbstractItemView *m_masterView;
-  int m_mode;
+  cs8VariableModel *m_globalVariableModel;
+  Mode m_mode;
 
-protected slots:
+  protected slots:
   void slotSelectionChanged(const QItemSelection &selected,
                             const QItemSelection &);
 };

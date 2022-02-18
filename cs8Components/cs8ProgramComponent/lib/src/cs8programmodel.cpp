@@ -248,12 +248,17 @@ void cs8ProgramModel::clear() {
 #endif
 }
 
-cs8VariableModel *
-cs8ProgramModel::localVariableModel(const QModelIndex &index) {
-  if (index.isValid())
-    return m_programList.at(index.row())->localVariableModel();
-  else
-    return 0;
+QList<cs8Program *> cs8ProgramModel::programList()
+{
+    return m_programList;
+}
+
+cs8VariableModel *cs8ProgramModel::localVariableModel(const QModelIndex &index) const
+{
+    if (index.isValid())
+        return m_programList.at(index.row())->localVariableModel();
+    else
+        return 0;
 }
 
 cs8VariableModel *cs8ProgramModel::parameterModel(const QModelIndex &index) {
@@ -263,12 +268,12 @@ cs8VariableModel *cs8ProgramModel::parameterModel(const QModelIndex &index) {
     return 0;
 }
 
-QList<cs8Variable *>
-cs8ProgramModel::referencedGlobalVriableModel(const QModelIndex &index) {
-  if (index.isValid())
-    return m_programList.at(index.row())->referencedGlobalVariables();
-  else
-    return QList<cs8Variable *>();
+QList<cs8Variable *> cs8ProgramModel::referencedGlobalVariables(const QModelIndex &index)
+{
+    if (index.isValid())
+        return m_programList.at(index.row())->referencedGlobalVariables();
+    else
+        return QList<cs8Variable *>();
 }
 
 bool cs8ProgramModel::setData(const QModelIndex &index, const QVariant &value,

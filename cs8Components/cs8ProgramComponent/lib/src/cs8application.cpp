@@ -265,11 +265,11 @@ void cs8Application::setProjectMillimeterUnit(
 }
 
 bool cs8Application::open(const QString &pfxFilePath) {
-  // qDebug() << Q_FUNC_INFO << "path:" << pfxFilePath;
-  QString pth = QDir::fromNativeSeparators(pfxFilePath);
-  if (pth.startsWith("Disk://")) {
-    pth.replace(QString("Disk://"), m_cellPath + "/usr/usrapp/");
-    pth = QDir::cleanPath(pth);
+    qDebug() << Q_FUNC_INFO << "path:" << pfxFilePath;
+    QString pth = QDir::fromNativeSeparators(pfxFilePath);
+    if (pth.startsWith("Disk://")) {
+        pth.replace(QString("Disk://"), m_cellPath + "/usr/usrapp/");
+        pth = QDir::cleanPath(pth);
   }
   m_moduleDocumentation = "";
   m_briefModuleDocumentation = "";
@@ -917,7 +917,7 @@ bool cs8Application::save(const QString &path, const QString &name,
                           "http://www.w3.org/2001/XMLSchema-instance");
     stream.writeAttribute("xmlns",
                           "http://www.staubli.com/robotics/VAL3/Program/2");
-    for (const auto program : m_programModel->programList()) {
+    foreach (cs8Program *program, m_programModel->programList()) {
         program->writeXMLStream(stream, true);
         program->deleteSourceFile();
     }
@@ -1081,8 +1081,8 @@ cs8Application::getEnumerations() const {
     i.next();
 
     constSet = i.value();
-    if (constSet->values().size() < 2)
-      constSets.remove(i.key());
+    if (constSet->size() < 2)
+        constSets.remove(i.key());
   }
   return constSets;
 }
@@ -1335,11 +1335,11 @@ bool cs8Application::writeProjectFile() {
     stream.writeAttribute("file", m_projectName + ".pgx");
     stream.writeEndElement();
   } else {
-    for (const auto item : m_programModel->programList()) {
-      stream.writeStartElement("Program");
-      stream.writeAttribute("file", item->fileName());
-      stream.writeEndElement();
-    }
+      foreach (cs8Program *item, m_programModel->programList()) {
+          stream.writeStartElement("Program");
+          stream.writeAttribute("file", item->fileName());
+          stream.writeEndElement();
+      }
   }
   stream.writeEndElement();
 
@@ -1428,7 +1428,7 @@ void cs8Application::moveParamsToGlobals(cs8Program *program) {
       // remove trailing '_'
       if (newName.endsWith('_'))
         newName.chop(1);
-      var->setName(newName, false);
+      var->setName(newName, 0);
       parameters << newName;
       // add variable to global list if it does not exist yet
       if (!m_globalVariableModel->variableNameList().contains(newName)) {

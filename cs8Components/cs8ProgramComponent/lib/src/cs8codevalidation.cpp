@@ -129,6 +129,25 @@ QStringList cs8CodeValidation::runDataValidationRule(
                   }
                 }
               }
+            if (checkProperty == "father" && varType == var->type()) {
+                QStringList l = var->orphanedValues();
+                if (!l.isEmpty()) {
+                    QString msg = message;
+                    msg.replace("%varType%", var->type());
+                    msg.replace("%index%", "[" + (l.length() > 2 ? l.first() + "..." + l.last() : l.join("; ")) + "]");
+                    msg.replace("%varName%", var->name());
+                    msg.replace("%level%", level);
+                    msg.replace("%lineNumber%", QString("%1").arg(var->symbolReferences().value(0).line));
+
+                    if (program == nullptr) {
+                        msg.replace("%fileName%", app->cellDataFilePath(true));
+                    } else {
+                        msg.replace("%progName%", program->name());
+                        msg.replace("%fileName%", program->cellFilePath());
+                    }
+                    validationMessages << msg;
+                }
+            }
             if (checkProperty == "name" &&
                 (minNameLength == -1 || var->name().length() > minNameLength) &&
                 (varType == var->type() || varType.isEmpty())) {
@@ -287,8 +306,7 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
         app, program, &program->localVariableModel()->variableListByType(),
         m_LocalDataRules, m_LocalDataRulesSeverity);
 
-    validationMessages << runDataValidationRule(app, program, 0, m_ProgramRules,
-                                                m_ProgramRulesSeverity);
+    validationMessages << runDataValidationRule(app, program, 0, m_ProgramRules, m_ProgramRulesSeverity);
 
     // check TODOs in code
     QMapIterator<int, QString> i(program->todos());

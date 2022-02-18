@@ -53,7 +53,8 @@ public:
   void setPublic(bool m_public);
   QString publicStr() const;
 
-  QStringList father();
+  QStringList father() const;
+  QStringList orphanedValues() const;
 
   void setValues(const QDomNodeList &values);
   QDomNodeList values() const;

@@ -16,8 +16,10 @@
 
 #include <QDebug>
 
-cs8ProgramDataView::cs8ProgramDataView(QWidget *parent)
-    : QTableView(parent), m_mode(false) {}
+cs8ProgramDataView::cs8ProgramDataView(QWidget *parent) : QTableView(parent), m_mode(Mode::GlobalData)
+{
+    m_globalVariableModel = new cs8VariableModel(this);
+}
 
 cs8ProgramDataView::~cs8ProgramDataView() {}
 
@@ -26,9 +28,9 @@ void cs8ProgramDataView::setMasterView(QAbstractItemView *theValue) {
   connect(m_masterView->selectionModel(),
           &QItemSelectionModel::selectionChanged, this,
           &cs8ProgramDataView::slotSelectionChanged);
-  if (m_mode == GlobalData) {
-    setModel(((cs8Application *)m_masterView->model()->parent())
-                 ->globalVariableModel());
+  if (m_mode == Mode::GlobalData) {
+      auto model = (cs8Application *) m_masterView->model()->parent();
+      setModel(model->globalVariableModel());
   }
 }
 
@@ -42,32 +44,31 @@ void cs8ProgramDataView::slotSelectionChanged(
   if (selected.count() > 0) {
     QAbstractItemModel *varModel;
     switch (m_mode) {
-    case LocalData: {
-      varModel = ((cs8ProgramModel *)m_masterView->model())
-                     ->localVariableModel(selected.indexes().at(0));
-      break;
+    case Mode::LocalData: {
+        varModel = ((cs8ProgramModel *) m_masterView->model())->localVariableModel(selected.indexes().at(0));
+        break;
     }
-    case ParameterData: {
-      varModel = ((cs8ProgramModel *)m_masterView->model())
-                     ->parameterModel(selected.indexes().at(0));
-      break;
+    case Mode::ParameterData: {
+        varModel = ((cs8ProgramModel *) m_masterView->model())->parameterModel(selected.indexes().at(0));
+        break;
     }
-    case GlobalData:
-      varModel = ((cs8Application *)m_masterView->model()->parent())
-                     ->globalVariableModel();
-      break;
-      /*
-          case ReferencedGlobalData:
-            varModel = ((cs8ProgramModel *)m_masterView->model())
-                           ->referencedGlobalVriableModel(selected.indexes().at(0));
-            break;
-        */
+    case Mode::GlobalData:
+        varModel = qobject_cast<cs8Application *>(m_masterView->model()->parent())->globalVariableModel();
+        break;
+
+    case Mode::ReferencedGlobalData:
+        varModel = m_globalVariableModel;
+        ///TODO qobject_cast<cs8ProgramModel *>(m_masterView->model())->referencedGlobalVariables(selected.indexes().at(0));
+        break;
     }
     setModel(varModel);
     resizeColumnsToContents();
   }
 }
 
-int cs8ProgramDataView::mode() const { return m_mode; }
+cs8ProgramDataView::Mode cs8ProgramDataView::mode() const
+{
+    return m_mode;
+}
 
 void cs8ProgramDataView::setMode(Mode theValue) { m_mode = theValue; }

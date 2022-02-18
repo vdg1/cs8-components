@@ -30,7 +30,7 @@ bool cs8VariableModel::addVariable(QDomElement &element,
     cs8Variable *variable = new cs8Variable(element, "", this);
 
     variable->setDescription(description);
-    m_variableList.append(variable);
+    rvariableList().append(variable);
 #if QT_VERSION >= 0x050000
     beginResetModel();
     endResetModel();
@@ -119,7 +119,7 @@ cs8VariableModel::variableListByName(const QRegExp &rx) const {
 cs8Variable *cs8VariableModel::createVariable(const QString &name,
                                               const QString &type) {
   auto *variable = new cs8Variable(this);
-  variable->setName(name, false);
+  variable->setName(name, 0);
   variable->setType(type);
   // variable->setParent(this);
   m_variableList.append(variable);

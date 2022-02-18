@@ -58,12 +58,18 @@ int cs8LibraryAliasModel::columnCount(const QModelIndex &index) const {
 
 void cs8LibraryAliasModel::clear() { m_aliasList.clear(); }
 
-bool cs8LibraryAliasModel::contains(const QString &alias_) {
-  foreach (cs8LibraryAlias *alias, m_aliasList) {
-    if (alias->name() == alias_)
-      return true;
-  }
-  return false;
+void cs8LibraryAliasModel::setProjectVersion(uint version)
+{
+    m_projectVersion = version;
+}
+
+bool cs8LibraryAliasModel::contains(const QString &alias_)
+{
+    foreach (cs8LibraryAlias *alias, m_aliasList) {
+        if (alias->name() == alias_)
+            return true;
+    }
+    return false;
 }
 
 QVariant cs8LibraryAliasModel::data(const QModelIndex &index, int role) const {
@@ -152,14 +158,20 @@ cs8LibraryAlias *cs8LibraryAliasModel::getAliasByName(const QString &name) {
   return nullptr;
 }
 
-QString cs8LibraryAliasModel::toDocumentedCode() {
-  QString header;
-  foreach (cs8LibraryAlias *var, m_aliasList) {
-    QString descr = var->documentation();
-    descr.replace("\n", "\n  //");
-    header += QString("\n  // %3 : %2").arg(descr, var->name());
-  }
-  return header;
+QList<cs8LibraryAlias *> cs8LibraryAliasModel::list() const
+{
+    return m_aliasList;
+}
+
+QString cs8LibraryAliasModel::toDocumentedCode()
+{
+    QString header;
+    foreach (cs8LibraryAlias *var, m_aliasList) {
+        QString descr = var->documentation();
+        descr.replace("\n", "\n  //");
+        header += QString("\n  // %3 : %2").arg(descr, var->name());
+    }
+    return header;
 }
 
 void cs8LibraryAliasModel::slotModified() { emit modified(true); }

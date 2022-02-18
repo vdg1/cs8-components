@@ -97,19 +97,34 @@ bool cs8Variable::isPublic() const {
   return m_element.attribute("access", "private") == "private" ? false : true;
 }
 
-QStringList cs8Variable::father() {
-  QStringList list;
-  QDomNode element = m_element.firstChildElement("Value");
-  while (!element.isNull()) {
-    QString father = element.toElement().attribute("fatherId");
-    if (!father.isEmpty()) {
-      father.remove(QRegExp(R"(\[(\d*)\])"));
-      list << father;
+QStringList cs8Variable::father() const
+{
+    QStringList list;
+    QDomNode element = m_element.firstChildElement("Value");
+    while (!element.isNull()) {
+        QString father = element.toElement().attribute("fatherId");
+        if (!father.isEmpty()) {
+            father.remove(QRegExp(R"(\[(\d*)\])"));
+            list << father;
+        }
+        element = element.nextSiblingElement("Value");
     }
-    element = element.nextSiblingElement("Value");
-  }
-  list.removeDuplicates();
-  return list;
+    list.removeDuplicates();
+    return list;
+}
+
+QStringList cs8Variable::orphanedValues() const
+{
+    QStringList list;
+    QDomNode element = m_element.firstChildElement("Value");
+    while (!element.isNull()) {
+        QString father = element.toElement().attribute("fatherId");
+        if (father.isEmpty()) {
+            list << element.toElement().attribute("key");
+        }
+        element = element.nextSiblingElement("Value");
+    }
+    return list;
 }
 
 void cs8Variable::setValues(const QDomNodeList &values) {
@@ -499,7 +514,6 @@ bool cs8Variable::setName(QString value, cs8Application *application)
     else if (m != nullptr && m->getVarByName(value) != nullptr)
         return false;
     else {
-        emit modified();
         QString oldName = m_name;
         m_name = value;
         m_element.setAttribute("name", value);
@@ -507,6 +521,7 @@ bool cs8Variable::setName(QString value, cs8Application *application)
             updateReference(application, oldName, value);
             application->programModel()->updateCodeModel();
         }
+        emit modified();
     }
     return true;
 }

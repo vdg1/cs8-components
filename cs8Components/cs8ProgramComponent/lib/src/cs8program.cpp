@@ -648,6 +648,11 @@ void cs8Program::parseDocumentation(const QString &code_) {
   foreach (QString line, documentation) {
     if (line.length() > 2)
       line = line.trimmed();
+    // check if line is an additional hint message
+    if (line.startsWith("//[= ")) {
+        m_additionalHintMessage = line;
+        m_additionalHintMessage.remove(R"(//[= )").remove(R"( =])");
+    }
     // process a complete tag before starting the next tag
     if ((line.startsWith("//!") || line.startsWith("//\\")) &&
         !tagType.isEmpty()) {
