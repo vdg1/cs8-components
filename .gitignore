@@ -25,3 +25,4 @@ cs8Components/cs8ProgramComponent/.vs/
 cs8Components/SRS 2019/
 *.orig
 cs8Components/cs8ControllerComponent/.vs/
+.qtc_clangd/
