@@ -12,6 +12,7 @@
 #include "cs8variable.h"
 #include "cs8variablemodel.h"
 #include <QBuffer>
+#include <QDirIterator>
 #include <QRegularExpression>
 #include <QXmlStreamWriter>
 #include <Qt3DCore/QTransform>
@@ -466,10 +467,7 @@ QString cs8Application::exportToCImplementation() const {
   out << "\n";
 
   foreach (cs8Program *program, m_programModel->programList()) {
-    out << QString("   void %3::%1{\n%2\n}")
-               .arg(program->definition())
-               .arg(program->toCSyntax())
-               .arg(m_projectName);
+      out << QString("   void %3::%1{\n%2\n}").arg(program->definition(), program->toCSyntax(), m_projectName);
   }
 
   return out.join("\n");
@@ -765,8 +763,34 @@ void cs8Application::setModified(bool modified_) {
 
 bool cs8Application::getCompactFileMode() const { return m_compactFileMode; }
 
-void cs8Application::setCompactFileMode(bool singleProgramFile) {
-  m_compactFileMode = singleProgramFile;
+void cs8Application::setCompactFileMode(bool singleProgramFile)
+{
+    m_compactFileMode = singleProgramFile;
+}
+
+QFileInfoList cs8Application::projectFileList() const
+{
+    QFileInfoList list;
+    QDir dir(m_projectPath);
+    // add project file and data file
+    list << dir.entryInfoList(QStringList() << "*.pjx"
+                                            << "*.dtx",
+                              QDir::Files);
+    // program file list
+    for (auto prog : m_programModel->programList()) {
+        QFileInfo i(m_projectPath + prog->getFilePath());
+        if (!list.contains(i))
+            list << i;
+    }
+
+    // recurse into "interface" folder
+    QDirIterator it(m_projectPath + "/interface", QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        it.next();
+        if (it.fileInfo().isFile())
+            list << it.fileInfo();
+    }
+    return list;
 }
 
 bool cs8Application::loadDocumentationFile(const QString & /*fileName*/) {
@@ -1145,12 +1169,11 @@ QStringList cs8Application::checkEnumerations() const {
         QString msg;
         QString firstName;
         for (const auto &key : constSet->values(i.key())) {
-          if (m_globalVariableModel->findVariableByName(key)
-                  ->linterDirective() != "ignore") {
-            if (msg.isEmpty())
-              firstName = key;
-            msg += key + ", ";
-          }
+            if (m_globalVariableModel->findVariableByName(key)->linterDirective() != "ignore") {
+                if (msg.isEmpty())
+                    firstName = key;
+                msg += key + ", ";
+            }
         }
         msg.chop(2);
         if (!msg.isEmpty())
