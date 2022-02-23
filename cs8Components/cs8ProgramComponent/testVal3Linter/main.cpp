@@ -3,29 +3,30 @@
 #include <cs8codevalidation.h>
 
 // D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s882\usr\usrapp\SAXEAutomation
-int main(int argc, char *argv[]) {
-  cs8Application app;
-  if (!app.openFromPathName(
-          R"(D:\data\Staubli\SRS\04 NovoNordisk\33119-reset-tube-by-flex\Controller1\usr\usrapp\aResetTube)")) {
-    qDebug() << "Failed to open application";
-  }
+int main(int argc, char *argv[])
+{
+    cs8Application app;
+    app.setCellPath(R"(D:\data\Staubli\SRS\_Customers\NovoNordisk\32971-sas-scaledrum-by-flex\Controller1\usr\usrapp)");
+    if (!app.openFromPathName(R"(D:\data\Staubli\SRS\_Customers\NovoNordisk\32971-sas-scaledrum-by-flex\Controller1\usr\usrapp\aScaleDrum)")) {
+        qDebug() << "Failed to open application";
+    }
+    qDebug() << app.projectFileList();
+    // auto prog = app.programModel()->getProgramByName("SP_PlaceBox");
+    // auto var = prog->localVariableModel()->getVarByName("lbFailed");
+    // if (var)
+    //  var->setName("newLbFailed", &app);
 
-  // auto prog = app.programModel()->getProgramByName("SP_PlaceBox");
-  // auto var = prog->localVariableModel()->getVarByName("lbFailed");
-  // if (var)
-  //  var->setName("newLbFailed", &app);
+    // auto var = app.globalVariableModel()->getVarByName("nStatePart");
+    // if (var)
+    //  var->setName("nNewStatePart", &app);
 
-  // auto var = app.globalVariableModel()->getVarByName("nStatePart");
-  // if (var)
-  //  var->setName("nNewStatePart", &app);
+    //auto prog = app.programModel()->getProgramByName("_aprStation");
+    //qDebug() << prog->symbolReferences();
+    //if (prog)
+    //  prog->setName("newApr", &app);
 
-  auto prog = app.programModel()->getProgramByName("_aprStation");
-  qDebug() << prog->symbolReferences();
-  if (prog)
-    prog->setName("newApr", &app);
-
-  app.save(false);
-  /*
+    //app.save(false);
+    /*
   cs8CodeValidation validator;
   if (validator.loadRuleFile(":/compilerRules.xml")) {
     QStringList msg = validator.runValidation(&app, 0);
@@ -35,5 +36,5 @@ int main(int argc, char *argv[]) {
     qDebug() << "Failed to load validation rules";
   }
 */
-  return 0;
+    return 0;
 }
