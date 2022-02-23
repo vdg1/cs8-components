@@ -367,7 +367,7 @@ void CodeEditor::showHintAndProblem()
         text=m_problemText+"<hr>";
     text+=m_hintText;
 
-    QTextCursor cursor = textCursor();
+    //QTextCursor cursor = textCursor();
     //int pos=cursor.verticalMovementX ();
 
     QToolTip::showText(mapToGlobal(pos()),text);

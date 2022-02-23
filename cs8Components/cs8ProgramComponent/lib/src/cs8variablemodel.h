@@ -37,10 +37,10 @@ public:
                                            bool public_ = true);
   QList<cs8Variable *>
   findVariablesReferencedByProgram(const QString &program) const;
-  cs8Variable *findVariableByName(const QString &name_);
+  cs8Variable *findVariableByName(const QString &name_) const;
   void clear();
-  QList<cs8Variable *> publicVariables();
-  QList<cs8Variable *> privateVariables();
+  QList<cs8Variable *> publicVariables() const;
+  QList<cs8Variable *> privateVariables() const;
   cs8Variable *variable(QModelIndex index);
   QStringList variableNameList();
   QList<cs8Variable *> &rvariableList();

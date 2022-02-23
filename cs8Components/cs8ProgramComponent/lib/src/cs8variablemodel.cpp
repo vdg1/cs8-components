@@ -47,22 +47,24 @@ void cs8VariableModel::addVariable(cs8Variable *variable) {
   variable->setParent(this);
 }
 
-QList<cs8Variable *> cs8VariableModel::publicVariables() {
-  QList<cs8Variable *> out;
-  foreach (cs8Variable *variable, m_variableList) {
-    if (variable->isPublic())
-      out << variable;
-  }
-  return out;
+QList<cs8Variable *> cs8VariableModel::publicVariables() const
+{
+    QList<cs8Variable *> out;
+    foreach (cs8Variable *variable, m_variableList) {
+        if (variable->isPublic())
+            out << variable;
+    }
+    return out;
 }
 
-QList<cs8Variable *> cs8VariableModel::privateVariables() {
-  QList<cs8Variable *> out;
-  foreach (cs8Variable *variable, m_variableList) {
-    if (!variable->isPublic())
-      out << variable;
-  }
-  return out;
+QList<cs8Variable *> cs8VariableModel::privateVariables() const
+{
+    QList<cs8Variable *> out;
+    foreach (cs8Variable *variable, m_variableList) {
+        if (!variable->isPublic())
+            out << variable;
+    }
+    return out;
 }
 
 cs8Variable *cs8VariableModel::variable(QModelIndex index) {
@@ -186,7 +188,7 @@ QList<cs8Variable *> cs8VariableModel::findVariablesReferencedByProgram(
   return list;
 }
 
-cs8Variable *cs8VariableModel::findVariableByName(const QString &name_)
+cs8Variable *cs8VariableModel::findVariableByName(const QString &name_) const
 {
     QString n = name_;
     n = n.replace(QRegExp("\\[.*\\]"), "");

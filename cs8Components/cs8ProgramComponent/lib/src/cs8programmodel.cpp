@@ -248,7 +248,7 @@ void cs8ProgramModel::clear() {
 #endif
 }
 
-QList<cs8Program *> cs8ProgramModel::programList()
+QList<cs8Program *> cs8ProgramModel::programList() const
 {
     return m_programList;
 }
