@@ -15,15 +15,15 @@
 void cs8Linter::executeVal3Check() {
   QProcess *proc = new QProcess(this);
   QObject::connect(proc, &QProcess::readyReadStandardOutput, [this, proc]() {
-    QByteArray output = proc->readAllStandardOutput();
-    // qDebug() << "standard output:" << output;
-    emit sendOutput(output);
+      QByteArray output = proc->readAllStandardOutput().trimmed();
+      // qDebug() << "standard output:" << output;
+      emit sendOutput(output);
   });
 
   QObject::connect(proc, &QProcess::readyReadStandardError, [this, proc]() {
-    QByteArray output = proc->readAllStandardError().simplified();
-    // qDebug() << "error output:" << output;
-    emit sendOutput(output);
+      QByteArray output = proc->readAllStandardError().trimmed();
+      // qDebug() << "error output:" << output;
+      emit sendOutput(output);
   });
 
   QObject::connect(proc, &QProcess::errorOccurred,
