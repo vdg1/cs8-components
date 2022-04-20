@@ -2,6 +2,7 @@
 #define CS8APPLICATION_H
 //
 #include <QDomDocument>
+#include <QFileInfoList>
 #include <QList>
 #include <QMultiHash>
 #include <QObject>
@@ -110,8 +111,9 @@ public:
 
   bool getCompactFileMode() const;
   void setCompactFileMode(bool singleProgramFile);
+  QFileInfoList projectFileList() const;
 
-protected:
+  protected:
   QHash<QString, QString> m_exportDirectives;
   QHash<QString, QString> m_pragmaList;
   QMap<QString, QList<cs8Program *>> m_callList;
