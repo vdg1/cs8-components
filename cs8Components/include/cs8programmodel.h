@@ -26,33 +26,32 @@ class cs8VariableModel;
 class cs8ProgramModel : public QAbstractListModel {
   Q_OBJECT
 public:
-  QList<cs8Program *> programList() { return m_programList; }
-  cs8VariableModel *localVariableModel(const QModelIndex &index);
-  cs8VariableModel *parameterModel(const QModelIndex &index);
-  QList<cs8Variable *> referencedGlobalVriableModel(const QModelIndex &index);
+    QList<cs8Program *> programList();
+    cs8VariableModel *localVariableModel(const QModelIndex &index) const;
+    cs8VariableModel *parameterModel(const QModelIndex &index);
+    QList<cs8Variable *> referencedGlobalVariables(const QModelIndex &index);
 
-  void clear();
-  bool addProgramFile(const QString &filePath);
-  cs8ProgramModel(QObject *parent = 0);
+    void clear();
+    bool addProgramFile(const QString &projectPath, const QString &filePath);
+    cs8ProgramModel(QObject *parent = 0);
 
-  ~cs8ProgramModel();
-  virtual int rowCount(const QModelIndex &) const;
-  virtual int colCount(const QModelIndex &) const;
-  virtual QVariant data(const QModelIndex &index, int role) const;
-  bool setData(const QModelIndex &index, const QVariant &value,
-               int role = Qt::EditRole);
-  QList<cs8Program *> publicPrograms();
-  QList<cs8Program *> privatePrograms();
-  cs8Program *getProgramByName(const QString &name);
-  void setCellPath(const QString &path);
-  void append(cs8Program *program);
+    ~cs8ProgramModel();
+    virtual int rowCount(const QModelIndex &) const;
+    virtual int colCount(const QModelIndex &) const;
+    virtual QVariant data(const QModelIndex &index, int role) const;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+    QList<cs8Program *> publicPrograms();
+    QList<cs8Program *> privatePrograms();
+    cs8Program *getProgramByName(const QString &name);
+    void setCellPath(const QString &path);
+    void append(cs8Program *program);
 
-  // void createProgram(cs8Program *program);
-  cs8Program *createProgram(const QString &programName = QString());
+    // void createProgram(cs8Program *program);
+    cs8Program *createProgram(const QString &programName = QString());
 
-  bool getHasByteOrderMark() const;
-  void setHasByteOrderMark(bool hasByteOrderMark);
-  void updateCodeModel();
+    bool getHasByteOrderMark() const;
+    void setHasByteOrderMark(bool hasByteOrderMark);
+    void updateCodeModel();
 
 protected:
   QList<cs8Program *> m_programList;

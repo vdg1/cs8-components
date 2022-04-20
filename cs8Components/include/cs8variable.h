@@ -30,7 +30,7 @@ public:
   QString use() const;
 
   void setDescription(QString value);
-  QString description() const;
+  QString description(bool formatted = false) const;
 
   uint size(int dimension = 0);
 
@@ -53,7 +53,8 @@ public:
   void setPublic(bool m_public);
   QString publicStr() const;
 
-  QStringList father();
+  QStringList father() const;
+  QStringList orphanedValues() const;
 
   void setValues(const QDomNodeList &values);
   QDomNodeList values() const;

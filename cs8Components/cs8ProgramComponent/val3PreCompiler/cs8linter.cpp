@@ -1,6 +1,7 @@
 #include "cs8linter.h"
 #include "../common/versionInfo.h"
 
+#include "qglobal.h"
 #include "windows.h"
 
 #include <QDebug>
@@ -16,14 +17,17 @@ void cs8Linter::executeVal3Check() {
   QProcess *proc = new QProcess(this);
   QObject::connect(proc, &QProcess::readyReadStandardOutput, [this, proc]() {
       QByteArray output = proc->readAllStandardOutput().trimmed();
+      output.replace("\r", "\n");
+      output.replace("\n\n", "\n");
       // qDebug() << "standard output:" << output;
+      //QTextStream(stdout)  << qUtf8Printable(output) ;
       emit sendOutput(output);
   });
 
   QObject::connect(proc, &QProcess::readyReadStandardError, [this, proc]() {
       QByteArray output = proc->readAllStandardError().trimmed();
-      // qDebug() << "error output:" << output;
-      emit sendOutput(output);
+      qDebug() << "error output:" << output;
+      emit sendOutput("error output:" + output);
   });
 
   QObject::connect(proc, &QProcess::errorOccurred,
@@ -48,6 +52,7 @@ void cs8Linter::executeVal3Check() {
 }
 
 void cs8Linter::output(const QByteArray &out) {
+    std::string l = out.toStdString();
   qDebug() << "out: " << out;
   std::cout << qUtf8Printable(out);
 }
@@ -68,13 +73,11 @@ void cs8Linter::executeLinter() {
       qDebug() << "Rules loaded, executing linter for " << m_arguments;
       foreach (const auto arg, m_applicationsToCheck) {
         qDebug() << "Linting now: " << arg;
-        std::cout << qPrintable("Linting now:" + arg + "\n");
+          emit sendOutput(qUtf8Printable("Linting now:" + arg + "\n"));
         cs8Application app;
         app.setCellPath(m_cellPath);
         app.openFromPathName(arg);
-        emit sendOutput(
-            QString(validator.runValidation(&app, 1).join("\r\n") + "\r\n")
-                .toUtf8());
+          emit sendOutput(qUtf8Printable(validator.runValidation(&app, 1).join("\n") + "\n"));
       }
     }
     qDebug() << "Ended linter";

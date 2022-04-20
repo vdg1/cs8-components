@@ -67,81 +67,87 @@ private:
   QStringList m_variableTokens;
 
 public:
-  // cs8Program(const QString & filePath);
-  bool open(const QString &filePath);
-  bool deleteSourceFile();
-  QString val3Code(bool withDocumentation = true) const;
-  QString toCSyntax();
-  void parseDocumentation(const QString &code);
+    // cs8Program(const QString & filePath);
+    bool open(const QString &projectPath, const QString &filePath);
+    bool deleteSourceFile();
+    QString val3Code(bool withDocumentation = true) const;
+    QStringList val3CodeList() const;
+    QString toCSyntax();
+    void parseDocumentation(const QString &code);
 
-  void setBriefDescription(const QString &theValue);
-  void setDetailedDocumentation(const QString &doc);
-  QString detailedDocumentation() const;
+    void setBriefDescription(const QString &theValue);
+    void setDetailedDocumentation(const QString &doc);
+    QString detailedDocumentation() const;
 
-  void setCopyrightMessage(const QString &text);
-  QString copyrightMessage() const;
+    void setCopyrightMessage(const QString &text);
+    QString copyrightMessage() const;
 
-  QString briefDescription(bool trimmed) const;
-  void setCellPath(const QString &path);
-  QString cellFilePath() const;
+    QString briefDescription(bool trimmed) const;
+    void setCellPath(const QString &path);
+    QString cellFilePath() const;
 
-  bool globalDocContainer() const;
-  void setGlobalDocContainer(bool globalDocContainer);
+    bool globalDocContainer() const;
+    void setGlobalDocContainer(bool globalDocContainer);
 
-  void setApplicationDocumentation(const QString &applicationDocumentation);
-  void setBriefModuleDocumentation(const QString &briefDocumentation);
-  void setMainPageDocumentation(const QString &applicationDocumentation);
+    void setApplicationDocumentation(const QString &applicationDocumentation);
+    void setBriefModuleDocumentation(const QString &briefDocumentation);
+    void setMainPageDocumentation(const QString &applicationDocumentation);
 
-  QString formattedDescriptionHeader() const;
+    QString formattedDescriptionHeader() const;
 
-  int getLineNumberCodeSection() const;
-  void undoTranslationTags();
+    int getLineNumberCodeSection() const;
+    void undoTranslationTags();
 
-  bool getHasByteOrderMark() const;
-  void setHasByteOrderMark(bool hasByteOrderMark);
+    bool getHasByteOrderMark() const;
+    void setHasByteOrderMark(bool hasByteOrderMark);
 
-  void parseProgramSection(const QDomElement &programSection,
-                           const QString &code);
+    void parseProgramSection(const QDomElement &programSection, const QString &code);
 
-  void writeXMLStream(QXmlStreamWriter &stream, bool withCode);
+    void writeXMLStream(QXmlStreamWriter &stream, bool withCode);
 
-  QString getFilePath() const;
-  void setFilePath(const QString &filePath);
+    QString getFilePath() const;
+    void setFilePath(const QString &projectPath, const QString &filePath);
 
-  QString getAdditionalHintMessage() const;
-  void setAdditionalHintMessage(const QString &additionalHintMessage);
+    QString getAdditionalHintMessage() const;
+    void setAdditionalHintMessage(const QString &additionalHintMessage);
+
+    void updateCodeModel();
+
+    uint linesOfCodeAndComments() const;
+
+    uint linesOfComments() const;
+
+    uint linesOfNoCode() const;
 
 protected:
-  bool parseProgramDoc(const QDomDocument &doc,
-                       const QString &code = QString());
-  void tidyUpCode(QString &code);
-  void setLinterDirective(const QString &directive, const QString &symbolName);
+    bool parseProgramDoc(const QDomDocument &doc, const QString &code = QString());
+    void tidyUpCode(QString &code);
+    void setLinterDirective(const QString &directive, const QString &symbolName);
 
-  QString m_detailedDocumentation;
-  QString m_cellPath;
-  QString m_filePath;
-  QString m_copyRightMessage;
-  QString m_applicationDocumentation, m_mainPageDocumentation,
-      m_briefModuleDocumentation, m_additionalHintMessage;
-  QString m_name;
-  QString m_programCode;
-  bool m_public;
-  bool m_withIfBlock;
-  bool m_hasByteOrderMark;
-  int m_lineNumberCodeSection;
-  int m_headerLines;
-
-  void updateCodeModel();
+    QString m_detailedDocumentation;
+    QString m_cellPath;
+    QString m_filePath;
+    QString m_projectPath;
+    QString m_copyRightMessage;
+    QString m_applicationDocumentation, m_mainPageDocumentation, m_briefModuleDocumentation, m_additionalHintMessage;
+    QString m_name;
+    QString m_programCode;
+    bool m_public;
+    bool m_withIfBlock;
+    bool m_hasByteOrderMark;
+    uint m_lineNumberCodeSection;
+    uint m_headerLines;
+    uint m_linesOfCodeAndComments;
+    uint m_linesOfComments;
+    uint m_linesOfNoCode;
 
 signals:
-  void globalVariableDocumentationFound(const QString &name,
-                                        const QString &document);
-  void moduleDocumentationFound(const QString &document);
-  void moduleBriefDocumentationFound(const QString &document);
-  void mainPageDocumentationFound(const QString &document);
-  void exportDirectiveFound(const QString &module, const QString &routine);
-  void unknownTagFound(const QString &tagType, const QString &tagName,
-                       const QString &tagText);
-  void modified();
+    void globalVariableDocumentationFound(const QString &name, const QString &document);
+    void moduleDocumentationFound(const QString &document);
+    void moduleBriefDocumentationFound(const QString &document);
+    void mainPageDocumentationFound(const QString &document);
+    void exportDirectiveFound(const QString &module, const QString &routine);
+    void unknownTagFound(const QString &tagType, const QString &tagName, const QString &tagText);
+    void modified();
 };
 #endif
