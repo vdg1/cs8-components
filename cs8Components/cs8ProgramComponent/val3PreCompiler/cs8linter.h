@@ -15,14 +15,16 @@ public:
 signals:
   void finished();
   void sendOutput(const QByteArray &);
+  void allDoneAndExit(int);
 
-protected:
+  protected:
   QStringList m_arguments;
   QStringList m_applicationsToCheck;
   QString m_val3checkExecutable;
   QString m_cellPath;
   QFuture<void> m_future;
   QFutureWatcher<void> m_futureWatcher;
+  QByteArray m_val3CheckOutput;
 
   bool m_val3checkDone;
   bool m_linterDone;
@@ -36,6 +38,7 @@ protected slots:
   void executeVal3Check();
   void output(const QByteArray &out);
   void startLinterAndChecker();
+  void exitProgram(int exitCode);
 };
 
 #endif // CS8LINTER_H

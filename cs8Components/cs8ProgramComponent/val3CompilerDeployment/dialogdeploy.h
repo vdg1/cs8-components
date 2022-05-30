@@ -20,7 +20,7 @@ public:
     QString path() const;
     void setPath(const QString &path);
 
-    void activatePreCompiler(bool activate);
+    bool activatePreCompiler(bool activate);
     void activateHelpFile(bool activate);
 
 private:

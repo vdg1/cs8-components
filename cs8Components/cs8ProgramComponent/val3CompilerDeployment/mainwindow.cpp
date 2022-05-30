@@ -150,8 +150,8 @@ void MainWindow::processActivation(const QModelIndex &index) {
         DialogDeploy dlg(this);
         dlg.setPath(path);
         dlg.show();
-        dlg.activatePreCompiler(false);
-        dlg.exec();
+        if (!dlg.activatePreCompiler(false))
+            dlg.exec();
       }
     } else {
       if (QMessageBox::question(
@@ -164,8 +164,8 @@ void MainWindow::processActivation(const QModelIndex &index) {
         DialogDeploy dlg(this);
         dlg.setPath(path);
         dlg.show();
-        dlg.activatePreCompiler(true);
-        dlg.exec();
+        if (!dlg.activatePreCompiler(true))
+            dlg.exec();
       }
     }
   }

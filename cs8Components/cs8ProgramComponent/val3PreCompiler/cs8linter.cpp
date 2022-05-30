@@ -2,6 +2,7 @@
 #include "../common/versionInfo.h"
 
 #include "qglobal.h"
+#include "qnamespace.h"
 #include "windows.h"
 
 #include <QDebug>
@@ -19,15 +20,16 @@ void cs8Linter::executeVal3Check() {
       QByteArray output = proc->readAllStandardOutput().trimmed();
       output.replace("\r", "\n");
       output.replace("\n\n", "\n");
+      //m_val3CheckOutput.append(output + "\n");
       // qDebug() << "standard output:" << output;
       //QTextStream(stdout)  << qUtf8Printable(output) ;
       emit sendOutput(output);
   });
 
   QObject::connect(proc, &QProcess::readyReadStandardError, [this, proc]() {
-      QByteArray output = proc->readAllStandardError().trimmed();
-      qDebug() << "error output:" << output;
-      emit sendOutput("error output:" + output);
+      //QByteArray output = proc->readAllStandardError().trimmed();
+      //qDebug() << "error output:" << output;
+      //emit sendOutput("error output:" + output);
   });
 
   QObject::connect(proc, &QProcess::errorOccurred,
@@ -38,14 +40,15 @@ void cs8Linter::executeVal3Check() {
                      emit finished();
                    });
 
-  QObject::connect(
-      proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-      [this](int exitCode, QProcess::ExitStatus exitStatus) {
-        qDebug() << "val3check completed:" << exitCode << exitStatus;
-        m_val3checkDone = true;
-        m_val3checkExitCode = exitCode;
-        emit finished();
-      });
+  QObject::connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [this, proc](int exitCode, QProcess::ExitStatus exitStatus) {
+      qDebug() << "val3check completed:" << exitCode << exitStatus;
+      qDebug() << "val3check output: " << m_val3CheckOutput;
+
+      output(m_val3CheckOutput);
+      m_val3checkDone = true;
+      m_val3checkExitCode = exitCode;
+      emit finished();
+  });
 
   qDebug() << "Start original val3 checker:" << m_val3checkExecutable;
   proc->start(m_val3checkExecutable, m_arguments);
@@ -53,8 +56,13 @@ void cs8Linter::executeVal3Check() {
 
 void cs8Linter::output(const QByteArray &out) {
     std::string l = out.toStdString();
-  qDebug() << "out: " << out;
-  std::cout << qUtf8Printable(out);
+    auto list = QString(out).split(QRegExp("[\\n\\r]"));
+    for (const auto &i : list) {
+        if (i.length() > 2) {
+            qDebug() << "out: " << i;
+            std::cout << i.simplified().toStdString() << std::endl;
+        }
+    }
 }
 
 void cs8Linter::executeLinter() {
@@ -62,48 +70,56 @@ void cs8Linter::executeLinter() {
   getProductName(qApp->applicationFilePath(), productName, productVersion);
   QString headerMessage = "SAXE: Val3 Linter " + productVersion;
   qDebug() << headerMessage;
-  std::cout << qPrintable(headerMessage + "\n");
+  emit sendOutput(qUtf8Printable(headerMessage));
 
-  connect(&m_futureWatcher, &QFutureWatcher<void>::finished,
-          []() { qDebug() << "Linter completed"; });
+  connect(&m_futureWatcher, &QFutureWatcher<void>::finished, []() { qDebug() << "Linter completed"; });
+
   m_future = QtConcurrent::run([=]() {
-    qDebug() << "Start linter";
-    cs8CodeValidation validator;
-    if (validator.loadRuleFile(":/rules/compilerRules.xml")) {
-      qDebug() << "Rules loaded, executing linter for " << m_arguments;
-      foreach (const auto arg, m_applicationsToCheck) {
-        qDebug() << "Linting now: " << arg;
-          emit sendOutput(qUtf8Printable("Linting now:" + arg + "\n"));
-        cs8Application app;
-        app.setCellPath(m_cellPath);
-        app.openFromPathName(arg);
-          emit sendOutput(qUtf8Printable(validator.runValidation(&app, 1).join("\n") + "\n"));
+      // emit sendOutput("Start linter");
+      cs8CodeValidation validator;
+      if (validator.loadRuleFile(":/rules/compilerRules.xml")) {
+          qDebug() << "Rules loaded, executing linter for " << m_arguments;
+          foreach (const auto arg, m_applicationsToCheck) {
+              qDebug() << "Linting now: " << arg;
+              emit sendOutput(qUtf8Printable("Linting now:" + arg + "\n"));
+              cs8Application app;
+              app.setCellPath(m_cellPath);
+              app.openFromPathName(arg);
+              emit sendOutput(qUtf8Printable(validator.runValidation(&app, 1).join("\n") + "\n"));
+          }
       }
-    }
-    qDebug() << "Ended linter";
-    m_linterDone = true;
-    emit finished();
+      qDebug() << "Ended linter";
+      m_linterDone = true;
+      emit finished();
   });
 }
 
-void cs8Linter::initConnections() {
-  connect(this, &cs8Linter::sendOutput, this, &cs8Linter::output,
-          Qt::QueuedConnection);
+void cs8Linter::initConnections()
+{
+    connect(this, &cs8Linter::sendOutput, this, &cs8Linter::output, Qt::QueuedConnection);
 
-  QObject::connect(this, &cs8Linter::finished, [=]() {
-    qDebug() << __FUNCTION__ << "val3check: " << m_val3checkDone
-             << "code: " << m_val3checkExitCode << ": linter" << m_linterDone;
-    if (m_val3checkDone && m_linterDone) {
-      qDebug() << "quit linter:" << m_val3checkExitCode;
-      exit(m_val3checkExitCode);
-      // QCoreApplication::quit();
-    }
-  });
+    connect(this, &cs8Linter::allDoneAndExit, this, &cs8Linter::exitProgram, Qt::QueuedConnection);
+
+    QObject::connect(this, &cs8Linter::finished, [=]() {
+        qDebug() << __FUNCTION__ << "val3Check finished: " << m_val3checkDone << "code: " << m_val3checkExitCode << ": linter" << m_linterDone;
+        if (m_val3checkDone && m_linterDone) {
+            //std::cout << std::endl;
+            //exit(m_val3checkExitCode);
+            emit allDoneAndExit(m_val3checkExitCode);
+        }
+    });
 }
 
-void cs8Linter::startLinterAndChecker() {
-  executeVal3Check();
-  executeLinter();
+void cs8Linter::startLinterAndChecker()
+{
+    executeVal3Check();
+    executeLinter();
+}
+
+void cs8Linter::exitProgram(int exitCode)
+{
+    qDebug() << "quit linter:" << m_val3checkExitCode;
+    QCoreApplication::exit(exitCode);
 }
 
 cs8Linter::cs8Linter(const QStringList &arguments,
