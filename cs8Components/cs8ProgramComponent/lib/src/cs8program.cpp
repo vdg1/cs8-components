@@ -80,7 +80,7 @@ void cs8Program::updateCodeModel() {
   // update token list
   m_variableTokens = variableTokens(false);
   // update variable occurences
-  QString c = val3Code(false);
+  QString c = val3Code(true);
   // calculate code line metrics
   QStringList l = c.split("\n");
   do {
@@ -112,11 +112,11 @@ void cs8Program::updateCodeModel() {
       int line = c.left(symbolPos).count(QRegExp("\n")) + 1;
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
       int column = symbolPos - lineStart - 1;
+      //qDebug() << c.mid(lineStart, column + 3);
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
         var->addSymbolReference(line, column, name());
     }
-    // qDebug() << "occurence of local var:" << var->name() << ":"
-    //         << var->symbolReferences();
+    qDebug() << "occurences of local var:" << var->name() << ":" << var->symbolReferences();
   }
 
   foreach (cs8Variable *var, m_parameterModel->variableListByType()) {

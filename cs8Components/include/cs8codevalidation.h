@@ -19,8 +19,11 @@ signals:
   void validationMessage(const QString &message);
 
 public slots:
-
-private:
+  
+  protected:
+  QStringList checkObsoleteProgramFiles(const cs8Application *app);
+  
+  private:
   QDomDocument m_validationRules;
   QDomNodeList m_GlobalDataRules, m_ParameterRules, m_LocalDataRules,
       m_ProgramRules;

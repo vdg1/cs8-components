@@ -1,7 +1,9 @@
 #include "cs8codevalidation.h"
 #include "cs8variable.h"
+#include "src/cs8application.h"
 
 #include <QDir>
+#include <QDirIterator>
 #include <QFile>
 #include <QMessageBox>
 
@@ -286,6 +288,38 @@ QStringList cs8CodeValidation::runDataValidationRule(
   return validationMessages;
 }
 
+QStringList cs8CodeValidation::checkObsoleteProgramFiles(const cs8Application *app)
+{
+    QStringList pgxFileList;
+    QDirIterator it(app->projectPath(), QStringList() << "*.pgx", QDir::NoFilter, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        pgxFileList << it.next();
+    }
+    pgxFileList=pgxFileList.replaceInStrings(app->projectPath(),"");
+    qDebug() << "Folders: " << app->projectPath();
+    qDebug() << pgxFileList;
+
+    QStringList validationMessages;
+    foreach (QString pgxFileName, pgxFileList) {
+        bool found = false;
+        foreach (cs8Program *program, app->programModel()->programList()) {
+            if (program->fileName() == pgxFileName) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
+                                          "line>%4<msg>%2<file>%3")
+                                      .arg(pgxFileName)
+                                      .arg("Warning: Program file is obsolete")
+                                      .arg(pgxFileName)
+                                      .arg("1");
+        }
+    }
+    return validationMessages;
+}
+
 QStringList cs8CodeValidation::runValidation(const cs8Application *app,
                                              int reportingLevel) {
   QStringList validationMessages;
@@ -349,25 +383,6 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
   // check for obsolete PGX files
   // retrieve list of pgx files from file system
 
-  QDir dir;
-  dir.setPath(app->projectPath());
-  QStringList pgxFileList = dir.entryList(QStringList() << "*.pgx");
-  foreach (QString pgxFileName, pgxFileList) {
-    bool found = false;
-    foreach (cs8Program *program, app->programModel()->programList()) {
-      if (program->fileName() == pgxFileName) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
-                                    "line>%4<msg>%2<file>%3")
-                                .arg(pgxFileName)
-                                .arg("Warning: Program file is obsolete")
-                                .arg(pgxFileName)
-                                .arg("1");
-    }
-  }
+  validationMessages << checkObsoleteProgramFiles(app);
   return validationMessages;
 }

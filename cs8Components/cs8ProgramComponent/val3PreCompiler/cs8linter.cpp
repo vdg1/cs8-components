@@ -119,7 +119,7 @@ void cs8Linter::startLinterAndChecker()
 void cs8Linter::exitProgram(int exitCode)
 {
     qDebug() << "quit linter:" << m_val3checkExitCode;
-    QCoreApplication::exit(exitCode);
+    exit(m_val3checkExitCode);
 }
 
 cs8Linter::cs8Linter(const QStringList &arguments,
