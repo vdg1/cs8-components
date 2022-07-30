@@ -59,7 +59,7 @@ void cs8Linter::output(const QByteArray &out) {
     auto list = QString(out).split(QRegExp("[\\n\\r]"));
     for (const auto &i : list) {
         if (i.length() > 2) {
-            qDebug() << "out: " << i;
+            //qDebug() << "out: " << i;
             std::cout << i.simplified().toStdString() << std::endl;
         }
     }

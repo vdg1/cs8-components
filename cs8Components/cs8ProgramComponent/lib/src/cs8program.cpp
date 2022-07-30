@@ -15,52 +15,57 @@
 #define MAX_LENGTH 40
 //
 cs8Program::cs8Program(QObject *parent)
-    : QObject(parent), cs8ReferencesAndLinter(), m_application(0), m_public(false), m_withIfBlock(true), m_hasByteOrderMark(true),
-      m_lineNumberCodeSection(0), m_linesOfCodeAndComments(0), m_linesOfComments(0)
-{
-    m_localVariableModel = new cs8LocalVariableModel(this);
-    connect(m_localVariableModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
-    m_parameterModel = new cs8ParameterModel(this);
-    connect(m_parameterModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
-    m_globalDocContainer = false;
-    m_programCode = "begin\nend";
-    if (parent)
-        m_application = qobject_cast<cs8Application *>(parent->parent());
+    : QObject(parent), cs8ReferencesAndLinter(), m_application(0),
+      m_public(false), m_withIfBlock(true), m_hasByteOrderMark(true),
+      m_lineNumberCodeSection(0), m_linesOfCodeAndComments(0),
+      m_linesOfComments(0) {
+  m_localVariableModel = new cs8LocalVariableModel(this);
+  connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
+          &cs8Program::modified);
+  m_parameterModel = new cs8ParameterModel(this);
+  connect(m_parameterModel, &cs8LocalVariableModel::modified, this,
+          &cs8Program::modified);
+  m_globalDocContainer = false;
+  m_programCode = "begin\nend";
+  if (parent)
+    m_application = qobject_cast<cs8Application *>(parent->parent());
 }
 
 cs8Program::cs8Program()
-    : QObject(), cs8ReferencesAndLinter(), m_application(0), m_public(false), m_withIfBlock(true), m_hasByteOrderMark(true),
-      m_lineNumberCodeSection(0), m_linesOfCodeAndComments(0), m_linesOfComments(0)
-{
-    m_localVariableModel = new cs8LocalVariableModel(this);
-    connect(m_localVariableModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
-    m_parameterModel = new cs8ParameterModel(this);
-    connect(m_parameterModel, &cs8LocalVariableModel::modified, this, &cs8Program::modified);
-    m_globalDocContainer = false;
-    m_programCode = "begin\nend";
+    : QObject(), cs8ReferencesAndLinter(), m_application(0), m_public(false),
+      m_withIfBlock(true), m_hasByteOrderMark(true), m_lineNumberCodeSection(0),
+      m_linesOfCodeAndComments(0), m_linesOfComments(0) {
+  m_localVariableModel = new cs8LocalVariableModel(this);
+  connect(m_localVariableModel, &cs8LocalVariableModel::modified, this,
+          &cs8Program::modified);
+  m_parameterModel = new cs8ParameterModel(this);
+  connect(m_parameterModel, &cs8LocalVariableModel::modified, this,
+          &cs8Program::modified);
+  m_globalDocContainer = false;
+  m_programCode = "begin\nend";
 }
 
-bool cs8Program::open(const QString &projectPath, const QString &filePath)
-{
-    // qDebug() << "cs8Program::open () " << filePath;
+bool cs8Program::open(const QString &projectPath, const QString &filePath) {
+  // qDebug() << "cs8Program::open () " << filePath;
 
-    QFile file(projectPath + filePath);
-    if (!file.open(QIODevice::ReadOnly))
-        return false;
-    m_hasByteOrderMark = QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
-    // if (m_hasByteOrderMark)
-    // qDebug() << "File has BOM";
+  QFile file(projectPath + filePath);
+  if (!file.open(QIODevice::ReadOnly))
+    return false;
+  m_hasByteOrderMark =
+      QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
+  // if (m_hasByteOrderMark)
+  // qDebug() << "File has BOM";
 
-    QDomDocument doc;
-    if (!doc.setContent(&file)) {
-        file.close();
-        return false;
-    }
+  QDomDocument doc;
+  if (!doc.setContent(&file)) {
     file.close();
+    return false;
+  }
+  file.close();
 
-    m_filePath = filePath;
-    m_projectPath = projectPath;
-    return parseProgramDoc(doc);
+  m_filePath = filePath;
+  m_projectPath = projectPath;
+  return parseProgramDoc(doc);
 }
 
 bool cs8Program::deleteSourceFile() {
@@ -84,19 +89,21 @@ void cs8Program::updateCodeModel() {
   // calculate code line metrics
   QStringList l = c.split("\n");
   do {
-      l.removeFirst();
-  } while (!l.isEmpty() && (l.first().trimmed().isEmpty() || l.first().trimmed() == "begin"));
+    l.removeFirst();
+  } while (!l.isEmpty() &&
+           (l.first().trimmed().isEmpty() || l.first().trimmed() == "begin"));
   do {
-      l.removeLast();
-  } while (!l.isEmpty() && (l.last().trimmed().isEmpty() || l.last().trimmed() == "end"));
+    l.removeLast();
+  } while (!l.isEmpty() &&
+           (l.last().trimmed().isEmpty() || l.last().trimmed() == "end"));
   m_linesOfCodeAndComments = l.length();
   m_linesOfComments = 0;
   m_linesOfNoCode = 0;
   for (const QString &s : qAsConst(l)) {
-      if (s.trimmed().startsWith("//"))
-          m_linesOfComments++;
-      if (s.trimmed().isEmpty())
-          m_linesOfNoCode++;
+    if (s.trimmed().startsWith("//"))
+      m_linesOfComments++;
+    if (s.trimmed().isEmpty())
+      m_linesOfNoCode++;
   }
   //
   QRegularExpression rx;
@@ -112,11 +119,12 @@ void cs8Program::updateCodeModel() {
       int line = c.left(symbolPos).count(QRegExp("\n")) + 1;
       int lineStart = c.left(symbolPos).lastIndexOf(QRegExp("\n"));
       int column = symbolPos - lineStart - 1;
-      //qDebug() << c.mid(lineStart, column + 3);
+      // qDebug() << c.mid(lineStart, column + 3);
       if (!c.mid(lineStart, column).trimmed().startsWith("//"))
         var->addSymbolReference(line, column, name());
     }
-    qDebug() << "occurences of local var:" << var->name() << ":" << var->symbolReferences();
+    qDebug() << "occurences of local var:" << var->name() << ":"
+             << var->symbolReferences();
   }
 
   foreach (cs8Variable *var, m_parameterModel->variableListByType()) {
@@ -281,19 +289,12 @@ if (var)
 */
 }
 
-uint cs8Program::linesOfNoCode() const
-{
-    return m_linesOfNoCode;
-}
+uint cs8Program::linesOfNoCode() const { return m_linesOfNoCode; }
 
-uint cs8Program::linesOfComments() const
-{
-    return m_linesOfComments;
-}
+uint cs8Program::linesOfComments() const { return m_linesOfComments; }
 
-uint cs8Program::linesOfCodeAndComments() const
-{
-    return m_linesOfCodeAndComments;
+uint cs8Program::linesOfCodeAndComments() const {
+  return m_linesOfCodeAndComments;
 }
 
 QString cs8Program::getAdditionalHintMessage() const {
@@ -307,10 +308,10 @@ void cs8Program::setAdditionalHintMessage(
 
 QString cs8Program::getFilePath() const { return m_filePath; }
 
-void cs8Program::setFilePath(const QString &projectPath, const QString &filePath)
-{
-    m_filePath = filePath;
-    m_projectPath = projectPath;
+void cs8Program::setFilePath(const QString &projectPath,
+                             const QString &filePath) {
+  m_filePath = filePath;
+  m_projectPath = projectPath;
 }
 
 bool cs8Program::getHasByteOrderMark() const { return m_hasByteOrderMark; }
@@ -359,15 +360,13 @@ void cs8Program::setMainPageDocumentation(
 }
 
 // returns the code without documentation header
-QString cs8Program::val3Code(bool withDocumentation) const
-{
-    // qDebug() << m_codeSection.text();
-    return withDocumentation ? m_programCode : extractCode(m_programCode);
+QString cs8Program::val3Code(bool withDocumentation) const {
+  // qDebug() << m_codeSection.text();
+  return withDocumentation ? m_programCode : extractCode(m_programCode);
 }
 
-QStringList cs8Program::val3CodeList() const
-{
-    return val3Code(true).split("\n");
+QStringList cs8Program::val3CodeList() const {
+  return val3Code(true).split("\n");
 }
 
 QString cs8Program::toCSyntax() {
@@ -470,7 +469,7 @@ QMap<int, QString> cs8Program::todos() const {
   QMap<int, QString> todos;
   // qDebug() << "Check todos in " << name();
   QRegExp rx;
-  rx.setPattern(R"(^\s*//[/\\]{1}\s*TODO.*)");
+  rx.setPattern(R"RX(^\s*//[/\\]{0,1}\s*TODO.*)RX");
   int codeLine = 1;
   foreach (const QString &line, code.split("\n")) {
     if (rx.indexIn(line) != -1)
@@ -650,8 +649,8 @@ void cs8Program::parseDocumentation(const QString &code_) {
       line = line.trimmed();
     // check if line is an additional hint message
     if (line.startsWith("//[= ")) {
-        m_additionalHintMessage = line;
-        m_additionalHintMessage.remove(R"(//[= )").remove(R"( =])");
+      m_additionalHintMessage = line;
+      m_additionalHintMessage.remove(R"(//[= )").remove(R"( =])");
     }
     // process a complete tag before starting the next tag
     if ((line.startsWith("//!") || line.startsWith("//\\")) &&
@@ -699,17 +698,17 @@ void cs8Program::parseDocumentation(const QString &code_) {
       } else if (tagType == "copyright") {
         setCopyrightMessage(tagText);
       } else if (tagType == "linter") {
-          setLinterDirective(tagName, tagText);
-          m_tags.insertMulti(tagType, tagName + " " + tagText);
+        setLinterDirective(tagName, tagText);
+        m_tags.insertMulti(tagType, tagName + " " + tagText);
       } else {
-          // unknown tag
-          if (tagText.isEmpty())
-              tagText = tagName;
-          m_tags.insertMulti(tagType, tagName + " " + tagText);
-          emit unknownTagFound(tagType, tagName, tagText);
-          // unknown tag type
-          // m_description += QString("\n\\%1
-          // %2\n%3").arg(tagType).arg(tagName).arg(tagText);
+        // unknown tag
+        if (tagText.isEmpty())
+          tagText = tagName;
+        m_tags.insertMulti(tagType, tagName + " " + tagText);
+        emit unknownTagFound(tagType, tagName, tagText);
+        // unknown tag type
+        // m_description += QString("\n\\%1
+        // %2\n%3").arg(tagType).arg(tagName).arg(tagText);
       }
     }
     // a new tag
@@ -789,15 +788,15 @@ void cs8Program::parseDocumentation(const QString &code_) {
     } else if (tagType == "copyright") {
       setCopyrightMessage(tagText);
     } else if (tagType == "linter") {
-        setLinterDirective(tagName, tagText);
-        m_tags.insertMulti(tagType, tagName + " " + tagText);
+      setLinterDirective(tagName, tagText);
+      m_tags.insertMulti(tagType, tagName + " " + tagText);
     } else {
-        if (tagText.isEmpty())
-            tagText = tagName;
-        m_tags.insertMulti(tagType, tagText);
-        emit unknownTagFound(tagType, tagName, tagText);
-        // m_description += QString("\n\\%1
-        // %2\n%3").arg(tagType).arg(tagName).arg(tagText);
+      if (tagText.isEmpty())
+        tagText = tagName;
+      m_tags.insertMulti(tagType, tagText);
+      emit unknownTagFound(tagType, tagName, tagText);
+      // m_description += QString("\n\\%1
+      // %2\n%3").arg(tagType).arg(tagName).arg(tagText);
     }
   }
   // qDebug() << documentationList;
@@ -813,12 +812,11 @@ void cs8Program::setCellPath(const QString &path) {
   m_cellPath = path;
 }
 
-QString cs8Program::cellFilePath() const
-{
-    QString pth = QDir::fromNativeSeparators(m_projectPath + m_filePath);
-    // qDebug() << __FUNCTION__ << pth << m_cellPath;
-    pth = pth.replace(m_cellPath + "usr/usrapp/", "Disk://");
-    return pth;
+QString cs8Program::cellFilePath() const {
+  QString pth = QDir::fromNativeSeparators(m_projectPath + m_filePath);
+  // qDebug() << __FUNCTION__ << pth << m_cellPath;
+  pth = pth.replace(m_cellPath + "usr/usrapp/", "Disk://");
+  return pth;
 }
 
 QString cs8Program::documentation(bool withPrefix, bool forCOutput) const {
@@ -884,8 +882,10 @@ QString cs8Program::formattedDescriptionHeader() const {
             .at(i)
             ->documentation(false, false)
             .length() > 2)
-        txt += m_parameterModel->variableListByType().at(i)->name().leftJustified(18, ' ') + ": "
-               + m_parameterModel->variableListByType().at(i)->description(true);
+      txt += m_parameterModel->variableListByType().at(i)->name().leftJustified(
+                 18, ' ') +
+             ": " +
+             m_parameterModel->variableListByType().at(i)->description(true);
   }
   QRegularExpression rx("(\\s|^)((\\w*)\\\\_)");
   while (rx.match(txt).hasMatch()) {
@@ -945,49 +945,50 @@ void cs8Program::writeXMLStream(QXmlStreamWriter &stream, bool withCode) {
   stream.writeEndElement();
 }
 
-bool cs8Program::save(const QString &projectPath, bool withCode)
-{
-    QBuffer buffer;
-    buffer.open(QBuffer::ReadWrite);
+bool cs8Program::save(const QString &projectPath, bool withCode) {
+  QBuffer buffer;
+  buffer.open(QBuffer::ReadWrite);
 
-    QXmlStreamWriter stream(&buffer);
-    stream.setAutoFormatting(true);
-    stream.setAutoFormattingIndent(2);
-    stream.setCodec("utf-8");
-    stream.writeStartDocument();
+  QXmlStreamWriter stream(&buffer);
+  stream.setAutoFormatting(true);
+  stream.setAutoFormattingIndent(2);
+  stream.setCodec("utf-8");
+  stream.writeStartDocument();
 
-    //
-    stream.writeStartElement("Programs");
-    stream.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-    stream.writeAttribute("xmlns", "http://www.staubli.com/robotics/VAL3/Program/2");
-    writeXMLStream(stream, withCode);
-    stream.writeEndDocument();
+  //
+  stream.writeStartElement("Programs");
+  stream.writeAttribute("xmlns:xsi",
+                        "http://www.w3.org/2001/XMLSchema-instance");
+  stream.writeAttribute("xmlns",
+                        "http://www.staubli.com/robotics/VAL3/Program/2");
+  writeXMLStream(stream, withCode);
+  stream.writeEndDocument();
 
-    // match our XML output to XML output of SRS
-    buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
-    if (buffer.buffer().right(1) == "\n")
-        buffer.buffer().chop(1);
-    buffer.buffer().replace("\n", "\r\n");
-    buffer.buffer().replace("\"/>", "\" />");
-    //
+  // match our XML output to XML output of SRS
+  buffer.buffer().replace("encoding=\"UTF-8", "encoding=\"utf-8");
+  if (buffer.buffer().right(1) == "\n")
+    buffer.buffer().chop(1);
+  buffer.buffer().replace("\n", "\r\n");
+  buffer.buffer().replace("\"/>", "\" />");
+  //
 
-    QFileInfo i(projectPath);
-    QString fileName_ = i.isDir() ? projectPath + "/" + fileName() : projectPath;
-    // QString fileName_ = filePath + fileName();
-    QFile file(fileName_);
-    if (!file.open(QIODevice::WriteOnly))
-        return false;
+  QFileInfo i(projectPath);
+  QString fileName_ = i.isDir() ? projectPath + "/" + fileName() : projectPath;
+  // QString fileName_ = filePath + fileName();
+  QFile file(fileName_);
+  if (!file.open(QIODevice::WriteOnly))
+    return false;
 
-    if (m_hasByteOrderMark) {
-        buffer.buffer().insert(0, static_cast<char>(0xBF));
-        buffer.buffer().insert(0, static_cast<char>(0xBB));
-        buffer.buffer().insert(0, static_cast<char>(0xEF));
-    }
-    file.write(buffer.buffer());
-    // qDebug() << "write file: " << fileName_;
-    // qDebug() << "start of buffer: " << buffer.buffer().at(0)
-    //         << buffer.buffer().at(1) << buffer.buffer().at(2);
-    return true;
+  if (m_hasByteOrderMark) {
+    buffer.buffer().insert(0, static_cast<char>(0xBF));
+    buffer.buffer().insert(0, static_cast<char>(0xBB));
+    buffer.buffer().insert(0, static_cast<char>(0xEF));
+  }
+  file.write(buffer.buffer());
+  // qDebug() << "write file: " << fileName_;
+  // qDebug() << "start of buffer: " << buffer.buffer().at(0)
+  //         << buffer.buffer().at(1) << buffer.buffer().at(2);
+  return true;
 }
 
 cs8ParameterModel *cs8Program::parameterModel() const {
@@ -1013,17 +1014,14 @@ QString cs8Program::name() const {
   return m_name;
 }
 
-QString cs8Program::fileName() const
-{
-    return m_filePath;
-}
+QString cs8Program::fileName() const { return m_filePath; }
 
 bool cs8Program::setName(const QString &name, cs8Application *application) {
   cs8ProgramModel *m = qobject_cast<cs8ProgramModel *>(parent());
   if (m_name == name)
     return true;
   else if (m != nullptr && m->getProgramByName(name) != nullptr)
-      return false;
+    return false;
   else {
     emit modified();
     QString oldName = m_name;

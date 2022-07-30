@@ -164,6 +164,23 @@ void cs8ProgramModel::updateCodeModel() {
   }
 }
 
+QStringList cs8ProgramModel::programFolders() const
+{
+    QStringList list;
+    for (cs8Program *program: programList()) {
+        QString str=program->fileName();
+        if (str.indexOf("/")!=-1)
+        str=str.mid(0, str.indexOf("/"));
+        else
+            str="";
+        if (!str.isEmpty())
+        list << str+"/";
+    }
+    list.removeDuplicates();
+    list << ".";
+    return list;
+}
+
 bool cs8ProgramModel::addProgramFile(const QString &projectPath, const QString &filePath)
 {
     QFile file(projectPath + filePath);

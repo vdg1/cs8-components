@@ -34,6 +34,8 @@ private slots:
 
   void on_actionRefresh_triggered();
 
+  void on_actionUpdate_all_triggered();
+
 private:
   void storeSettings();
   void loadSettings();

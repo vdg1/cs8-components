@@ -87,7 +87,7 @@
      <x>0</x>
      <y>0</y>
      <width>886</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAction">
@@ -95,6 +95,7 @@
      <string>Action</string>
     </property>
     <addaction name="actionRefresh"/>
+    <addaction name="actionUpdate_all"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -134,6 +135,11 @@
    </property>
    <property name="shortcut">
     <string>F5</string>
+   </property>
+  </action>
+  <action name="actionUpdate_all">
+   <property name="text">
+    <string>Update all</string>
    </property>
   </action>
  </widget>

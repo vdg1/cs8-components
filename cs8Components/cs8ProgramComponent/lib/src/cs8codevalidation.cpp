@@ -91,7 +91,8 @@ QStringList cs8CodeValidation::runDataValidationRule(
     QString message =
         ruleNode.elementsByTagName("message").at(0).toElement().text();
     int minNameLength = ruleNode.attribute("minLength", "-1").toInt();
-    nodeSeverity = ruleNode.attribute("severity", QString("%1").arg(nodeSeverity)).toInt();
+    nodeSeverity =
+        ruleNode.attribute("severity", QString("%1").arg(nodeSeverity)).toInt();
     QString level;
 
     switch (qMax(0, nodeSeverity + m_reportingLevel)) {
@@ -132,23 +133,29 @@ QStringList cs8CodeValidation::runDataValidationRule(
                 }
               }
             if (checkProperty == "father" && varType == var->type()) {
-                QStringList l = var->orphanedValues();
-                if (!l.isEmpty()) {
-                    QString msg = message;
-                    msg.replace("%varType%", var->type());
-                    msg.replace("%index%", "[" + (l.length() > 2 ? l.first() + "..." + l.last() : l.join("; ")) + "]");
-                    msg.replace("%varName%", var->name());
-                    msg.replace("%level%", level);
-                    msg.replace("%lineNumber%", QString("%1").arg(var->symbolReferences().value(0).line));
+              QStringList l = var->orphanedValues();
+              if (!l.isEmpty()) {
+                QString msg = message;
+                msg.replace("%varType%", var->type());
+                msg.replace("%index%",
+                            "[" +
+                                (l.length() > 2 ? l.first() + "..." + l.last()
+                                                : l.join("; ")) +
+                                "]");
+                msg.replace("%varName%", var->name());
+                msg.replace("%level%", level);
+                msg.replace(
+                    "%lineNumber%",
+                    QString("%1").arg(var->symbolReferences().value(0).line));
 
-                    if (program == nullptr) {
-                        msg.replace("%fileName%", app->cellDataFilePath(true));
-                    } else {
-                        msg.replace("%progName%", program->name());
-                        msg.replace("%fileName%", program->cellFilePath());
-                    }
-                    validationMessages << msg;
+                if (program == nullptr) {
+                  msg.replace("%fileName%", app->cellDataFilePath(true));
+                } else {
+                  msg.replace("%progName%", program->name());
+                  msg.replace("%fileName%", program->cellFilePath());
                 }
+                validationMessages << msg;
+              }
             }
             if (checkProperty == "name" &&
                 (minNameLength == -1 || var->name().length() > minNameLength) &&
@@ -288,36 +295,40 @@ QStringList cs8CodeValidation::runDataValidationRule(
   return validationMessages;
 }
 
-QStringList cs8CodeValidation::checkObsoleteProgramFiles(const cs8Application *app)
-{
-    QStringList pgxFileList;
-    QDirIterator it(app->projectPath(), QStringList() << "*.pgx", QDir::NoFilter, QDirIterator::Subdirectories);
+QStringList
+cs8CodeValidation::checkObsoleteProgramFiles(const cs8Application *app) {
+  QStringList pgxFileList;
+  for (const auto &path : app->projectSubFolders()) {
+    QDirIterator it(app->projectPath() + path, QStringList() << "*.pgx",
+                    QDir::NoFilter);
     while (it.hasNext()) {
-        pgxFileList << it.next();
+      QFileInfo info(it.next());
+      pgxFileList << info.canonicalFilePath();
     }
-    pgxFileList=pgxFileList.replaceInStrings(app->projectPath(),"");
-    qDebug() << "Folders: " << app->projectPath();
-    qDebug() << pgxFileList;
+  }
+  pgxFileList = pgxFileList.replaceInStrings(app->projectPath(), "");
+  qDebug() << "Folder: " << app->projectPath();
+  qDebug() << pgxFileList;
 
-    QStringList validationMessages;
-    foreach (QString pgxFileName, pgxFileList) {
-        bool found = false;
-        foreach (cs8Program *program, app->programModel()->programList()) {
-            if (program->fileName() == pgxFileName) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
-                                          "line>%4<msg>%2<file>%3")
-                                      .arg(pgxFileName)
-                                      .arg("Warning: Program file is obsolete")
-                                      .arg(pgxFileName)
-                                      .arg("1");
-        }
+  QStringList validationMessages;
+  foreach (QString pgxFileName, pgxFileList) {
+    bool found = false;
+    foreach (cs8Program *program, app->programModel()->programList()) {
+      if (program->fileName() == pgxFileName) {
+        found = true;
+        break;
+      }
     }
-    return validationMessages;
+    if (!found) {
+      validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
+                                    "line>%4<msg>%2<file>%3")
+                                .arg(pgxFileName)
+                                .arg("Warning: Program file is obsolete")
+                                .arg(pgxFileName)
+                                .arg("1");
+    }
+  }
+  return validationMessages;
 }
 
 QStringList cs8CodeValidation::runValidation(const cs8Application *app,
@@ -340,7 +351,8 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
         app, program, &program->localVariableModel()->variableListByType(),
         m_LocalDataRules, m_LocalDataRulesSeverity);
 
-    validationMessages << runDataValidationRule(app, program, 0, m_ProgramRules, m_ProgramRulesSeverity);
+    validationMessages << runDataValidationRule(app, program, 0, m_ProgramRules,
+                                                m_ProgramRulesSeverity);
 
     // check TODOs in code
     QMapIterator<int, QString> i(program->todos());
@@ -357,23 +369,27 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
     // check program line length
     QStringList l = program->val3CodeList();
     for (int i = 0; i < l.length(); i++) {
-        if (l[i].length() > 258) {
-            validationMessages << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<line>%4<msg>%2<file>%3")
-                                      .arg(program->name())
-                                      .arg("Code line exceeds maximum allowed length of 259 characters")
-                                      .arg(program->cellFilePath())
-                                      .arg(i);
-        }
+      if (l[i].length() > 258) {
+        validationMessages << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
+                                      "line>%4<msg>%2<file>%3")
+                                  .arg(program->name())
+                                  .arg("Code line exceeds maximum allowed "
+                                       "length of 259 characters")
+                                  .arg(program->cellFilePath())
+                                  .arg(i);
+      }
     }
 
     // check lines of code
-    if (program->linesOfCodeAndComments() == 0 || (program->linesOfCodeAndComments() <= (program->linesOfComments() + program->linesOfNoCode()))) {
-        validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
-                                      "line>%4<msg>%2<file>%3")
-                                  .arg(program->name())
-                                  .arg("Program does not contain any active code")
-                                  .arg(program->cellFilePath())
-                                  .arg(0);
+    if (program->linesOfCodeAndComments() == 0 ||
+        (program->linesOfCodeAndComments() <=
+         (program->linesOfComments() + program->linesOfNoCode()))) {
+      validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
+                                    "line>%4<msg>%2<file>%3")
+                                .arg(program->name())
+                                .arg("Program does not contain any active code")
+                                .arg(program->cellFilePath())
+                                .arg(0);
     }
   }
 
@@ -382,7 +398,6 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
 
   // check for obsolete PGX files
   // retrieve list of pgx files from file system
-
   validationMessages << checkObsoleteProgramFiles(app);
   return validationMessages;
 }

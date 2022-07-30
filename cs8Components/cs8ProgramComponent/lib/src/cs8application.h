@@ -112,6 +112,8 @@ public:
   bool getCompactFileMode() const;
   void setCompactFileMode(bool singleProgramFile);
   QFileInfoList projectFileList() const;
+  QStringList projectSubFolders() const;
+
 
   protected:
   QHash<QString, QString> m_exportDirectives;

@@ -11,6 +11,7 @@
 #include "cs8programmodel.h"
 #include "cs8variable.h"
 #include "cs8variablemodel.h"
+#include "qdiriterator.h"
 #include <QBuffer>
 #include <QDirIterator>
 #include <QRegularExpression>
@@ -777,7 +778,7 @@ QFileInfoList cs8Application::projectFileList() const
                                             << "*.dtx",
                               QDir::Files);
     // program file list
-    for (auto prog : m_programModel->programList()) {
+    for (const auto prog : m_programModel->programList()) {
         QFileInfo i(m_projectPath + prog->getFilePath());
         if (!list.contains(i))
             list << i;
@@ -789,6 +790,19 @@ QFileInfoList cs8Application::projectFileList() const
         it.next();
         if (it.fileInfo().isFile())
             list << it.fileInfo();
+    }
+    return list;
+}
+
+QStringList cs8Application::projectSubFolders() const
+{
+    QStringList list=m_programModel->programFolders();
+    // recurse into "interface" folder
+    QDirIterator it(m_projectPath + "/interface",QDir::NoDotDot, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        it.next();
+        if (it.fileInfo().isDir())
+            list << "."+it.fileInfo().filePath().remove(m_projectPath);
     }
     return list;
 }
