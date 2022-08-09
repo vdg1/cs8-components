@@ -391,6 +391,17 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
                                 .arg(program->cellFilePath())
                                 .arg(0);
     }
+
+    // check empty lines of code
+    if (program->linesOfNoCode() > 0) {
+      validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
+                                    "line>%4<msg>%2<file>%3")
+                                .arg(program->name())
+                                .arg("Program has empty lines. Consider to "
+                                     "delete lines or add comment token (//)")
+                                .arg(program->cellFilePath())
+                                .arg(program->firstLineOfNoCode());
+    }
   }
 
   // check values of ENUMS

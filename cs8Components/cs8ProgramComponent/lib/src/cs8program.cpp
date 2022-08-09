@@ -99,11 +99,16 @@ void cs8Program::updateCodeModel() {
   m_linesOfCodeAndComments = l.length();
   m_linesOfComments = 0;
   m_linesOfNoCode = 0;
+  m_firstLineOfNoCode = 0;
+  int i = 1;
   for (const QString &s : qAsConst(l)) {
     if (s.trimmed().startsWith("//"))
       m_linesOfComments++;
-    if (s.trimmed().isEmpty())
+    if (s.trimmed().isEmpty()) {
       m_linesOfNoCode++;
+      m_firstLineOfNoCode = i;
+    }
+    i++;
   }
   //
   QRegularExpression rx;
@@ -287,6 +292,11 @@ if (!var && m_application)
 if (var)
   var->setLinterDirective(directive);
 */
+}
+
+uint cs8Program::firstLineOfNoCode() const
+{
+    return m_firstLineOfNoCode;
 }
 
 uint cs8Program::linesOfNoCode() const { return m_linesOfNoCode; }
