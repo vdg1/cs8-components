@@ -26,3 +26,7 @@ cs8Components/SRS 2019/
 *.orig
 cs8Components/cs8ControllerComponent/.vs/
 .qtc_clangd/
+cs8Components/cs8ProgramComponent/lib/buildd/
+cs8Components/cs8ProgramComponent/lib/build/
+cs8Components/cs8ProgramComponent/extractDoc/build/
+*_qmlcache.qrc
