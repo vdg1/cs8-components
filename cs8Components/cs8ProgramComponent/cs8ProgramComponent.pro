@@ -28,3 +28,5 @@ val3CreateAPI.depends=lib
 val3CompilerDeployment.depends=lib
 saveAsS6.depends=lib
 testVal3Linter.depends=lib
+
+DEFINES += QT_DEPRECATED_WARNINGS

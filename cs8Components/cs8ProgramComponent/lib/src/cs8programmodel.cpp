@@ -164,56 +164,57 @@ void cs8ProgramModel::updateCodeModel() {
   }
 }
 
-QStringList cs8ProgramModel::programFolders() const
-{
-    QStringList list;
-    for (cs8Program *program: programList()) {
-        QString str=program->fileName();
-        if (str.indexOf("/")!=-1)
-        str=str.mid(0, str.indexOf("/"));
-        else
-            str="";
-        if (!str.isEmpty())
-        list << str+"/";
-    }
-    list.removeDuplicates();
-    list << ".";
-    return list;
+QStringList cs8ProgramModel::programFolders() const {
+  QStringList list;
+  const auto l = programList();
+  for (const cs8Program *program : l) {
+    QString str = program->fileName();
+    if (str.indexOf("/") != -1)
+      str = str.mid(0, str.indexOf("/"));
+    else
+      str = "";
+    if (!str.isEmpty())
+      list << str + "/";
+  }
+  list.removeDuplicates();
+  list << ".";
+  return list;
 }
 
-bool cs8ProgramModel::addProgramFile(const QString &projectPath, const QString &filePath)
-{
-    QFile file(projectPath + filePath);
-    if (!file.open(QIODevice::ReadOnly))
-        return false;
-    m_hasByteOrderMark = QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
-    // if (m_hasByteOrderMark)
-    //    qDebug() << "File has BOM";
+bool cs8ProgramModel::addProgramFile(const QString &projectPath,
+                                     const QString &filePath) {
+  QFile file(projectPath + filePath);
+  if (!file.open(QIODevice::ReadOnly))
+    return false;
+  m_hasByteOrderMark =
+      QTextCodec::codecForUtfText(file.peek(4), nullptr) != nullptr;
+  // if (m_hasByteOrderMark)
+  //    qDebug() << "File has BOM";
 
-    QDomDocument doc;
-    if (!doc.setContent(&file)) {
-        file.close();
-        return false;
-    }
+  QDomDocument doc;
+  if (!doc.setContent(&file)) {
     file.close();
+    return false;
+  }
+  file.close();
 
-    QDomElement programsSection = doc.documentElement();
-    Q_ASSERT(!programsSection.isNull());
-    // printChildNodes(m_programsSection);
+  QDomElement programsSection = doc.documentElement();
+  Q_ASSERT(!programsSection.isNull());
+  // printChildNodes(m_programsSection);
 
-    for (int i = 0; i < programsSection.childNodes().count(); i++) {
-        QDomElement programSection = programsSection.childNodes().at(i).toElement();
-        cs8Program *program = createProgram();
-        program->setHasByteOrderMark(m_hasByteOrderMark);
-        program->parseProgramSection(programSection, "");
-        program->setFilePath(projectPath, filePath);
-    }
-    // QDomElement programSection = programsSection.firstChild().toElement();
-    // parseProgramSection(programSection, code);
+  for (int i = 0; i < programsSection.childNodes().count(); i++) {
+    QDomElement programSection = programsSection.childNodes().at(i).toElement();
+    cs8Program *program = createProgram();
+    program->setHasByteOrderMark(m_hasByteOrderMark);
+    program->parseProgramSection(programSection, "");
+    program->setFilePath(projectPath, filePath);
+  }
+  // QDomElement programSection = programsSection.firstChild().toElement();
+  // parseProgramSection(programSection, code);
 
-    // QFileInfo info(filePath);
-    // cs8Program *program = createProgram(info.baseName());
-    // if (!program->open(filePath))
+  // QFileInfo info(filePath);
+  // cs8Program *program = createProgram(info.baseName());
+  // if (!program->open(filePath))
 //    qDebug() << "Opening program " << filePath << " failed";
 #if QT_VERSION >= 0x050000
   beginResetModel();
@@ -265,17 +266,16 @@ void cs8ProgramModel::clear() {
 #endif
 }
 
-QList<cs8Program *> cs8ProgramModel::programList() const
-{
-    return m_programList;
+QList<cs8Program *> cs8ProgramModel::programList() const {
+  return m_programList;
 }
 
-cs8VariableModel *cs8ProgramModel::localVariableModel(const QModelIndex &index) const
-{
-    if (index.isValid())
-        return m_programList.at(index.row())->localVariableModel();
-    else
-        return 0;
+cs8VariableModel *
+cs8ProgramModel::localVariableModel(const QModelIndex &index) const {
+  if (index.isValid())
+    return m_programList.at(index.row())->localVariableModel();
+  else
+    return 0;
 }
 
 cs8VariableModel *cs8ProgramModel::parameterModel(const QModelIndex &index) {
@@ -285,12 +285,12 @@ cs8VariableModel *cs8ProgramModel::parameterModel(const QModelIndex &index) {
     return 0;
 }
 
-QList<cs8Variable *> cs8ProgramModel::referencedGlobalVariables(const QModelIndex &index)
-{
-    if (index.isValid())
-        return m_programList.at(index.row())->referencedGlobalVariables();
-    else
-        return QList<cs8Variable *>();
+QList<cs8Variable *>
+cs8ProgramModel::referencedGlobalVariables(const QModelIndex &index) {
+  if (index.isValid())
+    return m_programList.at(index.row())->referencedGlobalVariables();
+  else
+    return QList<cs8Variable *>();
 }
 
 bool cs8ProgramModel::setData(const QModelIndex &index, const QVariant &value,

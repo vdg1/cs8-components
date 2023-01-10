@@ -95,13 +95,13 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
   QString moduleBaseName;
   QString name;
 
-  foreach (cs8Application *cs8SourceApp, cs8SourceApps) {
+  foreach (const cs8Application *cs8SourceApp, cs8SourceApps) {
     // check if module has any public programs
     if (cs8SourceApp->programModel()->publicPrograms().count() > 0) {
       moduleBaseName = cs8SourceApp->name().remove(0, 3);
       cs8DestApp = nullptr;
       // create API calls to public programs
-      foreach (cs8Program *program,
+      foreach (const cs8Program *program,
                cs8SourceApp->programModel()->programList()) {
 
         if ((program->name().startsWith("_") && program->isPublic()) ||
@@ -239,19 +239,26 @@ void MainWindow::createAPIs(QList<cs8Application *> cs8SourceApps,
             }
           }
           // public global variable is a dio or aio and name starts with '_'
-          if (var->name().at(0) == "_" && (var->type() == "dio" || var->type() == "aio")) {
-              QString n = var->name();
-              n = n.remove(0, 1);
-              cs8Variable *globalVar = cs8DestApp->globalVariableModel()->createVariable(n, var->type());
+          if (var->name().at(0) == "_" &&
+              (var->type() == "dio" || var->type() == "aio")) {
+            QString n = var->name();
+            n = n.remove(0, 1);
+            cs8Variable *globalVar =
+                cs8DestApp->globalVariableModel()->createVariable(n,
+                                                                  var->type());
 
-              globalVar->setPublic(true);
-              globalVar->setScope(cs8Variable::Global);
-              globalVar->setDimension(var->dimension());
-              //globalVar->setValues(var->values());
-              // cs8DestApp->globalVariableModel()->addVariable(globalVar);
-              for (uint i = 0; i < var->size(); i++) {
-                  initProgramCode += QString("  dioLink(%1[%2],%3:%4[%2])\n").arg(globalVar->name()).arg(i).arg(cs8SourceApp->name()).arg(var->name());
-              }
+            globalVar->setPublic(true);
+            globalVar->setScope(cs8Variable::Global);
+            globalVar->setDimension(var->dimension());
+            // globalVar->setValues(var->values());
+            //  cs8DestApp->globalVariableModel()->addVariable(globalVar);
+            for (uint i = 0; i < var->size(); i++) {
+              initProgramCode += QString("  dioLink(%1[%2],%3:%4[%2])\n")
+                                     .arg(globalVar->name())
+                                     .arg(i)
+                                     .arg(cs8SourceApp->name())
+                                     .arg(var->name());
+            }
           }
         }
 
