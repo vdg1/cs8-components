@@ -358,7 +358,7 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
     QMapIterator<int, QString> i(program->todos());
     while (i.hasNext()) {
       i.next();
-      validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
+      validationMessages << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
                                     "line>%4<msg>%2<file>%3")
                                 .arg(program->name())
                                 .arg(i.value())
@@ -367,16 +367,18 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
     }
 
     // check program line length
-    QStringList l = program->val3CodeList();
-    for (int i = 0; i < l.length(); i++) {
-      if (l[i].length() > 258) {
-        validationMessages << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
-                                      "line>%4<msg>%2<file>%3")
-                                  .arg(program->name())
-                                  .arg("Code line exceeds maximum allowed "
-                                       "length of 259 characters")
-                                  .arg(program->cellFilePath())
-                                  .arg(i);
+    if (false) {
+      QStringList l = program->val3CodeList();
+      for (int i = 0; i < l.length(); i++) {
+        if (l[i].length() > 258) {
+          validationMessages << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
+                                        "line>%4<msg>%2<file>%3")
+                                    .arg(program->name())
+                                    .arg("Code line exceeds maximum allowed "
+                                         "length of 259 characters")
+                                    .arg(program->cellFilePath())
+                                    .arg(i);
+        }
       }
     }
 
@@ -400,7 +402,7 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
                                 .arg("Program has empty lines. Consider to "
                                      "delete lines or add comment token (//)")
                                 .arg(program->cellFilePath())
-                                .arg(program->firstLineOfNoCode());
+                                .arg(program->firstLineOfNoCode() + 1);
     }
   }
 

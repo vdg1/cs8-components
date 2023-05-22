@@ -267,11 +267,11 @@ void cs8Application::setProjectMillimeterUnit(
 }
 
 bool cs8Application::open(const QString &pfxFilePath) {
-    qDebug() << Q_FUNC_INFO << "path:" << pfxFilePath;
-    QString pth = QDir::fromNativeSeparators(pfxFilePath);
-    if (pth.startsWith("Disk://")) {
-        pth.replace(QString("Disk://"), m_cellPath + "/usr/usrapp/");
-        pth = QDir::cleanPath(pth);
+  qDebug() << Q_FUNC_INFO << "path:" << pfxFilePath;
+  QString pth = QDir::fromNativeSeparators(pfxFilePath);
+  if (pth.startsWith("Disk://")) {
+    pth.replace(QString("Disk://"), m_cellPath + "/usr/usrapp/");
+    pth = QDir::cleanPath(pth);
   }
   m_moduleDocumentation = "";
   m_briefModuleDocumentation = "";
@@ -468,7 +468,8 @@ QString cs8Application::exportToCImplementation() const {
   out << "\n";
 
   foreach (cs8Program *program, m_programModel->programList()) {
-      out << QString("   void %3::%1{\n%2\n}").arg(program->definition(), program->toCSyntax(), m_projectName);
+    out << QString("   void %3::%1{\n%2\n}")
+               .arg(program->definition(), program->toCSyntax(), m_projectName);
   }
 
   return out.join("\n");
@@ -764,47 +765,45 @@ void cs8Application::setModified(bool modified_) {
 
 bool cs8Application::getCompactFileMode() const { return m_compactFileMode; }
 
-void cs8Application::setCompactFileMode(bool singleProgramFile)
-{
-    m_compactFileMode = singleProgramFile;
+void cs8Application::setCompactFileMode(bool singleProgramFile) {
+  m_compactFileMode = singleProgramFile;
 }
 
-QFileInfoList cs8Application::projectFileList() const
-{
-    QFileInfoList list;
-    QDir dir(m_projectPath);
-    // add project file and data file
-    list << dir.entryInfoList(QStringList() << "*.pjx"
-                                            << "*.dtx",
-                              QDir::Files);
-    // program file list
-    for (const auto prog : m_programModel->programList()) {
-        QFileInfo i(m_projectPath + prog->getFilePath());
-        if (!list.contains(i))
-            list << i;
-    }
+QFileInfoList cs8Application::projectFileList() const {
+  QFileInfoList list;
+  QDir dir(m_projectPath);
+  // add project file and data file
+  list << dir.entryInfoList(QStringList() << "*.pjx"
+                                          << "*.dtx",
+                            QDir::Files);
+  // program file list
+  for (const auto prog : m_programModel->programList()) {
+    QFileInfo i(m_projectPath + prog->getFilePath());
+    if (!list.contains(i))
+      list << i;
+  }
 
-    // recurse into "interface" folder
-    QDirIterator it(m_projectPath + "/interface", QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        it.next();
-        if (it.fileInfo().isFile())
-            list << it.fileInfo();
-    }
-    return list;
+  // recurse into "interface" folder
+  QDirIterator it(m_projectPath + "/interface", QDirIterator::Subdirectories);
+  while (it.hasNext()) {
+    it.next();
+    if (it.fileInfo().isFile())
+      list << it.fileInfo();
+  }
+  return list;
 }
 
-QStringList cs8Application::projectSubFolders() const
-{
-    QStringList list=m_programModel->programFolders();
-    // recurse into "interface" folder
-    QDirIterator it(m_projectPath + "/interface",QDir::NoDotDot, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        it.next();
-        if (it.fileInfo().isDir())
-            list << "."+it.fileInfo().filePath().remove(m_projectPath);
-    }
-    return list;
+QStringList cs8Application::projectSubFolders() const {
+  QStringList list = m_programModel->programFolders();
+  // recurse into "interface" folder
+  QDirIterator it(m_projectPath + "/interface", QDir::NoDotDot,
+                  QDirIterator::Subdirectories);
+  while (it.hasNext()) {
+    it.next();
+    if (it.fileInfo().isDir())
+      list << "." + it.fileInfo().filePath().remove(m_projectPath);
+  }
+  return list;
 }
 
 bool cs8Application::loadDocumentationFile(const QString & /*fileName*/) {
@@ -893,9 +892,9 @@ bool cs8Application::save(const QString &path, const QString &name,
   m_projectName = name;
   m_compactFileMode = compactMode;
 
-  // check if a global data has documented code or application documentation exists.
-  // If it does, we select program zzDocumentation() - if it does not exist yet
-  // we append it here
+  // check if a global data has documented code or application documentation
+  // exists. If it does, we select program zzDocumentation() - if it does not
+  // exist yet we append it here
   if (m_globalVariableModel->hasDocumentation() ||
       !m_moduleDocumentation.isEmpty() ||
       !m_briefModuleDocumentation.isEmpty() ||
@@ -956,8 +955,8 @@ bool cs8Application::save(const QString &path, const QString &name,
     stream.writeAttribute("xmlns",
                           "http://www.staubli.com/robotics/VAL3/Program/2");
     foreach (cs8Program *program, m_programModel->programList()) {
-        program->writeXMLStream(stream, true);
-        program->deleteSourceFile();
+      program->writeXMLStream(stream, true);
+      program->deleteSourceFile();
     }
     stream.writeEndDocument();
 
@@ -1120,7 +1119,7 @@ cs8Application::getEnumerations() const {
 
     constSet = i.value();
     if (constSet->size() < 2)
-        constSets.remove(i.key());
+      constSets.remove(i.key());
   }
   return constSets;
 }
@@ -1183,11 +1182,12 @@ QStringList cs8Application::checkEnumerations() const {
         QString msg;
         QString firstName;
         for (const auto &key : constSet->values(i.key())) {
-            if (m_globalVariableModel->findVariableByName(key)->linterDirective() != "ignore") {
-                if (msg.isEmpty())
-                    firstName = key;
-                msg += key + ", ";
-            }
+          if (m_globalVariableModel->findVariableByName(key)
+                  ->linterDirective() != "ignore") {
+            if (msg.isEmpty())
+              firstName = key;
+            msg += key + ", ";
+          }
         }
         msg.chop(2);
         if (!msg.isEmpty())
@@ -1231,7 +1231,6 @@ QMap<QString, QString> cs8Application::ambigousEnumerationItems() const {
 
 QMap<QString, QList<cs8Program *>> cs8Application::buildCallList() {
   QMap<QString, QList<cs8Program *>> callList;
-  // check if a local variable hides the global variable
   foreach (cs8Program *program, m_programModel->programList()) {
     QStringList list = program->getCalls();
 
@@ -1372,11 +1371,11 @@ bool cs8Application::writeProjectFile() {
     stream.writeAttribute("file", m_projectName + ".pgx");
     stream.writeEndElement();
   } else {
-      foreach (cs8Program *item, m_programModel->programList()) {
-          stream.writeStartElement("Program");
-          stream.writeAttribute("file", item->fileName());
-          stream.writeEndElement();
-      }
+    foreach (cs8Program *item, m_programModel->programList()) {
+      stream.writeStartElement("Program");
+      stream.writeAttribute("file", item->fileName());
+      stream.writeEndElement();
+    }
   }
   stream.writeEndElement();
 

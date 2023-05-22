@@ -12,7 +12,8 @@ DESTDIR = ../bin/preCompilerPackage
 
 SOURCES += main.cpp \
     ../common/versionInfo.cpp \
-    cs8linter.cpp
+    cs8linter.cpp \
+    wintoastlib.cpp
 
 EXTRA_FILES.path    = $${DESTDIR}
 EXTRA_FILES.files   += $$(QTDIR)/bin/Qt5Core.dll
@@ -43,6 +44,7 @@ RESOURCES += \
 
 HEADERS += \
     ../common/versionInfo.h \
-    cs8linter.h
+    cs8linter.h \
+    wintoastlib.h
 
 # CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT

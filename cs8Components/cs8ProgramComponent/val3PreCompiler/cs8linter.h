@@ -5,6 +5,7 @@
 #include <QFutureWatcher>
 #include <QObject>
 
+class QSystemTrayIcon;
 class cs8Linter : public QObject {
   Q_OBJECT
 public:
@@ -17,7 +18,7 @@ signals:
   void sendOutput(const QByteArray &);
   void allDoneAndExit(int);
 
-  protected:
+protected:
   QStringList m_arguments;
   QStringList m_applicationsToCheck;
   QString m_val3checkExecutable;
@@ -39,6 +40,7 @@ protected slots:
   void output(const QByteArray &out);
   void startLinterAndChecker();
   void exitProgram(int exitCode);
+  void showToastNotification();
 };
 
 #endif // CS8LINTER_H
