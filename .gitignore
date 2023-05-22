@@ -30,3 +30,7 @@ cs8Components/cs8ProgramComponent/lib/buildd/
 cs8Components/cs8ProgramComponent/lib/build/
 cs8Components/cs8ProgramComponent/extractDoc/build/
 *_qmlcache.qrc
+*.vcxproj.user
+*.vcxproj
+.vs/
+*.vcxproj.filters
