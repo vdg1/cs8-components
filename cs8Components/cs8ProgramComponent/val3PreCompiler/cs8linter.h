@@ -40,7 +40,7 @@ protected slots:
   void output(const QByteArray &out);
   void startLinterAndChecker();
   void exitProgram(int exitCode);
-  void showToastNotification();
+  void showToastNotification(const QString &msg, const QString &info);
 };
 
 #endif // CS8LINTER_H

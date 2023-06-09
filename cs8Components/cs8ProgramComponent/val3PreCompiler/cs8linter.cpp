@@ -71,6 +71,11 @@ void cs8Linter::output(const QByteArray &out) {
 }
 
 void cs8Linter::executeLinter() {
+  QString l;
+  for (auto &&e : m_applicationsToCheck) {
+    l += e.split("\\").last() + "\n";
+  }
+  showToastNotification("Val3 syntax check started for:\n", l);
   QString productName, productVersion;
   getProductName(qApp->applicationFilePath(), productName, productVersion);
   QString headerMessage = "SAXE: Val3 Linter " + productVersion;
@@ -127,11 +132,12 @@ void cs8Linter::startLinterAndChecker() {
 }
 
 void cs8Linter::exitProgram(int exitCode) {
-  showToastNotification();
+  showToastNotification("Val3 syntax check completed","");
   qDebug() << "quit linter:" << m_val3checkExitCode;
   QTimer::singleShot(1000, [=]() { exit(m_val3checkExitCode); });
   // exit(m_val3checkExitCode);
 }
+
 class CustomHandler : public IWinToastHandler {
 public:
   void toastActivated() const {
@@ -164,11 +170,14 @@ public:
     }
   }
 };
-void cs8Linter::showToastNotification() {
-  WinToastTemplate templ = WinToastTemplate(WinToastTemplate::Text01);
-  QString text = "Val3 syntax check completed";
+
+void cs8Linter::showToastNotification(const QString &msg, const QString &info) {
+  WinToastTemplate templ = WinToastTemplate(WinToastTemplate::Text02);
+  QString text = msg;
   templ.setTextField(text.toStdWString(), WinToastTemplate::FirstLine);
-  templ.setExpiration(2000);
+  templ.setTextField(info.toStdWString(), WinToastTemplate::SecondLine);
+  // templ.setExpiration(1000);
+  templ.setDuration(WinToastLib::WinToastTemplate::Short);
   if (WinToast::instance()->showToast(templ, new CustomHandler()) < 0) {
     qDebug() << "Toast failed: ";
   }
