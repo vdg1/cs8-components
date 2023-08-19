@@ -1,5 +1,6 @@
 SUBDIRS = lib errorLogBin \
-    FileManagerTest
+    FileManagerTest \
+    ftpSync
 TEMPLATE = subdirs
 CONFIG += ordered
 

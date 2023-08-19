@@ -29,7 +29,7 @@ void cs8Linter::executeVal3Check() {
     emit sendOutput(output);
   });
 
-  QObject::connect(proc, &QProcess::readyReadStandardError, [this, proc]() {
+  QObject::connect(proc, &QProcess::readyReadStandardError, []() {
     // QByteArray output = proc->readAllStandardError().trimmed();
     // qDebug() << "error output:" << output;
     // emit sendOutput("error output:" + output);
@@ -45,7 +45,7 @@ void cs8Linter::executeVal3Check() {
 
   QObject::connect(
       proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-      [this, proc](int exitCode, QProcess::ExitStatus exitStatus) {
+      [this](int exitCode, QProcess::ExitStatus exitStatus) {
         qDebug() << "val3check completed:" << exitCode << exitStatus;
         qDebug() << "val3check output: " << m_val3CheckOutput;
 
