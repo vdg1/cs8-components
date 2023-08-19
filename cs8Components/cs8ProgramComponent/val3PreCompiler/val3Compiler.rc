@@ -8,8 +8,8 @@ VS_VERSION_INFO VERSIONINFO FILEVERSION 10, 1, 0, 0 PRODUCTVERSION 0, 1, 0,
     0x4b0 END BLOCK "StringFileInfo" BEGIN BLOCK "040904b0" BEGIN VALUE
                     "CompanyName",
     "SAXE Group\0" VALUE "FileDescription",
-    "SAXE Val3Linter\0" VALUE "FileVersion", "1.9.15\0" VALUE "InternalName",
+    "SAXE Val3Linter\0" VALUE "FileVersion", "1.9.23\0" VALUE "InternalName",
     "Filename\0" VALUE "LegalCopyright",
     "Copyright 2021 by SAXE Group\0" VALUE "OriginalFilename",
     "Val3Check.exe\0" VALUE "ProductName",
-    "SAXE Val3Linter\0" VALUE "ProductVersion", "1.9.15\0" END END END
+    "SAXE Val3Linter\0" VALUE "ProductVersion", "1.9.23\0" END END END

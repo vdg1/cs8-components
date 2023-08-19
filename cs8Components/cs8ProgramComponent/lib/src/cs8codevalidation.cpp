@@ -1,5 +1,6 @@
 #include "cs8codevalidation.h"
 #include "cs8variable.h"
+#include "qregularexpression.h"
 #include "src/cs8application.h"
 
 #include <QDir>
@@ -366,18 +367,84 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
                                 .arg(i.key());
     }
 
-    // check program line length
-    if (false) {
-      QStringList l = program->val3CodeList();
-      for (int i = 0; i < l.length(); i++) {
-        if (l[i].length() > 258) {
-          validationMessages << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
-                                        "line>%4<msg>%2<file>%3")
-                                    .arg(program->name())
-                                    .arg("Code line exceeds maximum allowed "
-                                         "length of 259 characters")
-                                    .arg(program->cellFilePath())
-                                    .arg(i);
+    QStringList l = program->val3CodeList();
+
+    for (int i = 0; i < l.length(); i++) {
+      // check length of code line
+      if (l[i].length() > 258 && false) {
+        validationMessages << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
+                                      "line>%4<msg>%2<file>%3")
+                                  .arg(program->name())
+                                  .arg("Code line exceeds maximum allowed "
+                                       "length of 259 characters")
+                                  .arg(program->cellFilePath())
+                                  .arg(i);
+      }
+      QRegularExpression rx(
+          // R"RX(^\s*(taskCreate|taskCreateSync)\s+(.*)\s*,\s*(\S*)\s*,\s*(\S*)$)RX");
+          R"RX(^\s*(taskCreate|taskCreateSync)\s+([^,]+)\s*,)RX");
+      auto match = rx.match(l[i].trimmed());
+      if (match.hasMatch()) {
+        // line is a taskCreate(Sync) line, investigate the parameters now
+        QString taskNameSymbol = match.captured(2).trimmed();
+        // check if taskName is a literal string
+        if (taskNameSymbol.count('"') == 2) {
+          // taskName is a literal string
+          taskNameSymbol = taskNameSymbol.mid(1, taskNameSymbol.length() - 2);
+        } else {
+          // check if taskName is a variable within application
+          auto var =
+              program->localVariableModel()->getVarByName(taskNameSymbol);
+          if (var)
+            // taskName is a local variable, we cannot evaluate its value here
+            taskNameSymbol = "";
+          else {
+            auto var = app->globalVariableModel()->getVarByName(taskNameSymbol);
+            if (var) {
+              taskNameSymbol = var->varValue().toString();
+              if (taskNameSymbol.isEmpty()) {
+                validationMessages
+                    << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>"
+                               "%2<msg>Task name in '%3' is empty<file>%4")
+                           .arg(program->name())
+                           .arg(i + 1)
+                           .arg(var->name())
+                           .arg(program->cellFilePath());
+              } else {
+                QRegularExpression rx(R"RX(^[a-zA-Z]+[a-zA-Z0-9_]*$)RX");
+                auto match = rx.match(taskNameSymbol);
+                if (match.capturedTexts().count() != 1) {
+                  validationMessages
+                      << QString(
+                             "<level>Error<CLASS>PRG<P1>%1<P2>CODE<line>"
+                             "%2<msg>Task name '%3' given in variable '%5' is "
+                             "invalid<file>%4")
+                             .arg(program->name())
+                             .arg(i + 1)
+                             .arg(taskNameSymbol)
+                             .arg(program->cellFilePath())
+                             .arg(var->name());
+                  taskNameSymbol = "";
+                }
+              }
+            } else {
+              taskNameSymbol = "";
+            }
+          }
+        }
+        if (!taskNameSymbol.isEmpty()) {
+          // check if taskName value follows the naming convention
+          QRegularExpression rx(R"RX(^[a-zA-Z]+[a-zA-Z0-9_]*$)RX");
+          auto match = rx.match(taskNameSymbol);
+          if (match.capturedTexts().count() != 1) {
+            validationMessages
+                << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<line>"
+                           "%2<msg>Task name '%3' is invalid<file>%4")
+                       .arg(program->name())
+                       .arg(i + 1)
+                       .arg(taskNameSymbol)
+                       .arg(program->cellFilePath());
+          }
         }
       }
     }
