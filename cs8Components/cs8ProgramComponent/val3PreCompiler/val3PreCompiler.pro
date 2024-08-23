@@ -21,7 +21,14 @@ EXTRA_FILES.files   += $$(QTDIR)/bin/Qt5Gui.dll
 EXTRA_FILES.files   += $$(QTDIR)/bin/Qt5Xml.dll
 INSTALLS       += EXTRA_FILES
 
-win32:RC_FILE = val3Compiler.rc
+#win32:RC_FILE = val3Compiler.rc
+RC_ICONS += val3linter.ico
+VERSION = 1.9.24
+QMAKE_TARGET_COMPANY = SAXE Group
+QMAKE_TARGET_DESCRIPTION=SAXE Val3 Linter
+QMAKE_TARGET_COPYRIGHT=SAXE
+#QMAKE_TARGET_PRODUCT, RC_LANG, RC_CODEPAGE.
+
 
 OTHER_FILES += \
     val3Compiler.rc
