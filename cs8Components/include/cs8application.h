@@ -12,6 +12,7 @@
 #include "cs8program.h"
 #include "cs8programmodel.h"
 #include "cs8typemodel.h"
+#include "cs8validationresult.h"
 
 //
 
@@ -36,7 +37,7 @@ public:
   QString exportToCImplementation() const;
   QString exportToCDefinition() const;
   QString exportToIOList() const;
-  //bool exportInterfacePrototype(const QString &path) const;
+  // bool exportInterfacePrototype(const QString &path) const;
   bool integrateInterface(cs8Application *sourceApplication);
   QString name() const;
   void setName(const QString &name);
@@ -74,7 +75,7 @@ public:
 
   QMap<QString, QMap<QString, QString> *> getEnumerations() const;
   void checkPrograms(QStringList &output);
-  QStringList checkEnumerations() const;
+  cs8ValidationResult checkEnumerations() const;
   QMap<QString, QString> ambigousEnumerationItems() const;
   void checkObsoleteProgramFiles(QStringList &output);
   QString moduleDocumentation() const;
@@ -114,8 +115,7 @@ public:
   QFileInfoList projectFileList() const;
   QStringList projectSubFolders() const;
 
-
-  protected:
+protected:
   QHash<QString, QString> m_exportDirectives;
   QHash<QString, QString> m_pragmaList;
   QMap<QString, QList<cs8Program *>> m_callList;

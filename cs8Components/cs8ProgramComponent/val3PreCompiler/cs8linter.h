@@ -14,9 +14,9 @@ public:
                      QObject *parent = nullptr);
 
 signals:
-  void finished();
+  void finished(int, int, int);
   void sendOutput(const QByteArray &);
-  void allDoneAndExit(int);
+  void allDoneAndExit(int, int, int, int);
 
 protected:
   QStringList m_arguments;
@@ -30,6 +30,9 @@ protected:
   bool m_val3checkDone;
   bool m_linterDone;
   int m_val3checkExitCode;
+  int m_totalErrors;
+  int m_totalWarnings;
+  int m_totalInfos;
 
   void executeLinter();
 
@@ -39,8 +42,9 @@ protected slots:
   void executeVal3Check();
   void output(const QByteArray &out);
   void startLinterAndChecker();
-  void exitProgram(int exitCode);
-  void showToastNotification(const QString &msg, const QString &info);
+  void exitProgram(int exitCode, int totalInfos, int totalWarnings,
+                   int totalErrors);
+  void showToastNotification(const QString &msg, const QString &info, bool longDuration);
 };
 
 #endif // CS8LINTER_H

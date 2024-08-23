@@ -2,6 +2,7 @@
 #include "cs8variable.h"
 #include "qregularexpression.h"
 #include "src/cs8application.h"
+#include "src/cs8validationresult.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -77,11 +78,28 @@ bool cs8CodeValidation::loadRuleFile(const QString &fileName) {
   return true;
 }
 
-QStringList cs8CodeValidation::runDataValidationRule(
+void cs8CodeValidation::addValidationResult(
+    QString msg, int nodeSeverity, cs8ValidationResult &validationMessages) {
+  switch (nodeSeverity) {
+  case 0:
+    validationMessages.totalInfos++;
+    break;
+  case 1:
+    validationMessages.totalWarnings++;
+    break;
+  default:
+    validationMessages.totalErrors++;
+    break;
+  }
+  validationMessages.messages << msg;
+}
+
+cs8ValidationResult cs8CodeValidation::runDataValidationRule(
     const cs8Application *app, cs8Program *program,
     QList<cs8Variable *> *variableList, QDomNodeList ruleList,
     int nodeSeverity) {
-  QStringList validationMessages;
+  cs8ValidationResult validationResults;
+  int totalErrors = 0, totalWarnings = 0, totalInfos = 0;
   for (int i = 0; i < ruleList.count(); i++) {
     QDomElement ruleNode = ruleList.at(i).toElement();
     QString expressionString = ruleNode.attribute("expression");
@@ -155,7 +173,8 @@ QStringList cs8CodeValidation::runDataValidationRule(
                   msg.replace("%progName%", program->name());
                   msg.replace("%fileName%", program->cellFilePath());
                 }
-                validationMessages << msg;
+                //
+                addValidationResult(msg, nodeSeverity, validationResults);
               }
             }
             if (checkProperty == "name" &&
@@ -177,7 +196,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                   msg.replace("%progName%", program->name());
                   msg.replace("%fileName%", program->cellFilePath());
                 }
-                validationMessages << msg;
+                addValidationResult(msg, nodeSeverity, validationResults);
               }
             }
           }
@@ -227,7 +246,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                       msg.replace("%progName%", program->name());
                       msg.replace("%fileName%", program->cellFilePath());
                     }
-                    validationMessages << msg;
+                    addValidationResult(msg, nodeSeverity, validationResults);
                   }
                 }
               } else if (checkProperty == "hidden") {
@@ -244,7 +263,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                     msg.replace("%lineNumber%",
                                 QString("%1").arg(
                                     var->symbolReferences().value(0).line));
-                    validationMessages << msg;
+                    addValidationResult(msg, nodeSeverity, validationResults);
                   }
                 }
               }
@@ -273,7 +292,7 @@ QStringList cs8CodeValidation::runDataValidationRule(
                 msg.replace("%fileName%", program->cellFilePath());
                 msg.replace("%lineNumber%", "0");
                 msg.replace("%level%", level);
-                validationMessages << msg;
+                addValidationResult(msg, nodeSeverity, validationResults);
               }
             }
           }
@@ -287,16 +306,16 @@ QStringList cs8CodeValidation::runDataValidationRule(
           msg.replace("%fileName%", program->cellFilePath());
           msg.replace("%lineNumber%", "1");
           msg.replace("%level%", level);
-          validationMessages << msg;
+          addValidationResult(msg, nodeSeverity, validationResults);
         }
       }
     }
   }
 
-  return validationMessages;
+  return validationResults;
 }
 
-QStringList
+cs8ValidationResult
 cs8CodeValidation::checkObsoleteProgramFiles(const cs8Application *app) {
   QStringList pgxFileList;
   for (const auto &path : app->projectSubFolders()) {
@@ -311,7 +330,7 @@ cs8CodeValidation::checkObsoleteProgramFiles(const cs8Application *app) {
   qDebug() << "Folder: " << app->projectPath();
   qDebug() << pgxFileList;
 
-  QStringList validationMessages;
+  cs8ValidationResult validationMessages;
   foreach (QString pgxFileName, pgxFileList) {
     bool found = false;
     foreach (cs8Program *program, app->programModel()->programList()) {
@@ -321,20 +340,22 @@ cs8CodeValidation::checkObsoleteProgramFiles(const cs8Application *app) {
       }
     }
     if (!found) {
-      validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
-                                    "line>%4<msg>%2<file>%3")
-                                .arg(pgxFileName)
-                                .arg("Warning: Program file is obsolete")
-                                .arg(pgxFileName)
-                                .arg("1");
+      validationMessages << cs8ValidationResult(
+          QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
+                  "line>%4<msg>%2<file>%3")
+              .arg(pgxFileName)
+              .arg("Warning: Program file is obsolete")
+              .arg(pgxFileName)
+              .arg("1"),
+          1);
     }
   }
   return validationMessages;
 }
 
-QStringList cs8CodeValidation::runValidation(const cs8Application *app,
-                                             int reportingLevel) {
-  QStringList validationMessages;
+cs8ValidationResult cs8CodeValidation::runValidation(const cs8Application *app,
+                                                     int reportingLevel) {
+  cs8ValidationResult validationMessages;
   m_reportingLevel = reportingLevel;
   // run global data rules
 
@@ -359,12 +380,14 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
     QMapIterator<int, QString> i(program->todos());
     while (i.hasNext()) {
       i.next();
-      validationMessages << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
-                                    "line>%4<msg>%2<file>%3")
-                                .arg(program->name())
-                                .arg(i.value())
-                                .arg(program->cellFilePath())
-                                .arg(i.key());
+      validationMessages << cs8ValidationResult(
+          QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
+                  "line>%4<msg>%2<file>%3")
+              .arg(program->name())
+              .arg(i.value())
+              .arg(program->cellFilePath())
+              .arg(i.key()),
+          2);
     }
 
     QStringList l = program->val3CodeList();
@@ -372,13 +395,15 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
     for (int i = 0; i < l.length(); i++) {
       // check length of code line
       if (l[i].length() > 258 && false) {
-        validationMessages << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
-                                      "line>%4<msg>%2<file>%3")
-                                  .arg(program->name())
-                                  .arg("Code line exceeds maximum allowed "
-                                       "length of 259 characters")
-                                  .arg(program->cellFilePath())
-                                  .arg(i);
+        validationMessages << cs8ValidationResult(
+            QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<"
+                    "line>%4<msg>%2<file>%3")
+                .arg(program->name())
+                .arg("Code line exceeds maximum allowed "
+                     "length of 259 characters")
+                .arg(program->cellFilePath())
+                .arg(i),
+            2);
       }
       QRegularExpression rx(
           // R"RX(^\s*(taskCreate|taskCreateSync)\s+(.*)\s*,\s*(\S*)\s*,\s*(\S*)$)RX");
@@ -403,27 +428,28 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
             if (var) {
               taskNameSymbol = var->varValue().toString();
               if (taskNameSymbol.isEmpty()) {
-                validationMessages
-                    << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>"
-                               "%2<msg>Task name in '%3' is empty<file>%4")
-                           .arg(program->name())
-                           .arg(i + 1)
-                           .arg(var->name())
-                           .arg(program->cellFilePath());
+                validationMessages << cs8ValidationResult(
+                    QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<line>"
+                            "%2<msg>Task name in '%3' is empty<file>%4")
+                        .arg(program->name())
+                        .arg(i + 1)
+                        .arg(var->name())
+                        .arg(program->cellFilePath()),
+                    1);
               } else {
                 QRegularExpression rx(R"RX(^[a-zA-Z]+[a-zA-Z0-9_]*$)RX");
                 auto match = rx.match(taskNameSymbol);
                 if (match.capturedTexts().count() != 1) {
-                  validationMessages
-                      << QString(
-                             "<level>Error<CLASS>PRG<P1>%1<P2>CODE<line>"
-                             "%2<msg>Task name '%3' given in variable '%5' is "
-                             "invalid<file>%4")
-                             .arg(program->name())
-                             .arg(i + 1)
-                             .arg(taskNameSymbol)
-                             .arg(program->cellFilePath())
-                             .arg(var->name());
+                  validationMessages << cs8ValidationResult(
+                      QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<line>"
+                              "%2<msg>Task name '%3' given in variable '%5' is "
+                              "invalid<file>%4")
+                          .arg(program->name())
+                          .arg(i + 1)
+                          .arg(taskNameSymbol)
+                          .arg(program->cellFilePath())
+                          .arg(var->name()),
+                      2);
                   taskNameSymbol = "";
                 }
               }
@@ -437,13 +463,14 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
           QRegularExpression rx(R"RX(^[a-zA-Z]+[a-zA-Z0-9_]*$)RX");
           auto match = rx.match(taskNameSymbol);
           if (match.capturedTexts().count() != 1) {
-            validationMessages
-                << QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<line>"
-                           "%2<msg>Task name '%3' is invalid<file>%4")
-                       .arg(program->name())
-                       .arg(i + 1)
-                       .arg(taskNameSymbol)
-                       .arg(program->cellFilePath());
+            validationMessages << cs8ValidationResult(
+                QString("<level>Error<CLASS>PRG<P1>%1<P2>CODE<line>"
+                        "%2<msg>Task name '%3' is invalid<file>%4")
+                    .arg(program->name())
+                    .arg(i + 1)
+                    .arg(taskNameSymbol)
+                    .arg(program->cellFilePath()),
+                2);
           }
         }
       }
@@ -453,23 +480,27 @@ QStringList cs8CodeValidation::runValidation(const cs8Application *app,
     if (program->linesOfCodeAndComments() == 0 ||
         (program->linesOfCodeAndComments() <=
          (program->linesOfComments() + program->linesOfNoCode()))) {
-      validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
-                                    "line>%4<msg>%2<file>%3")
-                                .arg(program->name())
-                                .arg("Program does not contain any active code")
-                                .arg(program->cellFilePath())
-                                .arg(0);
+      validationMessages << cs8ValidationResult(
+          QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
+                  "line>%4<msg>%2<file>%3")
+              .arg(program->name())
+              .arg("Program does not contain any active code")
+              .arg(program->cellFilePath())
+              .arg(0),
+          1);
     }
 
     // check empty lines of code
     if (program->linesOfNoCode() > 0) {
-      validationMessages << QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
-                                    "line>%4<msg>%2<file>%3")
-                                .arg(program->name())
-                                .arg("Program has empty lines. Consider to "
-                                     "delete lines or add comment token (//)")
-                                .arg(program->cellFilePath())
-                                .arg(program->firstLineOfNoCode() + 1);
+      validationMessages << cs8ValidationResult(
+          QString("<level>Warning<CLASS>PRG<P1>%1<P2>CODE<"
+                  "line>%4<msg>%2<file>%3")
+              .arg(program->name())
+              .arg("Program has empty lines. Consider to "
+                   "delete lines or add comment token (//)")
+              .arg(program->cellFilePath())
+              .arg(program->firstLineOfNoCode() + 1),
+          1);
     }
   }
 

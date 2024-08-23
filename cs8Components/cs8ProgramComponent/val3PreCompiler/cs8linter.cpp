@@ -1,9 +1,10 @@
 #include "cs8linter.h"
 #include "../common/versionInfo.h"
 
+#include "cs8validationresult.h"
 #include "qglobal.h"
 #include "qnamespace.h"
-#include "windows.h"
+#include "qregularexpression.h"
 #include "wintoastlib.h"
 
 #include <QDebug>
@@ -24,7 +25,7 @@ void cs8Linter::executeVal3Check() {
     output.replace("\r", "\n");
     output.replace("\n\n", "\n");
     // m_val3CheckOutput.append(output + "\n");
-    //  qDebug() << "standard output:" << output;
+    // qDebug() << "standard output:" << output;
     // QTextStream(stdout)  << qUtf8Printable(output) ;
     emit sendOutput(output);
   });
@@ -40,7 +41,7 @@ void cs8Linter::executeVal3Check() {
                      qDebug() << __FUNCTION__ << error;
                      m_val3checkDone = true;
                      m_val3checkExitCode = 1;
-                     emit finished();
+                     emit finished(0, 0, 0);
                    });
 
   QObject::connect(
@@ -52,7 +53,7 @@ void cs8Linter::executeVal3Check() {
         output(m_val3CheckOutput);
         m_val3checkDone = true;
         m_val3checkExitCode = exitCode;
-        emit finished();
+        emit finished(0, 0, 0);
       });
 
   qDebug() << "Start original val3 checker:" << m_val3checkExecutable;
@@ -61,8 +62,14 @@ void cs8Linter::executeVal3Check() {
 
 void cs8Linter::output(const QByteArray &out) {
   std::string l = out.toStdString();
+  QRegularExpression re(R"RX(--\n(\d+) error\(s\),(\d+) warning\(s\))RX");
+  QRegularExpressionMatch match = re.match(l.c_str());
+  if (match.hasMatch()) {
+    m_totalErrors += match.captured(1).toInt();
+    m_totalWarnings += match.captured(2).toInt();
+  }
   auto list = QString(out).split(QRegExp("[\\n\\r]"));
-  for (const auto &i : list) {
+  for (const auto &i : qAsConst(list)) {
     if (i.length() > 2) {
       // qDebug() << "out: " << i;
       std::cout << i.simplified().toStdString() << std::endl;
@@ -75,7 +82,7 @@ void cs8Linter::executeLinter() {
   for (auto &&e : m_applicationsToCheck) {
     l += e.split("\\").last() + "\n";
   }
-  showToastNotification("Val3 syntax check started for:\n", l);
+  showToastNotification("Val3 syntax check started for:\n", l, false);
   QString productName, productVersion;
   getProductName(qApp->applicationFilePath(), productName, productVersion);
   QString headerMessage = "SAXE: Val3 Linter " + productVersion;
@@ -85,6 +92,7 @@ void cs8Linter::executeLinter() {
   connect(&m_futureWatcher, &QFutureWatcher<void>::finished,
           []() { qDebug() << "Linter completed"; });
 
+  //
   m_future = QtConcurrent::run([=]() {
     // emit sendOutput("Start linter");
     cs8CodeValidation validator;
@@ -96,13 +104,16 @@ void cs8Linter::executeLinter() {
         cs8Application app;
         app.setCellPath(m_cellPath);
         app.openFromPathName(arg);
-        emit sendOutput(
-            qUtf8Printable(validator.runValidation(&app, 1).join("\n") + "\n"));
+        cs8ValidationResult result = validator.runValidation(&app, 1);
+        emit sendOutput(qUtf8Printable(result.messages.join("\n") + "\n"));
+        m_totalInfos += result.totalInfos;
+        m_totalErrors += result.totalErrors;
+        m_totalWarnings += result.totalWarnings;
       }
     }
     qDebug() << "Ended linter";
     m_linterDone = true;
-    emit finished();
+    emit finished(m_totalInfos, m_totalWarnings, m_totalErrors);
   });
 }
 
@@ -118,10 +129,8 @@ void cs8Linter::initConnections() {
              << "code: " << m_val3checkExitCode << ": linter" << m_linterDone;
 
     if (m_val3checkDone && m_linterDone) {
-      // std::cout << std::endl;
-      // exit(m_val3checkExitCode);
-
-      emit allDoneAndExit(m_val3checkExitCode);
+      emit allDoneAndExit(m_val3checkExitCode, m_totalInfos, m_totalWarnings,
+                          m_totalErrors);
     }
   });
 }
@@ -131,8 +140,13 @@ void cs8Linter::startLinterAndChecker() {
   executeLinter();
 }
 
-void cs8Linter::exitProgram(int exitCode) {
-  showToastNotification("Val3 syntax check completed","");
+void cs8Linter::exitProgram(int exitCode, int totalInfos, int totalWarnings,
+                            int totalErrors) {
+  showToastNotification("Val3 syntax check completed",
+                        QString("%2 Warning(s), %3 Error(s)")
+                            .arg(totalWarnings)
+                            .arg(totalErrors),
+                        totalErrors > 0);
   qDebug() << "quit linter:" << m_val3checkExitCode;
   QTimer::singleShot(1000, [=]() { exit(m_val3checkExitCode); });
   // exit(m_val3checkExitCode);
@@ -171,13 +185,17 @@ public:
   }
 };
 
-void cs8Linter::showToastNotification(const QString &msg, const QString &info) {
+void cs8Linter::showToastNotification(const QString &msg, const QString &info,
+                                      bool longDuration) {
   WinToastTemplate templ = WinToastTemplate(WinToastTemplate::Text02);
   QString text = msg;
   templ.setTextField(text.toStdWString(), WinToastTemplate::FirstLine);
   templ.setTextField(info.toStdWString(), WinToastTemplate::SecondLine);
   // templ.setExpiration(1000);
-  templ.setDuration(WinToastLib::WinToastTemplate::Short);
+  if (longDuration)
+    templ.setDuration(WinToastLib::WinToastTemplate::Long);
+  else
+    templ.setDuration(WinToastLib::WinToastTemplate::Short);
   if (WinToast::instance()->showToast(templ, new CustomHandler()) < 0) {
     qDebug() << "Toast failed: ";
   }

@@ -69,7 +69,7 @@ void MainWindow::fillTableView() {
       QString productName;
       if (getProductName(systemPath + "\\VAL3Check.exe", productName,
                          fileVersion)) {
-        if (productName.isEmpty())
+        if (productName.isEmpty() || productName.contains("Control CS9"))
           productName = QString("Staubli Val3 Check");
         else
           productName = QString("SAXE Linter & Staubli Val3 Check");

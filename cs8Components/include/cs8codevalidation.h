@@ -2,6 +2,7 @@
 #define CS8CODEVALIDATION_H
 
 #include "cs8application.h"
+#include "qlist.h"
 
 #include <QObject>
 
@@ -10,20 +11,24 @@ class cs8CodeValidation : public QObject {
 public:
   explicit cs8CodeValidation(QObject *parent = 0);
   bool loadRuleFile(const QString &fileName);
-  QStringList runValidation(const cs8Application *app, int reportingLevel);
-  QStringList runDataValidationRule(const cs8Application *app,
-                                    cs8Program *program,
-                                    QList<cs8Variable *> *variableList,
-                                    QDomNodeList ruleList, int nodeSeverity);
+  cs8ValidationResult runValidation(const cs8Application *app, int reportingLevel);
+  cs8ValidationResult runDataValidationRule(const cs8Application *app,
+                                            cs8Program *program,
+                                            QList<cs8Variable *> *variableList,
+                                            QDomNodeList ruleList,
+                                            int nodeSeverity);
+  void addValidationResult(QString msg, int nodeSeverity,
+                           cs8ValidationResult &validationMessages);
+
 signals:
   void validationMessage(const QString &message);
 
 public slots:
-  
-  protected:
-  QStringList checkObsoleteProgramFiles(const cs8Application *app);
-  
-  private:
+
+protected:
+  cs8ValidationResult checkObsoleteProgramFiles(const cs8Application *app);
+
+private:
   QDomDocument m_validationRules;
   QDomNodeList m_GlobalDataRules, m_ParameterRules, m_LocalDataRules,
       m_ProgramRules;

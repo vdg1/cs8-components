@@ -12,6 +12,7 @@
 #include "cs8variable.h"
 #include "cs8variablemodel.h"
 #include "qdiriterator.h"
+#include "src/cs8codevalidation.h"
 #include <QBuffer>
 #include <QDirIterator>
 #include <QRegularExpression>
@@ -1169,8 +1170,8 @@ void cs8Application::checkPrograms(QStringList &output) {
   }
 }
 
-QStringList cs8Application::checkEnumerations() const {
-  QStringList output;
+cs8ValidationResult cs8Application::checkEnumerations() const {
+  cs8ValidationResult output;
   QMap<QString, QMap<QString, QString> *> constSets = getEnumerations();
 
   QMap<QString, QString> *constSet;
@@ -1191,14 +1192,16 @@ QStringList cs8Application::checkEnumerations() const {
         }
         msg.chop(2);
         if (!msg.isEmpty())
-          output.append(QString("<level>Error<CLASS>DATA<P1>%1<P2>%5<line>%4<"
-                                "msg>%2<file>%3")
-                            .arg("")
-                            .arg("Global variables '" + msg +
-                                 "' have the same value '" + i.key() + "'")
-                            .arg(cellDataFilePath(true))
-                            .arg(0)
-                            .arg(firstName));
+          output << cs8ValidationResult(
+              QString("<level>Error<CLASS>DATA<P1>%1<P2>%5<line>%4<"
+                      "msg>%2<file>%3")
+                  .arg("")
+                  .arg("Global variables '" + msg + "' have the same value '" +
+                       i.key() + "'")
+                  .arg(cellDataFilePath(true))
+                  .arg(0)
+                  .arg(firstName),
+              2);
         break;
       }
     }
