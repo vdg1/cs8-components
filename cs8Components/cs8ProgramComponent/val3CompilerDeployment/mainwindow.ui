@@ -22,7 +22,7 @@
     <item>
      <widget class="QTableWidget" name="tableWidget">
       <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
+       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
       </property>
       <property name="showDropIndicator" stdset="0">
        <bool>false</bool>
@@ -31,7 +31,7 @@
        <bool>true</bool>
       </property>
       <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
+       <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
       </property>
       <property name="sortingEnabled">
        <bool>true</bool>
@@ -96,6 +96,7 @@
     </property>
     <addaction name="actionRefresh"/>
     <addaction name="actionUpdate_all"/>
+    <addaction name="actionSettings"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -140,6 +141,11 @@
   <action name="actionUpdate_all">
    <property name="text">
     <string>Update all</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

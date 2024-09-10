@@ -112,7 +112,7 @@ public:
 
   bool getCompactFileMode() const;
   void setCompactFileMode(bool singleProgramFile);
-  QFileInfoList projectFileList() const;
+  QFileInfoList projectFileList(bool relativeToProjectPath=false) const;
   QStringList projectSubFolders() const;
 
 protected:

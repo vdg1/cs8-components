@@ -15,6 +15,7 @@ DESTDIR = ../bin
 
 SOURCES += main.cpp\
     ../common/versionInfo.cpp \
+    dialogsettings.cpp \
         mainwindow.cpp \
     dialogdeploy.cpp \
     val3PrecompilerSettings.cpp \
@@ -24,12 +25,14 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     ../common/versionInfo.h \
     dialogdeploy.h \
+    dialogsettings.h \
     val3PrecompilerSettings.h \
     chmxx.h \
     tagreader.h
 
 FORMS    += mainwindow.ui \
     dialogdeploy.ui \
+    dialogsettings.ui \
     val3PrecompilerSettings.ui
 
 LIBS = -lversion

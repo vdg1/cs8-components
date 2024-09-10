@@ -71,7 +71,7 @@ void cs8Linter::output(const QByteArray &out) {
   auto list = QString(out).split(QRegExp("[\\n\\r]"));
   for (const auto &i : qAsConst(list)) {
     if (i.length() > 2) {
-      // qDebug() << "out: " << i;
+      qDebug() << "out: " << i;
       std::cout << i.simplified().toStdString() << std::endl;
     }
   }
@@ -109,12 +109,68 @@ void cs8Linter::executeLinter() {
         m_totalInfos += result.totalInfos;
         m_totalErrors += result.totalErrors;
         m_totalWarnings += result.totalWarnings;
+        executeGITIntegration(app);
       }
     }
     qDebug() << "Ended linter";
     m_linterDone = true;
     emit finished(m_totalInfos, m_totalWarnings, m_totalErrors);
   });
+}
+
+void cs8Linter::executeGITIntegration(const cs8Application &app)
+{
+    // get all project files
+    auto projectFiles = app.projectFileList();
+    // check if git is enabled
+    QSettings settings;
+    bool gitEnabled = settings.value("gitEnabled", false).toBool();
+    if (gitEnabled) {
+        QString gitPath = settings.value("gitPath", "").toString();
+        if (gitPath.isEmpty()) {
+            emit sendOutput(qUtf8Printable("Git path not set in settings\n"));
+            return;
+        }
+        QFileInfo gitFile(gitPath);
+        if (!gitFile.exists()) {
+            emit sendOutput(qUtf8Printable("Git executable not found\n"));
+            return;
+        }
+        if (gitFile.fileName() != "git.exe") {
+            emit sendOutput(qUtf8Printable("Git executable not found\n"));
+            return;
+        }
+        // retrive list of files that are not in git
+        QProcess process;
+        process.setProcessChannelMode(QProcess::MergedChannels);
+        process.setProgram(gitPath);
+        process.setArguments(QStringList() << "ls-files");
+        process.setWorkingDirectory(app.projectPath());
+        process.start();
+        process.waitForFinished();
+        QString output = process.readAllStandardOutput();
+        // check if output starts with "fatal: "
+        if (!output.startsWith("fatal: ")) {
+            QStringList filesInGit = output.split("\n");
+            // prepend path to filesInGit
+            for (auto &f : filesInGit) {
+                f = app.projectPath() + f;
+            }
+            for (const auto &f : qAsConst(projectFiles)) {
+                if (!filesInGit.contains(f.absoluteFilePath())) {
+                    // <level>%level%<CLASS>PRG<P1>%progName%<P2>CODE<line>%lineNumber%<msg>Program %progName% is not called<file>%fileName%
+                    QString filePath = f.absoluteFilePath().replace(app.cellPath() + "usr/usrapp/",
+                                                                    "Disk://");
+                    QString msg = QString("<level>ERROR<CLASS>PRG<P1>%1<P2>CODE<line>0<msg>File "
+                                          "not in git<file>%2")
+                                      .arg(f.baseName())
+                                      .arg(filePath);
+                    m_totalErrors++;
+                    emit sendOutput(qUtf8Printable(msg));
+                }
+            }
+        }
+    }
 }
 
 void cs8Linter::initConnections() {
@@ -142,14 +198,12 @@ void cs8Linter::startLinterAndChecker() {
 
 void cs8Linter::exitProgram(int exitCode, int totalInfos, int totalWarnings,
                             int totalErrors) {
-  showToastNotification("Val3 syntax check completed",
-                        QString("%2 Warning(s), %3 Error(s)")
-                            .arg(totalWarnings)
-                            .arg(totalErrors),
-                        totalErrors > 0);
-  qDebug() << "quit linter:" << m_val3checkExitCode;
-  QTimer::singleShot(1000, [=]() { exit(m_val3checkExitCode); });
-  // exit(m_val3checkExitCode);
+    showToastNotification("Val3 syntax check completed",
+                          QString("%1 Warning(s), %2 Error(s)").arg(totalWarnings).arg(totalErrors),
+                          totalErrors > 0);
+    qDebug() << "quit linter:" << m_val3checkExitCode;
+    QTimer::singleShot(1000, [=]() { exit(m_val3checkExitCode); });
+    // exit(m_val3checkExitCode);
 }
 
 class CustomHandler : public IWinToastHandler {
@@ -176,8 +230,8 @@ public:
                  << std::endl;
       break;
     case TimedOut:
-      std::wcout << L"The toast has timed out" << std::endl;
-      break;
+        //std::wcout << L"The toast has timed out" << std::endl;
+        break;
     default:
       std::wcout << L"Toast not activated" << std::endl;
       break;
@@ -205,7 +259,7 @@ cs8Linter::cs8Linter(const QStringList &arguments,
                      const QString &val3checkExecutable, bool overrideIOCheck,
                      QObject *parent)
     : QObject(parent), m_val3checkDone(false), m_linterDone(false),
-      m_val3checkExitCode(0) {
+      m_val3checkExitCode(0), m_totalErrors(0), m_totalWarnings(0){
   m_arguments = arguments;
   m_val3checkExecutable = val3checkExecutable;
 

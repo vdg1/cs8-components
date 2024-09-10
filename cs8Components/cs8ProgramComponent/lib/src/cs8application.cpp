@@ -770,7 +770,7 @@ void cs8Application::setCompactFileMode(bool singleProgramFile) {
   m_compactFileMode = singleProgramFile;
 }
 
-QFileInfoList cs8Application::projectFileList() const {
+QFileInfoList cs8Application::projectFileList(bool relativeToProjectPath) const {
   QFileInfoList list;
   QDir dir(m_projectPath);
   // add project file and data file
@@ -790,6 +790,12 @@ QFileInfoList cs8Application::projectFileList() const {
     it.next();
     if (it.fileInfo().isFile())
       list << it.fileInfo();
+  }
+  // iterate over list and remove project path
+  if (relativeToProjectPath) {
+    for (auto &i : list) {
+      i.setFile(i.filePath().remove(m_projectPath));
+    }
   }
   return list;
 }

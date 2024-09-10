@@ -1,6 +1,7 @@
 #ifndef CS8LINTER_H
 #define CS8LINTER_H
 
+#include "cs8application.h"
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QObject>
@@ -35,6 +36,7 @@ protected:
   int m_totalInfos;
 
   void executeLinter();
+  void executeGITIntegration(const cs8Application &app);
 
   void initConnections();
 

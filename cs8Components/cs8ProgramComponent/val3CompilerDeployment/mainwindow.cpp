@@ -12,6 +12,7 @@
 #include <QSettings>
 #include <QTimer>
 #include <chmxx.h>
+#include <dialogSettings.h>
 
 using namespace std;
 using namespace chm;
@@ -46,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent)
   if (qApp->arguments().count() == 1) {
     QTimer::singleShot(0, this, [this]() { checkUpdateLinter(); });
   }
+
+  connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::onSettingsTriggered);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -371,3 +374,9 @@ void MainWindow::on_actionAbout_Qt_triggered() { qApp->aboutQt(); }
 void MainWindow::on_actionRefresh_triggered() { fillTableView(); }
 
 void MainWindow::on_actionUpdate_all_triggered() { checkUpdateLinter(); }
+
+void MainWindow::onSettingsTriggered()
+{
+    DialogSettings dlg;
+    dlg.exec();
+}
