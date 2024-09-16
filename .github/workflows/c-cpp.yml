@@ -1,0 +1,35 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+    
+    - name: Install Qt
+  # You may pin to the exact commit or the version.
+  # uses: jurplel/install-qt-action@a10f4d43af43348aab618414b68a9d32cb008977
+      uses: jurplel/install-qt-action@v2.13.2
+      with:
+    # Host platform
+       host: win64_msvc2019_64
+    # Architecture for Windows/Android
+       arch: win64_msvc2019_64
+       dir: '${{ github.workspace }}/qt/'
+       cached: true
+  
+    - uses: actions/checkout@v2
+    - name: qmake
+      run: '${{ github.workspace }}/qt/win64_msvc2019_64/bin/qmake'
+    - name: make
+      run: make
+    - name: make check
+      run: make check
+    - name: make distcheck
+      run: make distcheck
