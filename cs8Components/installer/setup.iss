@@ -2,10 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Val3 Tools"
-#define MyAppVersion "4.3.22"
+#define MyAppVersion "4.3.23"
 #define MyAppPublisher "SAXE Process AB"
 #define MyAppURL "http://www.saxe-group.com"
 #define QT "D:\Qt\5.15.2\msvc2019_64"
+#define SysTrayExe "val3LinterSysTray.exe"
 ;#define MINGW "C:\MinGW"
 
 
@@ -40,10 +41,12 @@ Source: "..\cs8ProgramComponent\bin\val3LinterControlPanel.exe"; DestDir: "{app}
 Source: "..\cs8ProgramComponent\bin\val3CreateAPI.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\val3Compact.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\extractDoc.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\cs8ProgramComponent\bin\val3LinterSysTray.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\preCompilerPackage\*.exe"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Core.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Xml.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5Gui.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
+
 Source: "{#QT}\bin\Qt5Positioning.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "{#QT}\bin\Qt5PrintSupport.dll"; DestDir: "{app}\preCompilerPackage"; Flags: ignoreversion
 Source: "..\cs8ProgramComponent\bin\helpFilePackage\*.chm"; DestDir: "{app}\helpFilePackage"; Flags: ignoreversion
@@ -88,8 +91,15 @@ Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 
 [Run]
 Filename: "{app}\val3LinterControlPanel.EXE"; Parameters: "--install"; Description: "Install SAXE Val3 Linter for SRC7.x and SRC8.x versions"; Flags: postinstall nowait shellexec
+Filename: "{app}\val3LinterSysTray.EXE"; Description: "Start System Tray application"; Flags: postinstall nowait shellexec
 
 
 [UninstallRun]
 Filename: "{app}\val3LinterControlPanel.EXE"; Parameters: "--uninstall --exitWhenReady";
+
+[Tasks]
+Name: "autostarticon"; Description: "{cm:AutoStartProgram,{#MyAppName}}"; GroupDescription: "{cm:AdditionalIcons}";
+ 
+[Icons]
+Name: "{commonstartup}\{#MyAppName}"; Filename: "{app}\{#SysTrayExe}"; Parameters: "/auto"; Tasks: autostarticon
 

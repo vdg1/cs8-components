@@ -193,7 +193,14 @@ void cs8Linter::initConnections() {
 
 void cs8Linter::startLinterAndChecker() {
   executeVal3Check();
-  executeLinter();
+  QSettings settings;
+  bool linterEnabled = settings.value("linterEnabled", true).toBool();
+  if (linterEnabled)
+      executeLinter();
+  else {
+      m_linterDone = true;
+      emit sendOutput(qUtf8Printable("SAXE Val3 Linter globally disabled\n"));
+  }
 }
 
 void cs8Linter::exitProgram(int exitCode, int totalInfos, int totalWarnings,

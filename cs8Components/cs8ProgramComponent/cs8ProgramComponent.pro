@@ -14,7 +14,8 @@ SUBDIRS = lib \
     val3PreCompiler \
     val3CreateAPI \
     val3CompilerDeployment \
-    chmlib
+    chmlib \
+    Val3LinterSysTray
    # importVPlus
 
 

@@ -37,22 +37,20 @@ int main(int argc, char *argv[]) {
   QCoreApplication::setApplicationName("Val3 Linter");
 
   QStringList args = qApp->arguments();
-
   /*
   args
       = QStringList()
-        << R"("C:\Program Files (x86)\Staubli\CS8\s8.12.2cs9_BS2561\VAL3Check.exe)"
+        << R"("C:\Program Files (x86)\Staubli\CS8\s8.18.1cs9_BS4010\VAL3Check.exe)"
         << R"(-R"D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812)"
-        << R"(-E"<level>%e<line>%l<msg>%m<file>%f" -V"C:\Program Files (x86)\Staubli\CS8\s8.12.2cs9_BS2561)"
+        << R"(-E"<level>%e<line>%l<msg>%m<file>%f" -V"C:\Program Files (x86)\Staubli\CS8\s8.18.1cs9_BS4010)"
         << R"(-KA)"
         << R"(-LE)"
-        << R"(-s"C:\Program Files (x86)\Staubli\CS8\s8.12.2cs9_BS2561)"
+        << R"(-s"C:\Program Files (x86)\Staubli\CS8\s8.18.1cs9_BS4010)"
         << R"(-I+)"
-        << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modUserDisp)"
-        << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modStatusModel)"
-        << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\io_User)"
-        << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modSignalSlot)";
-
+        // << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modUserDisp)"
+        << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s8181\usr\usrapp\aTestHoming)";
+  // << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\aLinterTest)"
+  // << R"(D:\data\Staubli\SRS\_Development\Dev_SAXEAutomation_CS9\Controller_s812\usr\usrapp\SAXEAutomation\coreModules\modSignalSlot)";
 */
   qDebug() << "Linter started with arguments " << args;
   // remove 1st argument, that points to the executable itself

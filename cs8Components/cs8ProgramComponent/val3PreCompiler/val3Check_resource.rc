@@ -3,8 +3,8 @@
 IDI_ICON1	ICON	DISCARDABLE	"D:\\data\\Cpp\\_SAXESwissSystem\\_Libraries\\cs8Components\\cs8Components\\cs8ProgramComponent\\val3PreCompiler\\val3linter.ico"
 
 VS_VERSION_INFO VERSIONINFO
-	FILEVERSION 1,9,24,0
-	PRODUCTVERSION 1,9,24,0
+	FILEVERSION 1,9,26,0
+	PRODUCTVERSION 1,9,26,0
 	FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
 	FILEFLAGS VS_FF_DEBUG
@@ -21,11 +21,11 @@ VS_VERSION_INFO VERSIONINFO
 			BEGIN
 				VALUE "CompanyName", "SAXE Group\0"
 				VALUE "FileDescription", "SAXE Val3 Linter\0"
-				VALUE "FileVersion", "1.9.24.0\0"
+				VALUE "FileVersion", "1.9.26.0\0"
 				VALUE "LegalCopyright", "SAXE\0"
 				VALUE "OriginalFilename", "val3Check.exe\0"
 				VALUE "ProductName", "val3Check\0"
-				VALUE "ProductVersion", "1.9.24.0\0"
+				VALUE "ProductVersion", "1.9.26.0\0"
 			END
 		END
 		BLOCK "VarFileInfo"
